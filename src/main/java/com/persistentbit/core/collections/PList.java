@@ -294,7 +294,7 @@ public class PList<T> extends AbstractPSeq<T,PList<T>> implements Serializable{
     }
 
     public ListIterator<T> listIterator(int index) {
-        return PList.this.listIterator(index);
+        return new PListIterator(index);
     }
     private class PListIterator implements ListIterator<T> {
         private int position;
