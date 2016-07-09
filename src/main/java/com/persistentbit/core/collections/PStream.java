@@ -27,10 +27,6 @@ public interface PStream<T> extends Iterable<T> {
                 return iter.iterator();
             }
 
-            @Override
-            public String toString() {
-                return "lazy(" + iter + ")";
-            }
         };
     }
     static <T> PStream<T> sequence(T start, Function<T, T> next){
@@ -54,10 +50,7 @@ public interface PStream<T> extends Iterable<T> {
                 };
             }
 
-            @Override
-            public String toString() {
-                return "sequence.from(" + start + ")";
-            }
+
         };
     }
 
@@ -85,10 +78,7 @@ public interface PStream<T> extends Iterable<T> {
                 };
             }
 
-            @Override
-            public String toString() {
-                return "oneValue(" + value + ")";
-            }
+
         };
     }
 
@@ -107,23 +97,19 @@ public interface PStream<T> extends Iterable<T> {
 
 
     default PStream<T> clear(){
-        return new PStream<T>(){
+        return new PStreamLazy<T>(){
             @Override
             public Iterator<T> iterator() {
                 return Collections.emptyIterator();
             }
 
-            @Override
-            public String toString() {
-                return "clear(" + PStream.this + ")";
-            }
         };
     }
 
 
 
     default PStream<T> limit(int count){
-        return new PStream<T>() {
+        return new PStreamLazy<T>() {
 
             @Override
             public Iterator<T> iterator() {
@@ -145,15 +131,10 @@ public interface PStream<T> extends Iterable<T> {
                     }
                 };
             }
-
-            @Override
-            public String toString() {
-                return PStream.this.toString() + ".limit(" + count + ")";
-            }
         };
     }
     default PStream<T>  dropLast(){
-        return new PStream<T>() {
+        return new PStreamLazy<T>() {
 
             @Override
             public Iterator<T> iterator() {
@@ -176,19 +157,16 @@ public interface PStream<T> extends Iterable<T> {
                 };
             }
 
-            @Override
-            public String toString() {
-                return "dropLast(" + PStream.this + ")";
-            }
         };
     }
 
 
     default <R> PStream<R> map(Function<T, R> mapper){
-        Iterator<T> master = iterator();
-        return new PStream<R>(){
+
+        return new PStreamLazy<R>(){
             @Override
             public Iterator<R> iterator() {
+                Iterator<T> master = PStream.this.iterator();
                 return new Iterator<R>() {
                     @Override
                     public boolean hasNext() {
@@ -201,10 +179,7 @@ public interface PStream<T> extends Iterable<T> {
                     }
                 };
             }
-            @Override
-            public String toString() {
-                return limit(100).toString("[",",","]");
-            }
+
         };
     }
 
@@ -213,16 +188,13 @@ public interface PStream<T> extends Iterable<T> {
 
 
     default PStream<T> filter(Predicate<T> p){
-        return new PStream<T>(){
+        return new PStreamLazy<T>(){
             @Override
             public Iterator<T> iterator() {
                 return new FilteredIterator<T>(p,PStream.this.iterator());
             }
 
-            @Override
-            public String toString() {
-                return "filtered(" + PStream.this + ")";
-            }
+
         };
 
     }
@@ -239,7 +211,7 @@ public interface PStream<T> extends Iterable<T> {
     }
 
     default <Z> PStream<Tuple2<Z,T>> zip(PStream<Z> zipStream){
-        return new PStream<Tuple2<Z, T>>() {
+        return new PStreamLazy<Tuple2<Z, T>>() {
             @Override
             public Iterator<Tuple2<Z, T>> iterator() {
                 Iterator<Z> iz = zipStream.iterator();
@@ -258,10 +230,7 @@ public interface PStream<T> extends Iterable<T> {
                 };
             }
 
-            @Override
-            public String toString() {
-                return "zip(" + zipStream + "," + PStream.this.toString() + ")";
-            }
+
         };
     }
 
@@ -278,7 +247,7 @@ public interface PStream<T> extends Iterable<T> {
     }
 
     default PStream<T> sorted(Comparator<? super T> comp){
-        return new PStream<T>() {
+        return new PStreamLazy<T>() {
             private List<T> sorted;
             @Override
             public synchronized Iterator<T> iterator() {
@@ -293,10 +262,7 @@ public interface PStream<T> extends Iterable<T> {
                 return sorted.iterator();
             }
 
-            @Override
-            public String toString() {
-                return "sorted(" + PStream.this + ")";
-            }
+
         };
     }
     default PStream<T> sorted() {
@@ -353,7 +319,7 @@ public interface PStream<T> extends Iterable<T> {
 
 
     default PStream<T> plus(T value){
-        return new PStream<T>() {
+        return new PStreamLazy<T>() {
 
             @Override
             public Iterator<T> iterator() {
@@ -412,7 +378,7 @@ public interface PStream<T> extends Iterable<T> {
     }
 
     default PStream<T>  tail() {
-        return new PStream<T>() {
+        return new PStreamLazy<T>() {
             @Override
             public Iterator<T> iterator() {
                 Iterator<T> iter = PStream.this.iterator();
@@ -495,7 +461,7 @@ public interface PStream<T> extends Iterable<T> {
     }
 
     default PStream<T> distinct() {
-        return new PStream<T>() {
+        return new PStreamLazy<T>() {
             @Override
             public Iterator<T> iterator() {
                 Set<T> lookup = new HashSet<T>();

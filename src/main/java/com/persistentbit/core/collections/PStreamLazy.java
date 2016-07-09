@@ -8,5 +8,8 @@ package com.persistentbit.core.collections;
 public abstract class PStreamLazy<T> implements PStream<T> {
 
 
-
+    @Override
+    public String toString() {
+        return limit(100).toString("<",", ",">");
+    }
 }

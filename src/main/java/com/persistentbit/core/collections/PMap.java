@@ -754,10 +754,11 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
         PSet<Integer> psetKeys = pstreamKeys.pset();
         System.out.println(psetKeys);
         Set<Integer> pkeys = psetKeys.toSet();
-        System.out.println("Min = " + pmap.keys().min() + ", max=" + pmap.keys().max());
+
         if(refKeys.equals(pkeys) == false){
             throw new RuntimeException();
         }
+        System.out.println("Min = " + pmap.keys().min() + ", max=" + pmap.keys().max());
         for(Map.Entry<Integer,String> entry : refmap.entrySet()){
             if(pmap.get(entry.getKey()).equals(entry.getValue()) == false){
                 throw new RuntimeException(entry.toString());

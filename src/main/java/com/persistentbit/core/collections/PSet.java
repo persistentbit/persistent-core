@@ -98,19 +98,7 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> {
 
             @Override
             public <T1> T1[] toArray(T1[] a) {
-                int size = size();
-                if(a.length<size){
-                    a = Arrays.copyOf(a,size);
-                }
-                Iterator<T> iter = iterator();
-                for(int t=0; t<a.length;t++){
-                    if(iter.hasNext()){
-                        a[t] = (T1)iter.next();
-                    } else {
-                        a[t] = null;
-                    }
-                }
-                return a;
+                return PSet.this.toArray(a);
             }
 
             @Override
