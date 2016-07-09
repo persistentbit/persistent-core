@@ -20,8 +20,8 @@
     </developers>
     <licenses>
         <license>
-            <name>MIT</name>
-            <url>https://opensource.org/licenses/MIT</url>
+            <name>EPL</name>
+            <url>http://opensource.org/licenses/eclipse-1.0.php</url>
         </license>
     </licenses>
     <properties>
