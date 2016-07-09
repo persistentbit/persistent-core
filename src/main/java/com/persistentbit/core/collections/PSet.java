@@ -1,6 +1,6 @@
 package com.persistentbit.core.collections;
 
-import java.util.Arrays;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
@@ -10,7 +10,7 @@ import java.util.Set;
  * Date: 8/07/16
  * Time: 15:33
  */
-public class PSet<T> extends PStreamDirect<T,PSet<T>> {
+public class PSet<T> extends PStreamDirect<T,PSet<T>> implements Serializable{
     static public PSet<Object> sEmpty = new PSet<>();
 
     static public <T> PSet<T> empty() {
@@ -57,7 +57,7 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> {
 
     @Override
     public PSet<T> plusAll(Iterable<T> iter) {
-        return PStream.fromIter(iter).with(this,(r,v)-> r.plus(v));
+        return PStream.from(iter).with(this,(r, v)-> r.plus(v));
     }
     public PSet<T> plus(T value){
         return new PSet<>(map.put(value,value));
@@ -69,72 +69,23 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> {
     }
 
     public Set<T> toSet() {
-        return new Set<T>() {
-            @Override
-            public int size() {
-                return PSet.this.size();
-            }
+        return new PSetSet<T>(this);
+    }
 
-            @Override
-            public boolean isEmpty() {
-                return PSet.this.isEmpty();
-            }
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == this){
+            return true;
+        }
+        if(obj instanceof PSet == false){
+            return false;
+        }
+        PSet other = (PSet)obj;
+        return map.equals(other.map);
+    }
 
-            @Override
-            public boolean contains(Object o) {
-                return PSet.this.contains(o);
-            }
-
-            @Override
-            public Iterator<T> iterator() {
-                return PSet.this.iterator();
-            }
-
-            @Override
-            public Object[] toArray() {
-
-                return PSet.this.toArray();
-            }
-
-            @Override
-            public <T1> T1[] toArray(T1[] a) {
-                return PSet.this.toArray(a);
-            }
-
-            @Override
-            public boolean add(T t) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean remove(Object o) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean containsAll(Collection<?> c) {
-                return map.keys().containsAll(c);
-            }
-
-            @Override
-            public boolean addAll(Collection<? extends T> c) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean retainAll(Collection<?> c) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public boolean removeAll(Collection<?> c) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public void clear() {
-                throw new UnsupportedOperationException();
-            }
-        };
+    @Override
+    public int hashCode() {
+        return map.hashCode();
     }
 }

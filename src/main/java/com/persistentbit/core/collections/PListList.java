@@ -10,7 +10,7 @@ import java.util.ListIterator;
  * Date: 7/07/16
  * Time: 18:06
  */
-public class PListList<T> implements List<T> {
+public class PListList<T> implements List<T>,PStreamable {
 
     private PList<T> master;
 
@@ -46,6 +46,11 @@ public class PListList<T> implements List<T> {
     @Override
     public <T1> T1[] toArray(T1[] a) {
         return master.toArray(a);
+    }
+
+    @Override
+    public <T> PStream<T> asPStream() {
+        return (PStream<T>)master;
     }
 
     private void changeError(){

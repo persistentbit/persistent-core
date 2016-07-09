@@ -24,6 +24,9 @@
             <url>https://opensource.org/licenses/MIT</url>
         </license>
     </licenses>
+    <properties>
+        <testng.version>6.9.10</testng.version>
+    </properties>
 
 <build>
     <pluginManagement>
@@ -46,6 +49,14 @@
             </plugin>
         </plugins>
     </pluginManagement>
-</build>
 
+</build>
+<dependencies>
+    <dependency>
+        <groupId>org.testng</groupId>
+        <artifactId>testng</artifactId>
+        <version>${testng.version}</version>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
 </project>

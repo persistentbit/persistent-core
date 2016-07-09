@@ -4,23 +4,23 @@ package com.persistentbit.core.collections;
 
 import com.persistentbit.core.Tuple2;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Function;
 
 /**
  * @author Peter Muys
  * @since 6/07/2016
  */
-public class PList<T> extends PStreamDirect<T,PList<T>> {
+public class PList<T> extends AbstractPSeq<T,PList<T>> implements Serializable{
 
 
 
-    private final static Object[] emptyArray = new Object[0];
-    private final static Node emtpyNode = new Node();
+    static private final Object[] emptyArray = new Object[0];
+    static private final Node emtpyNode = new Node();
     static private final PList emptyPList = new PList();
 
 
@@ -38,11 +38,12 @@ public class PList<T> extends PStreamDirect<T,PList<T>> {
         }
     }
 
-    private final int cnt;
-    private final int shift;
-    private final Node root;
-    private final Object[] tail;
-    private final int tailOffset;
+    //Next ones should be final but can't because of Serializable
+    private int cnt;
+    private int shift;
+    private Node root;
+    private Object[] tail;
+    private int tailOffset;
 
 
     @Override
@@ -66,6 +67,14 @@ public class PList<T> extends PStreamDirect<T,PList<T>> {
         } else {
             tailOffset = ((cnt - 1) >>> 5) << 5;
         }
+    }
+
+    static public <T> PList<T> val(T...elements){
+        PList<T> res = PList.empty();
+        for(T v: elements){
+            res = res.plus(v);
+        }
+        return res;
     }
 
     static PList<Integer> forInt() {
@@ -115,7 +124,7 @@ public class PList<T> extends PStreamDirect<T,PList<T>> {
             node = (Node) node.array[(i >>> level) & 0x01f];
         return node.array;
     }
-    public PList<T> with(int i, T val) {
+    public PList<T> put(int i, T val) {
         if(i<0 || i > cnt){
             throw new IndexOutOfBoundsException(" index " + i);
         }
@@ -448,6 +457,26 @@ public class PList<T> extends PStreamDirect<T,PList<T>> {
         return res;
     }
 
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeInt(size());
+        for(T v : this){
+            out.writeObject(v);
+        }
+    }
+
+    private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
+        int size = in.readInt();
+        PList v = empty();
+        for(int t=0; t< size; t++){
+            v = v.plus(in.readObject());
+        }
+        this.cnt = v.cnt;
+        this.shift = v.shift;
+        this.root = v.root;
+        this.tail = v.tail;
+        this.tailOffset = v.tailOffset;
+    }
+
     static public void main(String...args){
         PList<Integer> l = new PList<>();
         for(int t=0; t<100000;t++){
@@ -458,7 +487,7 @@ public class PList<T> extends PStreamDirect<T,PList<T>> {
             if(l.get(t) != t){
                 throw new RuntimeException();
             }
-            l2 = l2.with(t,-t);
+            l2 = l2.put(t,-t);
         }
         for(int t=0; t<l2.size();t++){
             if(l2.get(t) != -t){

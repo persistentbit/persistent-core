@@ -5,7 +5,9 @@ package com.persistentbit.core.collections;
 import com.persistentbit.core.Tuple2;
 
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -21,7 +23,13 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
 
     @Override
     public PStream<T> lazy() {
-        return this;
+        return new PStreamLazy<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return PStreamDirect.this.iterator();
+            }
+
+        };
     }
 
     @Override
@@ -121,4 +129,6 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
     public String toString() {
         return limit(100).toString(getClass().getSimpleName()  + "[" ,"," , "]");
     }
+
+
 }

@@ -2,6 +2,7 @@ package com.persistentbit.core.collections;
 
 
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Objects;
@@ -11,7 +12,7 @@ import java.util.Optional;
  * @author Peter Muys
  * @since 9/06/2016
  */
-public abstract class LList<E> extends PStreamDirect<E,LList<E>> {
+public abstract class LList<E> extends AbstractPSeq<E,LList<E>> implements Serializable{
 
     static private final  LList  empty = new LList() {
         @Override
@@ -50,13 +51,13 @@ public abstract class LList<E> extends PStreamDirect<E,LList<E>> {
         }
 
 
-        public PSeq with(int index, Object value) {
+        public PSeq put(int index, Object value) {
             throw new IndexOutOfBoundsException("empty LList");
         }
 
         @Override
         public PStream plusAll(Iterable right) {
-            return PStream.fromIter(right);
+            return PStream.from(right);
         }
 
         @Override
@@ -66,7 +67,7 @@ public abstract class LList<E> extends PStreamDirect<E,LList<E>> {
 
         @Override
         public LList constAll(Iterable right) {
-            return PStream.fromIter(right).llist();
+            return PStream.from(right).llist();
         }
     };
 
@@ -147,7 +148,7 @@ public abstract class LList<E> extends PStreamDirect<E,LList<E>> {
         }
 
 
-        public PStream<E> with(int index, E value) {
+        public PSeq<E> put(int index, E value) {
             LList<E> r = LList.empty;
             if(index <0){
                 throw new IndexOutOfBoundsException("< 0");
@@ -218,7 +219,7 @@ public abstract class LList<E> extends PStreamDirect<E,LList<E>> {
 
     @Override
     public PStream<E> lazy() {
-        return PStream.fromIter(this);
+        return PStream.from(this);
     }
 
 

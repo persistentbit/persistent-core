@@ -144,74 +144,10 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
 
 
 
-    public Map<K,V> toMap() {
-        return new Map<K, V>() {
-            @Override
-            public int size() {
-                return PMap.this.size();
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return PMap.this.isEmpty();
-            }
-
-            @Override
-            public boolean containsKey(Object key) {
-                return PMap.this.containsKey(key);
-            }
-
-            @Override
-            public boolean containsValue(Object value) {
-                return PMap.this.values().contains(value);
-            }
-
-            @Override
-            public V get(Object key) {
-                return getOrDefault(key,null);
-            }
-
-            @Override
-            public V put(K key, V value) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public V remove(Object key) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public void putAll(Map<? extends K, ? extends V> m) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public void clear() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public Set<K> keySet() {
-                return keys().pset().toSet();
-            }
-
-            @Override
-            public Collection<V> values() {
-                return PMap.this.values().plist().list();
-            }
-
-            @Override
-            public Set<Entry<K, V>> entrySet() {
-
-                return PMap.this.map(t -> PMap.this.toMapEntry(t)).pset().toSet();
-            }
-        };
+    public Map<K,V> map() {
+        return new PMapMap<K, V>(this);
     }
-    private Map.Entry<K,V> toMapEntry(Tuple2<K,V> e) {
-        return (PMapEntry<K,V>)e;
 
-    }
 
 
 
@@ -737,37 +673,5 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
 
 
 
-    static public void main(String...args){
-        Map<Integer,String> refmap = new HashMap<>();
-        PMap<Integer,String> pmap = new PMap<>();
-        Random r = new Random(System.currentTimeMillis());
 
-        for(int t=0; t<100000;t++){
-            int key = r.nextInt();
-            String val = ""  +r.nextGaussian();
-            refmap.put(key,val);
-            pmap = pmap.put(key,val);
-        }
-        Set<Integer> refKeys = refmap.keySet();
-        PStream<Integer> pstreamKeys = pmap.keys();
-        System.out.println(pstreamKeys);
-        PSet<Integer> psetKeys = pstreamKeys.pset();
-        System.out.println(psetKeys);
-        Set<Integer> pkeys = psetKeys.toSet();
-
-        if(refKeys.equals(pkeys) == false){
-            throw new RuntimeException();
-        }
-        System.out.println("Min = " + pmap.keys().min() + ", max=" + pmap.keys().max());
-        for(Map.Entry<Integer,String> entry : refmap.entrySet()){
-            if(pmap.get(entry.getKey()).equals(entry.getValue()) == false){
-                throw new RuntimeException(entry.toString());
-            }
-        }
-        for(Tuple2<Integer,String> entry : pmap){
-            if(pmap.get(entry._1).equals(entry._2) == false){
-                throw new RuntimeException(entry.toString());
-            }
-        }
-    }
 }
