@@ -61,13 +61,13 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
 
 
     @Override
-    public IMP sorted(Comparator<? super T> comp) {
-        return toImpl(super.sorted(comp));
+    public PStream<T> sorted(Comparator<? super T> comp) {
+        return lazy().sorted(comp);
     }
 
     @Override
-    public IMP sorted() {
-        return toImpl(super.sorted());
+    public PStream<T> sorted() {
+        return lazy().sorted();
     }
 
     @Override
@@ -88,6 +88,7 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
     }
 
 
+    public abstract boolean equals(Object obj);
 
     @Override
     public <R> PStream<R> map(Function<T, R> mapper) {

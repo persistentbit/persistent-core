@@ -56,8 +56,10 @@ public abstract class LList<E> extends AbstractPSeq<E,LList<E>> implements Seria
         }
 
         @Override
-        public PStream plusAll(Iterable right) {
-            return PStream.from(right);
+        public LList plusAll(Iterable right) {
+
+            return PStream.from(right).llist();
+
         }
 
         @Override
@@ -217,10 +219,6 @@ public abstract class LList<E> extends AbstractPSeq<E,LList<E>> implements Seria
 
     public abstract boolean isEmpty();
 
-    @Override
-    public PStream<E> lazy() {
-        return PStream.from(this);
-    }
 
 
     static public void main(String...args){
@@ -241,13 +239,6 @@ public abstract class LList<E> extends AbstractPSeq<E,LList<E>> implements Seria
         }
 
 
-        /*List<Integer> a = new ArrayList<>();
-        for(int t=0; t< 1000000000; t++){
-            if(t % 1000000 == 0){
-                System.out.println(t);
-            }
-            a.add(t);
-        }*/
         System.out.println("done");
     }
 

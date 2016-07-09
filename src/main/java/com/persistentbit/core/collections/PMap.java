@@ -636,6 +636,30 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
     }
 
 
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == this){
+            return true;
+        }
+        if(obj instanceof PMap == false){
+            return false;
+        }
+        PMap other = (PMap)obj;
+        if(other.size() != size()){
+            return false;
+        }
+        for(Tuple2 entry : this){
+            Object v1 = entry._2;
+            Object v2 = other.get(entry._1);
+            if(v1 == null){
+                return v2 == null;
+            }
+            if(v1.equals(v2) == false){
+                return false;
+            }
+        }
+        return true;
+    }
 
 
 }

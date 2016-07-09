@@ -86,17 +86,17 @@ public class PList<T> extends AbstractPSeq<T,PList<T>> implements Serializable{
         return res;
     }
 
-    static PList<Integer> forInt() {
+    static public PList<Integer> forInt() {
         return empty();
     }
-    static PList<Long> forLong() {
+    static public PList<Long> forLong() {
         return empty();
     }
 
-    static PList<String> forString() {
+    static public PList<String> forString() {
         return empty();
     }
-    static PList<Boolean> forBoolean() {
+    static public PList<Boolean> forBoolean() {
         return empty();
     }
 
@@ -161,6 +161,7 @@ public class PList<T> extends AbstractPSeq<T,PList<T>> implements Serializable{
         }
         return ret;
     }
+
 
     @Override
     public PList<T> plus(T val) {

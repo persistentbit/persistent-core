@@ -129,6 +129,9 @@ public interface PStream<T> extends Iterable<T> {
 
 
     default PStream<T> limit(int count){
+        if(count < 0){
+            throw new IndexOutOfBoundsException("count can't be < 0: " + count);
+        }
         return new PStreamLazy<T>() {
 
 
@@ -428,6 +431,9 @@ public interface PStream<T> extends Iterable<T> {
     }
 
     default PStream<T>  tail() {
+        if(isEmpty()){
+            throw new IllegalStateException("Tail of empty stream");
+        }
         return new PStreamLazy<T>() {
             @Override
             public boolean isInfinit() {
@@ -478,6 +484,10 @@ public interface PStream<T> extends Iterable<T> {
             iter.next();
         }
         return count;
+    }
+
+    default int count(Predicate<T> predicate){
+        return filter(predicate).size();
     }
 
     default PStream<T> plusAll(T v1,T... rest){
@@ -556,7 +566,7 @@ public interface PStream<T> extends Iterable<T> {
 
         LList<T> res = LList.empty();
         for (T v : reversed()) {
-            res.prepend(v);
+            res = res.prepend(v);
         }
         return res;
     }

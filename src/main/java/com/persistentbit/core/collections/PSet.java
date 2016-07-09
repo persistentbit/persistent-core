@@ -2,6 +2,7 @@ package com.persistentbit.core.collections;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -21,6 +22,20 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> implements Serializable{
 
     public PSet() {
         this(PMap.empty());
+    }
+
+    static public PSet<Integer> forInt() {
+        return empty();
+    }
+    static public PSet<Long> forLong() {
+        return empty();
+    }
+
+    static public PSet<String> forString() {
+        return empty();
+    }
+    static public PSet<Boolean> forBoolean() {
+        return empty();
     }
 
     private PSet(PMap<T,T> map){
@@ -47,7 +62,6 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> implements Serializable{
     public PSet<T> pset() {
         return this;
     }
-
 
 
     @Override
