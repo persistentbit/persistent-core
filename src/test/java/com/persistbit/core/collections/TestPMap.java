@@ -29,8 +29,8 @@ public class TestPMap {
             refmap.put(key,val);
             pmap = pmap.put(key,val);
         }
-        refmap.put(null,"1234");
-        pmap = pmap.put(null,"1234");
+        //refmap.put(null,"1234");
+        //pmap = pmap.put(null,"1234");
         Set<Integer> refKeys = refmap.keySet();
         PStream<Integer> pstreamKeys = pmap.keys();
         //System.out.println(pstreamKeys);

@@ -14,7 +14,8 @@ import java.util.function.Function;
  * Time: 09:07
  */
 public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
-    final private static PMap sEmpty = new PMap(0, null, false, null);
+    static final private Object sNullKey = new Object();
+    static final private PMap sEmpty = new PMap(0, null);
     static public final <K,V> PMap<K,V> empty() {
         return (PMap<K,V>) sEmpty;
     }
@@ -25,22 +26,15 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
 
 
     final MapNode root;
-    final boolean hasNull;
-
-
-    final V nullValue;
-
 
     public PMap() {
-        this(0, null, false, null);
+        this(0, null);
     }
 
 
-    private PMap(int size, MapNode root, boolean hasNull, V nullValue) {
+    private PMap(int size, MapNode root) {
         this.size = size;
         this.root = root;
-        this.hasNull = hasNull;
-        this.nullValue = nullValue;
     }
 
     @Override
@@ -67,15 +61,13 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
     }
 
     static private int hash(Object o) {
-        return o == null ? 0 : o.hashCode();
+        return o.hashCode();
     }
 
 
     public boolean containsKey(Object key) {
-        if (key == null) {
-            return hasNull;
-        }
-        return (root != null) ? root.find(0, key.hashCode(), key, sNotFound) != sNotFound
+
+            return (root != null) ? root.find(0, hash(key), key, sNotFound) != sNotFound
                 : false;
     }
 
@@ -87,18 +79,13 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
 
 
     public PMap<K, V> put(K key, V val) {
-        if (key == null) {
-            if (hasNull && val == nullValue)
-                return this;
-            return new PMap<K, V>(hasNull ? size : size + 1,
-                    root, true, val);
-        }
+        if(key == null) { key = (K)sNullKey; }
         Box addedLeaf = new Box(null);
-        MapNode newroot = (root == null ? BitmapIndexedNode.EMPTY : root).assoc(0, key.hashCode(), key, val, addedLeaf);
+        MapNode newroot = (root == null ? BitmapIndexedNode.EMPTY : root).assoc(0, hash(key), key, val, addedLeaf);
         if (newroot == root)
             return this;
-        return new PMap<K, V>(addedLeaf.val == null ? size
-                : size + 1, newroot, hasNull, nullValue);
+        return new PMap<>(addedLeaf.val == null ? size
+                : size + 1, newroot);
     }
 
 
@@ -107,9 +94,8 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
 
     @SuppressWarnings("unchecked")
     public V getOrDefault(Object key, V notFound) {
-        if (key == null)
-            return hasNull ? nullValue : notFound;
-        return (V) (root != null ? root.find(0, key.hashCode(), key, notFound) : notFound);
+        if(key == null) { key = sNullKey; }
+        return (V) (root != null ? root.find(0, hash(key), key, notFound) : notFound);
     }
 
     public V get(Object key){
@@ -122,16 +108,14 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
 
 
     public PMap<K, V> removeKey(Object key) {
-        if (key == null)
-            return hasNull ? new PMap<>(size - 1, root, false, null) : this;
+        if(key == null) { key = sNullKey; }
 
         if (root == null)
             return this;
-        MapNode newroot = root.without(0, key.hashCode(), key);
+        MapNode newroot = root.without(0, hash(key), key);
         if (newroot == root)
             return this;
-        return new PMap<K, V>(size - 1, newroot, hasNull,
-                nullValue);
+        return new PMap<K, V>(size - 1, newroot);
     }
 
     public PStream<K>   keys(){
@@ -145,7 +129,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
 
 
     public Map<K,V> map() {
-        return new PMapMap<K, V>(this);
+        return new PMapMap<>(this);
     }
 
 
@@ -154,31 +138,8 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
 
     public Iterator<Tuple2<K, V>> iterator() {
         final Iterator<?> rootIter = (root == null) ? Collections.emptyIterator() : root.iterator();
-        if (hasNull) {
-            return new Iterator<Tuple2<K, V>>() {
-                private boolean seen = false;
+        return (Iterator<Tuple2<K, V>>) rootIter;
 
-                public boolean hasNext() {
-                    if (!seen)
-                        return true;
-                    else
-                        return rootIter.hasNext();
-                }
-
-                public PMapEntry<K, V> next() {
-                    if (!seen) {
-                        seen = true;
-                        return (PMapEntry<K, V>) nullValue;
-                    } else
-                        return (PMapEntry<K, V>) rootIter.next();
-                }
-
-                public void remove() {
-                    throw new UnsupportedOperationException();
-                }
-            };
-        } else
-            return (Iterator<Tuple2<K, V>>) rootIter;
     }
 
     @Override
@@ -295,10 +256,6 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
             return new BitmapIndexedNode(bitmap, newArray);
         }
 
-
-        /*public ISeq nodeSeq() {
-            return Seq.create(array);
-        }*/
 
         public Iterator<Object> iterator() {
             return new Iter(array);
@@ -616,10 +573,10 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static final class NodeIter implements Iterator<Object> {
-        private static final Object NULL = new Object();
+
         final Object[] array;
         private int i = 0;
-        private Object nextEntry = NULL;
+        private Object nextEntry = null;
         private Iterator nextIter;
 
         NodeIter(Object[] array) {
@@ -632,7 +589,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
                 Object nodeOrVal = array[i + 1];
                 i += 2;
                 if (key != null) {
-                    nextEntry = new PMapEntry(key, nodeOrVal);
+                    nextEntry = new PMapEntry(key == sNullKey ? null : key, nodeOrVal);
                     return true;
                 } else if (nodeOrVal != null) {
                     Iterator iter = ((MapNode) nodeOrVal).iterator();
@@ -646,15 +603,15 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
         }
 
         public boolean hasNext() {
-            if (nextEntry != NULL || nextIter != null)
+            if (nextEntry != null || nextIter != null)
                 return true;
             return advance();
         }
 
         public Object next() {
             Object ret = nextEntry;
-            if (ret != NULL) {
-                nextEntry = NULL;
+            if (ret != null) {
+                nextEntry = null;
                 return ret;
             } else if (nextIter != null) {
                 ret = nextIter.next();
