@@ -5,6 +5,8 @@ package com.persistentbit.core.utils;
 import com.persistentbit.core.NotNullable;
 import com.persistentbit.core.Nullable;
 import com.persistentbit.core.Pair;
+import com.persistentbit.core.collections.PMap;
+import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.lenses.Lens;
 import com.persistentbit.core.properties.FieldNames;
 import com.persistentbit.core.properties.PropertyGetter;
@@ -60,7 +62,7 @@ public class ImTools<C> {
         }
     }
 
-    private final Map<String,Getter> getters = new LinkedHashMap<>();
+    private PMap<String,Getter> getters = PMap.empty();
     private List<Getter> constructorProperties = new ArrayList<>();
     private Constructor<?> constructor;
 
@@ -77,7 +79,7 @@ public class ImTools<C> {
             throw new RuntimeException("Can't find constructor for " + this.cls.getName() + " with properties" + allGetters);
         }
         for(Getter g : allGetters){
-            getters.put(g.propertyName,g);
+            getters = getters.put(g.propertyName,g);
         }
     }
 
@@ -121,6 +123,9 @@ public class ImTools<C> {
         }
     }
 
+    public PStream<Getter> getConstructorProperties() {
+        return PStream.from(constructorProperties);
+    }
 
     public C    copyWith(C orgObject, Map<String,Object> newProperties){
         Objects.requireNonNull(orgObject,"orgObject");
@@ -197,6 +202,43 @@ public class ImTools<C> {
             throw new RuntimeException(e);
         }
     }
+    public Optional<Method> getGetterMethod(Field f){
+        Class<?> cls  = this.cls;
+        String get1 = "get" + firstCharUppercase(f.getName());
+        String get2 = "is" + firstCharUppercase(f.getName());
+
+
+        while(cls != null && cls.equals(Object.class) == false){
+            for(Method m : cls.getDeclaredMethods()){
+                String name = m.getName();
+                if(!name.equals(get1) &&  !name.equals(get2)){
+                    continue;
+                }
+                return Optional.of(m);
+            }
+            cls = cls.getSuperclass();
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Method> getWithMethod(Field f){
+        Class<?> cls  = this.cls;
+        String get1 = "with" + firstCharUppercase(f.getName());
+
+
+        while(cls != null && cls.equals(Object.class) == false){
+            for(Method m : cls.getDeclaredMethods()){
+                String name = m.getName();
+                if(!name.equals(get1)){
+                    continue;
+                }
+                return Optional.of(m);
+            }
+            cls = cls.getSuperclass();
+        }
+        return Optional.empty();
+    }
+
     private boolean checkGetterNullable(Field f) throws Exception {
         Class<?> cls  = this.cls;
         String get1 = "get" + firstCharUppercase(f.getName());
@@ -213,11 +255,12 @@ public class ImTools<C> {
             }
             cls = cls.getSuperclass();
         }
-        throw new RuntimeException("Don't know if " + f.getName() + " in " + this.cls.getName() + " is nullable or not nullable");
+        return false;   //if not defined: assume not nullable
+        //throw new RuntimeException("Don't know if " + f.getName() + " in " + this.cls.getName() + " is nullable or not nullable");
     }
 
-    public List<Getter> getFieldGetters() {
-        return new ArrayList<>(getters.values());
+    public PStream<Getter> getFieldGetters() {
+        return getters.values();
     }
 
     private void setBestConstructor(List<Getter> getters){
@@ -291,7 +334,7 @@ public class ImTools<C> {
     }
 
     public int hashCode(C obj,String...properties) {
-        Collection<String> names = (properties == null || properties.length==0 )? getters.keySet() :  Arrays.asList(properties);
+        PStream<String> names = (properties == null || properties.length==0 )? getters.keys() :  PStream.from(properties);
         int result = 1;
         for(String prop : names){
             Object value = get(obj,prop);
@@ -303,14 +346,14 @@ public class ImTools<C> {
     }
 
     public int hashCodeAll(C obj){
-        return hashCode(obj,getters.keySet().toArray(new String[getters.keySet().size()]));
+        return hashCode(obj,getters.keys().toArray());
     }
 
 
     public String toStringAll(C obj, boolean ignoreNull) {
         String result = cls.getSimpleName() + "[";
         boolean first = true;
-        for(String prop : getters.keySet()){
+        for(String prop : getters.keys()){
             Object value = get(obj,prop);
             if(value == null && ignoreNull){
                 continue;
@@ -384,7 +427,7 @@ public class ImTools<C> {
         if(right == null || right.getClass().equals(left.getClass()) == false){
             return false;
         }
-        for(String prop : getters.keySet()){
+        for(String prop : getters.keys()){
             Object v1  = get(left,prop);
             Object v2 = get((C)right,prop);
             if(v1 == null){
@@ -401,7 +444,8 @@ public class ImTools<C> {
         if(right == null || right.getClass().equals(left.getClass())){
             return false;
         }
-        Collection<String> names = (properties == null || properties.length==0 )? getters.keySet() :  Arrays.asList(properties);
+        //Collection<String> names = (properties == null || properties.length==0 )? getters.keySet() :  Arrays.asList(properties);
+        PStream<String> names = (properties == null || properties.length==0 )? getters.keys() :  PStream.from(properties);
         for(String prop : names){
             Object v1  = get(left,prop);
             Object v2 = get((C)right,prop);
