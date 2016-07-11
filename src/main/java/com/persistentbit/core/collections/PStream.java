@@ -3,6 +3,7 @@ package com.persistentbit.core.collections;
 
 import com.persistentbit.core.Tuple2;
 
+
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
@@ -16,6 +17,12 @@ import java.util.stream.Stream;
  */
 public interface PStream<T> extends Iterable<T> {
 
+    static <T> PStream<T> from(Optional<T> opt){
+        if(opt.isPresent()){
+            return val(opt.get());
+        }
+        return val();
+    }
 
     static <T> PStream<T> from(Iterable<T> iter){
         if(iter instanceof PStream){
@@ -621,6 +628,15 @@ public interface PStream<T> extends Iterable<T> {
             res = joiner.apply(res,sec);
         }
         return Optional.of(res);
+    }
+
+    default <X> PStream<X> flatten() {
+        return new PStreamLazy<X>() {
+            @Override
+            public Iterator<X> iterator() {
+                return new FlattenIterator<X>(PStream.this.iterator());
+            }
+        };
     }
 
 
