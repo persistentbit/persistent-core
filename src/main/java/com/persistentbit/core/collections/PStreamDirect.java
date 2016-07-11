@@ -125,6 +125,10 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
         return toImpl(super.distinct());
     }
 
+    @Override
+    public <X> PStream<X> flatten() {
+        return (PStream<X>) toImpl(super.flatten());
+    }
 
     @Override
     public String toString() {
