@@ -20,8 +20,8 @@ public interface Lens<P,C> {
 
     /**
      * Ask the C client property of a P parent object
-     * @param parent
-     * @return
+     * @param parent The Container
+     * @return The Client property
      */
     C get(P parent);
 
@@ -47,10 +47,10 @@ public interface Lens<P,C> {
     }
 
     /**
-     * Join 2 lenses so we get: P->C->CC
+     * Join 2 lenses so we get: P- C- CC
      * @param subLens The sublens to add
      * @param <CC> Type of the C client property property
-     * @return A new Lens from P -> CC
+     * @return A new Lens from P - CC
      */
     default <CC> Lens<P,CC> andThen(Lens<C, CC> subLens){
         return new ThenLens<>(this,subLens);

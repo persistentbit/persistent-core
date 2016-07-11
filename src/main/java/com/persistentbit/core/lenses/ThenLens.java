@@ -3,7 +3,6 @@ package com.persistentbit.core.lenses;
 /**
  * A Lens that is the combination of 2 other lenses.<br>
  * So we get from P to C to CC.<br>
- * see {@link Lens<P,C>{@link #andThen(Lens)}}
  * @author Peter Muys
  * @since 20/06/2016
  */
