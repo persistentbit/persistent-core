@@ -32,9 +32,31 @@ public interface PStream<T> extends Iterable<T> {
 
         };
     }
+    static <T> PStream<T> from(T[] values){
+        if(values == null){
+            return PList.empty();
+        }
+        return new PStreamLazy<T>(){
+            @Override
+            public Iterator<T> iterator() {
+                return new Iterator<T>(){
+                    int i = 0;
+                    @Override
+                    public boolean hasNext() {
+                        return i< values.length;
+                    }
 
-    static <T> PList<T> val(T...values){
-        return PList.val(values);
+                    @Override
+                    public T next() {
+                        return values[i++];
+                    }
+                };
+            }
+        };
+    }
+
+    static <T> PStream<T> val(T...values){
+        return from((T[])values);
     }
 
     static <T> PStream<T> sequence(T start, Function<T, T> next){
