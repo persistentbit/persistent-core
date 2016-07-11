@@ -1,5 +1,6 @@
 package com.persistentbit.core.codegen;
 
+import com.persistentbit.core.Immutable;
 import com.persistentbit.core.Pair;
 import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.utils.ImTools;

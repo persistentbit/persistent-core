@@ -1,9 +1,6 @@
 package com.persistentbit.core;
 
 import com.persistentbit.core.codegen.GenNoGetter;
-import com.persistentbit.core.codegen.Immutable;
-import com.persistentbit.core.lenses.Lens;
-import com.persistentbit.core.lenses.LensImpl;
 import com.persistentbit.core.properties.FieldNames;
 
 

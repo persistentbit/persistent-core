@@ -1,4 +1,4 @@
-package com.persistentbit.core.codegen;
+package com.persistentbit.core;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

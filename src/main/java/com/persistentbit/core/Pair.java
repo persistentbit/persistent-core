@@ -1,7 +1,6 @@
 package com.persistentbit.core;
 
 
-import com.persistentbit.core.codegen.Immutable;
 import com.persistentbit.core.properties.FieldNames;
 
 import java.util.Objects;

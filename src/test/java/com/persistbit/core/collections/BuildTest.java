@@ -1,9 +1,7 @@
 package com.persistbit.core.collections;
 
 import com.persistentbit.core.Nullable;
-import com.persistentbit.core.codegen.Immutable;
-import com.persistentbit.core.lenses.Lens;
-import com.persistentbit.core.lenses.LensImpl;
+import com.persistentbit.core.Immutable;
 import com.persistentbit.core.properties.FieldNames;
 
 import java.util.Optional;
