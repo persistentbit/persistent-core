@@ -1,12 +1,13 @@
-package com.persistentbit.core.immutable;
+package com.persistentbit.core.codegen;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * @author Peter Muys
- * @since 11/07/2016
+ * User: petermuys
+ * Date: 11/07/16
+ * Time: 17:27
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Immutable {
+public @interface GenNoGetter {
 }

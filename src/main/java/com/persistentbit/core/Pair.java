@@ -1,7 +1,8 @@
 package com.persistentbit.core;
 
 
-import com.persistentbit.core.immutable.Immutable;
+import com.persistentbit.core.codegen.Immutable;
+import com.persistentbit.core.properties.FieldNames;
 
 import java.util.Objects;
 
@@ -11,7 +12,7 @@ import java.util.Objects;
  */
 @Immutable
 public class Pair<L,R> extends Tuple2<L,R> {
-
+    @FieldNames(names = {"_1","_2"})
     public Pair(L _1, R _2){
         super(
                 Objects.requireNonNull(_1),

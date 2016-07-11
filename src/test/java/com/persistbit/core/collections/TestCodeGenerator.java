@@ -1,7 +1,7 @@
 package com.persistbit.core.collections;
 
 import com.persistentbit.core.Tuple2;
-import com.persistentbit.core.immutable.ImBuilder;
+import com.persistentbit.core.codegen.ImmutableCodeBuilder;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -17,8 +17,8 @@ public class TestCodeGenerator {
     public void testCodeGenerator() {
         Tuple2 tuple2 = null;
 
-        File source = ImBuilder.findSourcePath(Tuple2.class,"persistentbit.com.marker.txt");
-        //File testSource = new File(source,"../../test/java");
-        ImBuilder.build(source,TestCodeGenerator.class.getClassLoader());
+        File source = ImmutableCodeBuilder.findSourcePath(Tuple2.class,"test.persistentbit.com.marker.txt");
+        File testSource = new File(source,"../../test/java");
+        ImmutableCodeBuilder.build(testSource,TestCodeGenerator.class.getClassLoader());
     }
 }
