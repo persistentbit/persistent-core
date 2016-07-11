@@ -17,6 +17,12 @@ import java.util.stream.Stream;
  */
 public interface PStream<T> extends Iterable<T> {
 
+    /**
+     * Create a PStream from an Optional value.
+     * @param opt The optional
+     * @param <T> The type of the PStream
+     * @return An empty PStream or a Pstream with 1 element
+     */
     static <T> PStream<T> from(Optional<T> opt){
         if(opt.isPresent()){
             return val(opt.get());
@@ -24,6 +30,12 @@ public interface PStream<T> extends Iterable<T> {
         return val();
     }
 
+    /**
+     * Create a PStream from an {@link Iterator} or a {@link PStreamable}<br>
+     * @param iter The Iterator or PStreamable
+     * @param <T> The type of the resulting stream
+     * @return The PStream
+     */
     static <T> PStream<T> from(Iterable<T> iter){
         if(iter instanceof PStream){
             return ((PStream<T>)iter);

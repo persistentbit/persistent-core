@@ -27,6 +27,8 @@ import java.util.Optional;
  * @see GenNoGetter
  * @see GenNoLens
  * @see GenNoWith
+ * @see com.persistentbit.core.Nullable
+ * @see com.persistentbit.core.NotNullable
  * @author Peter Muys
  * @since 11/07/2016
  */
