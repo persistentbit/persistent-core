@@ -1,5 +1,8 @@
 package com.persistentbit.core;
 
+import com.persistentbit.core.immutable.Immutable;
+
+
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Optional;
@@ -11,9 +14,10 @@ import java.util.Optional;
  * Date: 8/07/16
  * Time: 16:40
  */
+@Immutable
 public class Tuple2<T1, T2> implements Comparable<Tuple2<T1,T2>>,Serializable{
-    public final T1 _1;
-    public final T2 _2;
+    @Nullable  public final T1 _1;
+    @Nullable  public final T2 _2;
 
     /**
      * Create a new Tuple2 with 2 values
