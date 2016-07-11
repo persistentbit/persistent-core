@@ -12,6 +12,21 @@ import java.net.URL;
 import java.util.Optional;
 
 /**
+ * Class to auto generate code for Immutable classes that are marked with {@link Immutable}. <br>
+ * Start The codebuilder with <code>ImmutableCodeBuilder.build(sourcePathFile);</code>
+ * This will iterate over all the *.java files in the filesystem and for each found file,<br>
+ * Load the class and add the generated code to the .java file if the method is not found in the class.<br>
+ * Code that can be generated: per property: Lens, with, get functions.<br>
+ * and equals/hashcode for the class<br>
+ * Typical use:<br>
+ * <code>static public void main(String...args){<br>
+ * ImmutableCodeBuilder.build(findSourcePath(ImmutableCodeBuilder.class,"resource-marker.txt"));<br>
+ * }<br></code>
+ *
+ * @see GenNoEquals
+ * @see GenNoGetter
+ * @see GenNoLens
+ * @see GenNoWith
  * @author Peter Muys
  * @since 11/07/2016
  */
