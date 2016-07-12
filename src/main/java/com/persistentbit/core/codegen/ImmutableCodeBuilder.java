@@ -163,55 +163,102 @@ public class ImmutableCodeBuilder {
         if(cls.getAnnotation(GenNoEquals.class) != null){
             return;
         }
-        if(hasEquals(cls)){
+        if(hasEquals(cls) == false){
+            boolean useSuperEqual = false;
+            PStream<ImTools.Getter> fields = im.getFieldGetters().filter(g -> g.field.getAnnotation(GenNoEquals.class) == null);
+            if(cls.getSuperclass().equals(Object.class) == false) {
+                if (hasEquals(cls.getSuperclass())) {
+                    useSuperEqual = true;
+                    fields = fields.filter(f -> f.field.getDeclaringClass().equals(cls));
+                }
+            }
+            out.println("\t@Override");
+            out.println("\tpublic boolean equals(Object o){");
+            out.println("\t\tif(o == this) { return true; }");
+            out.println("\t\tif(o instanceof " + cls.getSimpleName() + " ==false) { return false; }");
+            if(useSuperEqual){
+                out.println("\t\tif(!super.equals(o)) { return false; }");
+            }
+            out.println("\t\t" + cls.getSimpleName() + " other = (" + cls.getSimpleName() + ")o;");
+
+            fields.forEach(g-> {
+                String gthis  = g.propertyName;
+                String gother = "other." + g.propertyName;
+
+                if(g.field.getDeclaringClass().equals(cls) == false && Modifier.isPrivate(g.field.getModifiers())){
+                    gthis  = getCode(g.propertyName,true);
+                    gother = "other." + getCode(g.propertyName,true);
+                }
+                String cmp = gthis + ".equals(" + gother +")";
+                if(g.field.getType().isPrimitive()){
+                    cmp = gthis + " == " + gother;
+                }
+                if(g.isNullable){
+                    out.println("\t\tif(" + gthis + " == null) { if(" + gother+" != null) { return false; } } else { if(!" + cmp+"){ return false; } } ;");
+                } else {
+                    out.println("\t\tif(!" + cmp +"){ return false; }");
+                }
+
+            });
+            out.println("\t\treturn true;");
+            out.println("\t}" );
+            out.println();
+
+        }
+
+        if(hasHashcode(cls)){
             return;
         }
-
-        boolean useSuperEqual = false;
-        PStream<ImTools.Getter> fields = im.getFieldGetters().filter(g -> g.field.getAnnotation(GenNoEquals.class) == null);
-        if(cls.getSuperclass().equals(Object.class) == false) {
-            if (hasEquals(cls.getSuperclass())) {
-                useSuperEqual = true;
-                fields = fields.filter(f -> f.field.getDeclaringClass().equals(cls));
-            }
-        }
         out.println("\t@Override");
-        out.println("\tpublic boolean equals(Object o){");
-        out.println("\t\tif(o == this) { return true; }");
-        out.println("\t\tif(o instanceof " + cls.getSimpleName() + " ==false) { return false; }");
-        if(useSuperEqual){
-            out.println("\t\tif(!super.equals(o)) { return false; }");
+        out.println("\tpublic int hashCode(){");
+        PStream<ImTools.Getter> hf = im.getFieldGetters().filter(g -> g.field.getAnnotation(GenNoEquals.class) == null).filter(f -> f.field.getDeclaringClass().equals(cls));
+        if(cls.getSuperclass().equals(Object.class) == false) {
+            out.println("\t\tint result=super.hashCode();");
+        } else {
+            out.println("\t\tint result=0;");
         }
-        out.println("\t\t" + cls.getSimpleName() + " other = (" + cls.getSimpleName() + ")o;");
 
-        fields.forEach(g-> {
-            String gthis  = g.propertyName;
-            String gother = "other." + g.propertyName;
 
-            if(g.field.getDeclaringClass().equals(cls) == false && Modifier.isPrivate(g.field.getModifiers())){
-                gthis  = getCode(g.propertyName,true);
-                gother = "other." + getCode(g.propertyName,true);
-            }
-            String cmp = gthis + ".equals(" + gother +")";
-            if(g.field.getType().isPrimitive()){
-              cmp = gthis + " == " + gother;
+
+        hf.forEach(g-> {
+            String gthis = g.propertyName;
+            if(g.field.getType().equals(boolean.class)){
+                gthis = "(" + gthis + "? 1 : 0 )";
+            } else if(g.field.getType().equals(long.class)){
+                gthis = "Long.hashCode(" + gthis + ")";
+            } else if(g.field.getType().equals(float.class)){
+                gthis = "Float.hashCode(" + gthis + ")";
+            } else if(g.field.getType().equals(double.class)){
+                gthis = "Double.hashCode(" + gthis + ")";
+            } else if(g.field.getType().equals(short.class)){
+                gthis = "Short.hashCode(" + gthis + ")";
+            } else {
+                gthis = gthis + ".hashCode()";
             }
             if(g.isNullable){
-                out.println("\t\tif(" + gthis + " == null) { if(" + gother+" != null) { return false; } } else { if(!" + cmp+"){ return false; } } ;");
+                gthis = "(" + g.propertyName +" == null ? 0 : " + gthis +");";
             } else {
-                out.println("\t\tif(!" + cmp +"){ return false; }");
+                out.println("\t\tresult = 31 * result + " + gthis+";");
             }
-
         });
-        out.println("\t\treturn true;");
+        out.println("\t\treturn result;");
+
         out.println("\t}" );
         out.println();
-
     }
+
 
     private boolean hasEquals(Class cls){
         try {
             cls.getDeclaredMethod("equals",Object.class);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+    private boolean hasHashcode(Class cls){
+        try{
+            cls.getDeclaredMethod("hashCode");
             return true;
         } catch (NoSuchMethodException e) {
             return false;
