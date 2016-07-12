@@ -18,7 +18,7 @@ Every PStream has the following methods build in:
 - filter(f): filter the elements using a predicate
 - find(f) find an element using a predicate
 - zip(stream) create 1 stream from 2 
-- strea(): create a Java Stream
+- stream(): create a Java Stream
 - sorted(c): sort a stream
 - reversed(): reverse all the elements in a stream
 - plusAll(iter): add all elements from an Iterable to this stream
