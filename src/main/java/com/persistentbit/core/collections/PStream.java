@@ -41,20 +41,58 @@ public interface PStream<T> extends Iterable<T> {
             return ((PStream<T>)iter);
         }
         if(iter instanceof PStreamable){
-            return ((PStreamable)iter).asPStream();
+            return (PStream<T>)((PStreamable)iter).asPStream().lazy();
         }
-        return new PStreamLazy<T>() {
-            @Override
-            public Iterator<T> iterator() {
-                return iter.iterator();
-            }
+        if(iter instanceof Collection){
+            Collection col = (Collection)iter;
+            Object[] arr = col.toArray();
+            return new PStreamLazy<T>(){
+                @Override
+                public Iterator<T> iterator() {
+                    return new Iterator<T>(){
+                        int i = 0;
+                        @Override
+                        public boolean hasNext() {
+                            return i< arr.length;
+                        }
 
-        };
+                        @Override
+                        public T next() {
+                            return (T)arr[i++];
+                        }
+                    };
+                }
+            };
+        }
+        return PList.<T>empty().plusAll(iter).lazy();
     }
     static <T> PStream<T> from(T[] values){
         if(values == null){
-            return PList.empty();
+            return PList.<T>empty().lazy();
         }
+
+        Object[] fixed = new Object[values.length];
+        System.arraycopy(values,0,fixed,0,values.length);
+        return new PStreamLazy<T>(){
+            @Override
+            public Iterator<T> iterator() {
+                return new Iterator<T>(){
+                    int i = 0;
+                    @Override
+                    public boolean hasNext() {
+                        return i< fixed.length;
+                    }
+
+                    @Override
+                    public T next() {
+                        return (T)fixed[i++];
+                    }
+                };
+            }
+        };
+    }
+
+    static <T> PStream<T> val(T...values){
         return new PStreamLazy<T>(){
             @Override
             public Iterator<T> iterator() {
@@ -72,10 +110,6 @@ public interface PStream<T> extends Iterable<T> {
                 };
             }
         };
-    }
-
-    static <T> PStream<T> val(T...values){
-        return from((T[])values);
     }
 
     static <T> PStream<T> sequence(T start, Function<T, T> next){
@@ -650,7 +684,12 @@ public interface PStream<T> extends Iterable<T> {
             }
         };
     }
-
+    default PStream<String> mapString(){
+        return mapString("null");
+    }
+    default PStream<String> mapString(String nullValue) {
+        return map(t -> t == null ? nullValue : t.toString());
+    }
 
     default String toString(String sep){
         return toString("",sep,"");
@@ -658,7 +697,7 @@ public interface PStream<T> extends Iterable<T> {
 
 
     default String toString(String left, String sep, String right){
-        return left + map(i-> "" + i).join((a,b)-> a + sep + b).orElse("") + right;
+        return left + mapString().join((a,b)-> a + sep + b).orElse("") + right;
     }
 
 
