@@ -1,7 +1,8 @@
 package com.persistbit.core.collections;
 
-import com.persistentbit.core.Nullable;
 import com.persistentbit.core.Immutable;
+import com.persistentbit.core.Nullable;
+import com.persistentbit.core.codegen.GenNoLens;
 import com.persistentbit.core.properties.FieldNames;
 
 import java.util.Optional;
@@ -11,7 +12,7 @@ import java.util.Optional;
  * Date: 11/07/16
  * Time: 18:01
  */
-@Immutable
+@Immutable @GenNoLens
 public class BuildTest<A> {
     private final String first;
     @Nullable
@@ -54,5 +55,31 @@ public class BuildTest<A> {
 	} 
 
 	public A getA(){ return a; }
+
+	//[[ImmutableCodeBuilder]]
+
+
+	//[[ImmutableCodeBuilder]]
+
+	@Override
+	public boolean equals(Object o){
+		if(o == this) { return true; }
+		if(o instanceof BuildTest ==false) { return false; }
+		BuildTest other = (BuildTest)o;
+		if(!a.equals(other.a)){ return false; }
+		if(!first.equals(other.first)){ return false; }
+		if(middle == null) { if(other.middle != null) { return false; } } else { if(!middle.equals(other.middle)){ return false; } } ;
+		if(!last.equals(other.last)){ return false; }
+		return true;
+	}
+
+	@Override
+	public int hashCode(){
+		int result=0;
+		result = 31 * result + a.hashCode();
+		result = 31 * result + first.hashCode();
+		result = 31 * result + last.hashCode();
+		return result;
+	}
 
 }
