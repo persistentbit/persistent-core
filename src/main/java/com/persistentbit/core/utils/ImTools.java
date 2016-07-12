@@ -50,10 +50,12 @@ public class ImTools<C> {
         public final PropertyGetter getter;
         public final String propertyName;
         public final boolean isNullable;
-        public Getter(PropertyGetter getter, String propertyName, boolean isNullable){
+        public final Field field;
+        public Getter(PropertyGetter getter, String propertyName, boolean isNullable,Field f){
             this.getter = getter;
             this.propertyName = propertyName;
             this.isNullable = isNullable;
+            this.field = f;
         }
         @Override
         public String toString()
@@ -193,7 +195,7 @@ public class ImTools<C> {
                     if(isNullable == null){
                         isNullable =  checkGetterNullable(f);
                     }
-                    result.add(new Getter(new PropertyGetterField(f),f.getName(),isNullable));
+                    result.add(new Getter(new PropertyGetterField(f),f.getName(),isNullable,f));
                 }
                 cls = cls.getSuperclass();
             }
