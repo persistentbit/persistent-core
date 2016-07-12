@@ -21,8 +21,8 @@ public class Tuple2<T1, T2> implements Comparable<Tuple2<T1,T2>>,Serializable{
 
     /**
      * Create a new Tuple2 with 2 values
-     * @param v1
-     * @param v2
+     * @param v1 First value
+     * @param v2 Second value
      */
     @FieldNames(names = {"_1","_2"})
     public Tuple2(T1 v1, T2 v2) {

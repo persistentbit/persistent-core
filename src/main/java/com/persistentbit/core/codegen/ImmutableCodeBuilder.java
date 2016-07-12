@@ -2,6 +2,7 @@ package com.persistentbit.core.codegen;
 
 import com.persistentbit.core.Immutable;
 import com.persistentbit.core.Pair;
+import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.utils.ImTools;
 
@@ -111,7 +112,7 @@ public class ImmutableCodeBuilder {
         if(im.getWithMethod(f).isPresent() == false && f.getAnnotation(GenNoWith.class) == null){
             out.println("\tpublic " + name(cls) + "\t with" + firstCharUppercase(f.getName())+ "(" + name(f.getGenericType()) + " value){");
             out.println("\t\treturn new " + cls.getSimpleName() + (hasParams(cls)? "<>" : "")  + "(" +
-                    im.getConstructorProperties().map(g -> g.propertyName).map(n -> n.equals(f.getName())? "value" : "this." + n).join((a,b)->a+", " + b).get()
+                    im.getConstructorProperties().map(g -> g.propertyName).map(n -> n.equals(f.getName())? "value" : getCode(n)).join((a,b)->a+", " + b).get()
                     + ");");
             out.println("\t} ");
             out.println();
@@ -120,7 +121,7 @@ public class ImmutableCodeBuilder {
         //Generate getters
 
         ImTools.Getter getter = im.getFieldGetters().find(fg-> fg.propertyName.equals(f.getName())).get();
-        if(im.getGetterMethod(f).isPresent() == false && f.getAnnotation(GenNoGetter.class) == null){
+        if(im.getGetterMethod(f.getName()).isPresent() == false && f.getAnnotation(GenNoGetter.class) == null){
 
             String rt = getter.isNullable ? "Optional<" + name(f.getGenericType()) + ">" : name(f.getGenericType());
             String of = getter.isNullable ? "Optional.ofNullable(" +  getter.propertyName + ")" : getter.propertyName;
@@ -135,7 +136,7 @@ public class ImmutableCodeBuilder {
 
 
         try {
-            if(f.getAnnotation(GenNoLens.class) == null && f.getAnnotation(GenNoWith.class) == null && hasParams(cls) == false) {
+            if(f.getAnnotation(GenNoLens.class) == null && f.getAnnotation(GenNoWith.class) == null && hasParams(cls) == false && cls.getAnnotation(GenNoLens.class) == null) {
                 cls.getDeclaredField("_" + f.getName());
             }
             //new LensImpl<>((obj) -> obj.get...,(obj,value)->with(value))
@@ -150,7 +151,7 @@ public class ImmutableCodeBuilder {
                 }
             }
             String s = "(obj,value)-> obj.with" + firstCharUppercase(f.getName()) +"(value)";
-            String gen = "<" + cls.getSimpleName()+ "," + f.getType().getSimpleName() + ">";
+            String gen = "<" + cls.getSimpleName()+ "," + noPrimitive(f.getType()).getSimpleName() + ">";
             out.println("\tstatic public final Lens" + gen + " _" + f.getName() + " = new LensImpl" + gen + "("+ g + "," + s + ");");
             out.println("");
         }
@@ -163,15 +164,34 @@ public class ImmutableCodeBuilder {
         name = name.substring(i+1);
         return name;
     }
+    private PMap<Class,Class> primLookup =
+            PMap.<Class,Class>empty()
+                    .put(int.class,Integer.class)
+            .put(long.class,Long.class)
+            .put(boolean.class,Boolean.class)
+            .put(short.class,Short.class)
+            .put(float.class,Float.class)
+            .put(double.class,Double.class);
 
+
+    private Class<?> noPrimitive(Class<?> cls){
+        return primLookup.getOrDefault(cls,cls);
+    }
 
     private String params(Type t){
-        Class  cls = classFromType(t);
+        if(t instanceof ParameterizedType == false){
+            return "";
+        }
+        ParameterizedType pt = (ParameterizedType)t;
+        return "<" + PStream.from(pt.getActualTypeArguments()).map(m-> classFromType(m).getSimpleName()).join((a,b)-> a+"," + b).orElse("") + ">";
+        /*Class  cls = classFromType(t);
         if(cls.getTypeParameters().length == 0){
             return "";
         }
+        ParameterizedType pt = null;
+        pt.getActualTypeArguments();
         return "<" + PStream.from(cls.getTypeParameters()).map(m -> m.toString()).join((a,b)-> a + "," + b).orElse("") + ">";
-
+        */
     }
 
     boolean hasParams(Type t){
@@ -179,6 +199,7 @@ public class ImmutableCodeBuilder {
     }
 
     String name(Type t){
+
         if(t instanceof TypeVariable){
             TypeVariable tv = (TypeVariable)t;
             return tv.getName();
@@ -186,7 +207,7 @@ public class ImmutableCodeBuilder {
         Class<?> cls = classFromType(t);
         String p = params(t);
 
-        return classFromType(t).getSimpleName() + params(t);
+        return cls.getSimpleName() + params(t);
     }
     public static  Class<?> classFromType(Type t){
         if(t instanceof Class){
@@ -236,6 +257,21 @@ public class ImmutableCodeBuilder {
         }
         return PStream.val();
     }
+
+    String getCode(String name){
+        try{
+            return "this." + cls.getDeclaredField(name).getName();
+        }catch(NoSuchFieldException nsf){
+            ;
+        }
+        Method m = im.getGetterMethod(name).get();
+        String r = "super." + m.getName() + "()";
+        if(m.getReturnType().equals(Optional.class)){
+            r = r + ".orElse(null)";
+        }
+        return r;
+    }
+
     static public void build(File sourceRoot){
          build(sourceRoot,ImmutableCodeBuilder.class.getClassLoader());
     }

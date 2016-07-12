@@ -32,7 +32,7 @@ public class ImTools<C> {
      * Get an existing or create a new ImTools object for the provided class.<br>
      * The class should be of an immutable object<br>
      * @param cls The class of the immutable object
-     * @param <C>
+     * @param <C> Type of the class for ImTools instance
      * @return The ImTools instance for the provided class
      */
     static public synchronized <C> ImTools<C>    get(Class<C> cls) {
@@ -87,7 +87,7 @@ public class ImTools<C> {
      * Get or create a unit object for the class C<br>
      * The unit object is created by the default constructor of class C<br>
      * Unit objects are cached and chared between invocations.<br>
-     * @return
+     * @return The unit object
      */
     public C   unit() {
         if(unitObject != null){
@@ -202,10 +202,10 @@ public class ImTools<C> {
             throw new RuntimeException(e);
         }
     }
-    public Optional<Method> getGetterMethod(Field f){
+    public Optional<Method> getGetterMethod(String fieldName){
         Class<?> cls  = this.cls;
-        String get1 = "get" + firstCharUppercase(f.getName());
-        String get2 = "is" + firstCharUppercase(f.getName());
+        String get1 = "get" + firstCharUppercase(fieldName);
+        String get2 = "is" + firstCharUppercase(fieldName);
 
 
         while(cls != null && cls.equals(Object.class) == false){
