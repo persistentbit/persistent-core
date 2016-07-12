@@ -6,9 +6,11 @@
 
     <groupId>com.persistentbit</groupId>
     <artifactId>persistent-core</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
     <name>PERSISTENT-CORE</name>
+    <description>Persistent collections and streams for java</description>
+    <url>https://github.com/petermuys/persistentbit.com.git</url>
     <scm>
         <url>https://github.com/petermuys/persistentbit.com.git</url>
     </scm>
