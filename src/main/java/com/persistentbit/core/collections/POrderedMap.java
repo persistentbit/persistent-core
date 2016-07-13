@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
+ * A Persistent Map where the order of adding elements is preserved when iterating keys or values
  * @author Peter Muys
  * @since 13/07/2016
  */
@@ -38,7 +39,7 @@ public class POrderedMap<K,V> extends PStreamDirect<Tuple2<K,V>,POrderedMap<K,V>
         };
     }
     @Override
-    POrderedMap<K, V> toImpl(PStream<Tuple2<K, V>> lazy) {
+    protected POrderedMap<K, V> toImpl(PStream<Tuple2<K, V>> lazy) {
         POrderedMap<K,V> r = empty();
         return r.plusAll(lazy);
     }

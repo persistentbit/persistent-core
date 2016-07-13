@@ -1,6 +1,5 @@
 package com.persistentbit.core.collections;
 
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -9,7 +8,7 @@ import java.util.Set;
  * Date: 8/07/16
  * Time: 15:33
  */
-public class PSet<T> extends PStreamDirect<T,PSet<T>> implements Serializable{
+public class PSet<T> extends PStreamDirect<T,PSet<T>> implements IPSet<T>{
     static private PSet<Object> sEmpty = new PSet<>();
 
     static public <T> PSet<T> empty() {
@@ -36,7 +35,7 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> implements Serializable{
         return empty();
     }
 
-    private PSet(PMap<T,T> map){
+    PSet(PMap<T,T> map){
         this.map = map;
     }
 
@@ -58,7 +57,7 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> implements Serializable{
     }
 
     @Override
-    PSet<T> toImpl(PStream<T> lazy) {
+    protected PSet<T> toImpl(PStream<T> lazy) {
         return lazy.pset();
     }
 

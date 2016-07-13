@@ -630,6 +630,11 @@ public interface PStream<T> extends Iterable<T> {
 
         return new PSet<T>().plusAll(this);
     }
+    default POrderedSet<T> porderedset() {
+        if(isInfinit()){ throw new InfinitePStreamException();}
+
+        return new POrderedSet<T>().plusAll(this);
+    }
 
     default PStream<T> distinct() {
         return new PStreamLazy<T>() {

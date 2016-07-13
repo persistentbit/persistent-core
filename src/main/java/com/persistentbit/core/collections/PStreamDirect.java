@@ -7,7 +7,6 @@ import com.persistentbit.core.Tuple2;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -19,7 +18,7 @@ import java.util.stream.Stream;
  */
 public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLazy<T>{
 
-    abstract IMP toImpl(PStream<T> lazy);
+    abstract protected IMP toImpl(PStream<T> lazy);
 
     @Override
     public PStream<T> lazy() {

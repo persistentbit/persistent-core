@@ -78,7 +78,7 @@ public abstract class LList<E> extends AbstractPSeq<E,LList<E>> implements Seria
     }
 
     @Override
-    LList<E> toImpl(PStream<E> lazy) {
+    protected LList<E> toImpl(PStream<E> lazy) {
         return lazy.llist();
     }
 
@@ -221,36 +221,5 @@ public abstract class LList<E> extends AbstractPSeq<E,LList<E>> implements Seria
 
 
 
-    static public void main(String...args){
-        LList<Integer> li = LList.empty;
-        dump(li);
-        li = li.prepend(1);
-        dump(li);
-        li = li.prepend(2);
-        dump(li);
-        li = li.prepend(3);
-        dump(li);
 
-        for(int t=0; t< 1000000000; t++){
-            if(t % 1000000 == 0){
-                System.out.println(t);
-            }
-            li = li.prepend(t);
-        }
-
-
-        System.out.println("done");
-    }
-
-
-
-    static void dump(LList<Integer> list){
-        int count = 0;
-        System.out.println("");
-        System.out.println("dump list size = " + list.size());
-        for(Integer item : list.reversed()){
-            System.out.println("Item " + count + " = " + item);
-            count++;
-        }
-    }
 }

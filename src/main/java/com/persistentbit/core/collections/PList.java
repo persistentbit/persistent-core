@@ -56,7 +56,7 @@ public class PList<T> extends AbstractPSeq<T,PList<T>> implements Serializable{
 
 
     @Override
-    PList<T> toImpl(PStream<T> lazy) {
+    protected PList<T> toImpl(PStream<T> lazy) {
         return lazy.plist();
     }
 

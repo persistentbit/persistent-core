@@ -58,7 +58,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
     }
 
     @Override
-    PMap<K, V> toImpl(PStream<Tuple2<K, V>> lazy) {
+    protected PMap<K, V> toImpl(PStream<Tuple2<K, V>> lazy) {
         PMap<K,V> r = empty();
         return r.plusAll(lazy);
     }

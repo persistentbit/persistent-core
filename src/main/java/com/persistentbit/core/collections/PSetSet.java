@@ -11,9 +11,9 @@ import java.util.Set;
  * Time: 11:10
  */
 public class PSetSet<T> implements Set<T>,PStreamable<T>,Serializable{
-    private final PSet<T> master;
+    private final IPSet<T> master;
 
-    public PSetSet(PSet<T> master) {
+    public PSetSet(IPSet<T> master) {
         this.master = master;
     }
 
