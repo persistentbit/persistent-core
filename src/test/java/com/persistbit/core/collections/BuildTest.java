@@ -1,7 +1,7 @@
 package com.persistbit.core.collections;
 
-import com.persistentbit.core.Immutable;
 import com.persistentbit.core.Nullable;
+import com.persistentbit.core.codegen.CaseClass;
 import com.persistentbit.core.codegen.GenNoLens;
 import com.persistentbit.core.properties.FieldNames;
 
@@ -12,7 +12,8 @@ import java.util.Optional;
  * Date: 11/07/16
  * Time: 18:01
  */
-@Immutable @GenNoLens
+@CaseClass
+@GenNoLens
 public class BuildTest<A> {
     private final String first;
     @Nullable

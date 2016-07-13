@@ -108,7 +108,7 @@ public class POrderedMap<K,V> extends PStreamDirect<Tuple2<K,V>,POrderedMap<K,V>
 
     /**
      * Returns this ordered map as an unordered persistent map
-     * @return
+     * @return The Unorderd map internally used by this ordered map
      */
     public PMap<K,V>    pmap() {
         return map;

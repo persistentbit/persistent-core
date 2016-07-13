@@ -16,17 +16,18 @@ import java.util.Optional;
 import static com.persistentbit.core.utils.ReflectionUtils.classFromType;
 
 /**
- * Class to auto generate code for Immutable classes that are marked with {@link Immutable}. <br>
- * Start The codebuilder with <code>ImmutableCodeBuilder.build(sourcePathFile);</code>
+ * Class to auto generate code for Immutable classes that are marked with {@link CaseClass}. <br>
+ * Start The codebuilder with <code>CaseClaseCodeBuilder.build(sourcePathFile);</code>
  * This will iterate over all the *.java files in the filesystem and for each found file,<br>
  * Load the class and add the generated code to the .java file if the method is not found in the class.<br>
  * Code that can be generated: per property: Lens, with, get functions.<br>
  * and equals/hashcode for the class<br>
  * Typical use:<br>
  * <code>static public void main(String...args){<br>
- * ImmutableCodeBuilder.build(findSourcePath(ImmutableCodeBuilder.class,"resource-marker.txt"));<br>
+ * CaseClaseCodeBuilder.build(findSourcePath(CaseClaseCodeBuilder.class,"resource-marker.txt"));<br>
  * }<br></code>
  *
+ * @see CaseClass
  * @see GenNoEquals
  * @see GenNoGetter
  * @see GenNoLens
@@ -36,12 +37,12 @@ import static com.persistentbit.core.utils.ReflectionUtils.classFromType;
  * @author Peter Muys
  * @since 11/07/2016
  */
-public class ImmutableCodeBuilder {
+public class CaseClaseCodeBuilder {
     private final Class<?>    cls;
     private final ImTools<?> im;
     private final File        source;
 
-    public ImmutableCodeBuilder(Class<?> cls, File source) {
+    public CaseClaseCodeBuilder(Class<?> cls, File source) {
         this.cls = cls;
         this.source = source;
         this.im = ImTools.get(cls);
@@ -382,7 +383,7 @@ public class ImmutableCodeBuilder {
     }
 
     static public void build(File sourceRoot){
-         build(sourceRoot,ImmutableCodeBuilder.class.getClassLoader());
+         build(sourceRoot,CaseClaseCodeBuilder.class.getClassLoader());
     }
 
     static public void build(File sourceRoot,ClassLoader classLoader){
@@ -407,11 +408,11 @@ public class ImmutableCodeBuilder {
             return cls.getAnnotation(Immutable.class) != null;
         });
         cf.forEach(p -> {
-            ImmutableCodeBuilder b = new ImmutableCodeBuilder(p._2,p._1);
+            CaseClaseCodeBuilder b = new CaseClaseCodeBuilder(p._2,p._1);
             b.generate();
         });
     }
     static public void main(String...args){
-        ImmutableCodeBuilder.build(findSourcePath(ImmutableCodeBuilder.class,"resource-marker.txt"));
+        CaseClaseCodeBuilder.build(findSourcePath(CaseClaseCodeBuilder.class,"resource-marker.txt"));
     }
 }

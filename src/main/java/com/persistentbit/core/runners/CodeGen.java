@@ -1,6 +1,6 @@
 package com.persistentbit.core.runners;
 
-import com.persistentbit.core.codegen.ImmutableCodeBuilder;
+import com.persistentbit.core.codegen.CaseClaseCodeBuilder;
 
 /**
  * User: petermuys
@@ -9,6 +9,6 @@ import com.persistentbit.core.codegen.ImmutableCodeBuilder;
  */
 public class CodeGen {
     static public void main(String...args){
-        ImmutableCodeBuilder.build(ImmutableCodeBuilder.findSourcePath(CodeGen.class,"persistentbit.com.marker.txt"));
+        CaseClaseCodeBuilder.build(CaseClaseCodeBuilder.findSourcePath(CodeGen.class,"persistentbit.com.marker.txt"));
     }
 }
