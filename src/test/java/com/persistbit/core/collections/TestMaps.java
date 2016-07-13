@@ -1,26 +1,27 @@
 package com.persistbit.core.collections;
 
-import com.persistentbit.core.Tuple2;
-import com.persistentbit.core.collections.PMap;
-import com.persistentbit.core.collections.PSet;
-import com.persistentbit.core.collections.PStream;
+import com.persistentbit.core.collections.*;
 import org.testng.annotations.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: petermuys
  * Date: 9/07/16
  * Time: 13:35
  */
-public class TestPMap {
+public class TestMaps {
     @Test
-    void testAddRemove(){
-        Map<Integer,String> refmap = new HashMap<>();
-        PMap<Integer,String> pmap = new PMap<>();
+    public  void testPMap(){
+        doAddRemove(PMap.empty());
+    }
+    @Test
+    public  void testPOrderedMap(){
+        doAddRemove(POrderedMap.empty());
+    }
+    private void doAddRemove(IPMap<Integer,String> empty){
+        LinkedHashMap<Integer,String> refmap = new LinkedHashMap<>();
+        IPMap<Integer,String> pmap = empty;
         Random r = new Random(System.currentTimeMillis());
 
         for(int t=0; t<100000;t++){
@@ -29,8 +30,8 @@ public class TestPMap {
             refmap.put(key,val);
             pmap = pmap.put(key,val);
         }
-        //refmap.put(null,"1234");
-        //pmap = pmap.put(null,"1234");
+        refmap.put(null,"1234");
+        pmap = pmap.put(null,"1234");
         Set<Integer> refKeys = refmap.keySet();
         PStream<Integer> pstreamKeys = pmap.keys();
         //System.out.println(pstreamKeys);
@@ -39,6 +40,16 @@ public class TestPMap {
         Set<Integer> pkeys = psetKeys.toSet();
         assert refmap.size() == pmap.size();
 
+        if(pmap instanceof POrderedMap){
+            //Lets check if the order is ok...
+            Iterator<Integer> refIter = refmap.keySet().iterator();
+            Iterator<Integer> pIter = pmap.keys().iterator();
+            while(refIter.hasNext() && pIter.hasNext()){
+                assert Objects.equals(refIter.next(),pIter.next());
+
+            }
+            assert refIter.hasNext() == pIter.hasNext();
+        }
 
         if(refKeys.equals(pkeys) == false){
             throw new RuntimeException();
@@ -54,5 +65,7 @@ public class TestPMap {
                 throw new RuntimeException(entry.toString());
             }
         }
+
+
     }
 }

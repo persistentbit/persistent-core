@@ -130,7 +130,7 @@ public class POrderedMap<K,V> extends PStreamDirect<Tuple2<K,V>,POrderedMap<K,V>
             @Override
             public Tuple2<K, V> next() {
                 K key = keys.next();
-                return new Tuple2<K, V>(key,map.get(key));
+                return new PMapEntry<K, V>(key,map.get(key));
             }
         };
     }

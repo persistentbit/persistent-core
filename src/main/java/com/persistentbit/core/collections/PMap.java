@@ -87,7 +87,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
 
     @Override
     public boolean containsKey(Object key) {
-
+        if(key == null) { key = (K)sNullKey; }
             return (root != null) ? root.find(0, hash(key), key, sNotFound) != sNotFound
                 : false;
     }
