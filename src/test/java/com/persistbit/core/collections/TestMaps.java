@@ -4,6 +4,7 @@ import com.persistentbit.core.collections.*;
 import org.testng.annotations.Test;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * User: petermuys
@@ -11,6 +12,7 @@ import java.util.*;
  * Time: 13:35
  */
 public class TestMaps {
+    static private final Logger log = Logger.getLogger(TestMaps.class.getName());
     @Test
     public  void testPMap(){
         doAddRemove(PMap.empty());
@@ -20,16 +22,19 @@ public class TestMaps {
         doAddRemove(POrderedMap.empty());
     }
     private void doAddRemove(IPMap<Integer,String> empty){
+
         LinkedHashMap<Integer,String> refmap = new LinkedHashMap<>();
         IPMap<Integer,String> pmap = empty;
         Random r = new Random(System.currentTimeMillis());
-
-        for(int t=0; t<100000;t++){
+        int count = 100000;
+        log.info("Adding " + count + " elements to a PMap and a java Map");
+        for(int t=0; t<count;t++){
             int key = r.nextInt();
             String val = ""  +r.nextGaussian();
             refmap.put(key,val);
             pmap = pmap.put(key,val);
         }
+        log.info("Adding " + count + " elements to a PMap and a java Map...done");
         refmap.put(null,"1234");
         pmap = pmap.put(null,"1234");
         Set<Integer> refKeys = refmap.keySet();

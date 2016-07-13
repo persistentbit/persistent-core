@@ -7,6 +7,8 @@ import com.persistentbit.core.Tuple2;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
+import java.util.logging.Logger;
+
 /**
  *   Copyright(c) Peter Muys.
  *   This code is base on the PersistenHashMap created by Rich Hickey.
@@ -21,6 +23,7 @@ import java.util.function.Function;
  *   You must not remove this notice, or any other, from this software.
  */
 public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements IPMap<K,V>{
+    static final private Logger log = Logger.getLogger(PMap.class.getName());
     static final private Object sNullKey = new Object();
     static final private PMap sEmpty = new PMap(0, null);
     static public final <K,V> PMap<K,V> empty() {
@@ -94,7 +97,11 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
 
     @Override
     public boolean contains(Object value) {
+        if(value == null){
+            return false;
+        }
         if(value instanceof Tuple2 == false){
+            log.warning("calling PMap.contains without a Tuple2 value");
             return false;
         }
         Tuple2 tup = (Tuple2)value;
