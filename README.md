@@ -42,4 +42,15 @@ Every PStream has the following methods build in:
 - join(f): join all elements to 1 element
 - flatten(): flatten the stream
 
-  
+
+## How to get it.
+
+### Using maven:
+    Add the following dependency:
+```xml
+        <dependency>
+            <groupId>com.persistentbit</groupId>
+            <artifactId>persistent-core</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+```
