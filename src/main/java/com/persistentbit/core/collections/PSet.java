@@ -100,6 +100,12 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> implements IPSet<T>{
     }
 
     @Override
+    public boolean contains(Object value) {
+        return map.containsKey(value);
+    }
+
+
+    @Override
     public boolean equals(Object obj) {
         if(obj == this){
             return true;

@@ -100,6 +100,12 @@ public class POrderedSet<T> extends PStreamDirect<T,POrderedSet<T>> implements I
     }
 
     @Override
+    public boolean contains(Object value) {
+        return map.containsKey(value);
+    }
+
+
+    @Override
     public Iterator<T> iterator() {
         return map.keys().iterator();
     }

@@ -88,8 +88,20 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
     @Override
     public boolean containsKey(Object key) {
         if(key == null) { key = (K)sNullKey; }
-            return (root != null) ? root.find(0, hash(key), key, sNotFound) != sNotFound
-                : false;
+        return (root != null) ? root.find(0, hash(key), key, sNotFound) != sNotFound
+            : false;
+    }
+
+    @Override
+    public boolean contains(Object value) {
+        if(value instanceof Tuple2 == false){
+            return false;
+        }
+        Tuple2 tup = (Tuple2)value;
+        if(containsKey(tup._1) == false){
+            return false;
+        }
+        return Objects.equals(get(tup._1),tup._2);
     }
 
     @Override
@@ -126,6 +138,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
     public V get(Object key){
         return getOrDefault(key,null);
     }
+
 
     @Override
     public Optional<V> getOpt(Object key){

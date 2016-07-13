@@ -135,6 +135,13 @@ public class POrderedMap<K,V> extends PStreamDirect<Tuple2<K,V>,POrderedMap<K,V>
             }
         };
     }
+
+    @Override
+    public boolean contains(Object value) {
+        return map.contains(value);
+    }
+
+
     @Override
     public int size() {
         return map.size();
