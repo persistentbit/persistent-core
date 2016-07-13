@@ -86,6 +86,23 @@ public class PList<T> extends AbstractPSeq<T,PList<T>> implements Serializable{
         return res;
     }
 
+    @Override
+    public PStream<T> lazy() {
+        return new PStreamLazy<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return PList.this.iterator();
+            }
+
+            @Override
+            public PList<T> plist() {
+                return PList.this;
+            }
+
+        };
+
+    }
+
     static public PList<Integer> forInt() {
         return empty();
     }

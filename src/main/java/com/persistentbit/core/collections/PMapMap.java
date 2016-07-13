@@ -1,5 +1,7 @@
 package com.persistentbit.core.collections;
 
+import com.persistentbit.core.Tuple2;
+
 import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -11,16 +13,16 @@ import java.util.Set;
  * Date: 9/07/16
  * Time: 11:21
  */
-public class PMapMap<K,V> extends AbstractMap<K,V> implements PStreamable,Serializable{
-    private final PMap<K,V> master;
+public class PMapMap<K,V> extends AbstractMap<K,V> implements PStreamable<Tuple2<K,V>>,Serializable{
+    private final IPMap<K,V> master;
 
-    public PMapMap(PMap<K, V> master) {
+    public PMapMap(IPMap<K, V> master) {
         this.master = master;
     }
 
     @Override
-    public <T> PStream<T> asPStream() {
-        return (PStream<T>)master;
+    public PStream<Tuple2<K,V>> pstream() {
+        return master;
     }
 
     @Override

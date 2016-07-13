@@ -5,12 +5,15 @@ import com.persistentbit.core.Pair;
 import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.utils.ImTools;
+import com.persistentbit.core.utils.ReflectionUtils;
 
 
 import java.io.*;
 import java.lang.reflect.*;
 import java.net.URL;
 import java.util.Optional;
+
+import static com.persistentbit.core.utils.ReflectionUtils.classFromType;
 
 /**
  * Class to auto generate code for Immutable classes that are marked with {@link Immutable}. <br>
@@ -194,9 +197,9 @@ public class ImmutableCodeBuilder {
                     cmp = gthis + " == " + gother;
                 }
                 if(g.isNullable){
-                    out.println("\t\tif(" + gthis + " == null) { if(" + gother+" != null) { return false; } } else { if(!" + cmp+"){ return false; } } ;");
+                    out.println("\t\tif(" + gthis + " == null) { if(" + gother+" != null) { return false; } } else { if(" + cmp+" == false){ return false; } } ;");
                 } else {
-                    out.println("\t\tif(!" + cmp +"){ return false; }");
+                    out.println("\t\tif(" + cmp +" == false){ return false; }");
                 }
 
             });
@@ -222,15 +225,18 @@ public class ImmutableCodeBuilder {
 
         hf.forEach(g-> {
             String gthis = g.propertyName;
-            if(g.field.getType().equals(boolean.class)){
+            Class fc = g.getter.getPropertyClass();
+            if(fc.equals(boolean.class)){
                 gthis = "(" + gthis + "? 1 : 0 )";
-            } else if(g.field.getType().equals(long.class)){
+            } else if(fc.equals(long.class)){
                 gthis = "Long.hashCode(" + gthis + ")";
-            } else if(g.field.getType().equals(float.class)){
+            } else if(fc.equals(int.class)){
+                gthis = "Integer.hashCode(" + gthis + ")";
+            } else if(fc.equals(float.class)){
                 gthis = "Float.hashCode(" + gthis + ")";
-            } else if(g.field.getType().equals(double.class)){
+            } else if(fc.equals(double.class)){
                 gthis = "Double.hashCode(" + gthis + ")";
-            } else if(g.field.getType().equals(short.class)){
+            } else if(fc.equals(short.class)){
                 gthis = "Short.hashCode(" + gthis + ")";
             } else {
                 gthis = gthis + ".hashCode()";
@@ -312,31 +318,12 @@ public class ImmutableCodeBuilder {
             TypeVariable tv = (TypeVariable)t;
             return tv.getName();
         }
-        Class<?> cls = classFromType(t);
+        Class<?> cls = ReflectionUtils.classFromType(t);
         String p = params(t);
 
         return cls.getSimpleName() + params(t);
     }
-    public static  Class<?> classFromType(Type t){
-        if(t instanceof Class){
-            return (Class<?>)t;
-        }
-        if(t instanceof ParameterizedType){
-            return classFromType(((ParameterizedType)t).getRawType());
-        }
-        if(t instanceof GenericArrayType){
-            GenericArrayType gat = (GenericArrayType)t;
-            throw new RuntimeException(gat.getTypeName());
-        }
-        if(t instanceof WildcardType){
-            WildcardType wct = (WildcardType)t;
-            return classFromType(wct.getUpperBounds()[0]);
-        }
-        if(t instanceof TypeVariable){
-            return Object.class;
-        }
-        throw new RuntimeException("Don't know how to handle " + t);
-    }
+
     static public File findSourcePath(Class<?>cls, String resourceName) {
         URL url = cls.getClassLoader().getResource(resourceName);
         if(url == null){

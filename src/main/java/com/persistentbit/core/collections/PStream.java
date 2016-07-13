@@ -41,7 +41,7 @@ public interface PStream<T> extends Iterable<T> {
             return ((PStream<T>)iter);
         }
         if(iter instanceof PStreamable){
-            return (PStream<T>)((PStreamable)iter).asPStream().lazy();
+            return ((PStreamable<T>)iter).pstream().lazy();
         }
         if(iter instanceof Collection){
             Collection col = (Collection)iter;
@@ -429,6 +429,21 @@ public interface PStream<T> extends Iterable<T> {
         if(isInfinit()){ throw new InfinitePStreamException(); }
 
         PMap<K,PList<T>> r = PMap.empty();
+        PList<T> emptyList = PList.empty();
+        for(T v : this){
+            K k = keyGen.apply(v);
+            PList<T> l = r.getOrDefault(k,emptyList);
+            l = l.plus(v);
+            r = r.put(k,l);
+        }
+        return r;
+    }
+
+
+    default <K> POrderedMap<K,PList<T>> groupByOrdered(Function<T, K> keyGen){
+        if(isInfinit()){ throw new InfinitePStreamException(); }
+
+        POrderedMap<K,PList<T>> r = POrderedMap.empty();
         PList<T> emptyList = PList.empty();
         for(T v : this){
             K k = keyGen.apply(v);

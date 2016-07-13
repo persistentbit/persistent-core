@@ -20,7 +20,7 @@ import java.util.function.Function;
  * 	 the terms of this license.
  *   You must not remove this notice, or any other, from this software.
  */
-public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
+public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements IPMap<K,V>{
     static final private Object sNullKey = new Object();
     static final private PMap sEmpty = new PMap(0, null);
     static public final <K,V> PMap<K,V> empty() {
@@ -42,6 +42,19 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
     private PMap(int size, MapNode root) {
         this.size = size;
         this.root = root;
+    }
+
+
+    @Override
+    public PStream<Tuple2<K,V>> lazy() {
+        return new PStreamLazy<Tuple2<K,V>>() {
+            @Override
+            public Iterator<Tuple2<K,V>> iterator() {
+                return PMap.this.iterator();
+            }
+
+        };
+
     }
 
     @Override
@@ -72,12 +85,14 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
     }
 
 
+    @Override
     public boolean containsKey(Object key) {
 
             return (root != null) ? root.find(0, hash(key), key, sNotFound) != sNotFound
                 : false;
     }
 
+    @Override
     public <M> PMap<K,M> mapValues(Function<V,M> mapper){
 
         PMap<K,M> r = PMap.empty();
@@ -85,6 +100,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
     }
 
 
+    @Override
     public PMap<K, V> put(K key, V val) {
         if(key == null) { key = (K)sNullKey; }
         Box addedLeaf = new Box(null);
@@ -99,21 +115,25 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
 
 
 
+    @Override
     @SuppressWarnings("unchecked")
     public V getOrDefault(Object key, V notFound) {
         if(key == null) { key = sNullKey; }
         return (V) (root != null ? root.find(0, hash(key), key, notFound) : notFound);
     }
 
+    @Override
     public V get(Object key){
         return getOrDefault(key,null);
     }
 
+    @Override
     public Optional<V> getOpt(Object key){
         return Optional.ofNullable(getOrDefault(key,null));
     }
 
 
+    @Override
     public PMap<K, V> removeKey(Object key) {
         if(key == null) { key = sNullKey; }
 
@@ -125,24 +145,28 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
         return new PMap<K, V>(size - 1, newroot);
     }
 
+    @Override
     public PStream<K>   keys(){
         return map(e-> e._1);
     }
 
+    @Override
     public PStream<V>   values() {
         return map(e-> e._2);
     }
 
 
 
+    @Override
     public Map<K,V> map() {
-        return new PMapMap<>(this);
+        return new PMapMap<K,V>(this);
     }
 
 
 
 
 
+    @Override
     public Iterator<Tuple2<K, V>> iterator() {
         final Iterator<?> rootIter = (root == null) ? Collections.emptyIterator() : root.iterator();
         return (Iterator<Tuple2<K, V>>) rootIter;
@@ -641,10 +665,10 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>>{
         if(obj == this){
             return true;
         }
-        if(obj instanceof PMap == false){
+        if(obj instanceof IPMap == false){
             return false;
         }
-        PMap other = (PMap)obj;
+        IPMap other = (IPMap)obj;
         if(other.size() != size()){
             return false;
         }

@@ -1,8 +1,6 @@
 package com.persistentbit.core.collections;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -12,7 +10,7 @@ import java.util.Set;
  * Time: 15:33
  */
 public class PSet<T> extends PStreamDirect<T,PSet<T>> implements Serializable{
-    static public PSet<Object> sEmpty = new PSet<>();
+    static private PSet<Object> sEmpty = new PSet<>();
 
     static public <T> PSet<T> empty() {
         return (PSet<T>)sEmpty;
@@ -42,6 +40,22 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> implements Serializable{
         this.map = map;
     }
 
+
+    @Override
+    public PStream<T> lazy() {
+        return new PStreamLazy<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return PSet.this.iterator();
+            }
+
+            @Override
+            public PSet<T> pset() {
+                return PSet.this;
+            }
+        };
+
+    }
 
     @Override
     PSet<T> toImpl(PStream<T> lazy) {

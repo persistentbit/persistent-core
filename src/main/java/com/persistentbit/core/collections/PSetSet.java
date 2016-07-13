@@ -10,7 +10,7 @@ import java.util.Set;
  * Date: 9/07/16
  * Time: 11:10
  */
-public class PSetSet<T> implements Set<T>,PStreamable,Serializable{
+public class PSetSet<T> implements Set<T>,PStreamable<T>,Serializable{
     private final PSet<T> master;
 
     public PSetSet(PSet<T> master) {
@@ -18,7 +18,7 @@ public class PSetSet<T> implements Set<T>,PStreamable,Serializable{
     }
 
     @Override
-    public <T> PStream<T> asPStream() {
+    public PStream<T> pstream() {
         return (PStream<T>)master;
     }
 
