@@ -10,12 +10,12 @@
     <description>Persistent collections and streams for java</description>
     <url>https://github.com/petermuys/persistentbit.com.git</url>
 
+
     <scm>
-        <url>https://github.com/petermuys/persistentbit.com.git</url>
-        <connection>https://github.com/petermuys/persistentbit.com.git</connection>
-
-  </scm>
-
+        <connection>scm:git:git@github.com:petermuys/persistentbit.com.git</connection>
+        <url>scm:git:git@github.com:petermuys/persistentbit.com.git</url>
+        <developerConnection>scm:git:git@github.com:petermuys/persistentbit.com.git</developerConnection>
+    </scm>
 
     <inceptionYear>2016</inceptionYear>
     <developers>
