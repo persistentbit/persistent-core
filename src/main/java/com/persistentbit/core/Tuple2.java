@@ -38,7 +38,7 @@ public class Tuple2<T1, T2> implements Comparable<Tuple2<T1,T2>>,Serializable{
      * @param <T2> Type of _2
      * @return a new Tuple2
      */
-    static <T1,T2> Tuple2<T1,T2> of(T1 v1, T2 v2){
+    static public <T1,T2> Tuple2<T1,T2> of(T1 v1, T2 v2){
         return new Tuple2<>(v1,v2);
     }
 

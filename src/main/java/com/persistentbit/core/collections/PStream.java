@@ -438,7 +438,25 @@ public interface PStream<T> extends Iterable<T> {
         }
         return r;
     }
+    default <K> PMap<K,T> groupByOneValue(Function<T, K> keyGen){
+        return groupBy(keyGen).mapValues(l -> l.head());
+    }
+    default <K,V> PMap<K,PList<V>> groupBy(Function<T, K> keyGen,Function<T,V> valGen){
+        if(isInfinit()){ throw new InfinitePStreamException(); }
 
+        PMap<K,PList<V>> r = PMap.empty();
+        PList<V> emptyList = PList.empty();
+        for(T v : this){
+            K k = keyGen.apply(v);
+            PList<V> l = r.getOrDefault(k,emptyList);
+            l = l.plus(valGen.apply(v));
+            r = r.put(k,l);
+        }
+        return r;
+    }
+    default <K,V> PMap<K,V> groupByOneValue(Function<T, K> keyGen,Function<T,V> valGen){
+        return groupBy(keyGen,valGen).mapValues(l -> l.headOpt().orElse(null));
+    }
 
     default <K> POrderedMap<K,PList<T>> groupByOrdered(Function<T, K> keyGen){
         if(isInfinit()){ throw new InfinitePStreamException(); }
