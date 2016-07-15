@@ -10,7 +10,7 @@ import java.util.function.Function;
  * @since 15/07/2016
  */
 public class ObjectMapperRegistry implements Function<Class,ObjectMapper> {
-    private final Function<Class,ObjectMapper>    defaultMapperCreator;
+    private final Function<Class,ObjectMapperDefault>    defaultMapperCreator;
     private PMap<Class,ObjectMapper>        mappers = PMap.empty();
 
 
@@ -42,7 +42,7 @@ public class ObjectMapperRegistry implements Function<Class,ObjectMapper> {
     public ObjectMapper apply(Class aClass) {
         ObjectMapper mapper = mappers.get(aClass);
         if(mapper == null){
-            mapper = defaultMapperCreator.apply(aClass);
+            mapper = defaultMapperCreator.apply(aClass).addAllFields();
             mappers = mappers.put(aClass,mapper);
         }
         return mapper;
