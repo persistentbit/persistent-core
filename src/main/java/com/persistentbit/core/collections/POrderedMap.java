@@ -43,6 +43,15 @@ public class POrderedMap<K,V> extends PStreamDirect<Tuple2<K,V>,POrderedMap<K,V>
         POrderedMap<K,V> r = empty();
         return r.plusAll(lazy);
     }
+
+    @Override
+    public <K2, V2> POrderedMap<K2, V2> mapKeyValues(Function<Tuple2<K, V>, Tuple2<K2, V2>> itemsMapper) {
+        POrderedMap<K2,V2> res = POrderedMap.empty();
+        return with(res, (r,t) -> r.plus(itemsMapper.apply(t)));
+
+    }
+
+
     @Override
     public POrderedMap<K, V> plus(Tuple2<K, V> value) {
         return this.put(value._1,value._2);

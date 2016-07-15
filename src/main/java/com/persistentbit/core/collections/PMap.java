@@ -6,6 +6,7 @@ import com.persistentbit.core.Tuple2;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
@@ -183,7 +184,12 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
     }
 
 
+    @Override
+    public <K2, V2> PMap<K2, V2> mapKeyValues(Function<Tuple2<K, V>, Tuple2<K2, V2>> itemsMapper) {
+        PMap<K2,V2> res = PMap.empty();
+        return with(res, (r,t) -> r.plus(itemsMapper.apply(t)));
 
+    }
 
 
     @Override

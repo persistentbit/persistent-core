@@ -106,14 +106,14 @@ public class ImTools<C> {
     }
 
 
-    public C    createNew(Map<String,Object> newProperties){
+    public C    createNew(PMap<String,Object> newProperties){
         Objects.requireNonNull(newProperties,"newProperties");
         Object[] params = new Object[constructorProperties.size()];
         for(int t=0; t<constructorProperties.size();t++){
             Getter g = constructorProperties.get(t);
 
             if(newProperties.containsKey(g.propertyName)){
-                params[t] = newProperties.remove(g.propertyName);
+                params[t] = newProperties.get(g.propertyName);
             } else {
                 params[t] = null;
             }
@@ -129,7 +129,7 @@ public class ImTools<C> {
         return PStream.from(constructorProperties);
     }
 
-    public C    copyWith(C orgObject, Map<String,Object> newProperties){
+    public C    copyWith(C orgObject, PMap<String,Object> newProperties){
         Objects.requireNonNull(orgObject,"orgObject");
         Objects.requireNonNull(newProperties,"newProperties");
         Object[] params = new Object[constructorProperties.size()];
@@ -137,7 +137,7 @@ public class ImTools<C> {
             Getter g = constructorProperties.get(t);
 
             if(newProperties.containsKey(g.propertyName)){
-                params[t] = newProperties.remove(g.propertyName);
+                params[t] = newProperties.get(g.propertyName);
             } else {
                 params[t] = g.getter.get(orgObject);
             }
@@ -154,23 +154,20 @@ public class ImTools<C> {
     }
 
     public C copyWith(C orgObject, String n1, Object v1){
-        Map<String,Object> m = new HashMap<>();
-        m.put(n1,v1);
+        PMap<String,Object> m = new PMap<>();
+        m = m.put(n1,v1);
         return copyWith(orgObject,m);
     }
 
     public C copyWith(C orgObject, String n1, Object v1, String n2, Object v2){
-        Map<String,Object> m = new HashMap<>();
-        m.put(n1,v1);
-        m.put(n2,v2);
+        PMap<String,Object> m = PMap.empty();
+        m = m.put(n1,v1).put(n2,v2);
         return copyWith(orgObject,m);
     }
 
     public C copyWith(C orgObject, String n1, Object v1, String n2, Object v2, String n3, Object v3){
-        Map<String,Object> m = new HashMap<>();
-        m.put(n1,v1);
-        m.put(n2,v2);
-        m.put(n3,v3);
+        PMap<String,Object> m = PMap.empty();
+        m = m.put(n1,v1).put(n2,v2).put(n3,v3);
         return copyWith(orgObject,m);
     }
 

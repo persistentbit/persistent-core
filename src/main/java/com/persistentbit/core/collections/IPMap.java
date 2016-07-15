@@ -17,6 +17,18 @@ import java.util.function.Function;
  * @since 13/07/2016
  */
 public interface IPMap<K,V>  extends PStream<Tuple2<K,V>>{
+
+
+    /**
+     * Create a new IPMap where the keys and the values are mapped
+     * @param items All the map Key,Value items
+     * @param <K2>  Type of the new Keys
+     * @param <V2> Type of the new Values
+     * @return A new new Map with the mapped key,values
+     */
+    <K2,V2> IPMap<K2,V2> mapKeyValues(Function<Tuple2<K,V>,Tuple2<K2,V2>> items);
+
+
     /**
      * Does this map contains the provided key?<br>
      * Also returns true for keys that are set with a null value
@@ -89,5 +101,6 @@ public interface IPMap<K,V>  extends PStream<Tuple2<K,V>>{
     default Map<K,V> map() {
         return new PMapMap<K,V>(this);
     }
+
 
 }
