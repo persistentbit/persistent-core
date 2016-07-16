@@ -86,6 +86,14 @@ public class ImTools<C> {
     }
 
     /**
+     * Get the Class where this ImTools is for
+     * @return The Class
+     */
+    public Class<C> getObjectClass() {
+        return cls;
+    }
+
+    /**
      * Get or create a unit object for the class C<br>
      * The unit object is created by the default constructor of class C<br>
      * Unit objects are cached and chared between invocations.<br>
