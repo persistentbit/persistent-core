@@ -15,6 +15,7 @@ import com.persistentbit.core.properties.PropertyGetterField;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.logging.Logger;
 
 
 /**
@@ -26,6 +27,7 @@ import java.util.*;
  * @since 3/03/2016
  */
 public class ImTools<C> {
+    static private final Logger log = Logger.getLogger(ImTools.class.getName());
     static private Map<Class<?>,ImTools> sClassTools =   new HashMap<>();
 
     /**
@@ -128,7 +130,8 @@ public class ImTools<C> {
         }
         try {
             return (C)constructor.newInstance(params);
-        } catch (InstantiationException |IllegalAccessException |InvocationTargetException e) {
+        } catch (Exception e) {
+            log.severe("Error constructing new " + cls.getName()  + " with newProperties " + newProperties);
             throw new RuntimeException("Error constructing new " + cls.getName()  + " with newProperties " + newProperties);
         }
     }
