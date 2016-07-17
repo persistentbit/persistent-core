@@ -272,10 +272,14 @@ public interface PStream<T> extends Iterable<T> {
 
             @Override
             public Iterator<R> iterator() {
-                Iterator<T> master = PStream.this.iterator();
+
                 return new Iterator<R>() {
+                    Iterator<T> master = null;
                     @Override
                     public boolean hasNext() {
+                        if(master == null){
+                            master = PStream.this.iterator();
+                        }
                         return master.hasNext();
                     }
 

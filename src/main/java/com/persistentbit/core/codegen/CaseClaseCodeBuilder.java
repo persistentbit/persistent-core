@@ -326,6 +326,13 @@ public class CaseClaseCodeBuilder {
     }
 
     static public File findSourcePath(Class<?>cls, String resourceName) {
+        return new File(findProjectPath(cls,resourceName),"src/main/java");
+    }
+    static public File findTestSourcePath(Class<?>cls, String resourceName) {
+
+        return new File(findProjectPath(cls,resourceName),"src/test/java");
+    }
+    static public File findProjectPath(Class<?> cls, String resourceName){
         URL url = cls.getClassLoader().getResource(resourceName);
         if(url == null){
             throw new IllegalArgumentException("Can't find resouce '" + resourceName + "' using classloader for "+ cls.getName());
@@ -334,10 +341,11 @@ public class CaseClaseCodeBuilder {
         while(f.getName().equals("target")== false){
             f = f.getParentFile();
         }
-        f = new File(f.getParentFile(),"src/main/java");
-
-        return f;
+        return f.getParentFile();
     }
+
+
+
     static private String firstCharUppercase(String str){
         return "" + Character.toUpperCase(str.charAt(0)) + str.substring(1);
     }
@@ -405,7 +413,7 @@ public class CaseClaseCodeBuilder {
                 return false;
             }
             Class<?> cls = p._2;
-            return cls.getAnnotation(Immutable.class) != null;
+            return cls.getAnnotation(CaseClass.class) != null;
         });
         cf.forEach(p -> {
             CaseClaseCodeBuilder b = new CaseClaseCodeBuilder(p._2,p._1);
