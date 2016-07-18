@@ -404,6 +404,11 @@ public interface PStream<T> extends Iterable<T> {
         return new PStreamAnd<>(this,PStream.from(iter));
     }
 
+    default PStream<T> flattenPlusAll(Iterable<Iterable<T>> iterIter){
+
+        return PStream.from(iterIter).with(this, (c,e)-> c.plusAll(e));
+    }
+
     default boolean contains(Object value){
         for(T v : this){
             if(v == null){
