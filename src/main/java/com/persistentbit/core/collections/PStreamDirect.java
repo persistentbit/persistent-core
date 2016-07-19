@@ -134,5 +134,8 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
         return limit(100).toString(getClass().getSimpleName()  + "[" ,"," , "]");
     }
 
-
+    @Override
+    public IMP replaceFirst(T original, T newOne) {
+        return toImpl(super.replaceFirst(original,newOne));
+    }
 }

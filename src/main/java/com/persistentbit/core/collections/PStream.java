@@ -480,7 +480,19 @@ public interface PStream<T> extends Iterable<T> {
         }
         return r;
     }
+    default <K,V> POrderedMap<K,PList<V>> groupByOrdered(Function<T, K> keyGen,Function<T,V> valGen){
+        if(isInfinit()){ throw new InfinitePStreamException(); }
 
+        POrderedMap<K,PList<V>> r = POrderedMap.empty();
+        PList<V> emptyList = PList.empty();
+        for(T v : this){
+            K k = keyGen.apply(v);
+            PList<V> l = r.getOrDefault(k,emptyList);
+            l = l.plus(valGen.apply(v));
+            r = r.put(k,l);
+        }
+        return r;
+    }
 
     default PStream<T> plus(T value){
         if(isInfinit()){ throw new InfinitePStreamException(); }
@@ -545,6 +557,50 @@ public interface PStream<T> extends Iterable<T> {
 
     default T head() {
         return headOpt().get();
+    }
+
+
+    default Optional<T> lastOpt(){
+        Iterator<T> iter = iterator();
+        T last = null;
+        while(iter.hasNext()){
+            last = iter.next();
+        }
+        return Optional.ofNullable(last);
+    }
+
+    default Optional<T> beforeLastOpt() {
+        return dropLast().lastOpt();
+    }
+
+
+    default PStream<T> replaceFirst(T original, T newOne){
+        return new PStreamLazy<T>(){
+            @Override
+            public Iterator<T> iterator() {
+                return new Iterator<T>() {
+                    boolean found = false;
+                    Iterator<T> master;
+                    @Override
+                    public boolean hasNext() {
+                        if(master == null){
+                            master = PStream.this.iterator();
+                        }
+                        return master.hasNext();
+                    }
+
+                    @Override
+                    public T next() {
+                        T v = master.next();
+                        if(original.equals(v)){
+                            v = newOne;
+                            found = true;
+                        }
+                        return v;
+                    }
+                };
+            }
+        };
     }
 
     default PStream<T>  tail() {

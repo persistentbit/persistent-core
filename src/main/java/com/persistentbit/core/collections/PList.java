@@ -286,6 +286,22 @@ public class PList<T> extends AbstractPSeq<T,PList<T>> implements Serializable{
     }
 
 
+    @Override
+    public Optional<T> lastOpt() {
+        if(size() == 0){
+            return Optional.empty();
+        }
+        return Optional.ofNullable(get(size()-1));
+    }
+
+    @Override
+    public Optional<T> beforeLastOpt() {
+        if(size() <2){
+            return Optional.empty();
+        }
+        return Optional.ofNullable(get(size()-2));
+    }
+
     public int indexOf(Object o) {
         for(int t=0; t<cnt;t++){
             T v = get(t);
