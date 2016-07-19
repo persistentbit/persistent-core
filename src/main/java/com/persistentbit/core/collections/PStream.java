@@ -560,6 +560,10 @@ public interface PStream<T> extends Iterable<T> {
     }
 
 
+    default <X> PStream<X> cast(Class<X> itemClass){
+        return this.map(c -> (X)c);
+    }
+
     default Optional<T> lastOpt(){
         Iterator<T> iter = iterator();
         T last = null;
