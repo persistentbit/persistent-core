@@ -621,7 +621,7 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
             T sec = iter.next();
             res = joiner.apply(res,sec);
         }
-        return Optional.of(res);
+        return Optional.ofNullable(res);
     }
 
     default <X> PStream<X> flatten() {

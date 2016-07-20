@@ -12,8 +12,21 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
+ * A PStream is an Iterable object that is persistent (Immutable).<br>
+ * There are 2 main types of PStreams. Lazy and Direct PStreams.<br>
+ * In Lazy PStreams, nothing is done until the Iterator over this PStream is invoked.<br>
+ * In Direct PStream, the actions are done when the method is called.
+ * Examples of direct implementations: {@link PList},{@link PSet},{@link PMap} and {@link LList}.
+ * Every direct implementation can be converted by calling the {@link #lazy()} method to create a
+ * lazy version.
  * @author Peter Muys
  * @since 6/07/2016
+ * @see PList
+ * @see LList
+ * @see PSet
+ * @see POrderedSet
+ * @see PMap
+ * @see POrderedMap
  */
 public interface PStream<T> extends Iterable<T> {
 
@@ -221,7 +234,7 @@ public interface PStream<T> extends Iterable<T> {
 
     /**
      * Filter this stream using a Predicate
-     * @param p The predicate to filter. returning true-> include the item in the new filter
+     * @param p The predicate to filter. returning true to include the item in the new filter
      * @return The new filtered stream
      */
     PStream<T> filter(Predicate<T> p);
@@ -281,20 +294,6 @@ public interface PStream<T> extends Iterable<T> {
      */
     PStream<T> reversed();
 
-    /**
-     * Add all items provided add the end of this PStream
-     * @param iter The Iterable collections of items to add.
-     * @return A new PStream with the added items.
-     */
-    PStream<T> plusAll(Iterable<T> iter);
-
-    /**
-     * Flattend the provide Collection of Collections of items and
-     * add them to the end of this PStream
-     * @param iterIter The collection of collections of items.
-     * @return The new PStream with the added items
-     */
-    PStream<T> flattenPlusAll(Iterable<Iterable<T>> iterIter);
 
     /**
      * Check if this PStream contains the provided object
@@ -312,80 +311,309 @@ public interface PStream<T> extends Iterable<T> {
 
 
     /**
-     *
-     * @param keyGen
-     * @param <K>
-     * @return
+     * Group the elements in this PStream by generating a key to group on.<br>
+     * This will create a PMap with the generated key and a PList of items for that value.
+     * @param keyGen The Key generator from a value
+     * @param <K> The type of the key
+     * @return The PMap
      */
     <K> PMap<K,PList<T>> groupBy(Function<T, K> keyGen);
 
     /**
-     *
-     * @param keyGen
-     * @param <K>
-     * @return
+     * Same as {@link #groupBy(Function)} but only adding the last value for each key.
+     * @param keyGen The Key generator from a value
+     * @param <K> The type of the key
+     * @return The PMap
      */
     <K> PMap<K,T> groupByOneValue(Function<T, K> keyGen);
+
+    /**
+     * Group the elements in this PStream by generating a key/value pair for every item and
+     * adding them to a PMap with the generated key and a list of matching generated values<br>
+     * @param keyGen The Key generator
+     * @param valGen The value generator
+     * @param <K> The type of the key
+     * @param <V> The type of the value
+     * @return The PMap
+     */
     <K,V> PMap<K,PList<V>> groupBy(Function<T, K> keyGen,Function<T,V> valGen);
+
+    /**
+     * Same as {@link #groupBy(Function, Function)} but only adding the last value for each key.
+     * @param keyGen The Key generator
+     * @param valGen The value generator
+     * @param <K> The type of the key
+     * @param <V> The type of the value
+     * @return The PMap
+     */
     <K,V> PMap<K,V> groupByOneValue(Function<T, K> keyGen,Function<T,V> valGen);
 
+    /**
+     * Same as {@link #groupBy(Function)}, but adding them to a POrderedMap
+     * @param keyGen The key generator
+     * @param <K> The type of the key
+     * @return Th Ordered map
+     */
     <K> POrderedMap<K,PList<T>> groupByOrdered(Function<T, K> keyGen);
+
+    /**
+     * Same as {@link #groupBy(Function,Function)}, but adding them to a POrderedMap
+     * @param keyGen The key generator
+     * @param valGen The value generator
+     * @param <K> The type of the key
+     * @param <V> The type of the value
+     * @return The Orderd map
+     */
     <K,V> POrderedMap<K,PList<V>> groupByOrdered(Function<T, K> keyGen,Function<T,V> valGen);
+
+    /**
+     * Create a new PStream with the provided item added
+     * @param value The value to add to the end of this PStream
+     * @return The new PStream with the value added
+     */
     PStream<T> plus(T value);
-    T fold(T init, BinaryOperator<T> binOp);
 
-    <X> X with(X init, BiFunction<X, T, X> binOp);
+    /**
+     * Add all items provided add the end of this PStream
+     * @param iter The Iterable collections of items to add.
+     * @return A new PStream with the added items.
+     */
+    PStream<T> plusAll(Iterable<T> iter);
 
-    Optional<T> headOpt() ;
+    /**
+     * Flattend the provide Collection of Collections of items and
+     * add them to the end of this PStream
+     * @param iterIter The collection of collections of items.
+     * @return The new PStream with the added items
+     */
+    PStream<T> flattenPlusAll(Iterable<Iterable<T>> iterIter);
 
-    T head();
 
-    <X> PStream<X> cast(Class<X> itemClass);
-    Optional<T> lastOpt();
-
-    Optional<T> beforeLastOpt() ;
-
-    PStream<T> replaceFirst(T original, T newOne);
-
-    PStream<T>  tail();
-
-    Optional<T> max(Comparator<T> comp);
-    Optional<T> min(Comparator<T> comp);
-    Optional<T> min();
-    Optional<T> max();
-
-    boolean isEmpty();
-    int size();
-
-    int count(Predicate<T> predicate);
-
+    /**
+     * Add all the provided items to the end of this PStream
+     * @param v1 first item to add
+     * @param rest The rest of the items to add
+     * @return The new PStream with the added items
+     */
     PStream<T> plusAll(T v1,T... rest);
 
+
+    /**
+     * Apply a binary operation to the initial value of this PStream and all the others.<br>
+     * Example:
+     * <pre>{@code
+     *  PStream.val(1,2,3).fold(5,(a,b)-> a+b) == 5+1+2+3
+     * }</pre>
+     * @param init The Initial value
+     * @param binOp The binary operation to apply
+     * @return The end result
+     */
+    T fold(T init, BinaryOperator<T> binOp);
+
+    /**
+     * Folds over this PStream using a different initial value and end result.
+     * @param init The Initial value
+     * @param binOp The binary operation
+     * @param <X> The Resulting and initial type
+     * @return The X value
+     */
+    <X> X with(X init, BiFunction<X, T, X> binOp);
+
+    /**
+     * Get the first element of this PStream as an optional
+     * @return The first optional element
+     */
+    Optional<T> headOpt() ;
+
+    /**
+     * Get the first element of this PStream or null if does not exist.
+     * @return The first element
+     */
+    T head();
+
+    /**
+     * Just cast all elements in this PStream to a new Type.
+     * @param itemClass The class of the new element type
+     * @param <X> The new elment type
+     * @return The same stream casted
+     */
+    <X> PStream<X> cast(Class<X> itemClass);
+
+    /**
+     * Get the last element of this PStream as an optional
+     * @return The optional last element in this stream
+     */
+    Optional<T> lastOpt();
+
+    /**
+     * Get the element before the last element in this PStream
+     * @return The Optional element before the last element.
+     */
+    Optional<T> beforeLastOpt() ;
+
+    /**
+     * Create a new PStream where the first occurrence of the provided element
+     * is replaced.
+     * @param original The original element to find
+     * @param newOne The new element to replace it with
+     * @return The new PStream with the replaced element
+     */
+    PStream<T> replaceFirst(T original, T newOne);
+
+    /**
+     * Return a new PStream without the first element
+     * @return The new PStream
+     * @throws IllegalStateException when the stream was empty
+     */
+    PStream<T>  tail();
+
+    /**
+     * Get the biggest item in this PStream
+     * @param comp The {@link Comparator} used to find the biggest item
+     * @return The biggest item or empty if this PStream is empty
+     */
+    Optional<T> max(Comparator<T> comp);
+
+    /**
+     * Get the smallest item int this PStream
+     * @param comp The {@link Comparator} used to find the smallest item
+     * @return The smallest item or empty if this PStream is empty
+     */
+    Optional<T> min(Comparator<T> comp);
+
+    /**
+     * Same as {@link #min(Comparator)} but using the {@link Comparable} interface of the items
+     * @return The Smalles item
+     */
+    Optional<T> min();
+    /**
+     * Same as {@link #max(Comparator)} but using the {@link Comparable} interface of the items
+     * @return The biggest item
+     */
+    Optional<T> max();
+
+    /**
+     *
+     * @return true if this PStream contains no items
+     */
+    boolean isEmpty();
+
+    /**
+     *
+     * @return The number of items in this PStream
+     */
+    int size();
+
+    /**
+     * Count the number of items in this PStream conforming the predicate.
+     * @param predicate The filter for the items to count
+     * @return The number of items in the PStream
+     */
+    int count(Predicate<T> predicate);
+
+
+    /**
+     * Copy all items in this PStream into a new java array
+     * @return The new array
+     */
     T[] toArray();
 
+    /**
+     * Copy all items in this PStream into the provided array or a new one if the provided is too small.
+     * @param a The array to copy it to
+     * @param <T1> The type of the elements
+     * @return The array
+     */
     <T1> T1[] toArray(T1[] a);
 
+    /**
+     * Convert this PStream to a Persistent list
+     * @return the PList instance
+     */
     PList<T> plist();
 
+    /**
+     * Convert this PStream to a Persistent Set
+     * @return the PSet instance
+     */
     PSet<T> pset();
+
+    /**
+     * Convert this PStream to a Persistent Ordered Set
+     * @return The {@link POrderedSet} instance
+     */
     POrderedSet<T> porderedset();
 
+    /**
+     * Remove all duplicated items from this PStream.
+     * @return The new PStream without duplicates
+     */
     PStream<T> distinct();
 
 
+    /**
+     *
+     * @return A Persistent Linked List version of this PStream
+     */
     LList<T> llist();
+
+    /**
+     *
+     * @return A Immutable java {@link List} version of this PStream.
+     */
     List<T> list();
 
+    /**
+     *
+     * @return a new {@link ArrayList} with all the items in this PStream copied.
+     */
     List<T> toList();
 
 
+    /**
+     * A fold like function where the head of this PStream is the initial value.
+     * @param joiner The binary operation
+     * @return The result or empty if this PStream is empty
+     */
     Optional<T> join(BinaryOperator<T> joiner);
+
+    /**
+     * Flatten this stream.
+     * @param <X> The type of the items in the flatten stream
+     * @return The flatten stream.
+     */
     <X> PStream<X> flatten();
+
+    /**
+     * @see #mapString(String)
+     * @return this.mapString("null")
+     */
     PStream<String> mapString();
+
+    /**
+     * map all items to Strings
+     * @param nullValue the String to use when the item is null
+     * @return The null PStream
+     */
     PStream<String> mapString(String nullValue);
 
+    /**
+     * @see #toString(String, String, String)
+     * @param sep The seperator between items
+     * @return this.toString("",sep,"")
+     */
     String toString(String sep);
 
+    /**
+     * Convert this PStream to a String.<br>
+     * <pre>{@code
+     *  PStream.val(1,2,3).toString("[",":","]") == "[1:2:3]"
+     * }</pre>
+     * @param left The prefix String
+     * @param sep The seperator between items
+     * @param right Th postfix String
+     * @return The string
+     */
     String toString(String left, String sep, String right);
 
 
