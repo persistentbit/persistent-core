@@ -306,12 +306,25 @@ public interface PStream<T> extends Iterable<T> {
     /**
      * Check if this PStream contains all the items in the provide collection.
      * @param iter The collections to check
-     * @return
+     * @return True if this PStream contains all the elements in the provide collection
      */
     boolean containsAll(Iterable<?> iter);
 
 
+    /**
+     *
+     * @param keyGen
+     * @param <K>
+     * @return
+     */
     <K> PMap<K,PList<T>> groupBy(Function<T, K> keyGen);
+
+    /**
+     *
+     * @param keyGen
+     * @param <K>
+     * @return
+     */
     <K> PMap<K,T> groupByOneValue(Function<T, K> keyGen);
     <K,V> PMap<K,PList<V>> groupBy(Function<T, K> keyGen,Function<T,V> valGen);
     <K,V> PMap<K,V> groupByOneValue(Function<T, K> keyGen,Function<T,V> valGen);
