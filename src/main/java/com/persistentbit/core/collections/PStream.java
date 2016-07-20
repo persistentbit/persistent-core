@@ -261,18 +261,53 @@ public interface PStream<T> extends Iterable<T> {
     Stream<T> stream();
 
     /**
-     *
-     * @param comp
-     * @return
+     * Create a new sorted PStream using the provided {@link Comparator}.<br>
+     * A Lazy stream will likely be converted to a non lazy implementation by this.<br>
+     * @param comp The comparator to compare the items
+     * @return A new Sorted PStream
      */
     PStream<T> sorted(Comparator<? super T> comp);
+
+    /**
+     * Create a sorted PStream by assuming that all items in this stream are {@link Comparable}
+     * @return A new Sorted PStream
+     * @see #sorted(Comparator)
+     */
     PStream<T> sorted();
+
+    /**
+     * Reverse the order of all elements in this PStream
+     * @return The new PStream with the item reversed
+     */
     PStream<T> reversed();
+
+    /**
+     * Add all items provided add the end of this PStream
+     * @param iter The Iterable collections of items to add.
+     * @return A new PStream with the added items.
+     */
     PStream<T> plusAll(Iterable<T> iter);
+
+    /**
+     * Flattend the provide Collection of Collections of items and
+     * add them to the end of this PStream
+     * @param iterIter The collection of collections of items.
+     * @return The new PStream with the added items
+     */
     PStream<T> flattenPlusAll(Iterable<Iterable<T>> iterIter);
 
+    /**
+     * Check if this PStream contains the provided object
+     * @param value The value to check
+     * @return true if this PStream contains the item.
+     */
     boolean contains(Object value);
 
+    /**
+     * Check if this PStream contains all the items in the provide collection.
+     * @param iter The collections to check
+     * @return
+     */
     boolean containsAll(Iterable<?> iter);
 
 
