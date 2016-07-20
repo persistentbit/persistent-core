@@ -24,7 +24,7 @@ import java.util.function.Function;
  * 	 the terms of this license.
  *   You must not remove this notice, or any other, from this software.
  */
-public class PList<T> extends AbstractPSeq<T,PList<T>> implements Serializable{
+public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable{
 
 
 
@@ -468,8 +468,8 @@ public class PList<T> extends AbstractPSeq<T,PList<T>> implements Serializable{
             return true;
 
         Iterator<?> i2;
-        if(o instanceof PSeq) {
-            PSeq p = (PSeq)o;
+        if(o instanceof IPList) {
+            IPList p = (IPList)o;
             i2 = p.iterator();
         }else {
             return false;

@@ -1,18 +1,13 @@
 package com.persistentbit.core.collections;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.Iterator;
-import java.util.ListIterator;
 
 /**
  * User: petermuys
  * Date: 9/07/16
  * Time: 10:48
  */
-public abstract class AbstractPSeq<T,IMPL extends PStream<T>> extends PStreamDirect<T,IMPL> implements PSeq<T> {
+public abstract class AbstractIPList<T,IMPL extends PStream<T>> extends PStreamDirect<T,IMPL> implements IPList<T> {
     @Override
     public int hashCode() {
         int hashCode = 1;
@@ -27,10 +22,10 @@ public abstract class AbstractPSeq<T,IMPL extends PStream<T>> extends PStreamDir
         if(obj == this){
             return true;
         }
-        if(obj instanceof PSeq == false){
+        if(obj instanceof IPList == false){
             return false;
         }
-        PSeq p = (PSeq)obj;
+        IPList p = (IPList)obj;
 
         Iterator<T> i1 = iterator();
         Iterator<T> i2 = p.iterator();

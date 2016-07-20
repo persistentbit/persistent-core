@@ -12,7 +12,7 @@ import java.util.Optional;
  * @author Peter Muys
  * @since 9/06/2016
  */
-public abstract class LList<E> extends AbstractPSeq<E,LList<E>> implements Serializable{
+public abstract class LList<E> extends AbstractIPList<E,LList<E>> implements Serializable{
 
     static private final  LList  empty = new LList() {
         @Override
@@ -51,7 +51,7 @@ public abstract class LList<E> extends AbstractPSeq<E,LList<E>> implements Seria
         }
 
 
-        public PSeq put(int index, Object value) {
+        public IPList put(int index, Object value) {
             throw new IndexOutOfBoundsException("empty LList");
         }
 
@@ -150,7 +150,7 @@ public abstract class LList<E> extends AbstractPSeq<E,LList<E>> implements Seria
         }
 
 
-        public PSeq<E> put(int index, E value) {
+        public IPList<E> put(int index, E value) {
             LList<E> r = LList.empty;
             if(index <0){
                 throw new IndexOutOfBoundsException("< 0");

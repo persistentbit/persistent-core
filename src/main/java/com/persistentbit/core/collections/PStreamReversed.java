@@ -8,7 +8,7 @@ import java.util.List;
  * Date: 6/07/16
  * Time: 21:32
  */
-public class PStreamReversed<T> implements PStream<T>{
+public class PStreamReversed<T> extends PStreamLazy<T>{
 
     private final PStream<T> master;
     private List<T> rev;

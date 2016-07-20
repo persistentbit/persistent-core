@@ -7,7 +7,7 @@ import java.util.Iterator;
  * Date: 6/07/16
  * Time: 20:30
  */
-public abstract class PStreamLazy<T> implements PStream<T> {
+public abstract class PStreamLazy<T> implements PStreamWithDefaults<T> {
 
 
     @Override

@@ -5,8 +5,8 @@ package com.persistentbit.core.collections;
  * Date: 6/07/16
  * Time: 19:32
  */
-public interface PSeq<T> extends PStream<T>{
+public interface IPList<T> extends PStream<T>{
     T get(int index);
-    PSeq<T> put(int index, T value);
+    IPList<T> put(int index, T value);
 
 }

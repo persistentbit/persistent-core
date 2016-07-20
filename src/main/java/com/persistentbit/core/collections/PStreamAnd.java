@@ -7,7 +7,7 @@ import java.util.Iterator;
  * Date: 6/07/16
  * Time: 21:49
  */
-public class PStreamAnd<T> implements PStream<T>{
+public class PStreamAnd<T> extends PStreamLazy<T>{
     private final PStream<T> left;
     private final PStream<T> right;
 
