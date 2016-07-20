@@ -177,31 +177,94 @@ public interface PStream<T> extends Iterable<T> {
     static <E> E[] newArray(int length, E... array) { return Arrays.copyOf(array, length); }
 
 
-
+    /**
+     * Get a lazy version of this stream (if it is not already lazy).<br>
+     * @return A Lazy version of this PStream
+     */
     PStream<T> lazy();
 
 
-
-
+    /**
+     *
+     * @return true if this stream is inifinitely long.
+     */
     boolean isInfinit();
 
 
-
-
+    /**
+     * Create a new Empty PStream with the same implementation.
+     * @return A new Empty PStream
+     */
     PStream<T> clear();
 
 
-
+    /**
+     * Limit this stream to a provided count number of elements
+     * @param count The maximum number of elements to return in this stream
+     * @return The limited stream
+     */
     PStream<T> limit(int count);
+
+    /**
+     * Get a new PStream where the last item is removed from the stream
+     * @return The new PStream
+     */
     PStream<T>  dropLast();
+
+    /**
+     * Create a new PStream where every item is mapped to a new value
+     * @param mapper The Mapper that transforms a PStream item
+     * @param <R> The New Type of items
+     * @return A New stream where every item is mapped.
+     */
     <R> PStream<R> map(Function<T, R> mapper);
+
+    /**
+     * Filter this stream using a Predicate
+     * @param p The predicate to filter. returning true-> include the item in the new filter
+     * @return The new filtered stream
+     */
     PStream<T> filter(Predicate<T> p);
 
+    /**
+     * Find the first element tested ok
+     * @param p The predicate to use
+     * @return An Optional found value
+     */
     Optional<T> find(Predicate<T> p);
 
+    /**
+     * Create a new PStream that combines 2 seperate streams<br>
+     * Example: <pre>{@code
+     *  PStream.val(1,2,3,4).zip(PStream.val('a','b','c'))
+     *  == PStream.val(Tuple2(1,'a'),Tuple2(2,'b'),Tuple2(3,'c'))
+     * }</pre>
+     * The resulting stream length is the smallest length of the 2 PStreams.
+     * @param zipStream The stream to zip with
+     * @param <Z> The type of elements in the second stream
+     * @return A PStream of Tupl2 values
+     */
     <Z> PStream<Tuple2<Z,T>> zip(PStream<Z> zipStream);
+
+    /**
+     * Zip this stream with a sequence starting with 0.<br>
+     * Handy if you need the index position of an element in a stream
+     * @return A zipped streem
+     * @see #zip(PStream)
+     */
     PStream<Tuple2<Integer,T>> zipWithIndex();
+
+    /**
+     * Return an instance of this PStream as a java Stream
+     * @return A Java Stream instance
+     */
     Stream<T> stream();
+
+    /**
+     *
+     * @param comp
+     * @return
+     */
     PStream<T> sorted(Comparator<? super T> comp);
     PStream<T> sorted();
     PStream<T> reversed();
