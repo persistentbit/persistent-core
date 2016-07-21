@@ -2,11 +2,13 @@ package com.persistentbit.core.properties;
 import java.lang.reflect.Type;
 
 /**
- * @author Peter Muys
- * @since 23/10/2015
+ * Interface for getting a property from an Object.<br>
+ * @see PropertyGetterField
+ * @see PropertyGetterMethod
  */
 public interface PropertyGetter
 {
+
     Object get(Object container);
     Type getPropertyType();
     Class<?> getPropertyClass();

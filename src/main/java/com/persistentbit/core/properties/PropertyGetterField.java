@@ -3,8 +3,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
 /**
- * @author Peter Muys
- * @since 23/10/2015
+ * Get the property of an Object by using a provided {@link Field} instance.<br>
+ * @see PropertyGetter
+ * @see PropertyGetterMethod
  */
 public class PropertyGetterField implements PropertyGetter
 {
