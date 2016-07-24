@@ -16,7 +16,7 @@
         <url>scm:git:git@github.com:persistentbit/persistent-core.git</url>
         <developerConnection>scm:git:git@github.com:persistentbit/persistent-core.git</developerConnection>
       <tag>HEAD</tag>
-  </scm>
+    </scm>
 
     <inceptionYear>2016</inceptionYear>
     <developers>
