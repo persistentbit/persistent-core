@@ -8,13 +8,13 @@
     <packaging>jar</packaging>
     <name>PERSISTENT-CORE</name>
     <description>Persistent collections and streams for java</description>
-    <url>https://github.com/petermuys/persistentbit.com.git</url>
+    <url>https://github.com/persistentbit/persistentbit.com.git</url>
 
 
     <scm>
-        <connection>scm:git:git@github.com:petermuys/persistentbit.com.git</connection>
-        <url>scm:git:git@github.com:petermuys/persistentbit.com.git</url>
-        <developerConnection>scm:git:git@github.com:petermuys/persistentbit.com.git</developerConnection>
+        <connection>scm:git:git@github.com:persistentbit/persistentbit.com.git</connection>
+        <url>scm:git:git@github.com:persistentbit/persistentbit.com.git</url>
+        <developerConnection>scm:git:git@github.com:persistentbit/persistentbit.com.git</developerConnection>
       <tag>HEAD</tag>
   </scm>
 
