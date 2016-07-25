@@ -326,4 +326,9 @@ public abstract class PStreamDelegate<T> implements PStream<T>{
     public String toString() {
         return getDelegate().toString();
     }
+
+    @Override
+    public PStream<T> peek(Consumer<? super T> consumer) {
+        return getDelegate().peek(consumer);
+    }
 }
