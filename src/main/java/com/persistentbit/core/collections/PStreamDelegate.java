@@ -47,17 +47,17 @@ public abstract class PStreamDelegate<T> implements PStream<T>{
     }
 
     @Override
-    public <R> PStream<R> map(Function<T, R> mapper) {
+    public <R> PStream<R> map(Function<? super T, ? extends R> mapper) {
         return getDelegate().map(mapper);
     }
 
     @Override
-    public PStream<T> filter(Predicate<T> p) {
+    public PStream<T> filter(Predicate<? super T> p) {
         return getDelegate().filter(p);
     }
 
     @Override
-    public Optional<T> find(Predicate<T> p) {
+    public Optional<T> find(Predicate<? super T> p) {
         return getDelegate().find(p);
     }
 
@@ -92,12 +92,12 @@ public abstract class PStreamDelegate<T> implements PStream<T>{
     }
 
     @Override
-    public PStream<T> plusAll(Iterable<T> iter) {
+    public PStream<T> plusAll(Iterable<? extends T> iter) {
         return getDelegate().plusAll(iter);
     }
 
     @Override
-    public PStream<T> flattenPlusAll(Iterable<Iterable<T>> iterIter) {
+    public PStream<T> flattenPlusAll(Iterable<Iterable<? extends T>> iterIter) {
         return getDelegate().flattenPlusAll(iterIter);
     }
 
@@ -112,32 +112,32 @@ public abstract class PStreamDelegate<T> implements PStream<T>{
     }
 
     @Override
-    public <K> PMap<K, PList<T>> groupBy(Function<T, K> keyGen) {
+    public <K> PMap<K, PList<T>> groupBy(Function<? super T, ? extends K> keyGen) {
         return getDelegate().groupBy(keyGen);
     }
 
     @Override
-    public <K> PMap<K, T> groupByOneValue(Function<T, K> keyGen) {
+    public <K> PMap<K, T> groupByOneValue(Function<? super T, ? extends K> keyGen) {
         return getDelegate().groupByOneValue(keyGen);
     }
 
     @Override
-    public <K, V> PMap<K, PList<V>> groupBy(Function<T, K> keyGen, Function<T, V> valGen) {
+    public <K, V> PMap<K, PList<V>> groupBy(Function<? super T, ? extends K> keyGen, Function<? super T, ? extends V> valGen) {
         return getDelegate().groupBy(keyGen, valGen);
     }
 
     @Override
-    public <K, V> PMap<K, V> groupByOneValue(Function<T, K> keyGen, Function<T, V> valGen) {
+    public <K, V> PMap<K, V> groupByOneValue(Function<? super T, ? extends K> keyGen, Function<? super T, ? extends V> valGen) {
         return getDelegate().groupByOneValue(keyGen, valGen);
     }
 
     @Override
-    public <K> POrderedMap<K, PList<T>> groupByOrdered(Function<T, K> keyGen) {
+    public <K> POrderedMap<K, PList<T>> groupByOrdered(Function<? super T, ? extends K> keyGen) {
         return getDelegate().groupByOrdered(keyGen);
     }
 
     @Override
-    public <K, V> POrderedMap<K, PList<V>> groupByOrdered(Function<T, K> keyGen, Function<T, V> valGen) {
+    public <K, V> POrderedMap<K, PList<V>> groupByOrdered(Function<? super T, ? extends K> keyGen, Function<? super T, ? extends V> valGen) {
         return getDelegate().groupByOrdered(keyGen, valGen);
     }
 
@@ -222,7 +222,7 @@ public abstract class PStreamDelegate<T> implements PStream<T>{
     }
 
     @Override
-    public int count(Predicate<T> predicate) {
+    public int count(Predicate<? super T> predicate) {
         return getDelegate().count(predicate);
     }
 

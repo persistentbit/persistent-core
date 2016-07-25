@@ -3,10 +3,7 @@ package com.persistentbit.core.collections;
 import com.persistentbit.core.Tuple2;
 
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.Stream;
 
 /**
@@ -103,7 +100,7 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
     }
 
 
-    default <R> PStream<R> map(Function<T, R> mapper){
+    default <R> PStream<R> map(Function<? super T,? extends R> mapper){
 
         return new PStreamLazy<R>(){
             @Override
@@ -138,7 +135,7 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
 
 
 
-    default PStream<T> filter(Predicate<T> p){
+    default PStream<T> filter(Predicate<? super T> p){
         return new PStreamLazy<T>(){
             @Override
             public boolean isInfinit() {
@@ -154,7 +151,7 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
 
     }
 
-    default Optional<T> find(Predicate<T> p){
+    default Optional<T> find(Predicate<? super T> p){
         for(T v : this){
             if(p.test(v)){
                 return Optional.ofNullable(v);
@@ -239,13 +236,13 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
 
 
 
-    default PStream<T> plusAll(Iterable<T> iter){
+    default PStream<T> plusAll(Iterable<? extends T> iter){
         if(isInfinit()){ throw new InfinitePStreamException(); }
 
-        return new PStreamAnd<>(this,PStream.from(iter));
+        return new PStreamAnd<T>(this,(PStream<T>)PStream.from(iter));
     }
 
-    default PStream<T> flattenPlusAll(Iterable<Iterable<T>> iterIter){
+    default PStream<T> flattenPlusAll(Iterable<Iterable<? extends T>> iterIter){
 
         return PStream.from(iterIter).with((PStream<T>)this, (c,e)-> c.plusAll(e));
     }
@@ -275,7 +272,7 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
     }
 
 
-    default <K> PMap<K,PList<T>> groupBy(Function<T, K> keyGen){
+    default <K> PMap<K,PList<T>> groupBy(Function<? super T, ? extends K> keyGen){
         if(isInfinit()){ throw new InfinitePStreamException(); }
 
         PMap<K,PList<T>> r = PMap.empty();
@@ -288,10 +285,10 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
         }
         return r;
     }
-    default <K> PMap<K,T> groupByOneValue(Function<T, K> keyGen){
-        return groupBy(keyGen).mapValues(l -> l.head());
+    default <K> PMap<K,T> groupByOneValue(Function<? super T, ? extends K> keyGen){
+        return (PMap<K,T>)groupBy(keyGen).mapValues(l -> l.head());
     }
-    default <K,V> PMap<K,PList<V>> groupBy(Function<T, K> keyGen,Function<T,V> valGen){
+    default <K,V> PMap<K,PList<V>> groupBy(Function<? super T, ? extends K> keyGen,Function<? super T,? extends V> valGen){
         if(isInfinit()){ throw new InfinitePStreamException(); }
 
         PMap<K,PList<V>> r = PMap.empty();
@@ -304,11 +301,11 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
         }
         return r;
     }
-    default <K,V> PMap<K,V> groupByOneValue(Function<T, K> keyGen,Function<T,V> valGen){
-        return groupBy(keyGen,valGen).mapValues(l -> l.headOpt().orElse(null));
+    default <K,V> PMap<K,V> groupByOneValue(Function<? super T, ? extends K> keyGen,Function<? super T,? extends V> valGen){
+        return (PMap<K,V>)groupBy(keyGen,valGen).mapValues(l -> l.headOpt().orElse(null));
     }
 
-    default <K> POrderedMap<K,PList<T>> groupByOrdered(Function<T, K> keyGen){
+    default <K> POrderedMap<K,PList<T>> groupByOrdered(Function<? super T,? extends K> keyGen){
         if(isInfinit()){ throw new InfinitePStreamException(); }
 
         POrderedMap<K,PList<T>> r = POrderedMap.empty();
@@ -321,7 +318,7 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
         }
         return r;
     }
-    default <K,V> POrderedMap<K,PList<V>> groupByOrdered(Function<T, K> keyGen,Function<T,V> valGen){
+    default <K,V> POrderedMap<K,PList<V>> groupByOrdered(Function<? super T,? extends  K> keyGen,Function<? super T,? extends V> valGen){
         if(isInfinit()){ throw new InfinitePStreamException(); }
 
         POrderedMap<K,PList<V>> r = POrderedMap.empty();
@@ -504,7 +501,7 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
         return count;
     }
 
-    default int count(Predicate<T> predicate){
+    default int count(Predicate<? super T> predicate){
         return filter(predicate).size();
     }
 
@@ -647,5 +644,36 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
     default String toString(String left, String sep, String right){
         return left + mapString().join((a,b)-> a + sep + b).orElse("") + right;
     }
+
+    @Override
+    default PStream<T> peek(Consumer<? super T> consumer) {
+        return new PStreamLazy<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return new Iterator<T>() {
+                    Iterator<T> master;
+                    @Override
+                    public boolean hasNext() {
+                        if(master == null){
+                            master = PStreamWithDefaults.this.iterator();
+                        }
+                        return master.hasNext();
+                    }
+
+                    @Override
+                    public T next() {
+                        if(master == null){
+                            master = PStreamWithDefaults.this.iterator();
+                        }
+                        T element = master.next();
+                        consumer.accept(element);
+                        return element;
+                    }
+                };
+            }
+
+        };
+    }
+
 
 }

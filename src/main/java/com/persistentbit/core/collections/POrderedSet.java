@@ -92,7 +92,7 @@ public class POrderedSet<T> extends PStreamDirect<T,POrderedSet<T>> implements I
     }
 
     @Override
-    public POrderedSet<T> plusAll(Iterable<T> iter) {
+    public POrderedSet<T> plusAll(Iterable<? extends T> iter) {
         return PStream.from(iter).with(this,(r, v)-> r.plus(v));
     }
     public POrderedSet<T> plus(T value){

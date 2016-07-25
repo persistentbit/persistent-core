@@ -11,10 +11,10 @@ import java.util.function.Predicate;
 public class FilteredIterator<T> implements Iterator<T> {
     private boolean hasNext;
     private T next;
-    private Predicate<T> filter;
+    private Predicate<? super T> filter;
     private Iterator<T> master;
 
-    public FilteredIterator(Predicate<T> filter, Iterator<T> master) {
+    public FilteredIterator(Predicate<? super T> filter, Iterator<T> master) {
         this.filter = filter;
         this.master = master;
         doNext();

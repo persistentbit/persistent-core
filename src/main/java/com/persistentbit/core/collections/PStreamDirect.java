@@ -7,6 +7,7 @@ import com.persistentbit.core.Tuple2;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -43,12 +44,12 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
 
 
     @Override
-    public IMP filter(Predicate<T> p) {
+    public IMP filter(Predicate<? super T> p) {
         return toImpl(super.filter(p));
     }
 
     @Override
-    public Optional<T> find(Predicate<T> p) {
+    public Optional<T> find(Predicate<? super T> p) {
         return super.find(p);
     }
 
@@ -75,7 +76,7 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
     }
 
     @Override
-    public IMP plusAll(Iterable<T> iter) {
+    public IMP plusAll(Iterable<? extends T> iter) {
         return toImpl(super.plusAll(iter));
     }
     @Override
@@ -90,7 +91,7 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
     public abstract boolean equals(Object obj);
 
     @Override
-    public <R> PStream<R> map(Function<T, R> mapper) {
+    public <R> PStream<R> map(Function<? super T,? extends R> mapper) {
         return super.map(mapper);
     }
 
@@ -137,5 +138,11 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
     @Override
     public IMP replaceFirst(T original, T newOne) {
         return toImpl(super.replaceFirst(original,newOne));
+    }
+
+
+    @Override
+    public Iterator<T> iterator() {
+        return null;
     }
 }

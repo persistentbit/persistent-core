@@ -83,7 +83,7 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> implements IPSet<T>{
     }
 
     @Override
-    public PSet<T> plusAll(Iterable<T> iter) {
+    public PSet<T> plusAll(Iterable<? extends T> iter) {
         return PStream.from(iter).with(this,(r, v)-> r.plus(v));
     }
     public PSet<T> plus(T value){

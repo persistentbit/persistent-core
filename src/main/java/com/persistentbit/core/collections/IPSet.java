@@ -12,5 +12,5 @@ public interface IPSet<T> extends  PStream<T>,Serializable {
     IPSet<T> plus(T value);
 
     @Override
-    IPSet<T> plusAll(Iterable<T> iter) ;
+    IPSet<T> plusAll(Iterable<? extends T> iter) ;
 }

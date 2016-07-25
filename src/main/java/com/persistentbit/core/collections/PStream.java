@@ -5,10 +5,7 @@ import com.persistentbit.core.Tuple2;
 
 
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.Stream;
 
 /**
@@ -230,21 +227,21 @@ public interface PStream<T> extends Iterable<T> {
      * @param <R> The New Type of items
      * @return A New stream where every item is mapped.
      */
-    <R> PStream<R> map(Function<T, R> mapper);
+    <R> PStream<R> map(Function<? super T,? extends R> mapper);
 
     /**
      * Filter this stream using a Predicate
      * @param p The predicate to filter. returning true to include the item in the new filter
      * @return The new filtered stream
      */
-    PStream<T> filter(Predicate<T> p);
+    PStream<T> filter(Predicate<? super T> p);
 
     /**
      * Find the first element tested ok
      * @param p The predicate to use
      * @return An Optional found value
      */
-    Optional<T> find(Predicate<T> p);
+    Optional<T> find(Predicate<? super T> p);
 
     /**
      * Create a new PStream that combines 2 seperate streams<br>
@@ -317,7 +314,7 @@ public interface PStream<T> extends Iterable<T> {
      * @param <K> The type of the key
      * @return The PMap
      */
-    <K> PMap<K,PList<T>> groupBy(Function<T, K> keyGen);
+    <K> PMap<K,PList<T>> groupBy(Function<? super T, ? extends  K> keyGen);
 
     /**
      * Same as {@link #groupBy(Function)} but only adding the last value for each key.
@@ -325,7 +322,7 @@ public interface PStream<T> extends Iterable<T> {
      * @param <K> The type of the key
      * @return The PMap
      */
-    <K> PMap<K,T> groupByOneValue(Function<T, K> keyGen);
+    <K> PMap<K,T> groupByOneValue(Function<? super T,? extends K> keyGen);
 
     /**
      * Group the elements in this PStream by generating a key/value pair for every item and
@@ -336,7 +333,7 @@ public interface PStream<T> extends Iterable<T> {
      * @param <V> The type of the value
      * @return The PMap
      */
-    <K,V> PMap<K,PList<V>> groupBy(Function<T, K> keyGen,Function<T,V> valGen);
+    <K,V> PMap<K,PList<V>> groupBy(Function<? super T, ? extends K> keyGen,Function<? super T,? extends V> valGen);
 
     /**
      * Same as {@link #groupBy(Function, Function)} but only adding the last value for each key.
@@ -346,7 +343,7 @@ public interface PStream<T> extends Iterable<T> {
      * @param <V> The type of the value
      * @return The PMap
      */
-    <K,V> PMap<K,V> groupByOneValue(Function<T, K> keyGen,Function<T,V> valGen);
+    <K,V> PMap<K,V> groupByOneValue(Function<? super T, ? extends K> keyGen,Function<? super T,? extends V> valGen);
 
     /**
      * Same as {@link #groupBy(Function)}, but adding them to a POrderedMap
@@ -354,7 +351,7 @@ public interface PStream<T> extends Iterable<T> {
      * @param <K> The type of the key
      * @return Th Ordered map
      */
-    <K> POrderedMap<K,PList<T>> groupByOrdered(Function<T, K> keyGen);
+    <K> POrderedMap<K,PList<T>> groupByOrdered(Function<? super T,? extends K> keyGen);
 
     /**
      * Same as {@link #groupBy(Function,Function)}, but adding them to a POrderedMap
@@ -364,7 +361,7 @@ public interface PStream<T> extends Iterable<T> {
      * @param <V> The type of the value
      * @return The Orderd map
      */
-    <K,V> POrderedMap<K,PList<V>> groupByOrdered(Function<T, K> keyGen,Function<T,V> valGen);
+    <K,V> POrderedMap<K,PList<V>> groupByOrdered(Function<? super T,? extends  K> keyGen,Function<? super T,? extends V> valGen);
 
     /**
      * Create a new PStream with the provided item added
@@ -378,7 +375,7 @@ public interface PStream<T> extends Iterable<T> {
      * @param iter The Iterable collections of items to add.
      * @return A new PStream with the added items.
      */
-    PStream<T> plusAll(Iterable<T> iter);
+    PStream<T> plusAll(Iterable<? extends T> iter);
 
     /**
      * Flattend the provide Collection of Collections of items and
@@ -386,7 +383,7 @@ public interface PStream<T> extends Iterable<T> {
      * @param iterIter The collection of collections of items.
      * @return The new PStream with the added items
      */
-    PStream<T> flattenPlusAll(Iterable<Iterable<T>> iterIter);
+    PStream<T> flattenPlusAll(Iterable<Iterable<? extends T>> iterIter);
 
 
     /**
@@ -509,7 +506,7 @@ public interface PStream<T> extends Iterable<T> {
      * @param predicate The filter for the items to count
      * @return The number of items in the PStream
      */
-    int count(Predicate<T> predicate);
+    int count(Predicate<? super T> predicate);
 
 
     /**
@@ -571,7 +568,10 @@ public interface PStream<T> extends Iterable<T> {
 
 
     /**
-     * A fold like function where the head of this PStream is the initial value.
+     * A fold like function where the head of this PStream is the initial value.<br>
+     * If there are no elements in this strean, return empty.<br>
+     * If there is 1 element in this stream, return the element.<br>
+     * If there are more elements, do a reduce.<br>
      * @param joiner The binary operation
      * @return The result or empty if this PStream is empty
      */
@@ -617,4 +617,15 @@ public interface PStream<T> extends Iterable<T> {
     String toString(String left, String sep, String right);
 
 
+    /**
+     * Calls a consumer functions whenever an element from this stream
+     * is returned.<br>
+     * Example for debugging: <br>
+     * <pre>{@code
+     *      PStream.val(1,10,20,4).map(x -> x / 2).peek(System.out::println);
+     * }</pre>
+     * @param consumer The function to execute for every element returned from this stream
+     * @return The new PStream
+     */
+    PStream<T>  peek(Consumer<? super T> consumer);
 }

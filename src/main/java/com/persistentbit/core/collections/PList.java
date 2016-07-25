@@ -206,11 +206,11 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
 
 
     @Override
-    public PList<T> plusAll(Iterable<T> seq){
+    public PList<T> plusAll(Iterable<? extends T> seq){
         return plusAll(seq.iterator());
     }
 
-    public PList<T> plusAll(Iterator<T> iter){
+    public PList<T> plusAll(Iterator<? extends T> iter){
         PList<T> res = this;
         while(iter.hasNext()){
             res = res.plus(iter.next());
@@ -492,7 +492,7 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
 
 
     @Override
-    public <R> PList<R> map(Function<T, R> mapper) {
+    public <R> PList<R> map(Function<? super T,? extends R> mapper) {
         PList<R> res = PList.empty();
         for(T v:this){
             res = res.plus(mapper.apply(v));

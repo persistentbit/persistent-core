@@ -76,7 +76,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
 
 
     @Override
-    public PMap<K, V> plusAll(Iterable<Tuple2<K, V>> iter) {
+    public PMap<K, V> plusAll(Iterable<? extends Tuple2<K, V>> iter) {
         PMap<K,V> r = this;
         for(Tuple2<K,V> t : iter){
             r = r.plus(t);
@@ -113,7 +113,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
     }
 
     @Override
-    public <M> PMap<K,M> mapValues(Function<V,M> mapper){
+    public <M> PMap<K,M> mapValues(Function<? super V,? extends M> mapper){
 
         PMap<K,M> r = PMap.empty();
         return with(r,(m,e)-> m = m.put(e._1,mapper.apply(e._2)) );
@@ -185,7 +185,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
 
 
     @Override
-    public <K2, V2> PMap<K2, V2> mapKeyValues(Function<Tuple2<K, V>, Tuple2<K2, V2>> itemsMapper) {
+    public <K2, V2> PMap<K2, V2> mapKeyValues(Function<? super Tuple2<K, V>, ? extends Tuple2<K2, V2>> itemsMapper) {
         PMap<K2,V2> res = PMap.empty();
         return with(res, (r,t) -> r.plus(itemsMapper.apply(t)));
 

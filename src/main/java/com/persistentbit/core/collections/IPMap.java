@@ -26,7 +26,7 @@ public interface IPMap<K,V>  extends PStream<Tuple2<K,V>>{
      * @param <V2> Type of the new Values
      * @return A new new Map with the mapped key,values
      */
-    <K2,V2> IPMap<K2,V2> mapKeyValues(Function<Tuple2<K,V>,Tuple2<K2,V2>> items);
+    <K2,V2> IPMap<K2,V2> mapKeyValues(Function<? super Tuple2<K,V>,? extends Tuple2<K2,V2>> items);
 
 
     /**
@@ -43,7 +43,7 @@ public interface IPMap<K,V>  extends PStream<Tuple2<K,V>>{
      * @param <M> The new type for values
      * @return A new IPMap instance
      */
-    <M> IPMap<K,M> mapValues(Function<V,M> mapper);
+    <M> IPMap<K,M> mapValues(Function<? super V,? extends M> mapper);
 
     /**
      * Create a new map with the key and value added
