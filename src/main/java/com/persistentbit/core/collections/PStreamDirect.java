@@ -7,7 +7,6 @@ import com.persistentbit.core.Tuple2;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -46,6 +45,11 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
     @Override
     public IMP filter(Predicate<? super T> p) {
         return toImpl(super.filter(p));
+    }
+
+    @Override
+    public PStream<T> filterNulls() {
+        return toImpl(super.filterNulls());
     }
 
     @Override

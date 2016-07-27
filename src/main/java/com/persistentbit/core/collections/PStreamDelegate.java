@@ -57,6 +57,11 @@ public abstract class PStreamDelegate<T> implements PStream<T>{
     }
 
     @Override
+    public PStream<T> filterNulls() {
+        return getDelegate().filterNulls();
+    }
+
+    @Override
     public Optional<T> find(Predicate<? super T> p) {
         return getDelegate().find(p);
     }
