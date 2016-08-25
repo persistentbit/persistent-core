@@ -356,7 +356,7 @@ public class ImTools<C> {
     }
 
     public int hashCodeAll(C obj){
-        return hashCode(obj,getters.keys().toArray());
+        return hashCode(obj,getters.keys().toArray(new String[0]));
     }
 
 
@@ -440,10 +440,10 @@ public class ImTools<C> {
         for(String prop : getters.keys()){
             Object v1  = get(left,prop);
             Object v2 = get((C)right,prop);
-            if(v1 == null){
-                return v2 == null;
+            if(v1 == null && v2 != null){
+                return false;
             }
-            if(v1.equals(v2) == false){
+            if(v1 != null && v1.equals(v2) == false){
                 return false;
             }
         }
