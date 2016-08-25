@@ -151,6 +151,11 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
 
     }
 
+    @Override
+    default PStream<T> filterNulls() {
+        return filter(x -> x != null);
+    }
+
     default Optional<T> find(Predicate<? super T> p){
         for(T v : this){
             if(p.test(v)){

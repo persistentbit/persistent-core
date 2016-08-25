@@ -8,6 +8,8 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
 
+import static javafx.scene.input.KeyCode.Z;
+
 /**
  * A PStream is an Iterable object that is persistent (Immutable).<br>
  * There are 2 main types of PStreams. Lazy and Direct PStreams.<br>
@@ -235,6 +237,12 @@ public interface PStream<T> extends Iterable<T> {
      * @return The new filtered stream
      */
     PStream<T> filter(Predicate<? super T> p);
+
+    /**
+     * shortcut for filter(x -> x != null)
+     * @return a new PStream where all null items are removed.
+     */
+    PStream<T> filterNulls();
 
     /**
      * Find the first element tested ok
