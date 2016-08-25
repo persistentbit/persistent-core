@@ -239,7 +239,7 @@ public interface PStream<T> extends Iterable<T> {
     PStream<T> filter(Predicate<? super T> p);
 
     /**
-     * shortcut for filter(x -> x != null)
+     * shortcut for filter(x -&gt; x != null)
      * @return a new PStream where all null items are removed.
      */
     PStream<T> filterNulls();
