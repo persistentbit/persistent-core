@@ -1,9 +1,6 @@
 package com.persistentbit.core.utils;
 
-<<<<<<< HEAD
-=======
-import com.sun.beans.decoder.ValueObject;
->>>>>>> origin/develop
+
 
 /**
  *
