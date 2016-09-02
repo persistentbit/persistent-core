@@ -355,15 +355,29 @@ public class ImTools<C> {
         return result;
     }
 
+    /**
+     * Calculate the hashcode using all the fields in the supplied object where there is no {@link NoEqual} annotation
+     * @param obj The Object to calculate the hashCode for
+     * @return The hashCode
+     */
     public int hashCodeAll(C obj){
-        return hashCode(obj,getters.keys().toArray(new String[0]));
+        return hashCode(obj,getters.filter(g -> g._2.field.getDeclaredAnnotation(NoEqual.class) == null).keys().toArray(new String[0]));
     }
 
 
+    /**
+     * Create a string using all the toStrings of the fields in the suppliet object where there is no {@link NoToString} annotation.
+     * @param obj The Object to create a string of
+     * @param ignoreNull ignore fields that have a null value
+     * @return The String representation
+     */
     public String toStringAll(C obj, boolean ignoreNull) {
         String result = cls.getSimpleName() + "[";
         boolean first = true;
         for(String prop : getters.keys()){
+            if(getters.get(prop).field.getDeclaredAnnotation(NoToString.class)!= null){
+                continue;
+            }
             Object value = get(obj,prop);
             if(value == null && ignoreNull){
                 continue;
@@ -423,21 +437,30 @@ public class ImTools<C> {
         for(Lens<C,?>l : lenzen){
             Object v1  = l.get(left);
             Object v2 = l.get((C)right);
-            if(v1 == null && v2 != null){
-                return false;
+            if(v1 == null){
+                if(v2 != null) {
+                    return false;
+                }
+            } else {
+                if(v1.equals(v2) == false){
+                    return false;
+                }
             }
-            if(v1.equals(v2) == false){
-                return false;
-            }
+
         }
         return true;
     }
-
+    /**
+     * Compare 2 objects by comparing all the fileds in the supplied left object where there is no {@link NoEqual} annotation
+     * @param left The left field to compare
+     * @param right The right field to compare
+     * @return is equl
+     */
     public boolean equalsAll(C left,Object right){
         if(right == null || right.getClass().equals(left.getClass()) == false){
             return false;
         }
-        for(String prop : getters.keys()){
+        for(String prop : getters.filter(g -> g._2.field.getDeclaredAnnotation(NoEqual.class) == null).keys()){
             Object v1  = get(left,prop);
             Object v2 = get((C)right,prop);
             if(v1 == null && v2 != null){
