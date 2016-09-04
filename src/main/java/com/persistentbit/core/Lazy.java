@@ -4,11 +4,9 @@ import java.util.function.Supplier;
 
 /**
  * A Lazy Value Supplier.
- * When the lazy supplier is first called, then the value is retrieved from the provide Supplier.
- * Once it has a value, than the value will be reused in the next calls to get
- * User: petermuys
- * Date: 28/02/16
- * Time: 15:44
+ * When the lazy supplier is first called, the value is retrieved from the provide Supplier.
+ * Once it has a value, than the value will be reused in the next calls to {@link #get()}
+ * @see Supplier
  */
 public class Lazy<T> implements Supplier<T> {
     private final Supplier<T> supplier;

@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to mark a field or paramater as Not Nullable
+ * Annotation to mark a field or parameter as Not Nullable
  * @author Peter Muys
  * @since 18/03/2016
  */

@@ -7,8 +7,8 @@ import com.persistentbit.core.properties.FieldNames;
 import java.util.Objects;
 
 /**
- * A Tuple2 with non null values
- * Created by pmu on 8/01/2015.
+ * A {@link Tuple2} with non null values.
+ * @author Peter Muys
  */
 @CaseClass
 public class Pair<L,R> extends Tuple2<L,R> {

@@ -8,11 +8,9 @@ import java.io.Serializable;
 import java.util.Optional;
 
 /**
- * A Tuple2 contains 2 nullable values
+ * A Tuple2 contains 2 nullable values with possible different types.
  *
- * User: petermuys
- * Date: 8/07/16
- * Time: 16:40
+ * @author Peter Muys
  */
 @Immutable
 public class Tuple2<T1, T2> implements Comparable<Tuple2<T1,T2>>,Serializable{
