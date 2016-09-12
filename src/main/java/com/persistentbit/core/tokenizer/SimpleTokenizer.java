@@ -50,7 +50,7 @@ public class SimpleTokenizer<TT> {
 
     public SimpleTokenizer<TT> add(String regex, TT type) {
         return add(new TokenSupplier<TT>() {
-            private Pattern pattern = Pattern.compile("^("+regex+")",Pattern.DOTALL | Pattern.MULTILINE);
+            private Pattern pattern = Pattern.compile("\\A("+regex+")",Pattern.DOTALL | Pattern.MULTILINE);
             @Override
             public Optional<Tuple2<String, TT>> apply(String code) {
                 Matcher m = pattern.matcher(code);
