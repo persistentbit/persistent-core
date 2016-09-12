@@ -50,7 +50,7 @@ public class SimpleTokenizer<TT> {
 
     public SimpleTokenizer<TT> add(String regex, TT type) {
         return add(new TokenSupplier<TT>() {
-            private Pattern pattern = Pattern.compile("^("+regex+")");
+            private Pattern pattern = Pattern.compile("^("+regex+")",Pattern.DOTALL | Pattern.MULTILINE);
             @Override
             public Optional<Tuple2<String, TT>> apply(String code) {
                 Matcher m = pattern.matcher(code);
@@ -176,6 +176,7 @@ public class SimpleTokenizer<TT> {
         tokenizer.add(SimpleTokenizer.stringSupplier(-2,'\"',false));
         tokenizer.add(SimpleTokenizer.stringSupplier(-2,'\'',false));
         tokenizer.add("sin|cos|exp|ln|sqrt", 1); // function
+        tokenizer.add("/\\*.*\\*/",-9); //comment
         tokenizer.add("\\(", 2); // open bracket
         tokenizer.add("\\)", 3); // close bracket
         tokenizer.add("[+-]", 4); // plus or minus
@@ -184,7 +185,8 @@ public class SimpleTokenizer<TT> {
         tokenizer.add("[0-9]+",7); // integer number
         tokenizer.add("[a-zA-Z][a-zA-Z0-9_]*", 8); // variable
 
-        String txt = " sin(' x')*(1+var_12)";
+        String txt = " sin(' x') * /*(1+\n" +
+                "var_12)*/test";
         tokenizer.tokenize("test",txt).forEach(System.out::println);
     }
 
