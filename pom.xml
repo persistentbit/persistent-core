@@ -4,7 +4,7 @@
 
     <groupId>com.persistentbit</groupId>
     <artifactId>persistent-core</artifactId>
-    <version>1.1.6</version>
+    <version>1.1.7-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>PERSISTENT-CORE</name>
     <description>Persistent collections and streams for java</description>
@@ -15,7 +15,7 @@
         <connection>scm:git:git@github.com:persistentbit/persistent-core.git</connection>
         <url>scm:git:git@github.com:persistentbit/persistent-core.git</url>
         <developerConnection>scm:git:git@github.com:persistentbit/persistent-core.git</developerConnection>
-      <tag>persistent-core-1.1.6</tag>
+      <tag>HEAD</tag>
     </scm>
 
     <inceptionYear>2016</inceptionYear>
