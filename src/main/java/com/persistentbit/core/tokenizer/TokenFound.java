@@ -3,7 +3,7 @@ package com.persistentbit.core.tokenizer;
 import com.persistentbit.core.utils.BaseValueClass;
 
 /**
- * A TokenFound is the result of a {@link com.persistentbit.core.tokenizer.TokenSupplier} instance.
+ * A TokenFound is the result of a {@link TokenMatcher} instance.
  *
  * @author Peter Muys
  */

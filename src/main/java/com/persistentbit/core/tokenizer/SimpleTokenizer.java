@@ -1,22 +1,20 @@
 package com.persistentbit.core.tokenizer;
 
-import com.persistentbit.core.Tuple2;
 import com.persistentbit.core.collections.PList;
 
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * This Simple Tokenizer (Lexer) can transform your text into tokens.<br>
- * You add token parser by adding {@link com.persistentbit.core.tokenizer.TokenSupplier}s to the tokenizer.<br>
- * The way this works is that the tokenizer loops throue the suppliers one by one and if a token is found,
+ * You add token parser by adding {@link TokenMatcher}s to the tokenizer.<br>
+ * The way this works is that the tokenizer loops throue the matchers one by one and if a token is found,
  * then this is added to the result {@link Token} list.<br>
  * This tokenizer is not build for speed, but for easy usage. If you want to have more speed, you can still build a lexer
  * by hand.<br>
  * @author Peter Muys
  * @see Token
- * @see TokenSupplier
+ * @see TokenMatcher
  * @see TokenFound
  */
 public class SimpleTokenizer<TT> {
@@ -24,26 +22,26 @@ public class SimpleTokenizer<TT> {
 
 
 
-    private PList<TokenSupplier<TT>> tokenSuppliers = PList.empty();
+    private PList<TokenMatcher<TT>> tokenMatchers = PList.empty();
 
     /**
-     * Add a token supplier to the list of suppliers
-     * @param tokenSupplier The supplier to add
+     * Add a token matcher to the list of matchers
+     * @param tokenMatcher The matcher to add
      * @return this.
      */
-    public SimpleTokenizer<TT> add(TokenSupplier<TT> tokenSupplier){
-        tokenSuppliers = tokenSuppliers.plus(tokenSupplier);
+    public SimpleTokenizer<TT> add(TokenMatcher<TT> tokenMatcher){
+        tokenMatchers = tokenMatchers.plus(tokenMatcher);
         return this;
     }
 
     /**
-     * Shortcut for add(regExSupplier(regex,type)
+     * Shortcut for add(regExMatcher(regex,type)
      * @param regex The Regular Expression to add
      * @param type The resulting type if there is a match
      * @return this
      */
     public SimpleTokenizer<TT> add(String regex, TT type) {
-        return add(regExSupplier(regex,type));
+        return add(regExMatcher(regex,type));
     }
 
     /**
@@ -97,14 +95,14 @@ public class SimpleTokenizer<TT> {
     }
 
     /**
-     * A Token supplier that uses a Regular Expression to match the token.
+     * A Token matcher that uses a Regular Expression to match the token.
      * @param regex The regular Expression to match
      * @param type The resulting token type
      * @param <TT> The Type of the Token Type
-     * @return The TokenSupplier
+     * @return The TokenMatcher
      */
-    static public <TT> TokenSupplier<TT> regExSupplier(String regex, TT type){
-        return new TokenSupplier<TT>() {
+    static public <TT> TokenMatcher<TT> regExMatcher(String regex, TT type){
+        return new TokenMatcher<TT>() {
             private Pattern pattern = Pattern.compile("\\A("+regex+")",Pattern.DOTALL | Pattern.MULTILINE);
 
             @Override
@@ -129,9 +127,9 @@ public class SimpleTokenizer<TT> {
      * @param stringDelimiter    The string start/end character
      * @param multiLine If the string can span multiple lines
      * @param <TT> The Type of the Token
-     * @return A TokenSupplier
+     * @return A TokenMatcher
      */
-    static public <TT> TokenSupplier<TT> stringSupplier(TT type,char stringDelimiter, boolean multiLine) {
+    static public <TT> TokenMatcher<TT> stringMatcher(TT type, char stringDelimiter, boolean multiLine) {
         return (code -> {
             StringBuilder sb = new StringBuilder(10);
             try{
@@ -188,7 +186,7 @@ public class SimpleTokenizer<TT> {
     }
 
     private TokenFound<TT> findToken(String code){
-        for(TokenSupplier<TT> sup : tokenSuppliers){
+        for(TokenMatcher<TT> sup : tokenMatchers){
             TokenFound<TT> result = sup.tryParse(code);
             if(result != null){
                 return result;
@@ -199,9 +197,9 @@ public class SimpleTokenizer<TT> {
 
     static public void main(String...args){
         SimpleTokenizer<Integer> tokenizer = new SimpleTokenizer<>();
-        tokenizer.add(SimpleTokenizer.regExSupplier("(\\s)+",-1).ignore());
-        tokenizer.add(SimpleTokenizer.stringSupplier(-2,'\"',false));
-        tokenizer.add(SimpleTokenizer.stringSupplier(-2,'\'',false));
+        tokenizer.add(SimpleTokenizer.regExMatcher("(\\s)+",-1).ignore());
+        tokenizer.add(SimpleTokenizer.stringMatcher(-2,'\"',false));
+        tokenizer.add(SimpleTokenizer.stringMatcher(-2,'\'',false));
         tokenizer.add("/\\*.*\\*/",-9); //comment
         tokenizer.add("\\(", 2); // open bracket
         tokenizer.add("\\)", 3); // close bracket
@@ -209,7 +207,7 @@ public class SimpleTokenizer<TT> {
         tokenizer.add("[*/]", 5); // mult or divide
         tokenizer.add("\\^", 6); // raised
         tokenizer.add("[0-9]+",7); // integer number
-        tokenizer.add(SimpleTokenizer.regExSupplier("[a-zA-Z][a-zA-Z0-9_]*", 8).map(found -> {
+        tokenizer.add(SimpleTokenizer.regExMatcher("[a-zA-Z][a-zA-Z0-9_]*", 8).map(found -> {
             switch(found.text){
                 case "sin":
                 case "cos":
