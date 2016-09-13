@@ -2,74 +2,63 @@ package com.persistentbit.core.tokenizer;
 
 import com.persistentbit.core.Tuple2;
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.utils.BaseValueClass;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by petermuys on 12/09/16.
+ * This Simple Tokenizer (Lexer) can transform your text into tokens.<br>
+ * You add token parser by adding {@link com.persistentbit.core.tokenizer.TokenSupplier}s to the tokenizer.<br>
+ * The way this works is that the tokenizer loops throue the suppliers one by one and if a token is found,
+ * then this is added to the result {@link Token} list.<br>
+ * This tokenizer is not build for speed, but for easy usage. If you want to have more speed, you can still build a lexer
+ * by hand.<br>
+ * @author Peter Muys
+ * @see Token
+ * @see TokenSupplier
+ * @see TokenFound
  */
 public class SimpleTokenizer<TT> {
-    static public class Pos extends BaseValueClass {
-        public final String name;
-        public final int lineNumber;
-        public final int column;
-        public Pos(String name, int lineNumber,int column){
-            this.name = name;
-            this.lineNumber = lineNumber;
-            this.column = column;
-        }
-    }
-    static public class Token<TT> extends BaseValueClass{
-        public final Pos pos;
-        public final TT  type;
-        public final String text;
 
-        public Token(Pos pos, TT type, String text) {
-            this.pos = pos;
-            this.type = type;
-            this.text = text;
-        }
-    }
-
-    @FunctionalInterface
-    public interface TokenSupplier<TT>{
-        Optional<Tuple2<String,TT>> apply(String code);
-    }
 
 
 
     private PList<TokenSupplier<TT>> tokenSuppliers = PList.empty();
 
+    /**
+     * Add a token supplier to the list of suppliers
+     * @param tokenSupplier The supplier to add
+     * @return this.
+     */
     public SimpleTokenizer<TT> add(TokenSupplier<TT> tokenSupplier){
         tokenSuppliers = tokenSuppliers.plus(tokenSupplier);
         return this;
     }
 
+    /**
+     * Shortcut for add(regExSupplier(regex,type)
+     * @param regex The Regular Expression to add
+     * @param type The resulting type if there is a match
+     * @return this
+     */
     public SimpleTokenizer<TT> add(String regex, TT type) {
-        return add(new TokenSupplier<TT>() {
-            private Pattern pattern = Pattern.compile("\\A("+regex+")",Pattern.DOTALL | Pattern.MULTILINE);
-            @Override
-            public Optional<Tuple2<String, TT>> apply(String code) {
-                Matcher m = pattern.matcher(code);
-                if (m.find()) {
-                    String txt = m.group();
-                    return Optional.of(new Tuple2<>(txt,type));
-                }
-                return Optional.empty();
-            }
-        });
-
+        return add(regExSupplier(regex,type));
     }
 
-    public PList<Token<TT>> tokenize(String name, String code){
+    /**
+     * Tokenize the given code with the given name.<br>
+     * @param name The name of the code or source file
+     * @param code The code as a string
+     * @return A list of {@link Token}s corresponding to the source file.
+     * @throws TokenizerException Thrown when any exception occurs during the conversion.
+     */
+    public PList<Token<TT>> tokenize(String name, String code) throws TokenizerException{
         int line = 1;
         int col  = 1;
         PList<Token<TT>> res = PList.empty();
         while(code.isEmpty() == false){
-            Tuple2<String, TT> found;
+            TokenFound<TT> found;
             try {
                 found = findToken(code);
             } catch (Exception e){
@@ -78,19 +67,22 @@ public class SimpleTokenizer<TT> {
             if(found == null){
                 throw new TokenizerException(new Pos(name,line,col),"Unrecognized token.");
             }
-            if(found._1.length() == 0){
+            if(found.text.length() == 0){
                 throw new TokenizerException(new Pos(name,line,col),"Found a match with length 0 at ");
             }
-            res = res.plus(new Token<>(new Pos(name,line,col),found._2,found._1));
-            int nlCount = newLineCount(found._1);
-            if(nlCount > 0){
-                int lastNl = found._1.lastIndexOf('\n');
-                line += nlCount;
-                col = found._1.length() - lastNl;
-            } else {
-                col += found._1.length();
+            if(found.ignore == false) {
+                res = res.plus(new Token<>(new Pos(name, line, col), found.type, found.text));
             }
-            code = code.substring(found._1.length());
+            int nlCount = newLineCount(found.text);
+            int len = found.text.length();
+            if(nlCount > 0){
+                int lastNl = found.text.lastIndexOf('\n');
+                line += nlCount;
+                col = len - lastNl;
+            } else {
+                col += len;
+            }
+            code = code.substring(len);
         }
         return res;
     }
@@ -104,15 +96,49 @@ public class SimpleTokenizer<TT> {
         return count;
     }
 
+    /**
+     * A Token supplier that uses a Regular Expression to match the token.
+     * @param regex The regular Expression to match
+     * @param type The resulting token type
+     * @param <TT> The Type of the Token Type
+     * @return The TokenSupplier
+     */
+    static public <TT> TokenSupplier<TT> regExSupplier(String regex, TT type){
+        return new TokenSupplier<TT>() {
+            private Pattern pattern = Pattern.compile("\\A("+regex+")",Pattern.DOTALL | Pattern.MULTILINE);
 
-    static public <TT> TokenSupplier<TT> stringSupplier(TT token,char stringDelimiter, boolean multiLine) {
+            @Override
+            public TokenFound<TT> tryParse(String code) {
+                Matcher m = pattern.matcher(code);
+                if (m.find()) {
+                    String txt = m.group();
+                    return new TokenFound<>(txt,type);
+                }
+                return null;
+            }
+        };
+    }
+
+
+    /**
+     * Tokenizer that matches a literal String.<br>
+     * The string must start and end with the supplied stringDelimiter char.<br>
+     * String can contain escaped chars like in java/javascript: \t, \\, \b, \r, \n, \/
+     * and can contain unicode chars in the form of \\uXXXX where XXXX is a hexadecimal number.
+     * @param type The resulting token Type
+     * @param stringDelimiter    The string start/end character
+     * @param multiLine If the string can span multiple lines
+     * @param <TT> The Type of the Token
+     * @return A TokenSupplier
+     */
+    static public <TT> TokenSupplier<TT> stringSupplier(TT type,char stringDelimiter, boolean multiLine) {
         return (code -> {
             StringBuilder sb = new StringBuilder(10);
             try{
                 int i = 0;
                 char start = code.charAt(i++);
                 if(start != stringDelimiter){
-                    return Optional.empty();
+                    return null;
                 }
                 sb.append(start);
                 char c = code.charAt(i);
@@ -150,7 +176,7 @@ public class SimpleTokenizer<TT> {
                     }
                 }
                 code.charAt(++i);
-                return Optional.of(new Tuple2<String, TT>(sb.append(start).toString(),token));
+                return new TokenFound<>(sb.append(start).toString(),type,false);
 
             }catch(StringIndexOutOfBoundsException e){
                 throw new RuntimeException("Unclosed string");
@@ -161,21 +187,21 @@ public class SimpleTokenizer<TT> {
 
     }
 
-    private Tuple2<String,TT> findToken(String code){
+    private TokenFound<TT> findToken(String code){
         for(TokenSupplier<TT> sup : tokenSuppliers){
-            Tuple2<String,TT> result = sup.apply(code).orElse(null);
+            TokenFound<TT> result = sup.tryParse(code);
             if(result != null){
                 return result;
             }
         }
         return null;
     }
+
     static public void main(String...args){
         SimpleTokenizer<Integer> tokenizer = new SimpleTokenizer<>();
-        tokenizer.add("(\\s)+",-1);
+        tokenizer.add(SimpleTokenizer.regExSupplier("(\\s)+",-1).ignore());
         tokenizer.add(SimpleTokenizer.stringSupplier(-2,'\"',false));
         tokenizer.add(SimpleTokenizer.stringSupplier(-2,'\'',false));
-        tokenizer.add("sin|cos|exp|ln|sqrt", 1); // function
         tokenizer.add("/\\*.*\\*/",-9); //comment
         tokenizer.add("\\(", 2); // open bracket
         tokenizer.add("\\)", 3); // close bracket
@@ -183,10 +209,18 @@ public class SimpleTokenizer<TT> {
         tokenizer.add("[*/]", 5); // mult or divide
         tokenizer.add("\\^", 6); // raised
         tokenizer.add("[0-9]+",7); // integer number
-        tokenizer.add("[a-zA-Z][a-zA-Z0-9_]*", 8); // variable
+        tokenizer.add(SimpleTokenizer.regExSupplier("[a-zA-Z][a-zA-Z0-9_]*", 8).map(found -> {
+            switch(found.text){
+                case "sin":
+                case "cos":
+                    return new TokenFound<Integer>(found.text,1,found.ignore);
+                default: return found;
+            }
+        })); // variable
 
         String txt = " sin(' x') * /*(1+\n" +
-                "var_12)*/test";
+                "var_12)\n" +
+                "*/test";
         tokenizer.tokenize("test",txt).forEach(System.out::println);
     }
 
