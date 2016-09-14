@@ -40,6 +40,6 @@ public interface TokenMatcher<TT> {
      * @return The new TokenMatcher
      */
     default TokenMatcher<TT> ignore() {
-        return this.map(found ->  new TokenFound<>(found.text,found.type,false));
+        return this.map(found ->  new TokenFound<>(found.text,found.type,true));
     }
 }
