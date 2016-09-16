@@ -1,5 +1,6 @@
 package com.persistbit.core.collections;
 
+import com.persistentbit.core.Tuple2;
 import com.persistentbit.core.collections.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -13,6 +14,39 @@ import java.util.Collections;
  */
 public class TestPStream {
     static private final PStream<Integer> init = PStream.val(4,10,2,8,100,-2,0,1000);
+
+    @Test
+    public void testheadMiddleEnd() {
+        PList<Integer> l = PList.val(0,1,2,4);
+        PStream<Tuple2<PStream.HeadMiddleEnd,Integer>> hme = l.headMiddleEnd();
+        assert hme.map(t -> t._1).equals(PList.val(
+                PStream.HeadMiddleEnd.head,
+                PStream.HeadMiddleEnd.middle,
+                PStream.HeadMiddleEnd.middle,
+                PStream.HeadMiddleEnd.end));
+        assert hme.map(t -> t._2).equals(l);
+        l = PList.val(0,1,2);
+        hme = l.headMiddleEnd();
+        assert hme.map(t -> t._1).equals(PList.val(
+                PStream.HeadMiddleEnd.head,
+                PStream.HeadMiddleEnd.middle,
+                PStream.HeadMiddleEnd.end));
+        assert hme.map(t -> t._2).equals(l);
+        l = PList.val(0,1);
+        hme = l.headMiddleEnd();
+        assert hme.map(t -> t._1).equals(PList.val(
+                PStream.HeadMiddleEnd.head,
+                PStream.HeadMiddleEnd.end));
+        assert hme.map(t -> t._2).equals(l);
+        l = PList.val(0);
+        hme = l.headMiddleEnd();
+        assert hme.map(t -> t._1).equals(PList.val(
+                PStream.HeadMiddleEnd.headAndEnd));
+        assert hme.map(t -> t._2).equals(l);
+
+    }
+
+
 
     @Test
     public void testSequences() {
@@ -156,6 +190,7 @@ public class TestPStream {
         }
         throw new RuntimeException("Expected" + exceptionCls.getSimpleName() + " exception");
     }
+
 
 
 }

@@ -167,6 +167,46 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
 
     }
 
+    default PStream<Tuple2<HeadMiddleEnd,T>>    headMiddleEnd() {
+        return new PStreamLazy<Tuple2<HeadMiddleEnd, T>>() {
+            @Override
+            public boolean isInfinit() {
+                return PStreamWithDefaults.this.isInfinit();
+            }
+
+            @Override
+            public Iterator<Tuple2<HeadMiddleEnd, T>> iterator() {
+                Iterator<T> it = PStreamWithDefaults.this.iterator();
+                return new Iterator<Tuple2<HeadMiddleEnd, T>>() {
+                    private HeadMiddleEnd current = null;
+                    @Override
+                    public boolean hasNext() {
+                        return it.hasNext();
+                    }
+
+                    @Override
+                    public Tuple2<HeadMiddleEnd, T> next() {
+                        T result = it.next();
+                        if(current == null){
+                            current = HeadMiddleEnd.head;
+                            if(it.hasNext() == false){
+                                current = HeadMiddleEnd.headAndEnd;
+                            }
+                        } else {
+                            if(it.hasNext()){
+                                current = HeadMiddleEnd.middle;
+                            } else {
+                                current = HeadMiddleEnd.end;
+                            }
+                        }
+                        return new Tuple2<HeadMiddleEnd, T>(current,result);
+                    }
+                };
+            }
+        };
+    }
+
+
     default <Z> PStream<Tuple2<Z,T>> zip(PStream<Z> zipStream){
         return new PStreamLazy<Tuple2<Z, T>>() {
             @Override

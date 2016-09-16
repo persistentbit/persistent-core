@@ -264,6 +264,25 @@ public interface PStream<T> extends Iterable<T> {
      */
     <Z> PStream<Tuple2<Z,T>> zip(PStream<Z> zipStream);
 
+    enum HeadMiddleEnd {
+        head,middle,end,headAndEnd
+    }
+
+    /**
+     * Create a new PStream that combines the element with the
+     * head/middle/end position of the element in the stream.<br>
+     * The first element of the PStream has a {@link HeadMiddleEnd#head}
+     * position.<br>
+     * All elements between the first and last elements have a {@link HeadMiddleEnd#middle}
+     * position.<br>
+     * The last element has a {@link HeadMiddleEnd#headAndEnd}.<br>
+     * If there is only 1 element in the PStream, then the position is {@link HeadMiddleEnd#headAndEnd}
+     * @return A new PStream with the HeadMiddleEnd postion.
+     */
+    PStream<Tuple2<HeadMiddleEnd,T>> headMiddleEnd();
+
+
+
     /**
      * Zip this stream with a sequence starting with 0.<br>
      * Handy if you need the index position of an element in a stream
