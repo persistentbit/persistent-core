@@ -267,6 +267,16 @@ public abstract class PStreamDelegate<T> implements PStream<T>{
     }
 
     @Override
+    public PStream<T> duplicates() {
+        return getDelegate().duplicates();
+    }
+
+    @Override
+    public PStream<Tuple2<HeadMiddleEnd, T>> headMiddleEnd() {
+        return getDelegate().headMiddleEnd();
+    }
+
+    @Override
     public LList<T> llist() {
         return getDelegate().llist();
     }

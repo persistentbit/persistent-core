@@ -112,6 +112,10 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> implements IPSet<T>{
         return map.containsKey(value);
     }
 
+    @Override
+    public PSet<T> duplicates() {
+        return PSet.empty();
+    }
 
     @Override
     public boolean equals(Object obj) {

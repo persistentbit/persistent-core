@@ -574,6 +574,11 @@ public interface PStream<T> extends Iterable<T> {
      */
     PStream<T> distinct();
 
+    /**
+     * Return a new PStream containing all
+     * elements that are multiple times in this stream.
+     */
+     PStream<T> duplicates();
 
     /**
      *

@@ -624,6 +624,24 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
         };
     }
 
+    default PStream<T> duplicates() {
+        if(isInfinit()){ throw new InfinitePStreamException();}
+        return new PStreamLazy<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                Set<T> lookup = new HashSet<T>();
+                POrderedSet<T> dup = POrderedSet.empty();
+                for(T item : PStreamWithDefaults.this){
+                    if(lookup.contains(item)){
+                        dup = dup.plus(item);
+                    }
+                    lookup.add(item);
+                }
+                return dup.iterator();
+            }
+        };
+    }
+
 
     default LList<T> llist() {
         if(isInfinit()){ throw new InfinitePStreamException();}

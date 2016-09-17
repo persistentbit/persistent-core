@@ -46,6 +46,13 @@ public class TestPStream {
 
     }
 
+    @Test
+    public void testDuplicates() {
+        Assert.assertTrue(PList.val(0,1,2,3).duplicates().isEmpty());
+        Assert.assertTrue(PList.val(0,1,2,3,2).duplicates().equals(PList.val(2)));
+        Assert.assertTrue(PList.empty().duplicates().equals(PList.empty()));
+        Assert.assertEquals(PList.val(0,1,1,2,2,2,3,3,3,3,4).duplicates(),PList.val(1,2,3));
+    }
 
 
     @Test
