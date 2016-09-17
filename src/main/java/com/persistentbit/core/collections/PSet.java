@@ -34,6 +34,14 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> implements IPSet<T>{
     static public PSet<Boolean> forBoolean() {
         return empty();
     }
+    static public <T> PSet<T> val(T...elements){
+        PSet<T> res = PSet.empty();
+        for(T v: elements){
+            res = res.plus(v);
+        }
+        return res;
+    }
+
 
     PSet(PMap<T,T> map){
         this.map = map;
