@@ -66,7 +66,7 @@ public class SimpleTokenizer<TT> {
                 throw new TokenizerException(new Pos(name,line,col),"Unrecognized token.");
             }
             if(found.text.length() == 0){
-                throw new TokenizerException(new Pos(name,line,col),"Found a match with length 0 at ");
+                throw new TokenizerException(new Pos(name,line,col),"Found a match with length 0. Type=" + found.type);
             }
             if(found.ignore == false) {
                 res = res.plus(new Token<>(new Pos(name, line, col), found.type, found.text));
