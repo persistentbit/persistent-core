@@ -62,7 +62,8 @@ public class TestDependencies {
             DependencyResolver.<Node>resolve(a, n -> n.getEdges()).map(n -> n.getValue());
             assert false;
         }catch (CircularDependencyException ex){
-            ex.printStackTrace();
+            assert ex.getFirstNode().equals(d) || ex.getSecondNode().equals(d);
+            assert ex.getFirstNode().equals(b) || ex.getSecondNode().equals(b);
         }
 
     }

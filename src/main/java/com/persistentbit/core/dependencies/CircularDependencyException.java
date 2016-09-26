@@ -13,4 +13,12 @@ public class CircularDependencyException extends RuntimeException {
         this.first = first;
         this.second = second;
     }
+
+    public Object getFirstNode() {
+        return first;
+    }
+
+    public Object getSecondNode() {
+        return second;
+    }
 }
