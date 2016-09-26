@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 /**
  * Logging class that internally uses{@link Logger} to do the real logging.<br>
  * Typical use:
- * <code>{@code
+ * {@code <code>
  *      public class MyClass{
  *          static private JLogger log = JLogger.get(MyClass.class);
  *
@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  *              log.info("In My Function");
  *          }
  *      }
- * }</code>
+ * </code>}
  *
  */
 public class PLog {

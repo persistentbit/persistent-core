@@ -3,12 +3,9 @@ package com.persistentbit.core.collections;
 
 import com.persistentbit.core.Tuple2;
 
-
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
-
-import static javafx.scene.input.KeyCode.Z;
 
 /**
  * A PStream is an Iterable object that is persistent (Immutable).<br>
@@ -577,6 +574,7 @@ public interface PStream<T> extends Iterable<T> {
     /**
      * Return a new PStream containing all
      * elements that are multiple times in this stream.
+     * @return A new PStream containing all the duplicated elements.
      */
      PStream<T> duplicates();
 
