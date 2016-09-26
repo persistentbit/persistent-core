@@ -116,6 +116,10 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
     static public PList<Boolean> forBoolean() {
         return empty();
     }
+    static public <V> PList<V> from(Iterable<V> iter){
+        PList<V> res = PList.empty();
+        return res.plusAll(iter);
+    }
 
 
     public  PList<T> subList(int fromIndex, int toIndex){
