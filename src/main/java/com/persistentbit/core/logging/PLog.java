@@ -68,7 +68,7 @@ public class PLog {
                 "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS.%1$tL %4$-7s (%2$s) :  %5$s %6$s%n");
 
         Logger global = Logger.getLogger("");
-        global.setLevel(Level.FINE);
+        global.setLevel(Level.INFO);
 
         //global.getHandlers();
         PStream.from(global.getHandlers()).forEach(h ->global.removeHandler(h));
