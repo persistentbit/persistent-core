@@ -330,6 +330,13 @@ public interface PStream<T> extends Iterable<T> {
      */
     boolean containsAll(Iterable<?> iter);
 
+    /**
+     * Create a new PStream with all elements from this stream that are not in the supplied stream.
+     * @param others The other stream of elements
+     * @return PStream with all elements not in others.
+     */
+    PStream<T> filterNotContainedIn(PStream<? extends T> others);
+
 
     /**
      * Group the elements in this PStream by generating a key to group on.<br>

@@ -146,7 +146,7 @@ public class SimpleTokenizer<TT> {
                         switch(c){
                             case '\\': c=code.charAt(++i); sb.append('\\');break;
                             case '\"': c=code.charAt(++i); sb.append('\"');break;
-                            case '\'': c=code.charAt(++i); sb.append('\"');break;
+                            case '\'': c=code.charAt(++i); sb.append('\'');break;
                             case 'b': c=code.charAt(++i); sb.append('\b');break;
                             case 'r': c=code.charAt(++i); sb.append('\r');break;
                             case 'n': c=code.charAt(++i); sb.append('\n');break;

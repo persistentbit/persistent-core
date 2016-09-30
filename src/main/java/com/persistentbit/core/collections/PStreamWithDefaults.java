@@ -152,6 +152,12 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
     }
 
     @Override
+    default PStream<T> filterNotContainedIn(PStream<? extends T> others) {
+        PSet otherSet = others.pset();
+        return filter(v -> otherSet.contains(v) == false);
+    }
+
+    @Override
     default PStream<T> filterNulls() {
         return filter(x -> x != null);
     }
