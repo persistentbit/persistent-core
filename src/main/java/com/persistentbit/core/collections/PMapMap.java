@@ -1,6 +1,6 @@
 package com.persistentbit.core.collections;
 
-import com.persistentbit.core.Tuple2;
+import com.persistentbit.core.tuples.Tuple2;
 
 import java.io.Serializable;
 import java.util.AbstractMap;

@@ -1,7 +1,7 @@
 package com.persistbit.core.collections;
 
-import com.persistentbit.core.Tuple2;
 import com.persistentbit.core.codegen.CaseClaseCodeBuilder;
+import com.persistentbit.core.tuples.Tuple2;
 import org.testng.annotations.Test;
 
 import java.io.File;

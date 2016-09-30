@@ -3,6 +3,7 @@ package com.persistentbit.core;
 
 import com.persistentbit.core.codegen.CaseClass;
 import com.persistentbit.core.properties.FieldNames;
+import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.Objects;
 
