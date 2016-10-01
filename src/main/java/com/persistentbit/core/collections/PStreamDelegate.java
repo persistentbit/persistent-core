@@ -346,4 +346,9 @@ public abstract class PStreamDelegate<T> implements PStream<T>{
     public PStream<T> peek(Consumer<? super T> consumer) {
         return getDelegate().peek(consumer);
     }
+
+    @Override
+    public PStream<T> filterNotContainedIn(PStream<? extends T> others) {
+        return getDelegate().filterNotContainedIn(others);
+    }
 }

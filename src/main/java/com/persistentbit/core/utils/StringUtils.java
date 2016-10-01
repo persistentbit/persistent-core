@@ -50,13 +50,38 @@ public class StringUtils {
     }
 
     /**
-     * Convert the first character in the given string to Uppercase.
+     * Convert the first character in the given string to UpperCase.
      * @param s String to convert, can't be null
      * @return The new string with the first character in uppercase and the rest as it was.
      */
-    static public String firstCapital(@NotNullable String s){
+    static public String firstUpperCase(@NotNullable String s){
         Objects.requireNonNull(s);
         if(s.isEmpty()) { return s; }
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+
+    /**
+     * Convert the first character in the given string to LowerCase.
+     * @param s String to convert, can't be null
+     * @return The new string with the first character in lowercase and the rest as it was.
+     */
+    static public String firstLowerCase(@NotNullable String s){
+        Objects.requireNonNull(s);
+        if(s.isEmpty()) { return s; }
+        return Character.toLowerCase(s.charAt(0)) + s.substring(1);
+    }
+
+    /**
+     * Drop the last charCount chars from a string
+     * @param txt A Non null string
+     * @param charCount The number of characters to drop
+     * @return the string with dropped chars.
+     */
+    static public String dropLast(@NotNullable  String txt,int charCount){
+        Objects.requireNonNull(txt);
+        if(txt.length()<= charCount){
+            return "";
+        }
+        return txt.substring(0,txt.length()-charCount);
     }
 }
