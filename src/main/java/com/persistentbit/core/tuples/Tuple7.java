@@ -1,6 +1,8 @@
 package com.persistentbit.core.tuples;
 
 import com.persistentbit.core.Nullable;
+import com.persistentbit.core.function.Function2;
+import com.persistentbit.core.function.Function7;
 import com.persistentbit.core.properties.FieldNames;
 
 import java.io.Serializable;
@@ -152,5 +154,8 @@ public class Tuple7<T1, T2, T3,T4,T5,T6,T7> implements Comparable<Tuple7<T1, T2,
         result = 31 * result + (_6 != null ? _6.hashCode() : 0);
         result = 31 * result + (_7 != null ? _7.hashCode() : 0);
         return result;
+    }
+    public <R> R map(Function7<T1,T2,T3,T4,T5,T6,T7,R> map){
+        return map.apply(_1,_2,_3,_4,_5,_6,_7);
     }
 }

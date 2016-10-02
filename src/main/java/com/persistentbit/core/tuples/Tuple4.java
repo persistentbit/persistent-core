@@ -2,6 +2,8 @@ package com.persistentbit.core.tuples;
 
 import com.persistentbit.core.Immutable;
 import com.persistentbit.core.Nullable;
+import com.persistentbit.core.function.Function4;
+import com.persistentbit.core.function.Function5;
 import com.persistentbit.core.properties.FieldNames;
 
 import java.io.Serializable;
@@ -110,5 +112,9 @@ public class Tuple4<T1, T2, T3,T4> implements Comparable<Tuple4<T1, T2, T3,T4>>,
 
     public Tuple4<T1, T2, T3, T4> with_4(T4 value) {
         return new Tuple4(this._1, this._2, this._4,value);
+    }
+
+    public <R> R map(Function4<T1, T2, T3, T4, R> map){
+        return map.apply(_1,_2,_3,_4);
     }
 }

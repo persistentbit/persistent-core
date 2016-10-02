@@ -3,6 +3,8 @@ package com.persistentbit.core.tuples;
 import com.persistentbit.core.Immutable;
 import com.persistentbit.core.Nullable;
 import com.persistentbit.core.codegen.GenNoGetter;
+import com.persistentbit.core.function.Function3;
+import com.persistentbit.core.function.Function4;
 import com.persistentbit.core.properties.FieldNames;
 
 import java.io.Serializable;
@@ -119,4 +121,7 @@ public class Tuple3<T1, T2,T3> implements Comparable<Tuple3<T1,T2,T3>>,Serializa
         return new Tuple3<>(this._1, this._2,value);
     }
 
+    public <R> R map(Function3<T1, T2, T3, R> map){
+        return map.apply(_1,_2,_3);
+    }
 }

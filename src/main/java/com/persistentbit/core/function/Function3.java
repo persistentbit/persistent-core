@@ -1,7 +1,8 @@
-package com.persistentbit.core.utils.functional;
+package com.persistentbit.core.function;
 
 /**
- * Created by petermuys on 1/10/16.
+ * Functional Interface with 3 parameters
+ * @author Peter Muys
  */
 @FunctionalInterface
 public interface Function3<V1,V2,V3,R>  {
