@@ -145,4 +145,14 @@ public class StringUtils {
         return res;
     }
 
+    /**
+     * converts aStringInCamelCase to a_string_in_snake
+     * @param s The Non null string in camelCase
+     * @return The snake version of the name
+     */
+    static public String camelCaseTo_snake(String s){
+        Objects.requireNonNull(s);
+        return s.replaceAll("([a-z])([A-Z]+)", "$1_$2");
+    }
+
 }
