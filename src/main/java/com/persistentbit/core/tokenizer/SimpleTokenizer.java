@@ -65,16 +65,18 @@ public class SimpleTokenizer<TT> {
             if(found == null){
                 throw new TokenizerException(new Pos(name,line,col),"Unrecognized token.");
             }
-            if(found.text.length() == 0){
+            int len = found.skipLength;
+            if(len == 0){
                 throw new TokenizerException(new Pos(name,line,col),"Found a match with length 0. Type=" + found.type);
             }
             if(found.ignore == false) {
                 res = res.plus(new Token<>(new Pos(name, line, col), found.type, found.text));
             }
-            int nlCount = newLineCount(found.text);
-            int len = found.text.length();
+            String skipString = code.substring(0,len);
+            int nlCount = newLineCount(skipString);
+
             if(nlCount > 0){
-                int lastNl = found.text.lastIndexOf('\n');
+                int lastNl = skipString.lastIndexOf('\n');
                 line += nlCount;
                 col = len - lastNl;
             } else {
@@ -131,9 +133,10 @@ public class SimpleTokenizer<TT> {
      */
     static public <TT> TokenMatcher<TT> stringMatcher(TT type, char stringDelimiter, boolean multiLine) {
         return (code -> {
+
             StringBuilder sb = new StringBuilder(10);
+            int i = 0;
             try{
-                int i = 0;
                 char start = code.charAt(i++);
                 if(start != stringDelimiter){
                     return null;
@@ -174,7 +177,7 @@ public class SimpleTokenizer<TT> {
                     }
                 }
                 code.charAt(++i);
-                return new TokenFound<>(sb.append(start).toString(),type,false);
+                return new TokenFound<>(sb.append(start).toString(),type,false,i);
 
             }catch(StringIndexOutOfBoundsException e){
                 throw new RuntimeException("Unclosed string");

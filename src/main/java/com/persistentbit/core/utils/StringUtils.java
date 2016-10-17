@@ -37,7 +37,7 @@ public class StringUtils {
             } else if(c == '\r'){
                 sb.append("\\r");
             } else if(c == '\\'){
-                sb.append('\\');
+                sb.append("\\\\");
             } else if (c == '\b'){
                 sb.append("\\b");
             } else if(c == '\"'){
