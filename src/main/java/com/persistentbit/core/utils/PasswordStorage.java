@@ -7,6 +7,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 
+/**
+ * Utility class to convert and verify passwords with a salted hash.<br>
+ */
 public class PasswordStorage
 {
 
@@ -74,6 +77,11 @@ public class PasswordStorage
         return parts;
     }
 
+    /**
+     * Create a Secure Random String.
+     * @param length The length in bytes of the random code. (Not the length of the string)
+     * @return The base64 string of the generated code.
+     */
     public static String createRandomCode(int length){
         SecureRandom random = new SecureRandom();
         byte[] result = new byte[length];
