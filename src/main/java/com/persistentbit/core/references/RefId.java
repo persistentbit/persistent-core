@@ -32,7 +32,7 @@ public class RefId<R,ID> implements Ref<R,ID>{
 
     @Override
     public Ref<R, ID> asValueRef(R value) {
-        return new RefValue<R,ID>(this,value);
+        return new RefValue<>(this, value);
     }
 
 

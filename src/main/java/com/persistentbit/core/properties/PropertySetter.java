@@ -23,7 +23,7 @@ public interface PropertySetter
 
     /**
      *
-     * @return The expected Calss of the property to set
+     * @return The expected Class of the property to set
      */
     Class<?> getPropertyClass();
 }

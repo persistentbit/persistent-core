@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 /**
  * This Simple Tokenizer (Lexer) can transform your text into tokens.<br>
  * You add token parser by adding {@link TokenMatcher}s to the tokenizer.<br>
- * The way this works is that the tokenizer loops throue the matchers one by one and if a token is found,
+ * The way this works is that the tokenizer loops through the matchers one by one and if a token is found,
  * then this is added to the result {@link Token} list.<br>
  * This tokenizer is not build for speed, but for easy usage. If you want to have more speed, you can still build a lexer
  * by hand.<br>
@@ -51,6 +51,7 @@ public class SimpleTokenizer<TT> {
      * @return A list of {@link Token}s corresponding to the source file.
      * @throws TokenizerException Thrown when any exception occurs during the conversion.
      */
+    @SuppressWarnings("ConstantConditions")
     public PList<Token<TT>> tokenize(String name, String code) throws TokenizerException{
         int line = 1;
         int col  = 1;
@@ -103,9 +104,9 @@ public class SimpleTokenizer<TT> {
      * @param <TT> The Type of the Token Type
      * @return The TokenMatcher
      */
-    static public <TT> TokenMatcher<TT> regExMatcher(String regex, TT type){
+    public static <TT> TokenMatcher<TT> regExMatcher(String regex, TT type){
         return new TokenMatcher<TT>() {
-            private Pattern pattern = Pattern.compile("\\A("+regex+")",Pattern.DOTALL | Pattern.MULTILINE);
+            private final Pattern pattern = Pattern.compile("\\A("+regex+")", Pattern.DOTALL | Pattern.MULTILINE);
 
             @Override
             public TokenFound<TT> tryParse(String code) {
@@ -131,7 +132,7 @@ public class SimpleTokenizer<TT> {
      * @param <TT> The Type of the Token
      * @return A TokenMatcher
      */
-    static public <TT> TokenMatcher<TT> stringMatcher(TT type, char stringDelimiter, boolean multiLine) {
+    public static <TT> TokenMatcher<TT> stringMatcher(TT type, char stringDelimiter, boolean multiLine) {
         return (code -> {
 
             StringBuilder sb = new StringBuilder(10);
@@ -176,7 +177,7 @@ public class SimpleTokenizer<TT> {
                         c = code.charAt(++i);
                     }
                 }
-                code.charAt(++i);
+                ++i;
                 return new TokenFound<>(sb.append(start).toString(),type,false,i);
 
             }catch(StringIndexOutOfBoundsException e){
@@ -198,7 +199,8 @@ public class SimpleTokenizer<TT> {
         return null;
     }
 
-    static public void main(String...args){
+    @SuppressWarnings("UseOfSystemOutOrSystemErr")
+    public static void main(String...args){
         SimpleTokenizer<Integer> tokenizer = new SimpleTokenizer<>();
         tokenizer.add(SimpleTokenizer.regExMatcher("(\\s)+",-1).ignore());
         tokenizer.add(SimpleTokenizer.stringMatcher(-2,'\"',false));
@@ -214,7 +216,7 @@ public class SimpleTokenizer<TT> {
             switch(found.text){
                 case "sin":
                 case "cos":
-                    return new TokenFound<Integer>(found.text,1,found.ignore);
+                    return new TokenFound<>(found.text, 1, found.ignore);
                 default: return found;
             }
         })); // variable

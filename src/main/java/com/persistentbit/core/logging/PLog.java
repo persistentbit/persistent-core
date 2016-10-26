@@ -21,15 +21,15 @@ import java.util.logging.Logger;
  * </code>}
  *
  */
-public class PLog {
+public final class PLog {
     static{
         setDefaultConsoleLogger();
     }
 
-    private final java.util.logging.Logger impl;
+    private final Logger impl;
 
     private PLog(String name){
-        impl = java.util.logging.Logger.getLogger(name);
+        impl = Logger.getLogger(name);
     }
 
     /**
@@ -37,10 +37,10 @@ public class PLog {
      * @param cls Class to get a logger for
      * @return a JLogger.
      */
-    static public PLog get(Class cls){
+    public static PLog get(Class cls){
         return get(cls.getName());
     }
-    static public PLog get(String name){
+    public static PLog get(String name){
         return new PLog(name);
     }
 
@@ -49,7 +49,7 @@ public class PLog {
      * Init the logging system by setting a new logging format that logs on 1 line and setting the
      * log level to FINEST
      */
-    static public void setDefaultConsoleLogger() {
+    public static void setDefaultConsoleLogger() {
     /*
         1: date
             - a Date object representing event time of the log record.
@@ -71,7 +71,7 @@ public class PLog {
         global.setLevel(Level.INFO);
 
         //global.getHandlers();
-        PStream.from(global.getHandlers()).forEach(h ->global.removeHandler(h));
+        PStream.from(global.getHandlers()).forEach(global::removeHandler);
         ConsoleHandler ch= new ConsoleHandler();
         ch.setLevel(Level.FINEST);
         global.addHandler(ch);
@@ -82,7 +82,7 @@ public class PLog {
      * Set the global level (name = "")
      * @param level The Level
      */
-    static public void setDefaultLevel(Level level){
+    public static void setDefaultLevel(Level level){
         setLevel("",level);
     }
 
@@ -91,13 +91,13 @@ public class PLog {
      * @param name The name of the logger
      * @param level The new Level
      */
-    static public void setLevel(String name, Level level){
+    public static void setLevel(String name, Level level){
         Logger.getLogger(name).setLevel(level);
     }
-    static public void setLevel(Class cls,Level level){
+    public static void setLevel(Class cls, Level level){
         setLevel(cls.getName(),level);
     }
-    static public void setLevel(Package pack,Level level){
+    public static void setLevel(Package pack, Level level){
         setLevel(pack.getName(),level);
     }
 

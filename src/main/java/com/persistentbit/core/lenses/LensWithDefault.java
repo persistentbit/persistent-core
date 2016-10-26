@@ -1,7 +1,7 @@
 package com.persistentbit.core.lenses;
 
 /**
- * A Lens where the Getter returns a default value when the originial value is null
+ * A Lens where the Getter returns a default value when the original value is null
  * @author Peter Muys
  * @since 20/06/2016
  */

@@ -3,38 +3,37 @@ package com.persistentbit.core.utils;
 import java.util.function.Supplier;
 
 /**
- * Helpfull functions to check if something required is ok.<br>
+ * Helpful functions to check if something required is ok.<br>
  */
-public class Require {
+public final class Require {
     //*********  isTrue
-    static public boolean isTrue(boolean value){
+    public static boolean isTrue(boolean value){
         return isTrue(value,"Expected a 'true' value");
     }
-    static public boolean isTrue(boolean value, Supplier<RuntimeException> exception){
+    public static boolean isTrue(boolean value, Supplier<RuntimeException> exception){
         if(value == false){
             throwError(exception);
         }
-        return value;
+        return true;
     }
-    static public boolean isTrue(boolean value, String message){
+    public static boolean isTrue(boolean value, String message){
         return isTrue(value,() -> new RuntimeException(message));
     }
     //*********  isFalse
-    static public boolean isFalse(boolean value){
+    public static boolean isFalse(boolean value){
         return isFalse(value,"Expected a 'true' value");
     }
-    static public boolean isFalse(boolean value, Supplier<RuntimeException> exception){
+    public static boolean isFalse(boolean value, Supplier<RuntimeException> exception){
         if(value){
             throwError(exception);
         }
-        return value;
+        return false;
     }
-    static public boolean isFalse(boolean value, String message){
+    public static boolean isFalse(boolean value, String message){
         return isFalse(value,() -> new RuntimeException(message));
     }
 
-    static private void throwError(Supplier<RuntimeException> exception){
-        RuntimeException e = exception.get();
-        throw e;
+    private static void throwError(Supplier<RuntimeException> exception){
+        throw exception.get();
     }
 }

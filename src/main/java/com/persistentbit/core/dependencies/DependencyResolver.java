@@ -13,8 +13,8 @@ import java.util.function.Function;
  * Class to resolve dependencies between nodes.
  * @see #resolve(Object)
  */
-public class DependencyResolver<VALUE>{
-    static private final PLog   log  =PLog.get(DependencyResolver.class);
+public final class DependencyResolver<VALUE>{
+    private static final PLog log =PLog.get(DependencyResolver.class);
     private final Function<VALUE,PList<VALUE>> getEdges;
 
     private DependencyResolver(Function<VALUE,PList<VALUE>> getEdges) {
@@ -23,8 +23,8 @@ public class DependencyResolver<VALUE>{
 
 
     private PList<VALUE>  resolve(VALUE value){
-        List<VALUE> res = new ArrayList<VALUE>();
-        HashSet<VALUE> seen = new HashSet<VALUE>();
+        List<VALUE> res = new ArrayList<>();
+        HashSet<VALUE> seen = new HashSet<>();
         resolve(value,res,seen);
         return PList.from(res);
     }
@@ -53,7 +53,7 @@ public class DependencyResolver<VALUE>{
      * @return An ordered list with the dependencies.
      * @throws CircularDependencyException Thrown when there is a circular dependency between 2 nodes.
      */
-    static public <T>  PList<T> resolve(T node, Function<T,PList<T>> getDependencies) throws CircularDependencyException{
+    public static <T>  PList<T> resolve(T node, Function<T,PList<T>> getDependencies) throws CircularDependencyException{
         DependencyResolver<T> dr = new DependencyResolver<>(getDependencies);
         return dr.resolve(node);
     }

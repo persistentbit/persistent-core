@@ -12,7 +12,7 @@ import java.util.ListIterator;
  */
 public class PListList<T> implements List<T>,PStreamable<T> {
 
-    private PList<T> master;
+    private final PList<T> master;
 
     public PListList(PList<T> master){
         this.master = master;

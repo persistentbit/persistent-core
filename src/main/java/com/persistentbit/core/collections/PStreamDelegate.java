@@ -27,8 +27,8 @@ public abstract class PStreamDelegate<T> implements PStream<T>{
     }
 
     @Override
-    public boolean isInfinit() {
-        return getDelegate().isInfinit();
+    public boolean isInfinite() {
+        return getDelegate().isInfinite();
     }
 
     @Override
@@ -231,8 +231,9 @@ public abstract class PStreamDelegate<T> implements PStream<T>{
         return getDelegate().count(predicate);
     }
 
+    @SafeVarargs
     @Override
-    public PStream<T> plusAll(T v1, T... rest) {
+    public final PStream<T> plusAll(T v1, T... rest) {
         return getDelegate().plusAll(v1,rest);
     }
 
@@ -332,6 +333,7 @@ public abstract class PStreamDelegate<T> implements PStream<T>{
         return getDelegate().hashCode();
     }
 
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public boolean equals(Object obj) {
         return getDelegate().equals(obj);

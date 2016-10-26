@@ -7,7 +7,7 @@ import java.lang.reflect.*;
  * @author Peter Muys
  * @since 13/07/2016
  */
-public class ReflectionUtils {
+public final class ReflectionUtils {
     public static  Class<?> classFromType(Type t){
         if(t instanceof Class){
             return (Class<?>)t;

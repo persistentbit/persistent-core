@@ -1,7 +1,6 @@
 package com.persistentbit.core.tuples;
 
 import com.persistentbit.core.Nullable;
-import com.persistentbit.core.function.Function2;
 import com.persistentbit.core.function.Function7;
 import com.persistentbit.core.properties.FieldNames;
 
@@ -42,7 +41,7 @@ public class Tuple7<T1, T2, T3,T4,T5,T6,T7> implements Comparable<Tuple7<T1, T2,
     }
 
     public static <T1, T2, T3, T4, T5,T6,T7> Tuple7<T1, T2, T3, T4, T5,T6,T7> of(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5,T6 v6,T7 v7) {
-        return new Tuple7(v1, v2, v3, v4, v5,v6,v7);
+        return new Tuple7<>(v1, v2, v3, v4, v5,v6,v7);
     }
 
 
@@ -87,6 +86,7 @@ public class Tuple7<T1, T2, T3,T4,T5,T6,T7> implements Comparable<Tuple7<T1, T2,
         return Tuple7.of(_1,_2,_3,_4,_5,_6,_7,v8);
     }*/
 
+    @SuppressWarnings("unchecked")
     public int compareTo(Tuple7<T1, T2, T3, T4, T5,T6,T7> o) {
         int r = this.dropLast().compareTo(o.dropLast());
         if (r != 0) {
@@ -100,31 +100,31 @@ public class Tuple7<T1, T2, T3,T4,T5,T6,T7> implements Comparable<Tuple7<T1, T2,
     }
 
     public Tuple7<T1, T2, T3, T4, T5,T6,T7> with_1(T1 value) {
-        return new Tuple7(value, this._2, this._3, this._4, this._5, this._6, this._7);
+        return new Tuple7<>(value, this._2, this._3, this._4, this._5, this._6, this._7);
     }
 
     public Tuple7<T1, T2, T3, T4, T5,T6,T7> with_2(T2 value) {
-        return new Tuple7(this._1, value, this._3, this._4, this._5, this._6, this._7);
+        return new Tuple7<>(this._1, value, this._3, this._4, this._5, this._6, this._7);
     }
 
     public Tuple7<T1, T2, T3, T4, T5,T6,T7> with_3(T3 value) {
-        return new Tuple7(this._1, this._2, value, this._4, this._5, this._6, this._7);
+        return new Tuple7<>(this._1, this._2, value, this._4, this._5, this._6, this._7);
     }
 
     public Tuple7<T1, T2, T3, T4, T5,T6,T7> with_4(T4 value) {
-        return new Tuple7(this._1, this._2, this._4, value, this._5, this._6, this._7);
+        return new Tuple7<>(this._1, this._2, this._3, value, this._5, this._6, this._7);
     }
 
     public Tuple7<T1, T2, T3, T4, T5,T6,T7> with_5(T5 value) {
-        return new Tuple7(this._1, this._2, this._3, this._4, value, this._6, this._7);
+        return new Tuple7<>(this._1, this._2, this._3, this._4, value, this._6, this._7);
     }
 
     public Tuple7<T1, T2, T3, T4, T5,T6,T7> with_6(T6 value) {
-        return new Tuple7(this._1, this._2, this._3, this._4, this._5, value, this._7);
+        return new Tuple7<>(this._1, this._2, this._3, this._4, this._5, value, this._7);
     }
 
     public Tuple7<T1, T2, T3, T4, T5,T6,T7> with_7(T7 value) {
-        return new Tuple7(this._1, this._2, this._3, this._4, this._5, this._6, value);
+        return new Tuple7<>(this._1, this._2, this._3, this._4, this._5, this._6, value);
     }
 
     @Override

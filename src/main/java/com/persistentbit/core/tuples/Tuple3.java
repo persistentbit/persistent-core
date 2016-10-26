@@ -4,7 +4,6 @@ import com.persistentbit.core.Immutable;
 import com.persistentbit.core.Nullable;
 import com.persistentbit.core.codegen.GenNoGetter;
 import com.persistentbit.core.function.Function3;
-import com.persistentbit.core.function.Function4;
 import com.persistentbit.core.properties.FieldNames;
 
 import java.io.Serializable;
@@ -48,7 +47,7 @@ public class Tuple3<T1, T2,T3> implements Comparable<Tuple3<T1,T2,T3>>,Serializa
      * @param <T3> Type of _3
      * @return a new Tuple3
      */
-    static public <T1,T2,T3> Tuple3<T1,T2,T3> of(T1 v1, T2 v2,T3 v3){
+	public static <T1,T2,T3> Tuple3<T1,T2,T3> of(T1 v1, T2 v2,T3 v3){
         return new Tuple3<>(v1,v2,v3);
     }
 
@@ -94,6 +93,7 @@ public class Tuple3<T1, T2,T3> implements Comparable<Tuple3<T1,T2,T3>>,Serializa
         return Tuple2.of(_1,_2);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public int compareTo(Tuple3<T1, T2,T3> o) {
         int r = this.dropLast().compareTo(o.dropLast());

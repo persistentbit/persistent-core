@@ -22,11 +22,11 @@ public class SourceGen
         this.blockOpensOnSameLine = blockOpensOnSameLine;
     }
 
-    static private class CmdSubSource implements Consumer<SourceOut>
+    private static final class CmdSubSource implements Consumer<SourceOut>
     {
         private final SourceGen sub;
 
-        public CmdSubSource(SourceGen sub)
+        private CmdSubSource(SourceGen sub)
         {
             this.sub = sub;
         }
@@ -65,21 +65,21 @@ public class SourceGen
 
 
     public SourceGen bs(){
-        return add(o -> o.bs());
+        return add(SourceOut::bs);
     }
     public SourceGen bs(Object txt){
         return add(o ->o.print(txt).bs());
     }
     public SourceGen be(){
-        return add(o -> o.be());
+        return add(SourceOut::be);
     }
     public SourceGen be(String be) { return add(o -> o.be(be));}
     public SourceGen indent() {
-        return add(o -> o.indent());
+        return add(SourceOut::indent);
     }
 
     public SourceGen outdent() {
-        return add(o -> o.outdent());
+        return add(SourceOut::outdent);
     }
 
     public String str(Object obj){

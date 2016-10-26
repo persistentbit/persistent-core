@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 /**
  *   Copyright(c) Peter Muys.
- *   This code is base on the PersistenHashMap created by Rich Hickey.
+ *   This code is base on the PersistentHashMap created by Rich Hickey.
  *   see copyright notice below.
  *
  *   Copyright (c) Rich Hickey. All rights reserved.
@@ -23,13 +23,14 @@ import java.util.logging.Logger;
  *   You must not remove this notice, or any other, from this software.
  */
 public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements IPMap<K,V>{
-    static final private Logger log = Logger.getLogger(PMap.class.getName());
-    static final private Object sNullKey = new Object();
-    static final private PMap sEmpty = new PMap(0, null);
-    static public final <K,V> PMap<K,V> empty() {
+    private static final Logger log      = Logger.getLogger(PMap.class.getName());
+    private static final Object sNullKey = new Object();
+    private static final PMap   sEmpty   = new PMap(0, null);
+    @SuppressWarnings("unchecked")
+    public static <K,V> PMap<K,V> empty() {
         return (PMap<K,V>) sEmpty;
     }
-    final private static Object sNotFound = new Object();
+    private static final Object sNotFound = new Object();
 
 
     final int size;
@@ -83,16 +84,15 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
         return r;
     }
 
-    static private int hash(Object o) {
+    private static int hash(Object o) {
         return o.hashCode();
     }
 
 
     @Override
     public boolean containsKey(Object key) {
-        if(key == null) { key = (K)sNullKey; }
-        return (root != null) ? root.find(0, hash(key), key, sNotFound) != sNotFound
-            : false;
+        if(key == null) { key = sNullKey; }
+        return (root != null) && root.find(0, hash(key), key, sNotFound) != sNotFound;
     }
 
     @Override
@@ -119,6 +119,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
     }
 
 
+    @SuppressWarnings("unchecked")
     @Override
     public PMap<K, V> put(K key, V val) {
         if(key == null) { key = (K)sNullKey; }
@@ -162,7 +163,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
         MapNode newroot = root.without(0, hash(key), key);
         if (newroot == root)
             return this;
-        return new PMap<K, V>(size - 1, newroot);
+        return new PMap<>(size - 1, newroot);
     }
 
     @Override
@@ -179,7 +180,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
 
     @Override
     public Map<K,V> map() {
-        return new PMapMap<K,V>(this);
+        return new PMapMap<>(this);
     }
 
 
@@ -191,6 +192,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
     }
 
 
+    @SuppressWarnings("unchecked")
     @Override
     public Iterator<Tuple2<K, V>> iterator() {
         final Iterator<?> rootIter = (root == null) ? Collections.emptyIterator() : root.iterator();
@@ -213,11 +215,11 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
     }
 
 
-    static private class Box {
+    private static final class Box {
 
         public Object val;
 
-        public Box(Object val) {
+        private Box(Object val) {
             this.val = val;
         }
     }
@@ -235,12 +237,12 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    final static class ArrayNode implements MapNode {
-        int count;
+    private static final class ArrayNode implements MapNode {
+        final int       count;
         final MapNode[] array;
         //final AtomicReference<Thread> edit;
 
-        ArrayNode(int count, MapNode[] array) {
+        private ArrayNode(int count, MapNode[] array) {
             this.array = array;
             //this.edit = edit;
             this.count = count;
@@ -272,7 +274,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
                 if (count <= 8) // shrink
                     return pack(idx);
                 return new ArrayNode(count - 1,
-                        cloneAndSet(array, idx, n));
+                        cloneAndSet(array, idx, null));
             } else
                 return new ArrayNode(count, cloneAndSet(array, idx, n));
         }
@@ -317,7 +319,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
             return new Iter(array);
         }
 
-        static class Iter implements Iterator {
+        static final class Iter implements Iterator {
             private final MapNode[] array;
             private int i = 0;
             private Iterator nestedIter;
@@ -356,18 +358,18 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
         }
     }
 
-    final static class BitmapIndexedNode implements MapNode {
+    private static final class BitmapIndexedNode implements MapNode {
         static final BitmapIndexedNode EMPTY = new BitmapIndexedNode(0, new Object[0]);
 
-        int bitmap;
-        Object[] array;
+        final int      bitmap;
+        final Object[] array;
 
 
         final int index(int bit) {
             return Integer.bitCount(bitmap & (bit - 1));
         }
 
-        BitmapIndexedNode(int bitmap,
+        private BitmapIndexedNode(int bitmap,
                           Object[] array) {
             this.bitmap = bitmap;
             this.array = array;
@@ -461,6 +463,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
             return this;
         }
 
+        @SuppressWarnings("unchecked")
         public PMapEntry find(int shift, int hash, Object key) {
             int bit = bitpos(hash, shift);
             if ((bitmap & bit) == 0)
@@ -501,13 +504,13 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    final static class HashCollisionNode implements MapNode {
+    private static final class HashCollisionNode implements MapNode {
 
-        final int hash;
-        int count;
-        Object[] array;
+        final int      hash;
+        final int      count;
+        final Object[] array;
 
-        HashCollisionNode(int hash, int count, Object... array) {
+        private HashCollisionNode(int hash, int count, Object... array) {
             this.hash = hash;
             this.count = count;
             this.array = array;
@@ -610,8 +613,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
                                       int key2hash, Object key2, Object val2) {
         int key1hash = hash(key1);
         if (key1hash == key2hash)
-            return new HashCollisionNode(key1hash, 2, new Object[]{
-                    key1, val1, key2, val2});
+            return new HashCollisionNode(key1hash, 2, key1, val1, key2, val2);
         Box addedLeaf = new Box(null);
 
         return BitmapIndexedNode.EMPTY.assoc(shift, key1hash, key1, val1,
@@ -635,7 +637,7 @@ public class PMap<K, V> extends PStreamDirect<Tuple2<K,V>,PMap<K,V>> implements 
         private Object nextEntry = null;
         private Iterator nextIter;
 
-        NodeIter(Object[] array) {
+        private NodeIter(Object[] array) {
             this.array = array;
         }
 

@@ -9,9 +9,10 @@ import java.util.Set;
  * @since 13/07/2016
  */
 public class POrderedSet<T> extends PStreamDirect<T,POrderedSet<T>> implements IPSet<T>{
-    static private POrderedSet<Object> sEmpty = new POrderedSet<>();
+    private static final POrderedSet<Object> sEmpty = new POrderedSet<>();
 
-    static public <T> POrderedSet<T> empty() {
+    @SuppressWarnings("unchecked")
+    public static <T> POrderedSet<T> empty() {
         return (POrderedSet<T>)sEmpty;
     }
 
@@ -21,17 +22,17 @@ public class POrderedSet<T> extends PStreamDirect<T,POrderedSet<T>> implements I
         this(POrderedMap.empty());
     }
 
-    static public POrderedSet<Integer> forInt() {
+    public static POrderedSet<Integer> forInt() {
         return empty();
     }
-    static public POrderedSet<Long> forLong() {
+    public static POrderedSet<Long> forLong() {
         return empty();
     }
 
-    static public POrderedSet<String> forString() {
+    public static POrderedSet<String> forString() {
         return empty();
     }
-    static public POrderedSet<Boolean> forBoolean() {
+    public static POrderedSet<Boolean> forBoolean() {
         return empty();
     }
 
@@ -55,7 +56,7 @@ public class POrderedSet<T> extends PStreamDirect<T,POrderedSet<T>> implements I
 
             @Override
             public PSet<T> pset() {
-                return new PSet<T>(map.pmap());
+                return new PSet<>(map.pmap());
             }
         };
 
@@ -78,7 +79,7 @@ public class POrderedSet<T> extends PStreamDirect<T,POrderedSet<T>> implements I
 
     @Override
     public PSet<T> pset() {
-        return new PSet<T>(map.pmap());
+        return new PSet<>(map.pmap());
     }
 
     @Override
@@ -91,9 +92,10 @@ public class POrderedSet<T> extends PStreamDirect<T,POrderedSet<T>> implements I
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public POrderedSet<T> plusAll(Iterable<? extends T> iter) {
-        return PStream.from(iter).with(this,(r, v)-> r.plus(v));
+        return PStream.from(iter).with(this, POrderedSet::plus);
     }
     public POrderedSet<T> plus(T value){
         return new POrderedSet<>(map.put(value,value));
@@ -111,7 +113,7 @@ public class POrderedSet<T> extends PStreamDirect<T,POrderedSet<T>> implements I
     }
 
     public Set<T> toSet() {
-        return new PSetSet<T>(this);
+        return new PSetSet<>(this);
     }
 
     @Override

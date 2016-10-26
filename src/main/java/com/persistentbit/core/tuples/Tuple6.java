@@ -39,7 +39,7 @@ public class Tuple6<T1, T2, T3,T4,T5,T6> implements Comparable<Tuple6<T1, T2, T3
     }
 
     public static <T1, T2, T3, T4, T5,T6> Tuple6<T1, T2, T3, T4, T5,T6> of(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5,T6 v6) {
-        return new Tuple6(v1, v2, v3, v4, v5,v6);
+        return new Tuple6<>(v1, v2, v3, v4, v5,v6);
     }
 
 
@@ -79,6 +79,7 @@ public class Tuple6<T1, T2, T3,T4,T5,T6> implements Comparable<Tuple6<T1, T2, T3
         return Tuple7.of(_1,_2,_3,_4,_5,_6,v7);
     }
 
+    @SuppressWarnings("unchecked")
     public int compareTo(Tuple6<T1, T2, T3, T4, T5,T6> o) {
         int r = this.dropLast().compareTo(o.dropLast());
         if (r != 0) {
@@ -92,27 +93,27 @@ public class Tuple6<T1, T2, T3,T4,T5,T6> implements Comparable<Tuple6<T1, T2, T3
     }
 
     public Tuple6<T1, T2, T3, T4, T5,T6> with_1(T1 value) {
-        return new Tuple6(value, this._2, this._3, this._4, this._5, this._6);
+        return new Tuple6<>(value, this._2, this._3, this._4, this._5, this._6);
     }
 
     public Tuple6<T1, T2, T3, T4, T5,T6> with_2(T2 value) {
-        return new Tuple6(this._1, value, this._3, this._4, this._5, this._6);
+        return new Tuple6<>(this._1, value, this._3, this._4, this._5, this._6);
     }
 
     public Tuple6<T1, T2, T3, T4, T5,T6> with_3(T3 value) {
-        return new Tuple6(this._1, this._2, value, this._4, this._5, this._6);
+        return new Tuple6<>(this._1, this._2, value, this._4, this._5, this._6);
     }
 
     public Tuple6<T1, T2, T3, T4, T5,T6> with_4(T4 value) {
-        return new Tuple6(this._1, this._2, this._4, value, this._5, this._6);
+        return new Tuple6<>(this._1, this._2, this._3, value, this._5, this._6);
     }
 
     public Tuple6<T1, T2, T3, T4, T5,T6> with_5(T5 value) {
-        return new Tuple6(this._1, this._2, this._3, this._4, value, this._6);
+        return new Tuple6<>(this._1, this._2, this._3, this._4, value, this._6);
     }
 
     public Tuple6<T1, T2, T3, T4, T5,T6> with_6(T6 value) {
-        return new Tuple6(this._1, this._2, this._3, this._4, this._5, value);
+        return new Tuple6<>(this._1, this._2, this._3, this._4, this._5, value);
     }
 
     @Override

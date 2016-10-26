@@ -99,7 +99,7 @@ public interface IPMap<K,V>  extends PStream<Tuple2<K,V>>{
      * @return The java map.
      */
     default Map<K,V> map() {
-        return new PMapMap<K,V>(this);
+        return new PMapMap<>(this);
     }
 
 

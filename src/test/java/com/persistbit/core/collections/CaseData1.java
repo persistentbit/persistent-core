@@ -11,8 +11,9 @@ import java.util.Optional;
  * Date: 25/08/16
  * Time: 18:26
  */
+@SuppressWarnings({"UseOfObsoleteDateTimeApi", "unchecked", "AssignmentToDateFieldFromParameter", "SameParameterValue"})
 public class CaseData1 {
-    static public final ImTools im = ImTools.get(CaseData1.class);
+    public static final ImTools im = ImTools.get(CaseData1.class);
     private final  int id;
     private final String name;
     @Nullable private final Date birthDate;
@@ -32,6 +33,7 @@ public class CaseData1 {
         return im.hashCodeAll(this);
     }
 
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public boolean equals(Object obj) {
         return im.equalsAll(this,obj);

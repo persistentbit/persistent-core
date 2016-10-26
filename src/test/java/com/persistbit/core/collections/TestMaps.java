@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  * Time: 13:35
  */
 public class TestMaps {
-    static private final Logger log = Logger.getLogger(TestMaps.class.getName());
+	private static final Logger log = Logger.getLogger(TestMaps.class.getName());
     @Test
     public  void testPMap(){
         doAddRemove(PMap.empty());

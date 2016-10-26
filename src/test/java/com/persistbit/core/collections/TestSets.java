@@ -30,7 +30,6 @@ public class TestSets {
         }
         refmap.add(null);
         pmap = pmap.plus(null);
-        Set<Integer> refKeys = refmap;
         PStream<Integer> pstreamKeys = pmap;
         //System.out.println(pstreamKeys);
         PSet<Integer> psetKeys = pstreamKeys.pset();
@@ -49,7 +48,7 @@ public class TestSets {
             assert refIter.hasNext() == pIter.hasNext();
         }
 
-        if(refKeys.equals(pkeys) == false){
+        if(refmap.equals(pkeys) == false){
             throw new RuntimeException();
         }
 

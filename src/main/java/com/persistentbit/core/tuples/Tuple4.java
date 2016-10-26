@@ -3,7 +3,6 @@ package com.persistentbit.core.tuples;
 import com.persistentbit.core.Immutable;
 import com.persistentbit.core.Nullable;
 import com.persistentbit.core.function.Function4;
-import com.persistentbit.core.function.Function5;
 import com.persistentbit.core.properties.FieldNames;
 
 import java.io.Serializable;
@@ -32,7 +31,7 @@ public class Tuple4<T1, T2, T3,T4> implements Comparable<Tuple4<T1, T2, T3,T4>>,
     }
 
     public static <T1, T2, T3,T4> Tuple4<T1, T2, T3,T4> of(T1 v1, T2 v2, T3 v3,T4 v4) {
-        return new Tuple4(v1, v2, v3,v4);
+        return new Tuple4<>(v1, v2, v3,v4);
     }
 
     @Override
@@ -86,6 +85,7 @@ public class Tuple4<T1, T2, T3,T4> implements Comparable<Tuple4<T1, T2, T3,T4>>,
         return Tuple5.of(_1,_2,_3,_4,v5);
     }
 
+    @SuppressWarnings("unchecked")
     public int compareTo(Tuple4<T1, T2, T3,T4> o) {
         int r = this.dropLast().compareTo(o.dropLast());
         if(r != 0) {
@@ -99,19 +99,19 @@ public class Tuple4<T1, T2, T3,T4> implements Comparable<Tuple4<T1, T2, T3,T4>>,
     }
 
     public Tuple4<T1, T2, T3, T4> with_1(T1 value) {
-        return new Tuple4(value, this._2, this._3,this._4);
+        return new Tuple4<>(value, this._2, this._3,this._4);
     }
 
     public Tuple4<T1, T2, T3, T4> with_2(T2 value) {
-        return new Tuple4(this._1, value, this._3, this._4);
+        return new Tuple4<>(this._1, value, this._3, this._4);
     }
 
     public Tuple4<T1, T2, T3, T4> with_3(T3 value) {
-        return new Tuple4(this._1, this._2, value,this._4);
+        return new Tuple4<>(this._1, this._2, value,this._4);
     }
 
     public Tuple4<T1, T2, T3, T4> with_4(T4 value) {
-        return new Tuple4(this._1, this._2, this._4,value);
+        return new Tuple4<>(this._1, this._2, this._3,value);
     }
 
     public <R> R map(Function4<T1, T2, T3, T4, R> map){

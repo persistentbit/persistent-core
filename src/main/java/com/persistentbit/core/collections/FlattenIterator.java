@@ -23,6 +23,7 @@ public class FlattenIterator<T> implements Iterator<T> {
         return this.next != null;
     }
 
+    @SuppressWarnings("unchecked")
     public T next() {
         Object r = this.next;
         this.next = null;
@@ -33,6 +34,7 @@ public class FlattenIterator<T> implements Iterator<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void getNext() {
         if (this.next == null) {
             if (this.child != null && this.child.hasNext()) {
