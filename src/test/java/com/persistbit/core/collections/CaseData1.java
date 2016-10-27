@@ -12,7 +12,7 @@ import java.util.Optional;
  * Time: 18:26
  */
 public class CaseData1 {
-    static public final ImTools im = ImTools.get(CaseData1.class);
+    static private final ImTools<CaseData1> im = ImTools.get(CaseData1.class);
     private final  int id;
     private final String name;
     @Nullable private final Date birthDate;
