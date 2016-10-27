@@ -13,77 +13,78 @@ import java.util.Set;
  * Date: 9/07/16
  * Time: 11:21
  */
-public class PMapMap<K,V> extends AbstractMap<K,V> implements PStreamable<Tuple2<K,V>>,Serializable{
-    private final IPMap<K,V> master;
+public class PMapMap<K, V> extends AbstractMap<K, V> implements PStreamable<Tuple2<K, V>>, Serializable{
 
-    public PMapMap(IPMap<K, V> master) {
-        this.master = master;
-    }
+	private final IPMap<K, V> master;
 
-    @Override
-    public PStream<Tuple2<K,V>> pstream() {
-        return master;
-    }
+	public PMapMap(IPMap<K, V> master) {
+		this.master = master;
+	}
 
-    @Override
-    public int size() {
-        return master.size();
-    }
+	@Override
+	public PStream<Tuple2<K, V>> pstream() {
+		return master;
+	}
 
-    @Override
-    public boolean isEmpty() {
-        return master.isEmpty();
-    }
+	@Override
+	public int size() {
+		return master.size();
+	}
 
-    @Override
-    public boolean containsKey(Object key) {
-        return master.containsKey(key);
-    }
+	@Override
+	public boolean isEmpty() {
+		return master.isEmpty();
+	}
 
-    @Override
-    public boolean containsValue(Object value) {
-        return master.values().contains(value);
-    }
+	@Override
+	public boolean containsKey(Object key) {
+		return master.containsKey(key);
+	}
 
-    @Override
-    public V get(Object key) {
-        return getOrDefault(key,null);
-    }
+	@Override
+	public boolean containsValue(Object value) {
+		return master.values().contains(value);
+	}
 
-    @Override
-    public V put(K key, V value) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public V get(Object key) {
+		return getOrDefault(key, null);
+	}
 
-    @Override
-    public V remove(Object key) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public V put(K key, V value) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public void putAll(Map<? extends K, ? extends V> m) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public V remove(Object key) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void putAll(Map<? extends K, ? extends V> m) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public Set<K> keySet() {
-        return master.keys().pset().toSet();
-    }
+	@Override
+	public void clear() {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public Collection<V> values() {
-        return master.values().list();
-    }
+	@Override
+	public Set<K> keySet() {
+		return master.keys().pset().toSet();
+	}
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public Set<Map.Entry<K, V>> entrySet() {
+	@Override
+	public Collection<V> values() {
+		return master.values().list();
+	}
 
-        return master.lazy().map(t -> (Map.Entry<K,V>)t).pset().toSet();
-    }
+	@SuppressWarnings("unchecked")
+	@Override
+	public Set<Map.Entry<K, V>> entrySet() {
+
+		return master.lazy().map(t -> (Map.Entry<K, V>) t).pset().toSet();
+	}
 }

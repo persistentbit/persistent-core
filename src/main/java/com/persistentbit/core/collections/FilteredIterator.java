@@ -10,16 +10,28 @@ import java.util.function.Predicate;
  */
 public class FilteredIterator<T> implements Iterator<T>{
 
-	private       boolean              hasNext;
-	private       T                    next;
-	private final Predicate<? super T> filter;
-	private final Iterator<T>          master;
+  private final Predicate<? super T> filter;
+  private final Iterator<T>          master;
+  private       boolean              hasNext;
+  private       T                    next;
 
 	public FilteredIterator(Predicate<? super T> filter, Iterator<T> master) {
 		this.filter = filter;
 		this.master = master;
 		doNext();
 	}
+
+  private void doNext() {
+
+	do {
+	  hasNext = master.hasNext();
+	  if(hasNext == false) {
+		next = null;
+		return;
+	  }
+	  next = master.next();
+	} while(filter.test(next) == false);
+  }
 
 	@Override
 	public boolean hasNext() {
@@ -31,18 +43,6 @@ public class FilteredIterator<T> implements Iterator<T>{
 		T res = next;
 		doNext();
 		return res;
-	}
-
-	private void doNext() {
-
-		do {
-			hasNext = master.hasNext();
-			if (hasNext == false) {
-				next = null;
-				return;
-			}
-			next = master.next();
-		} while (filter.test(next) == false);
 	}
 
 

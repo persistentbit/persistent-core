@@ -9,43 +9,47 @@ import java.util.NoSuchElementException;
  */
 public class FlattenIterator<T> implements Iterator<T>{
 
-	private final Iterator<?> parent;
-	private Iterator<? extends T> child = null;
-	private T next;
+  private final Iterator<?>           parent;
+  private       Iterator<? extends T> child;
+  private       T                     next;
 
-	public FlattenIterator(Iterator<?> core) {
-		this.parent = core;
+  public FlattenIterator(Iterator<?> core) {
+	this.parent = core;
+  }
+
+
+  @Override
+  public boolean hasNext() {
+	this.getNext();
+	return this.next != null;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public T next() {
+	Object r = this.next;
+	this.next = null;
+	if(r == null) {
+	  throw new NoSuchElementException();
 	}
-
-
-	public boolean hasNext() {
-		this.getNext();
-		return this.next != null;
+	else {
+	  return (T) r;
 	}
+  }
 
-	public T next() {
-		Object r = this.next;
-		this.next = null;
-		if(r == null) {
-			throw new NoSuchElementException();
+  @SuppressWarnings("unchecked")
+  private void getNext() {
+	if(this.next == null) {
+	  if(this.child != null && this.child.hasNext()) {
+		this.next = this.child.next();
+	  }
+	  else {
+		if(this.parent.hasNext()) {
+		  this.child = (Iterator<? extends T>) ((Iterable<?>) this.parent.next()).iterator();
+		  this.getNext();
 		}
-		else {
-			return (T) r;
-		}
-	}
 
-	private void getNext() {
-		if(this.next == null) {
-			if(this.child != null && this.child.hasNext()) {
-				this.next = this.child.next();
-			}
-			else {
-				if(this.parent.hasNext()) {
-					this.child = ((Iterable) this.parent.next()).iterator();
-					this.getNext();
-				}
-
-			}
-		}
+	  }
 	}
+  }
 }

@@ -1,7 +1,6 @@
 package com.persistentbit.core.collections;
 
 
-
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.Map;
@@ -11,30 +10,32 @@ import java.util.Map;
  * Date: 8/07/16
  * Time: 09:19
  */
-public class PMapEntry<K,V> extends Tuple2<K,V> implements Map.Entry<K,V>{
+public class PMapEntry<K, V> extends Tuple2<K, V> implements Map.Entry<K, V>{
 
-    public PMapEntry(K key, V val) {
-        super(key,val);
-    }
+  public PMapEntry(K key, V val) {
+	super(key, val);
+  }
 
 
-    public K getKey() {
-        return _1;
-    }
+  @Override
+  public K getKey() {
+	return _1;
+  }
 
-    public V getValue() {
-        return _2;
-    }
+  @Override
+  public V getValue() {
+	return _2;
+  }
 
-    @Override
-    public V setValue(V value) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public V setValue(V value) {
+	throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public String toString() {
-        return "(" + _1 + " -> "+ _2 + ")";
-    }
+  @Override
+  public String toString() {
+	return "(" + _1 + " -> " + _2 + ")";
+  }
 
 
 }

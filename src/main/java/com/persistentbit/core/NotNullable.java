@@ -7,10 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation to mark a field or parameter as Not Nullable
+ *
  * @author Peter Muys
  * @since 18/03/2016
  */
-@Target({ElementType.METHOD, ElementType.FIELD,ElementType.PARAMETER})
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface NotNullable {
+public @interface NotNullable{
 }

@@ -6,7 +6,8 @@ package com.persistentbit.core.collections;
  * Time: 09:49
  */
 public class InfinitePStreamException extends UnsupportedOperationException{
-    public InfinitePStreamException() {
-        super("This operation is not supported on Infinite PStreams");
-    }
+
+  public InfinitePStreamException() {
+	super("This operation is not supported on Infinite PStreams");
+  }
 }

@@ -9,54 +9,53 @@ import java.util.Optional;
  * An Implementation of a {@link Ref} that only has the ID of the referenced object
  */
 @Immutable
-public class RefId<R,ID> implements Ref<R,ID>{
-    private final ID  id;
-    public RefId(ID id) {
-        this.id = Objects.requireNonNull(id);
-    }
+public class RefId<R, ID> implements Ref<R, ID>{
 
-    @Override
-    public Optional<R> getValue() {
-        return Optional.empty();
-    }
+  private final ID id;
 
-    @Override
-    public ID getId() {
-        return id;
-    }
+  public RefId(ID id) {
+	this.id = Objects.requireNonNull(id);
+  }
 
-    @Override
-    public Ref<R, ID> asIdRef() {
-        return this;
-    }
+  @Override
+  public Optional<R> getValue() {
+	return Optional.empty();
+  }
 
-    @Override
-    public Ref<R, ID> asValueRef(R value) {
-        return new RefValue<>(this, value);
-    }
+  @Override
+  public Ref<R, ID> asIdRef() {
+	return this;
+  }
 
+  @Override
+  public Ref<R, ID> asValueRef(R value) {
+	return new RefValue<>(this, value);
+  }
 
+  @Override
+  public int hashCode() {
+	return id.hashCode();
+  }
 
-    @Override
-    public int hashCode() {
-        return id.hashCode();
-    }
+  @Override
+  public boolean equals(Object obj) {
+	if(obj instanceof Ref == false) {
+	  return false;
+	}
+	if(this == obj) {
+	  return true;
+	}
+	Ref r = (Ref) obj;
+	return id.equals(r.getId());
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if(obj instanceof Ref == false){
-            return false;
-        }
-        if(this == obj){
-            return true;
-        }
-        Ref r = (Ref)obj;
-        return getId().equals(r.getId());
-    }
+  @Override
+  public ID getId() {
+	return id;
+  }
 
-
-    @Override
-    public String toString() {
-        return "RefId("  + id + ")";
-    }
+  @Override
+  public String toString() {
+	return "RefId(" + id + ")";
+  }
 }
