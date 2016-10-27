@@ -14,7 +14,7 @@ import java.util.Optional;
  */
 public abstract class LList<E> extends AbstractIPList<E,LList<E>> implements Serializable{
 
-    static private final  LList  empty = new LList() {
+    private static final LList empty = new LList() {
         @Override
         public int size() {
             return 0;
@@ -55,6 +55,7 @@ public abstract class LList<E> extends AbstractIPList<E,LList<E>> implements Ser
             throw new IndexOutOfBoundsException("empty LList");
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public LList plusAll(Iterable right) {
 
@@ -62,18 +63,21 @@ public abstract class LList<E> extends AbstractIPList<E,LList<E>> implements Ser
 
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public LList cons(Object item) {
             return prepend(item);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public LList constAll(Iterable right) {
             return PStream.from(right).llist();
         }
     };
 
-    static public <T> LList<T> empty() {
+    @SuppressWarnings("unchecked")
+    public static <T> LList<T> empty() {
         return (LList<T>) empty;
     }
 
@@ -84,11 +88,11 @@ public abstract class LList<E> extends AbstractIPList<E,LList<E>> implements Ser
 
 
 
-    private class LListImpl<E> extends LList<E>{
+    private static final class LListImpl<E> extends LList<E>{
         private final E head;
         private final LList<E>  tail;
 
-        public LListImpl(E head, LList<E> tail) {
+        private LListImpl(E head, LList<E> tail) {
             this.head = head;
             this.tail = Objects.requireNonNull(tail,"tail");
 
@@ -138,20 +142,20 @@ public abstract class LList<E> extends AbstractIPList<E,LList<E>> implements Ser
 
 
         public E get(int i) {
-            int cnt = i;
             Iterator<E> iter = iterator();
             while(iter.hasNext()){
-                if(cnt ==i){
+                if(i == 0){
                     return iter.next();
                 }
                 iter.next();
+                i--;
             }
             throw new IndexOutOfBoundsException("" + i);
         }
 
 
         public IPList<E> put(int index, E value) {
-            LList<E> r = LList.empty;
+            LList<E> r = LList.empty();
             if(index <0){
                 throw new IndexOutOfBoundsException("< 0");
             }
@@ -176,11 +180,12 @@ public abstract class LList<E> extends AbstractIPList<E,LList<E>> implements Ser
     }
 
     public LList<E> prepend(E item){
-        return new LListImpl<E>(item,this);
+        return new LListImpl<>(item, this);
     }
 
 
 
+    @SuppressWarnings("unchecked")
     public LList<E> cons(E item){
 
         LList<E> r = LList.empty.prepend(item);
@@ -201,7 +206,7 @@ public abstract class LList<E> extends AbstractIPList<E,LList<E>> implements Ser
 
     @Override
     public LList<E> reversed() {
-        LList<E> r = LList.empty;
+        LList<E> r = LList.empty();
         for(E e : this){
             r = r.prepend(e);
         }
@@ -210,8 +215,9 @@ public abstract class LList<E> extends AbstractIPList<E,LList<E>> implements Ser
 
 
 
-    abstract public Optional<E> headOpt();
+    public abstract Optional<E> headOpt();
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public LList<E>  tail() {
         return tailOption().get();
     }

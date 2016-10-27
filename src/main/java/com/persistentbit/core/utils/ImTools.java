@@ -26,9 +26,9 @@ import java.util.logging.Logger;
  * @author Peter Muys
  * @since 3/03/2016
  */
-public class ImTools<C> {
-    static private final Logger log = Logger.getLogger(ImTools.class.getName());
-    static private Map<Class<?>,ImTools> sClassTools =   new HashMap<>();
+public final class ImTools<C> {
+    private static final Logger                log         = Logger.getLogger(ImTools.class.getName());
+    private static final Map<Class<?>,ImTools> sClassTools =   new HashMap<>();
 
     /**
      * Get an existing or create a new ImTools object for the provided class.<br>
@@ -37,7 +37,8 @@ public class ImTools<C> {
      * @param <C> Type of the class for ImTools instance
      * @return The ImTools instance for the provided class
      */
-    static public synchronized <C> ImTools<C>    get(Class<C> cls) {
+    @SuppressWarnings("unchecked")
+    public static synchronized <C> ImTools<C>    get(Class<C> cls) {
         ImTools<C> im = (ImTools<C>)sClassTools.get(cls);
         if(im == null){
             im = new ImTools<>(cls);
@@ -98,9 +99,10 @@ public class ImTools<C> {
     /**
      * Get or create a unit object for the class C<br>
      * The unit object is created by the default constructor of class C<br>
-     * Unit objects are cached and chared between invocations.<br>
+     * Unit objects are cached and shared between invocations.<br>
      * @return The unit object
      */
+    @SuppressWarnings("unchecked")
     public C   unit() {
         if(unitObject != null){
             return unitObject;
@@ -116,6 +118,7 @@ public class ImTools<C> {
     }
 
 
+    @SuppressWarnings("unchecked")
     public C    createNew(PMap<String,Object> newProperties){
         Objects.requireNonNull(newProperties,"newProperties");
         Object[] params = new Object[constructorProperties.size()];
@@ -140,6 +143,7 @@ public class ImTools<C> {
         return PStream.from(constructorProperties);
     }
 
+    @SuppressWarnings("unchecked")
     public C    copyWith(C orgObject, PMap<String,Object> newProperties){
         Objects.requireNonNull(orgObject,"orgObject");
         Objects.requireNonNull(newProperties,"newProperties");
@@ -249,7 +253,7 @@ public class ImTools<C> {
         return Optional.empty();
     }
 
-    private boolean checkGetterNullable(Field f) throws Exception {
+    private boolean checkGetterNullable(Field f){
         Class<?> cls  = this.cls;
         String get1 = "get" + firstCharUppercase(f.getName());
         String get2 = "is" + firstCharUppercase(f.getName());
@@ -266,7 +270,6 @@ public class ImTools<C> {
             cls = cls.getSuperclass();
         }
         return false;   //if not defined: assume not nullable
-        //throw new RuntimeException("Don't know if " + f.getName() + " in " + this.cls.getName() + " is nullable or not nullable");
     }
 
     public PStream<Getter> getFieldGetters() {
@@ -332,7 +335,8 @@ public class ImTools<C> {
         }
     }
 
-    public int hashCode(C obj, Lens<C,?>...lenses){
+    @SafeVarargs
+    public final int hashCode(C obj, Lens<C, ?>... lenses){
         int result = 1;
         for(Lens<C,?> l : lenses){
             Object value = l.get(obj);
@@ -366,12 +370,12 @@ public class ImTools<C> {
 
 
     /**
-     * Create a string using all the toStrings of the fields in the suppliet object where there is no {@link NoToString} annotation.
+     * Create a string using all the toStrings of the fields in the supplied object where there is no {@link NoToString} annotation.
      * @param obj The Object to create a string of
      * @param ignoreNull ignore fields that have a null value
      * @return The String representation
      */
-    public String toStringAll(C obj, boolean ignoreNull) {
+    public String toStringAll(C obj, @SuppressWarnings("SameParameterValue") boolean ignoreNull) {
         String result = cls.getSimpleName() + "[";
         boolean first = true;
         for(String prop : getters.keys()){
@@ -407,18 +411,19 @@ public class ImTools<C> {
     public String toString(C obj, String n1, Lens<C,?> l1, String n2, Lens<C,?> l2, String n3, Lens<C,?> l3, String n4, Lens<C,?> l4, String n5, Lens<C,?> l5){
         return toString(obj,new Pair<>(n1,l1),new Pair<>(n2,l2),new Pair<>(n3,l3),new Pair<>(n4,l4),new Pair<>(n5,l5));
     }
-    public String toString(C obj, Pair<String,Lens<C,?>>... naamLenzen){
+    @SafeVarargs
+    public final String toString(C obj, Pair<String, Lens<C, ?>>... lensNames){
         String result = cls.getSimpleName() + "[";
         boolean first = true;
-        for(Pair<String,Lens<C,?>> p : naamLenzen){
+        for(Pair<String,Lens<C,?>> p : lensNames){
             if(first){
                 first = false;
             } else {
                 result += ", ";
             }
-            String naam = p.getLeft();
-            if(naam != null && naam.isEmpty() == false){
-                result += naam + " = ";
+            String name = p.getLeft();
+            if(name != null && name.isEmpty() == false){
+                result += name + " = ";
             }
             Object v1  = p.getRight().get(obj);
             if(v1 instanceof String){
@@ -430,11 +435,12 @@ public class ImTools<C> {
         return result + "]";
     }
 
-    public boolean equals(C left, Object right, Lens<C,?>...lenzen){
+    @SuppressWarnings("unchecked")
+    public boolean equals(C left, Object right, Lens<C,?>...lenses){
         if(right == null || right.getClass().equals(left.getClass())){
             return false;
         }
-        for(Lens<C,?>l : lenzen){
+        for(Lens<C,?>l : lenses){
             Object v1  = l.get(left);
             Object v2 = l.get((C)right);
             if(v1 == null){
@@ -451,12 +457,13 @@ public class ImTools<C> {
         return true;
     }
     /**
-     * Compare 2 objects by comparing all the fileds in the supplied left object where there is no {@link NoEqual} annotation
+     * Compare 2 objects by comparing all the fields in the supplied left object where there is no {@link NoEqual} annotation
      * @param left The left field to compare
      * @param right The right field to compare
-     * @return is equl
+     * @return is equal
      */
-    public boolean equalsAll(C left,Object right){
+    @SuppressWarnings("unchecked")
+    public boolean equalsAll(C left, Object right){
         if(right == null || right.getClass().equals(left.getClass()) == false){
             return false;
         }
@@ -473,6 +480,7 @@ public class ImTools<C> {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     public boolean equals(C left, Object right, String...properties){
         if(right == null || right.getClass().equals(left.getClass())){
             return false;
@@ -485,6 +493,7 @@ public class ImTools<C> {
             if(v1 == null && v2 != null){
                 return false;
             }
+            if(v1 == null){ return true; }
             if(v1.equals(v2) == false){
                 return false;
             }
@@ -498,7 +507,7 @@ public class ImTools<C> {
         }
         return new ImLens<>(propertyName);
     }
-    static public String firstCharUppercase(String str){
+    public static String firstCharUppercase(String str){
         return "" + Character.toUpperCase(str.charAt(0)) + str.substring(1);
     }
 

@@ -13,10 +13,12 @@ import java.util.function.Function;
  * @author Peter Muys
  * @since 13/07/2016
  */
-public class POrderedMap<K,V> extends PStreamDirect<Tuple2<K,V>,POrderedMap<K,V>> implements IPMap<K,V>{
+public final class POrderedMap<K,V> extends PStreamDirect<Tuple2<K,V>,POrderedMap<K,V>> implements IPMap<K,V>{
 
-    static final private POrderedMap sEmpty = new POrderedMap(PMap.empty(),PList.empty());
-    static public final <K,V> POrderedMap<K,V> empty() {
+    @SuppressWarnings("unchecked")
+    private static final POrderedMap sEmpty = new POrderedMap(PMap.empty(), PList.empty());
+    @SuppressWarnings("unchecked")
+    public static <K,V> POrderedMap<K,V> empty() {
         return (POrderedMap<K,V>) sEmpty;
     }
 
@@ -84,7 +86,7 @@ public class POrderedMap<K,V> extends PStreamDirect<Tuple2<K,V>,POrderedMap<K,V>
         if(map.containsKey(key) == false){
             kl = kl.plus(key);
         }
-        return new POrderedMap<K, V>(map.put(key,val),kl);
+        return new POrderedMap<>(map.put(key, val), kl);
     }
     @Override
     public V getOrDefault(Object key, V notFound){
@@ -104,7 +106,7 @@ public class POrderedMap<K,V> extends PStreamDirect<Tuple2<K,V>,POrderedMap<K,V>
         if(map.containsKey(key) == false){
             kl = kl.filter(e -> Objects.equals(e,key)==false);
         }
-        return new POrderedMap<K, V>(map.removeKey(key),kl);
+        return new POrderedMap<>(map.removeKey(key), kl);
     }
     @Override
     public PStream<K>   keys(){
@@ -118,7 +120,7 @@ public class POrderedMap<K,V> extends PStreamDirect<Tuple2<K,V>,POrderedMap<K,V>
 
     /**
      * Returns this ordered map as an unordered persistent map
-     * @return The Unorderd map internally used by this ordered map
+     * @return The Unordered map internally used by this ordered map
      */
     public PMap<K,V>    pmap() {
         return map;
@@ -131,7 +133,7 @@ public class POrderedMap<K,V> extends PStreamDirect<Tuple2<K,V>,POrderedMap<K,V>
     @Override
     public Iterator<Tuple2<K, V>> iterator(){
         return new Iterator<Tuple2<K, V>>() {
-            private Iterator<K> keys = order.iterator();
+            private final Iterator<K> keys = order.iterator();
             @Override
             public boolean hasNext() {
                 return keys.hasNext();
@@ -140,7 +142,7 @@ public class POrderedMap<K,V> extends PStreamDirect<Tuple2<K,V>,POrderedMap<K,V>
             @Override
             public Tuple2<K, V> next() {
                 K key = keys.next();
-                return new PMapEntry<K, V>(key,map.get(key));
+                return new PMapEntry<>(key, map.get(key));
             }
         };
     }

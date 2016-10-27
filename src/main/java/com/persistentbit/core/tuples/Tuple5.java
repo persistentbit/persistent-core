@@ -2,7 +2,6 @@ package com.persistentbit.core.tuples;
 
 import com.persistentbit.core.Nullable;
 import com.persistentbit.core.function.Function5;
-import com.persistentbit.core.function.Function6;
 import com.persistentbit.core.properties.FieldNames;
 
 import java.io.Serializable;
@@ -36,7 +35,7 @@ public class Tuple5<T1, T2, T3,T4,T5> implements Comparable<Tuple5<T1, T2, T3,T4
     }
 
     public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> of(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5) {
-        return new Tuple5(v1, v2, v3, v4, v5);
+        return new Tuple5<>(v1, v2, v3, v4, v5);
     }
 
 
@@ -72,6 +71,7 @@ public class Tuple5<T1, T2, T3,T4,T5> implements Comparable<Tuple5<T1, T2, T3,T4
         return Tuple6.of(_1,_2,_3,_4,_5,v6);
     }
 
+    @SuppressWarnings("unchecked")
     public int compareTo(Tuple5<T1, T2, T3, T4, T5> o) {
         int r = this.dropLast().compareTo(o.dropLast());
         if (r != 0) {
@@ -85,23 +85,23 @@ public class Tuple5<T1, T2, T3,T4,T5> implements Comparable<Tuple5<T1, T2, T3,T4
     }
 
     public Tuple5<T1, T2, T3, T4, T5> with_1(T1 value) {
-        return new Tuple5(value, this._2, this._3, this._4, this._5);
+        return new Tuple5<>(value, this._2, this._3, this._4, this._5);
     }
 
     public Tuple5<T1, T2, T3, T4, T5> with_2(T2 value) {
-        return new Tuple5(this._1, value, this._3, this._4, this._5);
+        return new Tuple5<>(this._1, value, this._3, this._4, this._5);
     }
 
     public Tuple5<T1, T2, T3, T4, T5> with_3(T3 value) {
-        return new Tuple5(this._1, this._2, value, this._4, this._5);
+        return new Tuple5<>(this._1, this._2, value, this._4, this._5);
     }
 
     public Tuple5<T1, T2, T3, T4, T5> with_4(T4 value) {
-        return new Tuple5(this._1, this._2, this._4, value, this._5);
+        return new Tuple5<>(this._1, this._2, this._3, value, this._5);
     }
 
     public Tuple5<T1, T2, T3, T4, T5> with_5(T5 value) {
-        return new Tuple5(this._1, this._2, this._3, this._4, value);
+        return new Tuple5<>(this._1, this._2, this._3, this._4, value);
     }
 
 

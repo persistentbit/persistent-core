@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 /**
  * Marks a Class as a case class.<br>
  * A case class is like in scala, an immutable values class<br>
- * Case classes are automaticly candidates for Code generation via {@link CaseClaseCodeBuilder}
+ * Case classes are automatically candidates for Code generation via {@link CaseClassCodeBuilder}
  * @author Peter Muys
  * @since 13/07/2016
  */

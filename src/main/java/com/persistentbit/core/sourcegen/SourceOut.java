@@ -8,8 +8,8 @@ import java.io.PrintWriter;
 public class SourceOut
 {
 
-    private PrintWriter wout;
-    private boolean blockOpenSameLine;
+    private final PrintWriter wout;
+    private final boolean     blockOpenSameLine;
     private String indent = "";
     private boolean needIndentPrint = false;
 

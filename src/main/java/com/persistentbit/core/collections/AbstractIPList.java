@@ -17,6 +17,7 @@ public abstract class AbstractIPList<T,IMPL extends PStream<T>> extends PStreamD
         return hashCode;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean equals(Object obj) {
         if(obj == this){

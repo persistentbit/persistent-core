@@ -19,7 +19,7 @@ public class PSetSet<T> implements Set<T>,PStreamable<T>,Serializable{
 
     @Override
     public PStream<T> pstream() {
-        return (PStream<T>)master;
+        return master;
     }
 
     @Override
@@ -98,17 +98,13 @@ public class PSetSet<T> implements Set<T>,PStreamable<T>,Serializable{
             return false;
         try {
             return containsAll(c);
-        } catch (ClassCastException unused)   {
-            return false;
-        } catch (NullPointerException unused) {
+        } catch (ClassCastException | NullPointerException unused)   {
             return false;
         }
     }
     public int hashCode() {
         int h = 0;
-        Iterator<T> i = iterator();
-        while (i.hasNext()) {
-            T obj = i.next();
+        for (T obj :  this) {
             if (obj != null)
                 h += obj.hashCode();
         }

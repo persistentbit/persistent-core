@@ -69,9 +69,8 @@ public class BuildTest<A> {
 		BuildTest other = (BuildTest)o;
 		if(!a.equals(other.a)){ return false; }
 		if(!first.equals(other.first)){ return false; }
-		if(middle == null) { if(other.middle != null) { return false; } } else { if(!middle.equals(other.middle)){ return false; } } ;
-		if(!last.equals(other.last)){ return false; }
-		return true;
+		if(middle == null) { if(other.middle != null) { return false; } } else { if(!middle.equals(other.middle)){ return false; } }
+		return last.equals(other.last);
 	}
 
 	@Override

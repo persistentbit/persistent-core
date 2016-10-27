@@ -1,12 +1,11 @@
 package com.persistentbit.core.codegen;
 
-import com.persistentbit.core.Immutable;
 import com.persistentbit.core.Pair;
 import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.collections.PStream;
+import com.persistentbit.core.logging.PLog;
 import com.persistentbit.core.utils.ImTools;
 import com.persistentbit.core.utils.ReflectionUtils;
-
 
 import java.io.*;
 import java.lang.reflect.*;
@@ -17,14 +16,14 @@ import static com.persistentbit.core.utils.ReflectionUtils.classFromType;
 
 /**
  * Class to auto generate code for Immutable classes that are marked with {@link CaseClass}. <br>
- * Start The codebuilder with <code>CaseClaseCodeBuilder.build(sourcePathFile);</code>
+ * Start The codebuilder with <code>CaseClassCodeBuilder.build(sourcePathFile);</code>
  * This will iterate over all the *.java files in the filesystem and for each found file,<br>
  * Load the class and add the generated code to the .java file if the method is not found in the class.<br>
  * Code that can be generated: per property: Lens, with, get functions.<br>
  * and equals/hashcode for the class<br>
  * Typical use:<br>
  * <code>static public void main(String...args){<br>
- * CaseClaseCodeBuilder.build(findSourcePath(CaseClaseCodeBuilder.class,"resource-marker.txt"));<br>
+ * CaseClassCodeBuilder.build(findSourcePath(CaseClassCodeBuilder.class,"resource-marker.txt"));<br>
  * }<br></code>
  *
  * @see CaseClass
@@ -37,19 +36,21 @@ import static com.persistentbit.core.utils.ReflectionUtils.classFromType;
  * @author Peter Muys
  * @since 11/07/2016
  */
-public class CaseClaseCodeBuilder {
+@SuppressWarnings("unchecked")
+public class CaseClassCodeBuilder{
+    private static final PLog log = PLog.get(CaseClassCodeBuilder.class);
     private final Class<?>    cls;
     private final ImTools<?> im;
     private final File        source;
 
-    public CaseClaseCodeBuilder(Class<?> cls, File source) {
+    public CaseClassCodeBuilder(Class<?> cls, File source) {
         this.cls = cls;
         this.source = source;
         this.im = ImTools.get(cls);
     }
 
     public void generate(){
-        System.out.println("Generate for " + cls);
+        log.info("Generate for " + cls);
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         try(PrintStream out = new PrintStream(bout,true)){
             for(Field f : cls.getDeclaredFields()){
@@ -64,7 +65,7 @@ public class CaseClaseCodeBuilder {
                 String org =readFile(source).get();
                 int i = org.lastIndexOf('}');
                 org = org.substring(0,i) + gen + org.substring(i);
-                System.out.println(org);
+                log.info(org);
                 writeFile(org,source);
             }
         }
@@ -72,7 +73,7 @@ public class CaseClaseCodeBuilder {
     }
 
 
-    static public Optional<String> readFile(File f){
+    public static Optional<String> readFile(File f){
         if(f.exists() == false || f.isFile() == false || f.canRead() == false){
             return Optional.empty();
         }
@@ -85,9 +86,9 @@ public class CaseClaseCodeBuilder {
 
     private static Optional<String> readStream(Reader fin) throws IOException {
 
-        char[]  buffer  =   new char[1024];
-        StringBuffer stringBuffer=   new StringBuffer();
-        int c = 0;
+        char[]        buffer       =   new char[1024];
+        StringBuilder stringBuffer =   new StringBuilder();
+        int           c;
         do {
             c = fin.read(buffer);
             if(c != -1){
@@ -98,13 +99,10 @@ public class CaseClaseCodeBuilder {
     }
 
 
-    static public void writeFile(String text, File f){
+    public static void writeFile(String text, File f){
         try{
-            FileWriter fout = new FileWriter(f);
-            try{
+            try (FileWriter fout = new FileWriter(f)) {
                 fout.write(text);
-            }finally {
-                fout.close();
             }
         }catch(Exception e){
             throw new RuntimeException(e);
@@ -273,13 +271,13 @@ public class CaseClaseCodeBuilder {
     }
 
     private String simpleName(Type t){
-        Class<?> cls = classFromType(t);;
+        Class<?> cls = classFromType(t);
         String name = cls.getSimpleName();
-        int i =name.lastIndexOf(".");
+        int i =name.lastIndexOf('.');
         name = name.substring(i+1);
         return name;
     }
-    private PMap<Class,Class> primLookup =
+    private final PMap<Class,Class> primLookup =
             PMap.<Class,Class>empty()
                     .put(int.class,Integer.class)
             .put(long.class,Long.class)
@@ -320,22 +318,21 @@ public class CaseClaseCodeBuilder {
             return tv.getName();
         }
         Class<?> cls = ReflectionUtils.classFromType(t);
-        String p = params(t);
 
         return cls.getSimpleName() + params(t);
     }
 
-    static public File findSourcePath(Class<?>cls, String resourceName) {
+    public static File findSourcePath(Class<?>cls, String resourceName) {
         return new File(findProjectPath(cls,resourceName),"src/main/java");
     }
-    static public File findTestSourcePath(Class<?>cls, String resourceName) {
+    public static File findTestSourcePath(Class<?>cls, String resourceName) {
 
         return new File(findProjectPath(cls,resourceName),"src/test/java");
     }
-    static public File findProjectPath(Class<?> cls, String resourceName){
+    public static File findProjectPath(Class<?> cls, String resourceName){
         URL url = cls.getClassLoader().getResource(resourceName);
         if(url == null){
-            throw new IllegalArgumentException("Can't find resouce '" + resourceName + "' using classloader for "+ cls.getName());
+            throw new IllegalArgumentException("Can't find resource '" + resourceName + "' using classloader for "+ cls.getName());
         }
         File f = new File(url.getFile());
         while(f.getName().equals("target")== false){
@@ -346,14 +343,14 @@ public class CaseClaseCodeBuilder {
 
 
 
-    static private String firstCharUppercase(String str){
+    private static String firstCharUppercase(String str){
         return "" + Character.toUpperCase(str.charAt(0)) + str.substring(1);
     }
 
-    static private PStream<File> findSources(File root) {
+    private static PStream<File> findSources(File root) {
         if(root.isDirectory()){
             return PStream.from(root.listFiles())
-                    .map(f-> findSources(f))
+                    .map(CaseClassCodeBuilder::findSources)
                     .flatten();
         }
         if(root.getName().toLowerCase().endsWith(".java")){
@@ -377,8 +374,7 @@ public class CaseClaseCodeBuilder {
         if(forceMethod == false) {
             try {
                 return "this." + cls.getDeclaredField(name).getName();
-            } catch (NoSuchFieldException nsf) {
-                ;
+            } catch (NoSuchFieldException ignored) {
             }
         }
         Method m = im.getGetterMethod(name).get();
@@ -390,13 +386,13 @@ public class CaseClaseCodeBuilder {
         return r;
     }
 
-    static public void build(File sourceRoot){
-         build(sourceRoot,CaseClaseCodeBuilder.class.getClassLoader());
+    public static void build(File sourceRoot){
+         build(sourceRoot,CaseClassCodeBuilder.class.getClassLoader());
     }
 
-    static public void build(File sourceRoot,ClassLoader classLoader){
+    public static void build(File sourceRoot, ClassLoader classLoader){
 
-        System.out.println(sourceRoot);
+        log.info(sourceRoot.getAbsolutePath());
         int subLength = sourceRoot.getAbsolutePath().length()+1;
         PStream<Pair<File,Class>> cf = findSources(sourceRoot).map(f -> {
             String clsName = f.getAbsolutePath().substring(subLength);
@@ -405,7 +401,7 @@ public class CaseClaseCodeBuilder {
             try {
                 return new Pair<File,Class>(f,classLoader.loadClass(clsName));
             } catch (NoClassDefFoundError|ClassNotFoundException e) {
-                System.err.println(e.getMessage());
+                log.error(e.getMessage());
                 return null;
             }
         }).filter(p -> {
@@ -416,11 +412,11 @@ public class CaseClaseCodeBuilder {
             return cls.getAnnotation(CaseClass.class) != null;
         });
         cf.forEach(p -> {
-            CaseClaseCodeBuilder b = new CaseClaseCodeBuilder(p._2,p._1);
+            CaseClassCodeBuilder b = new CaseClassCodeBuilder(p._2, p._1);
             b.generate();
         });
     }
-    static public void main(String...args){
-        CaseClaseCodeBuilder.build(findSourcePath(CaseClaseCodeBuilder.class,"resource-marker.txt"));
+    public static void main(String...args){
+        CaseClassCodeBuilder.build(findSourcePath(CaseClassCodeBuilder.class, "resource-marker.txt"));
     }
 }

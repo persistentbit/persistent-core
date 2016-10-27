@@ -3,16 +3,15 @@ package com.persistentbit.core.utils;
 
 import com.persistentbit.core.logging.PLog;
 
-import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 /**
- * Utility class voor performance testing.<br>
+ * Utility class for performance testing.<br>
  * Usage Example::<br>
  * TimeMeasurement duration = new TimeMeasurement("[Name of Operation]");<br>
  *    ...code...<br>
  * System.out.println(duration.done());<br>
- * in console: [Nmae of Operation] 1234ms<br>
+ * in console: [Name of Operation] 1234ms<br>
  * <br>
  * <br>
  *
@@ -48,7 +47,7 @@ public class TimeMeasurement{
      * @param <T> The return Type of the code
      * @return The return value of the code
      */
-    static public <T> T runAndLog(PLog  log, String name,Supplier<T> code){
+	public static <T> T runAndLog(PLog  log, String name,Supplier<T> code){
         TimeMeasurement tm = new TimeMeasurement(name);
         T result = code.get();
         log.info(tm.done().toString());
@@ -63,7 +62,7 @@ public class TimeMeasurement{
      * @param <T> The return Type of the code
      * @return The return value of the code
      */
-    static public <T> T runAndLog(PLog log, Supplier<T> code){
+	public static <T> T runAndLog(PLog log, Supplier<T> code){
         return runAndLog(log,"TimeMeasurement",code);
     }
 
@@ -72,7 +71,8 @@ public class TimeMeasurement{
      * @param name The name of the measurement
      * @param code The code to measure
      */
-    static public void runAndLog(String name, Runnable code){
+	@SuppressWarnings("UseOfSystemOutOrSystemErr")
+    public static void runAndLog(String name, Runnable code){
         TimeMeasurement tm = new TimeMeasurement(name);
         code.run();
         System.out.println(tm.done().toString());
@@ -83,7 +83,7 @@ public class TimeMeasurement{
      * Run a time measurement and logs the result to System.out with the name "TimeMeasurement".<br>
      * @param code The code to measure
      */
-    static public void runAndLog(Runnable code){
+	public static void runAndLog(Runnable code){
         runAndLog("TimeMeasurement", code);
     }
 
@@ -94,7 +94,8 @@ public class TimeMeasurement{
      * @param <T> The result value type.
      * @return The result value of the code
      */
-    static public <T> T runAndLog(String name,Supplier<T> code){
+	@SuppressWarnings("UseOfSystemOutOrSystemErr")
+    public static <T> T runAndLog(String name, Supplier<T> code){
         TimeMeasurement tm = new TimeMeasurement(name);
         T result = code.get();
         System.out.println(tm.done().toString());
@@ -107,7 +108,7 @@ public class TimeMeasurement{
      * @param <T> The code result type
      * @return The result value of the code
      */
-    static public <T> T runAndLog(Supplier<T> code){
+	public static <T> T runAndLog(Supplier<T> code){
         return runAndLog("TimeMeasurement",code);
     }
 

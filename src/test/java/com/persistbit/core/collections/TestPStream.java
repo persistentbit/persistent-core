@@ -12,8 +12,9 @@ import java.util.Collections;
  * Date: 9/07/16
  * Time: 09:35
  */
+@SuppressWarnings({"SizeReplaceableByIsEmpty", "AssertWithSideEffects", "OptionalGetWithoutIsPresent"})
 public class TestPStream {
-    static private final PStream<Integer> init = PStream.val(4,10,2,8,100,-2,0,1000);
+	private static final PStream<Integer> init = PStream.val(4, 10, 2, 8, 100, -2, 0, 1000);
 
     @Test
     public void testheadMiddleEnd() {
@@ -58,28 +59,28 @@ public class TestPStream {
     @Test
     public void testSequences() {
         PStream<Integer> s = PStream.sequence(10,(n)-> n-1);
-        assert s.isInfinit();
+        assert s.isInfinite();
         assert s.isEmpty() == false;
         Assert.assertEquals((Object)s.limit(10).plist(),PList.val(10,9,8,7,6,5,4,3,2,1));
-        expectInfinite(() -> s.size());
-        expectInfinite(() -> s.plist());
-        expectInfinite(() -> s.pset());
-        expectInfinite(() -> s.toArray());
-        expectInfinite(() -> s.list());
-        expectInfinite(() -> s.dropLast());
+        expectInfinite(s::size);
+        expectInfinite(s::plist);
+        expectInfinite(s::pset);
+        expectInfinite(s::toArray);
+        expectInfinite(s::list);
+        expectInfinite(s::dropLast);
         expectInfinite(() -> s.fold(0,(a,b)-> a));
         expectInfinite(() -> s.groupBy(i-> i));
         expectInfinite(() -> s.join((a,b)-> a));
-        expectInfinite(() -> s.llist());
-        expectInfinite(() -> s.max());
-        expectInfinite(() -> s.min());
+        expectInfinite(s::llist);
+        expectInfinite(s::max);
+        expectInfinite(s::min);
         expectInfinite(() -> s.plus(1));
-        expectInfinite(() -> s.plusAll(Collections.EMPTY_LIST));
-        expectInfinite(() -> s.reversed());
-        expectInfinite(() -> s.sorted());
-        expectInfinite(() -> s.toArray());
+        expectInfinite(() -> s.plusAll(Collections.emptyList()));
+        expectInfinite(s::reversed);
+        expectInfinite(s::sorted);
+        expectInfinite(s::toArray);
         expectInfinite(() -> s.toArray(null));
-        expectInfinite(() -> s.toList());
+        expectInfinite(s::toList);
         expectInfinite(() -> s.toString(","));
         expectInfinite(() -> s.with(1,(a,b)-> 1));
         expectInfinite(() -> s.count((i) -> true));
@@ -108,7 +109,7 @@ public class TestPStream {
 
     /**
      * Expect a stream with following elements: 4,10,2,8,100,-2,0,1000
-     * @param s
+     * @param s The stream
      */
     void testStream(PStream<Integer> s){
         assert s.size() == 8;

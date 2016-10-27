@@ -32,6 +32,7 @@ public interface PStream<T> extends Iterable<T> {
      * @param <T> The type of the PStream
      * @return An empty PStream or a Pstream with 1 element
      */
+    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unchecked"})
     static <T> PStream<T> from(Optional<T> opt){
         if(opt.isPresent()){
             return val(opt.get());
@@ -45,6 +46,7 @@ public interface PStream<T> extends Iterable<T> {
      * @param <T> The type of the resulting stream
      * @return The PStream
      */
+    @SuppressWarnings("unchecked")
     static <T> PStream<T> from(Iterable<T> iter){
         if(iter instanceof PStream){
             return ((PStream<T>)iter);
@@ -92,6 +94,7 @@ public interface PStream<T> extends Iterable<T> {
                         return i< fixed.length;
                     }
 
+                    @SuppressWarnings("unchecked")
                     @Override
                     public T next() {
                         return (T)fixed[i++];
@@ -101,6 +104,7 @@ public interface PStream<T> extends Iterable<T> {
         };
     }
 
+    @SafeVarargs
     static <T> PStream<T> val(T...values){
         return new PStreamLazy<T>(){
             @Override
@@ -125,7 +129,7 @@ public interface PStream<T> extends Iterable<T> {
         return new PStreamLazy<T>() {
 
             @Override
-            public boolean isInfinit() {
+            public boolean isInfinite() {
                 return true;
             }
 
@@ -161,7 +165,7 @@ public interface PStream<T> extends Iterable<T> {
     static <T> PStream<T> repeatValue(T value){
         return new PStreamLazy<T>() {
             @Override
-            public boolean isInfinit() {
+            public boolean isInfinite() {
                 return true;
             }
 
@@ -183,6 +187,7 @@ public interface PStream<T> extends Iterable<T> {
 
         };
     }
+    @SafeVarargs
     static <E> E[] newArray(int length, E... array) { return Arrays.copyOf(array, length); }
 
 
@@ -195,9 +200,9 @@ public interface PStream<T> extends Iterable<T> {
 
     /**
      *
-     * @return true if this stream is inifinitely long.
+     * @return true if this stream is infinitely long.
      */
-    boolean isInfinit();
+    boolean isInfinite();
 
 
     /**
@@ -249,7 +254,7 @@ public interface PStream<T> extends Iterable<T> {
     Optional<T> find(Predicate<? super T> p);
 
     /**
-     * Create a new PStream that combines 2 seperate streams<br>
+     * Create a new PStream that combines 2 separate streams<br>
      * Example: <pre>{@code
      *  PStream.val(1,2,3,4).zip(PStream.val('a','b','c'))
      *  == PStream.val(Tuple2(1,'a'),Tuple2(2,'b'),Tuple2(3,'c'))
@@ -257,7 +262,7 @@ public interface PStream<T> extends Iterable<T> {
      * The resulting stream length is the smallest length of the 2 PStreams.
      * @param zipStream The stream to zip with
      * @param <Z> The type of elements in the second stream
-     * @return A PStream of Tupl2 values
+     * @return A PStream of Tuple2 values
      */
     <Z> PStream<Tuple2<Z,T>> zip(PStream<Z> zipStream);
 
@@ -274,7 +279,7 @@ public interface PStream<T> extends Iterable<T> {
      * position.<br>
      * The last element has a {@link HeadMiddleEnd#headAndEnd}.<br>
      * If there is only 1 element in the PStream, then the position is {@link HeadMiddleEnd#headAndEnd}
-     * @return A new PStream with the HeadMiddleEnd postion.
+     * @return A new PStream with the HeadMiddleEnd position.
      */
     PStream<Tuple2<HeadMiddleEnd,T>> headMiddleEnd();
 
@@ -283,7 +288,7 @@ public interface PStream<T> extends Iterable<T> {
     /**
      * Zip this stream with a sequence starting with 0.<br>
      * Handy if you need the index position of an element in a stream
-     * @return A zipped streem
+     * @return A zipped stream
      * @see #zip(PStream)
      */
     PStream<Tuple2<Integer,T>> zipWithIndex();
@@ -390,7 +395,7 @@ public interface PStream<T> extends Iterable<T> {
      * @param valGen The value generator
      * @param <K> The type of the key
      * @param <V> The type of the value
-     * @return The Orderd map
+     * @return The Ordered map
      */
     <K,V> POrderedMap<K,PList<V>> groupByOrdered(Function<? super T,? extends  K> keyGen,Function<? super T,? extends V> valGen);
 
@@ -409,7 +414,7 @@ public interface PStream<T> extends Iterable<T> {
     PStream<T> plusAll(Iterable<? extends T> iter);
 
     /**
-     * Flattend the provide Collection of Collections of items and
+     * Flattened the provide Collection of Collections of items and
      * add them to the end of this PStream
      * @param iterIter The collection of collections of items.
      * @return The new PStream with the added items
@@ -423,6 +428,7 @@ public interface PStream<T> extends Iterable<T> {
      * @param rest The rest of the items to add
      * @return The new PStream with the added items
      */
+    @SuppressWarnings("unchecked")
     PStream<T> plusAll(T v1,T... rest);
 
 
@@ -462,7 +468,7 @@ public interface PStream<T> extends Iterable<T> {
     /**
      * Just cast all elements in this PStream to a new Type.
      * @param itemClass The class of the new element type
-     * @param <X> The new elment type
+     * @param <X> The new element type
      * @return The same stream casted
      */
     <X> PStream<X> cast(Class<X> itemClass);
@@ -511,7 +517,7 @@ public interface PStream<T> extends Iterable<T> {
 
     /**
      * Same as {@link #min(Comparator)} but using the {@link Comparable} interface of the items
-     * @return The Smalles item
+     * @return The Smallest item
      */
     Optional<T> min();
     /**
@@ -606,7 +612,7 @@ public interface PStream<T> extends Iterable<T> {
 
     /**
      * A fold like function where the head of this PStream is the initial value.<br>
-     * If there are no elements in this strean, return empty.<br>
+     * If there are no elements in this stream, return empty.<br>
      * If there is 1 element in this stream, return the element.<br>
      * If there are more elements, do a reduce.<br>
      * @param joiner The binary operation
@@ -636,7 +642,7 @@ public interface PStream<T> extends Iterable<T> {
 
     /**
      * @see #toString(String, String, String)
-     * @param sep The seperator between items
+     * @param sep The separator between items
      * @return this.toString("",sep,"")
      */
     String toString(String sep);
@@ -647,8 +653,8 @@ public interface PStream<T> extends Iterable<T> {
      *  PStream.val(1,2,3).toString("[",":","]") == "[1:2:3]"
      * }</pre>
      * @param left The prefix String
-     * @param sep The seperator between items
-     * @param right Th postfix String
+     * @param sep The separator between items
+     * @param right The postfix String
      * @return The string
      */
     String toString(String left, String sep, String right);

@@ -1,7 +1,8 @@
 package com.persistentbit.core.utils;
 
 /**
- * Created by petermuys on 26/09/16.
+ *@author petermuys
+ *@since 26/09/16
  */
 public class ToDo extends RuntimeException{
     public ToDo(String message) {

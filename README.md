@@ -9,7 +9,7 @@ The Collections and streams can easily be converted to immutable java HashMap,Ha
 
 ## Persistent Streams.
 
-Every Persisten Collections is a Persistent Stream(PStream) and every Iterable can be converted to a Persisten Stream. 
+Every Persistent Collections is a Persistent Stream(PStream) and every Iterable can be converted to a Persistent Stream. 
 Every PStream has the following methods build in:
 
 - limit(count): limits the number of elements in the stream

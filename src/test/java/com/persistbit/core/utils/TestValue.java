@@ -8,6 +8,7 @@ import com.persistentbit.core.utils.NoToString;
  * @author Peter Muys
  * @since 1/09/2016
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class TestValue extends BaseValueClass {
     private final Integer id;
     private final String name;

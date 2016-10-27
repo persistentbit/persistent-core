@@ -9,9 +9,10 @@ import java.util.Set;
  * Time: 15:33
  */
 public class PSet<T> extends PStreamDirect<T,PSet<T>> implements IPSet<T>{
-    static private PSet<Object> sEmpty = new PSet<>();
+    private static final PSet<Object> sEmpty = new PSet<>();
 
-    static public <T> PSet<T> empty() {
+    @SuppressWarnings("unchecked")
+    public static <T> PSet<T> empty() {
         return (PSet<T>)sEmpty;
     }
 
@@ -21,20 +22,21 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> implements IPSet<T>{
         this(PMap.empty());
     }
 
-    static public PSet<Integer> forInt() {
+    public static PSet<Integer> forInt() {
         return empty();
     }
-    static public PSet<Long> forLong() {
+    public static PSet<Long> forLong() {
         return empty();
     }
 
-    static public PSet<String> forString() {
+    public static PSet<String> forString() {
         return empty();
     }
-    static public PSet<Boolean> forBoolean() {
+    public static PSet<Boolean> forBoolean() {
         return empty();
     }
-    static public <T> PSet<T> val(T...elements){
+    @SafeVarargs
+    public static <T> PSet<T> val(T...elements){
         PSet<T> res = PSet.empty();
         for(T v: elements){
             res = res.plus(v);
@@ -90,9 +92,10 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> implements IPSet<T>{
         return this;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public PSet<T> plusAll(Iterable<? extends T> iter) {
-        return PStream.from(iter).with(this,(r, v)-> r.plus(v));
+        return PStream.from(iter).with(this, PSet::plus);
     }
     public PSet<T> plus(T value){
         return new PSet<>(map.put(value,value));
@@ -104,7 +107,7 @@ public class PSet<T> extends PStreamDirect<T,PSet<T>> implements IPSet<T>{
     }
 
     public Set<T> toSet() {
-        return new PSetSet<T>(this);
+        return new PSetSet<>(this);
     }
 
     @Override

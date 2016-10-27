@@ -80,6 +80,7 @@ public class PMapMap<K,V> extends AbstractMap<K,V> implements PStreamable<Tuple2
         return master.values().list();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Set<Map.Entry<K, V>> entrySet() {
 

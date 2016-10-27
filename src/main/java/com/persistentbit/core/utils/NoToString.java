@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Field annotiation for fields that should be excluded in {@link ImTools#toStringAll(Object, boolean)}
+ * Field annotation for fields that should be excluded in {@link ImTools#toStringAll(Object, boolean)}
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.FIELD})

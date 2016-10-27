@@ -10,11 +10,11 @@ import java.security.spec.InvalidKeySpecException;
 /**
  * Utility class to convert and verify passwords with a salted hash.<br>
  */
-public class PasswordStorage
+public final class PasswordStorage
 {
 
     @SuppressWarnings("serial")
-    static public class InvalidHashException extends RuntimeException {
+    public static class InvalidHashException extends RuntimeException {
         public InvalidHashException(String message) {
             super(message);
         }
@@ -24,7 +24,7 @@ public class PasswordStorage
     }
 
     @SuppressWarnings("serial")
-    static public class CannotPerformOperationException extends RuntimeException {
+    public static class CannotPerformOperationException extends RuntimeException {
         public CannotPerformOperationException(String message) {
             super(message);
         }
@@ -113,7 +113,7 @@ public class PasswordStorage
             );
         }
 
-        int iterations = 0;
+        int iterations;
         try {
             iterations = Integer.parseInt(params[ITERATION_INDEX]);
         } catch (NumberFormatException ex) {
@@ -130,7 +130,7 @@ public class PasswordStorage
         }
 
 
-        byte[] salt = null;
+        byte[] salt;
         try {
             salt = fromBase64(params[SALT_INDEX]);
         } catch (IllegalArgumentException ex) {
@@ -140,7 +140,7 @@ public class PasswordStorage
             );
         }
 
-        byte[] hash = null;
+        byte[] hash;
         try {
             hash = fromBase64(params[PBKDF2_INDEX]);
         } catch (IllegalArgumentException ex) {
@@ -151,7 +151,7 @@ public class PasswordStorage
         }
 
 
-        int storedHashSize = 0;
+        int storedHashSize;
         try {
             storedHashSize = Integer.parseInt(params[HASH_SIZE_INDEX]);
         } catch (NumberFormatException ex) {
@@ -214,7 +214,8 @@ public class PasswordStorage
         return DatatypeConverter.printBase64Binary(array);
     }
 
-    static public void main(String...args) throws Exception{
+    @SuppressWarnings("UseOfSystemOutOrSystemErr")
+    public static void main(String...args) throws Exception{
         String result = createHash("PEterMuys20");
         System.out.println(result);
         System.out.println(verifyPassword("PEterMuys20",result));

@@ -48,7 +48,7 @@ public interface Lens<P,C> {
 
     /**
      * Join 2 lenses so we get: P- C- CC
-     * @param subLens The sublens to add
+     * @param subLens The sub-lens to add
      * @param <CC> Type of the C client property property
      * @return A new Lens from P - CC
      */
@@ -56,6 +56,6 @@ public interface Lens<P,C> {
         return new ThenLens<>(this,subLens);
     }
     default Lens<P,C> withDefaultChildValue(C defaultChildValue){
-        return new LensWithDefault<P, C>(this,defaultChildValue);
+        return new LensWithDefault<>(this, defaultChildValue);
     }
 }

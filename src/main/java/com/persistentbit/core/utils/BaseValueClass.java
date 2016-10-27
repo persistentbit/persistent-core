@@ -12,6 +12,7 @@ package com.persistentbit.core.utils;
  * @see ImTools#hashCodeAll(Object)
  * @author Peter Muys
  */
+@SuppressWarnings("unchecked")
 public class BaseValueClass {
 
 
@@ -21,6 +22,7 @@ public class BaseValueClass {
         return im.hashCodeAll(this);
     }
 
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public boolean equals(Object obj) {
         ImTools im = ImTools.get(this.getClass());

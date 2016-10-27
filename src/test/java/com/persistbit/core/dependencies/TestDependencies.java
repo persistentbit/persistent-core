@@ -8,14 +8,15 @@ import com.persistentbit.core.utils.NoEqual;
 import org.testng.annotations.Test;
 
 /**
- * Created by petermuys on 25/09/16.
+ *@author petermuys
+ *@since 25/09/16
  */
 public class TestDependencies {
-    class Node extends BaseValueClass{
-        private String value;
+    static final class Node extends BaseValueClass{
+        private final String value;
         @NoEqual  private PList<Node> edges = PList.empty();
 
-        public Node(String value){
+        private Node(String value){
             this.value = value;
         }
         public Node add(Node dependency){
@@ -51,15 +52,15 @@ public class TestDependencies {
         b.add(e);
         c.add(d);
         c.add(e);
-        PList<String> resolved = DependencyResolver.<Node>resolve(a,n -> n.getEdges()).map(n -> n.getValue());
+        PList<String> resolved = DependencyResolver.resolve(a, Node::getEdges).map(Node::getValue);
         System.out.println("Resolved: " + resolved);
         assert resolved.equals(PList.val("d","e","c","b","a"));
 
-        //Check circualar dependency...
+        //Check circular dependency...
 
         d.add(b);
         try {
-            DependencyResolver.<Node>resolve(a, n -> n.getEdges()).map(n -> n.getValue());
+            DependencyResolver.resolve(a, Node::getEdges).map(Node::getValue);
             assert false;
         }catch (CircularDependencyException ex){
             assert ex.getFirstNode().equals(d) || ex.getSecondNode().equals(d);

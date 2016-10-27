@@ -28,21 +28,22 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
 
 
 
-    static private final Object[] emptyArray = new Object[0];
-    static private final Node emtpyNode = new Node();
-    static private final PList emptyPList = new PList();
+    private static final Object[] emptyArray = new Object[0];
+    private static final Node     emtpyNode  = new Node();
+    private static final PList    emptyPList = new PList();
 
 
-    static public <T> PList<T> empty() {
+    @SuppressWarnings("unchecked")
+    public static <T> PList<T> empty() {
         return (PList<T>) emptyPList;
     }
 
-    private static class Node implements Serializable {
+    private static final class Node implements Serializable {
         private final Object[] array;
-        public Node(Object[] array) {
+        private Node(Object[] array) {
             this.array = array;
         }
-        public Node() {
+        private Node() {
             this.array = new Object[32];
         }
     }
@@ -78,7 +79,8 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
         }
     }
 
-    static public <T> PList<T> val(T...elements){
+    @SafeVarargs
+    public static <T> PList<T> val(T...elements){
         PList<T> res = PList.empty();
         for(T v: elements){
             res = res.plus(v);
@@ -103,20 +105,20 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
 
     }
 
-    static public PList<Integer> forInt() {
+    public static PList<Integer> forInt() {
         return empty();
     }
-    static public PList<Long> forLong() {
+    public static PList<Long> forLong() {
         return empty();
     }
 
-    static public PList<String> forString() {
+    public static PList<String> forString() {
         return empty();
     }
-    static public PList<Boolean> forBoolean() {
+    public static PList<Boolean> forBoolean() {
         return empty();
     }
-    static public <V> PList<V> from(Iterable<V> iter){
+    public static <V> PList<V> from(Iterable<V> iter){
         PList<V> res = PList.empty();
         return res.plusAll(iter);
     }
@@ -138,6 +140,7 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
         return cnt == 0 ;
     }
 
+    @SuppressWarnings("unchecked")
     public T get(int i) {
         Object[] node = arrayFor(i);
         return (T)node[i & 0x01f];
@@ -154,6 +157,7 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
             node = (Node) node.array[(i >>> level) & 0x01f];
         return node.array;
     }
+    @SuppressWarnings("unchecked")
     public PList<T> put(int i, T val) {
         if(i<0 || i > cnt){
             throw new IndexOutOfBoundsException(" index " + i);
@@ -190,7 +194,7 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
             Object[] newTail = new Object[tail.length + 1];
             System.arraycopy(tail, 0, newTail, 0, tail.length);
             newTail[tail.length] = val;
-            return new PList<T>(cnt + 1, shift, root, newTail);
+            return new PList<>(cnt + 1, shift, root, newTail);
         }
         // full tail, push into tree
         Node newroot;
@@ -204,7 +208,7 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
             newshift += 5;
         } else
             newroot = pushTail(shift, root, tailnode);
-        return new PList<T>(cnt + 1, newshift, newroot, new Object[] { val });
+        return new PList<>(cnt + 1, newshift, newroot, new Object[]{val});
     }
 
 
@@ -264,6 +268,7 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
                 return i < end;
             }
 
+            @SuppressWarnings("unchecked")
             public T next() {
                 if (i - base == 32) {
                     array = arrayFor(i);
@@ -400,7 +405,7 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
 
     @Override
     public List<T> list() {
-        return new PListList<T>(this);
+        return new PListList<>(this);
     }
 
 
@@ -412,7 +417,7 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
         if (cnt - tailOffset > 1) {
             Object[] newTail = new Object[tail.length - 1];
             System.arraycopy(tail, 0, newTail, 0, newTail.length);
-            return new PList<T>(cnt - 1, shift, root, newTail);
+            return new PList<>(cnt - 1, shift, root, newTail);
         }
         Object[] newtail = arrayFor(cnt - 2);
 
@@ -425,7 +430,7 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
             newroot = (Node) newroot.array[0];
             newshift -= 5;
         }
-        return new PList<T>(cnt - 1, newshift, newroot, newtail);
+        return new PList<>(cnt - 1, newshift, newroot, newtail);
     }
 
     private Node popTail(int level, Node node) {
@@ -511,6 +516,7 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
         int size = in.readInt();
         PList v = empty();
@@ -524,7 +530,8 @@ public class PList<T> extends AbstractIPList<T,PList<T>> implements Serializable
         this.tailOffset = v.tailOffset;
     }
 
-    static public void main(String...args){
+    @SuppressWarnings("UseOfSystemOutOrSystemErr")
+    public static void main(String...args){
         PList<Integer> l = new PList<>();
         for(int t=0; t<100000;t++){
             l = l.plus(t);

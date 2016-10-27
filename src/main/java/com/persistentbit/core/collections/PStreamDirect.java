@@ -2,14 +2,11 @@ package com.persistentbit.core.collections;
 
 
 
-import com.persistentbit.core.tuples.Tuple2;
-
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * User: petermuys
@@ -18,7 +15,7 @@ import java.util.stream.Stream;
  */
 public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLazy<T>{
 
-    abstract protected IMP toImpl(PStream<T> lazy);
+    protected abstract IMP toImpl(PStream<T> lazy);
 
     @Override
     public PStream<T> lazy() {
@@ -59,12 +56,6 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
 
 
     @Override
-    public PStream<Tuple2<Integer, T>> zipWithIndex() {
-        return super.zipWithIndex();
-    }
-
-
-    @Override
     public PStream<T> sorted(Comparator<? super T> comp) {
         return lazy().sorted(comp);
     }
@@ -100,16 +91,6 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
     }
 
     @Override
-    public <Z> PStream<Tuple2<Z, T>> zip(PStream<Z> zipStream) {
-        return super.zip(zipStream);
-    }
-
-    @Override
-    public Stream<T> stream() {
-        return super.stream();
-    }
-
-    @Override
     public IMP dropLast() {
         return toImpl(super.dropLast());
     }
@@ -119,8 +100,9 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
         return toImpl(super.plus(value));
     }
 
+    @SafeVarargs
     @Override
-    public IMP plusAll(T val1, T... rest) {
+    public final IMP plusAll(T val1, T... rest) {
         return toImpl(super.plusAll(val1,rest));
     }
 
@@ -134,6 +116,7 @@ public abstract class PStreamDirect<T,IMP extends PStream<T>> extends PStreamLaz
         return toImpl(super.duplicates());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <X> PStream<X> flatten() {
         return (PStream<X>) toImpl(super.flatten());
