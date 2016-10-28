@@ -8,40 +8,42 @@ import java.util.function.Predicate;
  * Date: 7/07/16
  * Time: 17:33
  */
-public class FilteredIterator<T> implements Iterator<T> {
-    private boolean hasNext;
-    private T next;
-    private Predicate<? super T> filter;
-    private Iterator<T> master;
+public class FilteredIterator<T> implements Iterator<T>{
 
-    public FilteredIterator(Predicate<? super T> filter, Iterator<T> master) {
-        this.filter = filter;
-        this.master = master;
-        doNext();
-    }
+  private final Predicate<? super T> filter;
+  private final Iterator<T>          master;
+  private       boolean              hasNext;
+  private       T                    next;
 
-    @Override
-    public boolean hasNext() {
-        return hasNext;
-    }
+	public FilteredIterator(Predicate<? super T> filter, Iterator<T> master) {
+		this.filter = filter;
+		this.master = master;
+		doNext();
+	}
 
-    @Override
-    public T next() {
-        T res = next;
-        doNext();
-        return res;
-    }
-    private void doNext(){
+  private void doNext() {
 
-        do{
-            hasNext = master.hasNext();
-            if(hasNext == false){
-                next = null;
-                return;
-            }
-            next = master.next();
-        }while(filter.test(next) == false);
-    }
+	do {
+	  hasNext = master.hasNext();
+	  if(hasNext == false) {
+		next = null;
+		return;
+	  }
+	  next = master.next();
+	} while(filter.test(next) == false);
+  }
+
+	@Override
+	public boolean hasNext() {
+		return hasNext;
+	}
+
+	@Override
+	public T next() {
+		T res = next;
+		doNext();
+		return res;
+	}
 
 
 }

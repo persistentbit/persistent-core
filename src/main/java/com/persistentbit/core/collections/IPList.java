@@ -6,7 +6,9 @@ package com.persistentbit.core.collections;
  * Time: 19:32
  */
 public interface IPList<T> extends PStream<T>{
-    T get(int index);
-    IPList<T> put(int index, T value);
+
+  T get(int index);
+
+  IPList<T> put(int index, T value);
 
 }

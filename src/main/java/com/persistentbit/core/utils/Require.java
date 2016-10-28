@@ -3,38 +3,44 @@ package com.persistentbit.core.utils;
 import java.util.function.Supplier;
 
 /**
- * Helpfull functions to check if something required is ok.<br>
+ * Helpful functions to check if something required is ok.<br>
  */
-public class Require {
-    //*********  isTrue
-    static public boolean isTrue(boolean value){
-        return isTrue(value,"Expected a 'true' value");
-    }
-    static public boolean isTrue(boolean value, Supplier<RuntimeException> exception){
-        if(value == false){
-            throwError(exception);
-        }
-        return value;
-    }
-    static public boolean isTrue(boolean value, String message){
-        return isTrue(value,() -> new RuntimeException(message));
-    }
-    //*********  isFalse
-    static public boolean isFalse(boolean value){
-        return isFalse(value,"Expected a 'true' value");
-    }
-    static public boolean isFalse(boolean value, Supplier<RuntimeException> exception){
-        if(value){
-            throwError(exception);
-        }
-        return value;
-    }
-    static public boolean isFalse(boolean value, String message){
-        return isFalse(value,() -> new RuntimeException(message));
-    }
+@SuppressWarnings("BooleanParameter")
+public final class Require{
 
-    static private void throwError(Supplier<RuntimeException> exception){
-        RuntimeException e = exception.get();
-        throw e;
-    }
+  //*********  isTrue
+  public static boolean isTrue(boolean value) {
+	return isTrue(value, "Expected a 'true' value");
+  }
+
+  public static boolean isTrue(boolean value, String message) {
+	return isTrue(value, () -> new RuntimeException(message));
+  }
+
+  public static boolean isTrue(boolean value, Supplier<RuntimeException> exception) {
+	if(value == false) {
+	  throwError(exception);
+	}
+	return true;
+  }
+
+  private static void throwError(Supplier<RuntimeException> exception) {
+	throw exception.get();
+  }
+
+  //*********  isFalse
+  public static boolean isFalse(boolean value) {
+	return isFalse(value, "Expected a 'true' value");
+  }
+
+  public static boolean isFalse(boolean value, String message) {
+	return isFalse(value, () -> new RuntimeException(message));
+  }
+
+  public static boolean isFalse(boolean value, Supplier<RuntimeException> exception) {
+	if(value) {
+	  throwError(exception);
+	}
+	return false;
+  }
 }

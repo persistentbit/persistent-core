@@ -8,129 +8,134 @@ import java.util.Set;
  * Date: 8/07/16
  * Time: 15:33
  */
-public class PSet<T> extends PStreamDirect<T,PSet<T>> implements IPSet<T>{
-    static private PSet<Object> sEmpty = new PSet<>();
+public class PSet<T> extends AbstractPStreamDirect<T, PSet<T>> implements IPSet<T>{
 
-    static public <T> PSet<T> empty() {
-        return (PSet<T>)sEmpty;
-    }
+  private static final PSet<Object> sEmpty = new PSet<>();
+  private final PMap<T, T> map;
 
-    private final PMap<T,T> map;
+  public PSet() {
+	this(PMap.empty());
+  }
 
-    public PSet() {
-        this(PMap.empty());
-    }
+  PSet(PMap<T, T> map) {
+	this.map = map;
+  }
 
-    static public PSet<Integer> forInt() {
-        return empty();
-    }
-    static public PSet<Long> forLong() {
-        return empty();
-    }
+  public static PSet<Integer> forInt() {
+	return empty();
+  }
 
-    static public PSet<String> forString() {
-        return empty();
-    }
-    static public PSet<Boolean> forBoolean() {
-        return empty();
-    }
-    static public <T> PSet<T> val(T...elements){
-        PSet<T> res = PSet.empty();
-        for(T v: elements){
-            res = res.plus(v);
-        }
-        return res;
-    }
+  @SuppressWarnings("unchecked")
+  public static <T> PSet<T> empty() {
+	return (PSet<T>) sEmpty;
+  }
 
+  public static PSet<Long> forLong() {
+	return empty();
+  }
 
-    PSet(PMap<T,T> map){
-        this.map = map;
-    }
+  public static PSet<String> forString() {
+	return empty();
+  }
 
+  public static PSet<Boolean> forBoolean() {
+	return empty();
+  }
 
-    @Override
-    public PStream<T> lazy() {
-        return new PStreamLazy<T>() {
-            @Override
-            public Iterator<T> iterator() {
-                return PSet.this.iterator();
-            }
+  @SafeVarargs
+  public static <T> PSet<T> val(T... elements) {
+	PSet<T> res = PSet.empty();
+	for(T v : elements) {
+	  res = res.plus(v);
+	}
+	return res;
+  }
 
-            @Override
-            public PSet<T> pset() {
-                return PSet.this;
-            }
-        };
+  @Override
+  public PSet<T> plus(T value) {
+	return new PSet<>(map.put(value, value));
+  }
 
-    }
+  @Override
+  public PStream<T> lazy() {
+	return new AbstractPStreamLazy<T>(){
+	  @Override
+	  public Iterator<T> iterator() {
+		return PSet.this.iterator();
+	  }
 
-    @Override
-    protected PSet<T> toImpl(PStream<T> lazy) {
-        return lazy.pset();
-    }
+	  @Override
+	  public PSet<T> pset() {
+		return PSet.this;
+	  }
+	};
 
-    @Override
-    public int size() {
-        return map.size();
-    }
+  }
 
-    @Override
-    public boolean isEmpty() {
-        return map.isEmpty();
-    }
+  @Override
+  public Iterator<T> iterator() {
+	return map.keys().iterator();
+  }
 
-    @Override
-    public PSet<T> pset() {
-        return this;
-    }
+  @Override
+  protected PSet<T> toImpl(PStream<T> lazy) {
+	return lazy.pset();
+  }
 
+  @Override
+  public int size() {
+	return map.size();
+  }
 
-    @Override
-    public PSet<T> distinct() {
-        return this;
-    }
+  @Override
+  public boolean isEmpty() {
+	return map.isEmpty();
+  }
 
-    @Override
-    public PSet<T> plusAll(Iterable<? extends T> iter) {
-        return PStream.from(iter).with(this,(r, v)-> r.plus(v));
-    }
-    public PSet<T> plus(T value){
-        return new PSet<>(map.put(value,value));
-    }
+	@Override
+	public PSet<T> pset() {
+	  return this;
+	}
 
-    @Override
-    public Iterator<T> iterator() {
-        return map.keys().iterator();
-    }
+  @Override
+  public PSet<T> distinct() {
+	return this;
+  }
 
-    public Set<T> toSet() {
-        return new PSetSet<T>(this);
-    }
+  @SuppressWarnings("unchecked")
+  @Override
+  public PSet<T> plusAll(Iterable<? extends T> iter) {
+	return PStream.from(iter).with(this, PSet::plus);
+  }
 
-    @Override
-    public boolean contains(Object value) {
-        return map.containsKey(value);
-    }
+  public Set<T> toSet() {
+	return new PSetSet<>(this);
+  }
 
-    @Override
-    public PSet<T> duplicates() {
-        return PSet.empty();
-    }
+  @Override
+  public boolean contains(Object value) {
+	return map.containsKey(value);
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if(obj == this){
-            return true;
-        }
-        if(obj instanceof PSet == false){
-            return false;
-        }
-        PSet other = (PSet)obj;
-        return map.equals(other.map);
-    }
+  @Override
+  public PSet<T> duplicates() {
+	return PSet.empty();
+  }
 
-    @Override
-    public int hashCode() {
-        return map.hashCode();
-    }
+  @Override
+  public boolean equals(Object o) {
+	if(o == this) {
+	  return true;
+	}
+	if(o instanceof PSet == false) {
+	  return false;
+	}
+	PSet other = (PSet) o;
+	return map.equals(other.map);
+  }
+
+  @Override
+  public int hashCode() {
+	return map.hashCode();
+  }
 }

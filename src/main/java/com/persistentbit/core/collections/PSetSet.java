@@ -10,109 +10,108 @@ import java.util.Set;
  * Date: 9/07/16
  * Time: 11:10
  */
-public class PSetSet<T> implements Set<T>,PStreamable<T>,Serializable{
-    private final IPSet<T> master;
+public class PSetSet<T> implements Set<T>, PStreamable<T>, Serializable{
 
-    public PSetSet(IPSet<T> master) {
-        this.master = master;
-    }
+	private final IPSet<T> master;
 
-    @Override
-    public PStream<T> pstream() {
-        return (PStream<T>)master;
-    }
+	public PSetSet(IPSet<T> master) {
+		this.master = master;
+	}
 
-    @Override
-    public int size() {
-        return master.size();
-    }
+	@Override
+	public PStream<T> pstream() {
+		return master;
+	}
 
-    @Override
-    public boolean isEmpty() {
-        return master.isEmpty();
-    }
+	@Override
+	public boolean isEmpty() {
+		return master.isEmpty();
+	}
 
-    @Override
-    public boolean contains(Object o) {
-        return master.contains(o);
-    }
+	@Override
+	public boolean contains(Object o) {
+		return master.contains(o);
+	}
 
-    @Override
-    public Iterator<T> iterator() {
-        return master.iterator();
-    }
+	@Override
+	public Iterator<T> iterator() {
+		return master.iterator();
+	}
 
-    @Override
-    public Object[] toArray() {
+	@Override
+	public Object[] toArray() {
 
-        return master.toArray();
-    }
+		return master.toArray();
+	}
 
-    @Override
-    public <T1> T1[] toArray(T1[] a) {
-        return master.toArray(a);
-    }
+	@Override
+	public <T1> T1[] toArray(T1[] a) {
+		return master.toArray(a);
+	}
 
-    @Override
-    public boolean add(T t) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public boolean add(T t) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public boolean remove(Object o) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public boolean remove(Object o) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        return master.containsAll(c);
-    }
+	@Override
+	public boolean addAll(Collection<? extends T> c) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public boolean addAll(Collection<? extends T> c) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public boolean retainAll(Collection<?> c) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public boolean removeAll(Collection<?> c) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void clear() {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException();
-    }
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
+	public boolean equals(Object o) {
+		if(o == this)
+			return true;
 
-        if (!(o instanceof Set))
-            return false;
-        Collection<?> c = (Collection<?>) o;
-        if (c.size() != size())
-            return false;
-        try {
-            return containsAll(c);
-        } catch (ClassCastException unused)   {
-            return false;
-        } catch (NullPointerException unused) {
-            return false;
-        }
-    }
-    public int hashCode() {
-        int h = 0;
-        Iterator<T> i = iterator();
-        while (i.hasNext()) {
-            T obj = i.next();
-            if (obj != null)
-                h += obj.hashCode();
-        }
-        return h;
-    }
+		if(!(o instanceof Set))
+			return false;
+		Collection<?> c = (Collection<?>) o;
+		if(c.size() != size())
+			return false;
+		try {
+			return containsAll(c);
+		} catch(ClassCastException | NullPointerException unused) {
+			return false;
+		}
+	}
+
+	@Override
+	public int size() {
+		return master.size();
+	}
+
+	@Override
+	public boolean containsAll(Collection<?> c) {
+		return master.containsAll(c);
+	}
+
+	public int hashCode() {
+		int h = 0;
+		for(T obj : this) {
+			if(obj != null)
+				h += obj.hashCode();
+		}
+		return h;
+	}
 
 }

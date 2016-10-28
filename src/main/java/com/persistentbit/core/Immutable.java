@@ -7,10 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation that marks a class or property as Immutable
+ *
  * @author Peter Muys
  * @since 11/07/2016
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD,ElementType.TYPE})
-public @interface Immutable {
+@Target({ElementType.FIELD, ElementType.TYPE})
+public @interface Immutable{
 }

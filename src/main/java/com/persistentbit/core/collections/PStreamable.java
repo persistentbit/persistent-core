@@ -7,6 +7,8 @@ package com.persistentbit.core.collections;
  * Date: 9/07/16
  * Time: 09:36
  */
-public interface PStreamable<T> {
-     PStream<T> pstream();
+@FunctionalInterface
+public interface PStreamable<T>{
+
+  PStream<T> pstream();
 }

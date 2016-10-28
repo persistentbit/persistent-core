@@ -26,10 +26,10 @@ import java.lang.annotation.Target;
  *  </configuration>
  * </plugin>
  * }</pre>
- *
  */
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface FieldNames {
-    String[] names();
+public @interface FieldNames{
+
+  String[] names();
 }

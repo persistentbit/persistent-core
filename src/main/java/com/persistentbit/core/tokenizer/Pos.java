@@ -4,22 +4,25 @@ import com.persistentbit.core.utils.BaseValueClass;
 
 /**
  * Marks the position of a token in a source file.
+ *
  * @author Peter Muys
  * @see SimpleTokenizer
  * @see Token
  */
-public class Pos extends BaseValueClass {
-    public final String name;
-    public final int lineNumber;
-    public final int column;
-    public Pos(String name, int lineNumber,int column){
-        this.name = name;
-        this.lineNumber = lineNumber;
-        this.column = column;
-    }
+public class Pos extends BaseValueClass{
 
-    @Override
-    public String toString() {
-        return "source '" + name + "' line " + lineNumber + " column " + column;
-    }
+  public final String name;
+  public final int    lineNumber;
+  public final int    column;
+
+  public Pos(String name, int lineNumber, int column) {
+	this.name = name;
+	this.lineNumber = lineNumber;
+	this.column = column;
+  }
+
+  @Override
+  public String toString() {
+	return "source '" + name + "' line " + lineNumber + " column " + column;
+  }
 }
