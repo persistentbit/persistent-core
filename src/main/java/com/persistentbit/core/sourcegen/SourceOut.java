@@ -3,6 +3,7 @@ package com.persistentbit.core.sourcegen;
 import java.io.PrintWriter;
 
 /**
+ * TODOC
  * @author Peter Muys
  * @since 22/12/2015
  */
