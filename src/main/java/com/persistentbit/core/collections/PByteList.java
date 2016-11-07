@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Iterator;
 
 /**
@@ -46,15 +47,44 @@ public final class PByteList extends AbstractIPList<Byte, PByteList> implements 
 		return new PByteList(Arrays.copyOf(values, values.length));
 	}
 
+	/**
+	 * Read an input stream in a new PByteList.<br>
+	 *
+	 * @param in The InputStream to read
+	 *
+	 * @return The PByteList with the content from the inputStream.
+	 *
+	 * @see #getInputStream()
+	 */
 	public static PByteList from(InputStream in) {
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		IO.copy(in, bout);
 		return new PByteList(bout.toByteArray());
 	}
 
+
+	/**
+	 * Get the data as a InputStream.<br>
+	 * @return The inputstream containing this byte data
+	 * @see #from(InputStream)
+	 */
 	public InputStream getInputStream() {
 		return new ByteArrayInputStream(data);
 	}
+
+	/**
+	 * Convert this byte array to a base64 encoded string
+	 *
+	 * @return The encoded string
+	 */
+	public String toBase64String() {
+		return Base64.getEncoder().encodeToString(data);
+	}
+
+	public static PByteList fromBase64String(String base64EncodedString) {
+		return new PByteList(Base64.getDecoder().decode(base64EncodedString));
+	}
+
 
 	@Override
 	public Byte get(int index) {
