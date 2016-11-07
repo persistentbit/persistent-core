@@ -8,9 +8,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * User: petermuys
- * Date: 7/07/16
- * Time: 17:25
+ * Abstract base class for PStream implementations that implements the PStream methods not lazy.
+ * @author Peter Muys
+ * @since 7/07/16
  */
 public abstract class AbstractPStreamDirect<T, IMP extends PStream<T>> extends AbstractPStreamLazy<T>{
 
