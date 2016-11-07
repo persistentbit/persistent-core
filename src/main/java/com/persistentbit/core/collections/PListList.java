@@ -71,7 +71,7 @@ public class PListList<T> implements List<T>, PStreamable<T>{
 
   @Override
   public boolean containsAll(Collection<?> c) {
-	return false;
+	  return master.containsAll(c);
   }
 
   @Override
