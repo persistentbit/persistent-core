@@ -202,4 +202,9 @@ public final class PByteList extends AbstractIPList<Byte, PByteList> implements 
 
 		return false;
 	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(data);
+	}
 }
