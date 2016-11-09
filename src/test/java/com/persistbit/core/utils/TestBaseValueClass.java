@@ -1,6 +1,7 @@
 package com.persistbit.core.utils;
 
-import org.testng.annotations.Test;
+
+import org.junit.Test;
 
 /**
  * @author Peter Muys
@@ -9,7 +10,7 @@ import org.testng.annotations.Test;
 public class TestBaseValueClass{
 
   @Test
-  void test() {
+  public void test() {
 	TestValue t1 = new TestValue(1234, "userX");
 	TestValue t2 = new TestValue(1234, "userX");
 	TestValue t3 = new TestValue(5678, "userY");

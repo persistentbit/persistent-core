@@ -5,7 +5,7 @@ import com.persistentbit.core.dependencies.CircularDependencyException;
 import com.persistentbit.core.dependencies.DependencyResolver;
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.NoEqual;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 /**
  * @author petermuys

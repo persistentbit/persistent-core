@@ -4,7 +4,7 @@ import com.persistentbit.core.collections.IPSet;
 import com.persistentbit.core.collections.POrderedSet;
 import com.persistentbit.core.collections.PSet;
 import com.persistentbit.core.collections.PStream;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.*;
 

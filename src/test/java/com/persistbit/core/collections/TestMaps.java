@@ -1,15 +1,14 @@
 package com.persistbit.core.collections;
 
 import com.persistentbit.core.collections.*;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.*;
 import java.util.logging.Logger;
 
 /**
- * User: petermuys
- * Date: 9/07/16
- * Time: 13:35
+ * @author Peter Muys
+ * @since 9/07/16
  */
 public class TestMaps{
 

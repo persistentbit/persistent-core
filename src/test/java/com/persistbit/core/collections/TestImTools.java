@@ -1,14 +1,13 @@
 package com.persistbit.core.collections;
 
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.util.Date;
 
 /**
- * User: petermuys
- * Date: 25/08/16
- * Time: 18:24
+ * @author Peter Muys
+ * @since 25/08/16
  */
 public class TestImTools{
 

@@ -2,8 +2,8 @@ package com.persistbit.core.collections;
 
 import com.persistentbit.core.collections.*;
 import com.persistentbit.core.tuples.Tuple2;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 
@@ -107,7 +107,7 @@ public class TestPStream{
   }
 
   @Test
-  void testPList() {
+  public void testPList() {
 	PList<Integer> pi = PList.forInt().plusAll(init);
 	testStream(pi);
 	testStream(pi.lazy());
@@ -118,7 +118,7 @@ public class TestPStream{
    *
    * @param s The stream
    */
-  void testStream(PStream<Integer> s) {
+  public void testStream(PStream<Integer> s) {
 	assert s.size() == 8;
 	assert s.isEmpty() == false;
 	assert s.clear().size() == 0;
@@ -190,14 +190,14 @@ public class TestPStream{
   }
 
   @Test
-  void testPSet() {
+  public void testPSet() {
 	PSet<Integer> pi = PSet.forInt().plusAll(init);
 	testStream(pi);
 	testStream(pi.lazy());
   }
 
   @Test
-  void testLList() {
+  public void testLList() {
 	LList<Integer> pi = LList.<Integer>empty().plusAll(init);
 	testStream(pi);
 	testStream(pi.lazy());
