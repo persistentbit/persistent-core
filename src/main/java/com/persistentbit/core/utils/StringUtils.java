@@ -224,4 +224,36 @@ public final class StringUtils{
 		}
 		return res.toString();
 	}
+
+	/**
+	 * Make the given string have a minimum length by left padding the String with the given char
+	 *
+	 * @param str     The string
+	 * @param length  The minimum length
+	 * @param padding The padding char
+	 *
+	 * @return The new string
+	 */
+	public static String padLeft(String str, int length, char padding) {
+		while(str.length() < length) {
+			str = padding + str;
+		}
+		return str;
+	}
+
+	/**
+	 * Make the given string have a minimum length by right padding the String with the given char
+	 *
+	 * @param str     The string
+	 * @param length  The minimum length
+	 * @param padding The padding char
+	 *
+	 * @return The new string
+	 */
+	public static String padRight(String str, int length, char padding) {
+		while(str.length() < length) {
+			str += padding;
+		}
+		return str;
+	}
 }

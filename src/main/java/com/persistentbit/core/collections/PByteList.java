@@ -1,6 +1,7 @@
 package com.persistentbit.core.collections;
 
 import com.persistentbit.core.utils.IO;
+import com.persistentbit.core.utils.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -89,6 +90,19 @@ public final class PByteList extends AbstractIPList<Byte, PByteList> implements 
 		return new PByteList(Base64.getDecoder().decode(base64EncodedString));
 	}
 
+	public String toHexString() {
+		StringBuilder sb = new StringBuilder(size() * 2);
+		forEach(b -> sb.append(StringUtils.padLeft(Integer.toHexString(b & 0xff), 2, '0')));
+		return sb.toString();
+	}
+
+	public static PByteList fromHexString(String hexEncodedString) {
+		byte[] data = new byte[hexEncodedString.length() / 2];
+		for(int t = 0; t < data.length; t++) {
+			data[t] = Integer.valueOf(hexEncodedString.substring(t * 2, t * 2 + 2), 16).byteValue();
+		}
+		return new PByteList(data);
+	}
 
 	@Override
 	public Byte get(int index) {
