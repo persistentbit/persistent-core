@@ -5,6 +5,7 @@ import com.persistentbit.core.exceptions.RtIOException;
 import com.persistentbit.core.logging.PLog;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -82,7 +83,7 @@ public final class IO{
 	 *
 	 * @return The String content from the Reader
 	 */
-	private static String readStream(Reader fin) throws RtIOException {
+	public static String readStream(Reader fin) throws RtIOException {
 
 		try {
 			StringBuilder stringBuffer = new StringBuilder();
@@ -108,6 +109,19 @@ public final class IO{
 		}
 	}
 
+	/**
+	 * Read an InputStream into a String.<br>
+	 * Uses UTF-8 for encoding.<br>
+	 * The given stream is automatically closed.<br>
+	 *
+	 * @param fin the inputStream
+	 *
+	 * @return The String content from the InputStream
+	 */
+	public static String readStream(InputStream fin) throws RtIOException {
+		return readStream(new InputStreamReader(fin, Charset.forName("UTF-8")));
+
+	}
 
 	/**
 	 * Split a String into lines and supply each line to a String consumer,<br>
