@@ -2,8 +2,6 @@ package com.persistentbit.core.logging;
 
 import com.persistentbit.core.utils.BaseValueClass;
 
-import java.util.function.Function;
-
 /**
  * Logging Write Monad
  *
@@ -12,7 +10,7 @@ import java.util.function.Function;
  */
 public class Logged<V> extends BaseValueClass{
 
-	private final V        value;
+	/*private final V        value;
 	private final LogEntry log;
 
 	public Logged(V value, LogEntry log) {
@@ -36,6 +34,6 @@ public class Logged<V> extends BaseValueClass{
 		Logged<U> newLogged = mapper.apply(value);
 		return new Logged<>(newLogged.get(), log.add(newLogged.getLog()));
 	}
-
+	*/
 
 }

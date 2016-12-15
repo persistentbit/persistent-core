@@ -1,6 +1,7 @@
 package com.persistbit.core.logging;
 
-import com.persistentbit.core.logging.Logged;
+import com.persistentbit.core.logging.FLog;
+import com.persistentbit.core.logging.LogFactory;
 
 /**
  * TODOC
@@ -10,18 +11,45 @@ import com.persistentbit.core.logging.Logged;
  */
 public class MainService{
 
-	Logged<String> getName() {
-		return Logged.fun(l -> {
-			//getFirstName().flatMap(fn -> getLastName().map(ln -> fn + " " + ln));
+	private LogFactory logFactory;
 
-		});
+	public MainService(LogFactory logFactory) {
+		this.logFactory = logFactory;
 	}
 
-	Logged<String> getFirstName() {
-		return Logged.fun(l -> l.result("Peter"));
+	public int add(int a, int b) {
+		FLog log = logFactory.flog(a, b);
+		log.debug("calculating a+b = ", a + b);
+		return log.result(a + b);
 	}
 
-	Logged<String> getLastName() {
-		return Logged.fun(l -> l.result("Muys"));
+	public int multiply(int a, int b) {
+		FLog log = logFactory.flog(a, b);
+		log.debug("calculating a*b = ", a * b);
+		return log.result(a * b);
+	}
+
+	public int div(int a, int b) {
+		FLog log = logFactory.flog(a, b);
+		if(b == 0) {
+			log.warn("divide by 0");
+			return log.result(0);
+		}
+		log.debug("calculating a/b = ", a / b);
+		return log.result(a / b);
+	}
+
+	public int calc(int a, int b) {
+		FLog log    = logFactory.flog(a, b);
+		int  result = multiply(add(a, b), multiply(a, b));
+		return log.result(result);
+	}
+
+
+	static public void main(String... args) {
+		LogFactory  logFactory  = new LogFactory();
+		MainService mainService = new MainService(logFactory);
+		mainService.calc(12, 34);
+		System.out.println(logFactory);
 	}
 }
