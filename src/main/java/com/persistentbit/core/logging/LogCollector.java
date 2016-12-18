@@ -34,6 +34,11 @@ public class LogCollector {
         ll.add(entry);
     }
 
+    public boolean hasError() {
+        List<LogEntry> ll = logs.get();
+        return ll != null && ll.stream().filter(le -> le.hasError()).findAny().isPresent();
+    }
+
     public FLog fun(Object... params) {
         int callId = createFunctionId();
         Thread currentThread = Thread.currentThread();
@@ -55,4 +60,7 @@ public class LogCollector {
         return PStream.from(params).toString(", ");
     }
 
+    public ThreadLocal<List<LogEntry>> getLogs() {
+        return logs;
+    }
 }

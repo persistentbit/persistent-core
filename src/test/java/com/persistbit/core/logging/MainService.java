@@ -2,6 +2,7 @@ package com.persistbit.core.logging;
 
 import com.persistentbit.core.logging.FLog;
 import com.persistentbit.core.logging.LogCollector;
+import com.persistentbit.core.logging.LogWriter;
 
 /**
  * TODOC
@@ -50,6 +51,7 @@ public class MainService{
 		LogCollector  logFactory  = new LogCollector();
 		MainService mainService = new MainService(logFactory);
 		mainService.calc(12, 34);
-		System.out.println(logFactory);
+		//System.out.println(logFactory);
+		LogWriter.write(logFactory.hasError(), logFactory.getLogs().get(), s -> System.out.println(s));
 	}
 }

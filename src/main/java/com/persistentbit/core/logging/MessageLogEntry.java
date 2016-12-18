@@ -33,4 +33,9 @@ public class MessageLogEntry extends AbstractLogEntry{
     public boolean hasError() {
         return category == LogCategory.error;
     }
+
+    @Override
+    public void accept(LogEntryVisitor visitor) {
+        visitor.visit(this);
+    }
 }

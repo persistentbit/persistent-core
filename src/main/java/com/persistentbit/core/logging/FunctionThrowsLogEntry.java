@@ -33,4 +33,9 @@ public class FunctionThrowsLogEntry extends AbstractLogEntry{
     public boolean hasError() {
         return true;
     }
+
+    @Override
+    public void accept(LogEntryVisitor visitor) {
+        visitor.visit(this);
+    }
 }

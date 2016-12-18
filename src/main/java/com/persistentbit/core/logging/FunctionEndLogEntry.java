@@ -27,4 +27,9 @@ public class FunctionEndLogEntry extends AbstractLogEntry{
     public boolean hasError() {
         return false;
     }
+
+    @Override
+    public void accept(LogEntryVisitor visitor) {
+        visitor.visit(this);
+    }
 }

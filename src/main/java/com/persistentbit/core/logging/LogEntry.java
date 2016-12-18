@@ -9,4 +9,8 @@ package com.persistentbit.core.logging;
 public interface LogEntry {
 
     boolean hasError();
+
+	void accept(LogEntryVisitor visitor);
+
+
 }
