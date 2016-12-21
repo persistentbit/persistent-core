@@ -59,7 +59,7 @@ public class MainService{
 	public int doRealCalc(int a, int b) {
 		FLog log    = logCollector.fun(a, b);
 		int  result = multiply(add(a, b), multiply(a, b));
-		if(true) {
+		if(false) {
 			log.error("Throwing test exception...");
 			throw log.error(new RuntimeException("test"));
 		}
@@ -71,11 +71,11 @@ public class MainService{
 		MainService mainService = new MainService(logFactory);
 		try {
 			mainService.getPersoon(1234);
-			mainService.calc(12, 34);
-			mainService.div(1, 0);
 		}catch(Exception e){
 			//e.printStackTrace();
 		}
+		mainService.calc(12, 34);
+		mainService.div(1, 0);
 
 		//System.out.println(logFactory);
 		LogWriter.write(logFactory.hasError(), logFactory.getLogs().get(), System.out);
