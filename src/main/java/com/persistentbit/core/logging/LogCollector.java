@@ -1,9 +1,11 @@
 package com.persistentbit.core.logging;
 
 import com.persistentbit.core.collections.PStream;
+import com.persistentbit.core.exceptions.Try;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * TODO: Add comment
@@ -11,57 +13,73 @@ import java.util.List;
  * @author Peter Muys
  * @since 13/12/2016
  */
-public class LogCollector {
+public class LogCollector{
 
 
+	static private int nextFunctionId = 1;
+	private final ThreadLocal<List<LogEntry>> logs = new ThreadLocal<>();
 
+	public <V> Logged<Try<V>> logged(Supplier<Try<V>> code) {
+		List<LogEntry> existingLogs = logs.get();
+		logs.set(new ArrayList<>());
+		Try<V> result;
+		try {
+			result = code.get();
+		} catch(Throwable ex) {
+			result = Try.failure(ex);
+		}
+		List<LogEntry> collected = logs.get();
+		logs.set(existingLogs);
+		Logged<Try<V>> loggedResult = new Logged<>(collected, result);
+		return loggedResult;
+	}
 
-    private final ThreadLocal<List<LogEntry>> logs = new ThreadLocal<>();
+	public <V> Try<V> add(Logged<Try<V>> logged){
 
-    static private int nextFunctionId = 1;
+	}
 
-    static public synchronized int createFunctionId() {
-        return nextFunctionId++;
-    }
+	public boolean hasError() {
+		List<LogEntry> ll = logs.get();
+		return ll != null && ll.stream().filter(le -> le.hasError()).findAny().isPresent();
+	}
 
-    public void add(LogEntry entry) {
-        List<LogEntry> ll = logs.get();
-        if (ll == null) {
-            ll = new ArrayList<>();
-            logs.set(ll);
-        }
-        System.out.println(entry);
-        ll.add(entry);
-    }
+	public FLog fun(Object... params) {
+		int                 callId             = createFunctionId();
+		Thread              currentThread      = Thread.currentThread();
+		StackTraceElement[] stackTraceElements = currentThread.getStackTrace();
+		StackTraceElement   currentElement     = stackTraceElements[2];
+		add(new FunctionStartLogEntry(
+										 currentThread.getId(),
+										 callId,
+										 System.currentTimeMillis(),
+										 currentElement.getClassName(),
+										 currentElement.getMethodName(),
+										 currentElement.getLineNumber(),
+										 stackTraceElements.length,
+										 paramsToString(params)
+		));
+		return new FLog(this, callId);
+	}
 
-    public boolean hasError() {
-        List<LogEntry> ll = logs.get();
-        return ll != null && ll.stream().filter(le -> le.hasError()).findAny().isPresent();
-    }
+	static public synchronized int createFunctionId() {
+		return nextFunctionId++;
+	}
 
-    public FLog fun(Object... params) {
-        int callId = createFunctionId();
-        Thread currentThread = Thread.currentThread();
-        StackTraceElement[] stackTraceElements = currentThread.getStackTrace();
-        StackTraceElement currentElement = stackTraceElements[2];
-        add(new FunctionStartLogEntry(
-                currentThread.getId(),
-                callId,
-                System.currentTimeMillis(),
-                currentElement.getClassName(),
-                currentElement.getMethodName(),
-                currentElement.getLineNumber(),
-                stackTraceElements.length,
-                paramsToString(params)
-        ));
-        return new FLog(this,callId);
-    }
+	public void add(LogEntry entry) {
+		List<LogEntry> ll = logs.get();
+		if(ll == null) {
+			ll = new ArrayList<>();
+			logs.set(ll);
+		}
+		System.out.println(entry);
+		ll.add(entry);
+	}
 
-    private String paramsToString(Object...params){
-        return PStream.from(params).toString(", ");
-    }
+	private String paramsToString(Object... params) {
+		return PStream.from(params).toString(", ");
+	}
 
-    public ThreadLocal<List<LogEntry>> getLogs() {
-        return logs;
-    }
+	public ThreadLocal<List<LogEntry>> getLogs() {
+		return logs;
+	}
 }
