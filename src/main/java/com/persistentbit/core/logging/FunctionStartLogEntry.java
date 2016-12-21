@@ -10,8 +10,17 @@ public class FunctionStartLogEntry extends AbstractLogEntry{
     private final String params;
 
 
-    public FunctionStartLogEntry(int functionCallId, long timestamp, String className, String methodName, int lineNumber, int callStackLength, String params) {
-        super(functionCallId, timestamp, className, methodName, lineNumber, callStackLength);
+    public FunctionStartLogEntry(
+            long threadId,
+            int functionCallId,
+            long timestamp,
+            String className,
+            String methodName,
+            int lineNumber,
+            int callStackLength,
+            String params
+    ) {
+        super(threadId,functionCallId, timestamp, className, methodName, lineNumber, callStackLength);
         this.params = params;
     }
 

@@ -45,6 +45,7 @@ public class LogCollector {
         StackTraceElement[] stackTraceElements = currentThread.getStackTrace();
         StackTraceElement currentElement = stackTraceElements[2];
         add(new FunctionStartLogEntry(
+                currentThread.getId(),
                 callId,
                 System.currentTimeMillis(),
                 currentElement.getClassName(),

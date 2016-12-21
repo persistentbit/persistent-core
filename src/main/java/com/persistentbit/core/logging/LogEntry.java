@@ -12,5 +12,7 @@ public interface LogEntry {
 
 	void accept(LogEntryVisitor visitor);
 
-
+    int getFunctionCallId();
+    int getCallStackLength();
+    long getTimestamp();
 }

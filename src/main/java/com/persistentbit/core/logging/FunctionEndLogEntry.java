@@ -9,8 +9,17 @@ package com.persistentbit.core.logging;
 public class FunctionEndLogEntry extends AbstractLogEntry{
     private final String returnValue;
 
-    public FunctionEndLogEntry(int functionCallId, long timestamp, String className, String methodName, int lineNumber, int callStackLength, String returnValue) {
-        super(functionCallId, timestamp, className, methodName, lineNumber, callStackLength);
+    public FunctionEndLogEntry(
+            long threadId,
+            int functionCallId,
+            long timestamp,
+            String className,
+            String methodName,
+            int lineNumber,
+            int callStackLength,
+            String returnValue
+    ) {
+        super(threadId,functionCallId, timestamp, className, methodName, lineNumber, callStackLength);
         this.returnValue = returnValue;
     }
 

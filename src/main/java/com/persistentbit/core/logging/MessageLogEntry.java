@@ -10,8 +10,18 @@ public class MessageLogEntry extends AbstractLogEntry{
     private final LogCategory category;
     private final String message;
 
-    public MessageLogEntry(int functionCallId, long timestamp, String className, String methodName, int lineNumber, int callStackLength, LogCategory category, String message) {
-        super(functionCallId, timestamp, className, methodName, lineNumber, callStackLength);
+    public MessageLogEntry(
+            long threadId,
+            int functionCallId,
+            long timestamp,
+            String className,
+            String methodName,
+            int lineNumber,
+            int callStackLength,
+            LogCategory category,
+            String message
+    ) {
+        super(threadId,functionCallId, timestamp, className, methodName, lineNumber, callStackLength);
         this.category = category;
         this.message = message;
     }

@@ -7,6 +7,7 @@ package com.persistentbit.core.logging;
  * @since 16/12/2016
  */
 public abstract class AbstractLogEntry implements LogEntry{
+    protected final long threadId;
     protected final int functionCallId;
     protected final long timestamp;
     protected final String className;
@@ -14,7 +15,8 @@ public abstract class AbstractLogEntry implements LogEntry{
     protected final int lineNumber;
     protected final int callStackLength;
 
-    public AbstractLogEntry(int functionCallId, long timestamp, String className, String methodName, int lineNumber, int callStackLength) {
+    public AbstractLogEntry(long threadId, int functionCallId, long timestamp, String className, String methodName, int lineNumber, int callStackLength) {
+        this.threadId = threadId;
         this.functionCallId = functionCallId;
         this.timestamp = timestamp;
         this.className = className;
@@ -45,5 +47,9 @@ public abstract class AbstractLogEntry implements LogEntry{
 
     public int getCallStackLength() {
         return callStackLength;
+    }
+
+    public long getThreadId() {
+        return threadId;
     }
 }

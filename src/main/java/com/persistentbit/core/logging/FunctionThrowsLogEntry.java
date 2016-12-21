@@ -10,8 +10,18 @@ public class FunctionThrowsLogEntry extends AbstractLogEntry{
     private final String exceptionMessage;
     private final String exceptionStackTrace;
 
-    public FunctionThrowsLogEntry(int functionCallId, long timestamp, String className, String methodName, int lineNumber, int callStackLength, String exceptionMessage, String exceptionStackTrace) {
-        super(functionCallId, timestamp, className, methodName, lineNumber, callStackLength);
+    public FunctionThrowsLogEntry(
+            long threadId,
+            int functionCallId,
+            long timestamp,
+            String className,
+            String methodName,
+            int lineNumber,
+            int callStackLength,
+            String exceptionMessage,
+            String exceptionStackTrace
+    ) {
+        super(threadId,functionCallId, timestamp, className, methodName, lineNumber, callStackLength);
         this.exceptionMessage = exceptionMessage;
         this.exceptionStackTrace = exceptionStackTrace;
     }
