@@ -4,6 +4,8 @@ import com.persistentbit.core.logging.FLog;
 import com.persistentbit.core.logging.LogCollector;
 import com.persistentbit.core.logging.LogWriter;
 
+import java.util.concurrent.ExecutionException;
+
 /**
  * TODOC
  *
@@ -12,12 +14,14 @@ import com.persistentbit.core.logging.LogWriter;
  */
 public class MainService{
 
-	private LogCollector logCollector;
+	private LogCollector  logCollector;
 	private JpaPersoonDAO jpaPersoonDAO;
+	private MailServer    mailServer;
 
 	public MainService(LogCollector logCollector) {
 		this.logCollector = logCollector;
 		this.jpaPersoonDAO = new JpaPersoonDAO(logCollector);
+		this.mailServer = new MailServer(new LogCollector(), "smtp.com");
 	}
 
 	public Persoon getPersoon(int id){
@@ -53,7 +57,13 @@ public class MainService{
 	}
 	public int doCalc(int a, int b) {
 		FLog log    = logCollector.fun(a, b);
-
+		try {
+			logCollector.add(mailServer.send("peter", "els", "Hallo").get());
+		} catch(InterruptedException e) {
+			throw new RuntimeException("TODO ERROR HANDLING", e);
+		} catch(ExecutionException e) {
+			throw new RuntimeException("TODO ERROR HANDLING", e);
+		}
 		return log.done(doRealCalc(add(a,1),add(b,1)));
 	}
 	public int doRealCalc(int a, int b) {

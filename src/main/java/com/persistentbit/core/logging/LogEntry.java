@@ -15,4 +15,6 @@ public interface LogEntry {
     int getFunctionCallId();
     int getCallStackLength();
     long getTimestamp();
+
+	LogEntry asCall(long threadId, int stackLevel);
 }

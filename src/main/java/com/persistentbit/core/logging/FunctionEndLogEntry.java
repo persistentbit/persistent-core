@@ -41,4 +41,11 @@ public class FunctionEndLogEntry extends AbstractLogEntry{
     public void accept(LogEntryVisitor visitor) {
         visitor.visit(this);
     }
+
+	@Override
+	public LogEntry asCall(long threadId, int stackLevel) {
+		return new FunctionEndLogEntry(
+			threadId, functionCallId, timestamp, className, methodName, lineNumber, stackLevel, returnValue
+		);
+	}
 }

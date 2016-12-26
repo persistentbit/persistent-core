@@ -35,7 +35,12 @@ public class LogCollector{
 	}
 
 	public <V> Try<V> add(Logged<Try<V>> logged){
-
+		List<LogEntry> theseLogs = this.logs.get();
+		List<LogEntry> logsToAdd = logged.getLogs();
+		logsToAdd.stream()
+			.map(le -> le)
+			.forEachOrdered(le -> theseLogs.add(le));
+		return logged.getValue();
 	}
 
 	public boolean hasError() {
