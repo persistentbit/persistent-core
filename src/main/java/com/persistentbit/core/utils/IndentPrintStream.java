@@ -8,7 +8,7 @@ import java.io.UnsupportedEncodingException;
  *
  * @author Peter Muys
  * @since 20/12/2016
- * @see
+ * @see IndentOutputStream
  */
 public class IndentPrintStream extends PrintStream{
     private IndentOutputStream indentOutputStream;

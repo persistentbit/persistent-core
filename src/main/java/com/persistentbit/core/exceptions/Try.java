@@ -100,7 +100,7 @@ public interface Try<R> extends Iterable<R> {
 
     /**
      * Get the value or throw an unchecked {@link TryFailureException} wrapping the Failure exception
-     * @return
+     * @return The value if present
      */
     R getUnchecked();
 
