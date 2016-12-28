@@ -16,4 +16,9 @@ public interface Function4<V1, V2, V3, V4, R>{
   default Function<V1, Function<V2, Function<V3, Function<V4, R>>>> curry() {
     return v1 -> v2 -> v3 -> v4 -> apply(v1, v2, v3, v4);
   }
+
+  static <A, B, C, D, R> Function<A, Function<B, Function<C, Function<D, R>>>> curry(Function4<A, B, C, D, R> f) {
+    return f.curry();
+  }
+
 }

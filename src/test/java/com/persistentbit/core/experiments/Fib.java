@@ -1,8 +1,5 @@
 package com.persistentbit.core.experiments;
 
-import com.persistentbit.core.collections.PStream;
-import com.persistentbit.core.function.F;
-
 import java.math.BigInteger;
 
 /**
@@ -27,15 +24,7 @@ public class Fib{
 		return fib_(BigInteger.ZERO, BigInteger.ONE, BigInteger.valueOf(number)).eval();
 	}
 
-	public static <T, U> U foldLeft(PStream<T> list, U init, F<U, F<T, U>> f) {
-		return foldLeft_(list, init, f).eval();
-	}
 
-	public static <T, U> TailCall<U> foldLeft_(PStream<T> list, U init, F<U, F<T, U>> f) {
-		return list.isEmpty()
-			? TailCall.ret(init)
-			: TailCall.suspend(() -> foldLeft_(list.tail(), f.apply(init).apply(list.head()), f));
-	}
 
 	public static void main(String[] args) {
 		//PStream.sequence(0).limit(20000).map(Fib::fib).forEach(System.out::println);

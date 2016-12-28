@@ -1,6 +1,5 @@
 package com.persistentbit.core.collections;
 
-import com.persistentbit.core.function.F;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.*;
@@ -58,6 +57,43 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
 						}
 						cnt--;
 						return master.next();
+					}
+				};
+			}
+		};
+	}
+
+	@Override
+	default PStream<T> until(Predicate<T> until) {
+		return new AbstractPStreamLazy<T>(){
+			@Override
+			public boolean isInfinite() {
+				return false;
+			}
+
+			@Override
+			public Iterator<T> iterator() {
+				return new Iterator<T>(){
+					final Iterator<T> master = PStreamWithDefaults.this.iterator();
+					T lastValue;
+					boolean gotNext;
+
+					@Override
+					public boolean hasNext() {
+						gotNext = master.hasNext();
+						if(gotNext) {
+							lastValue = master.next();
+						}
+						gotNext = gotNext && until.test(lastValue);
+						return gotNext;
+					}
+
+					@Override
+					public T next() {
+						if(gotNext == false) {
+							throw new IllegalStateException("Over limit");
+						}
+						return lastValue;
 					}
 				};
 			}
@@ -539,7 +575,7 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
 	}
 
 	@Override
-	default <R> R fold(R init, F<R, F<T, R>> f) {
+	default <R> R fold(R init, Function<R, Function<T, R>> f) {
 		if(isInfinite()) { throw new InfinitePStreamException(); }
 		R res = init;
 		for(T v : this) {
@@ -549,7 +585,7 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
 	}
 
 	@Override
-	default <R> R foldRight(R init, F<T, F<R, R>> f) {
+	default <R> R foldRight(R init, Function<T, Function<R, R>> f) {
 		if(isInfinite()) { throw new InfinitePStreamException(); }
 		R res = init;
 		for(T v : this.reversed()) {

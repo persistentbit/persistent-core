@@ -181,4 +181,23 @@ public interface Try<R> extends Iterable<R> {
         }
     }
 
+	static <A, R> Function<A, Try<R>> toTry(Function<A, R> f) {
+		return x -> {
+			try {
+				return Try.success(f.apply(x));
+			} catch(Exception e) {
+				return Try.failure(e);
+			}
+		};
+	}
+
+	static <A, B, R> Function<A, Function<B, Try<R>>> higherToTry(Function<A, Function<B, R>> f) {
+		return x -> y -> {
+			try {
+				return Try.success(f.apply(x).apply(y));
+			} catch(Exception e) {
+				return Try.failure(e);
+			}
+		};
+	}
 }

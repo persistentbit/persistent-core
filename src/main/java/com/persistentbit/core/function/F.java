@@ -8,38 +8,17 @@ import java.util.function.Function;
  * @author petermuys
  * @since 26/12/16
  */
-@FunctionalInterface
-public interface F<T, U>{
+public interface F{
 
-	U apply(T arg);
 
-	default <V> F<V, U> compose(F<? super V, ? extends T> f) {
-		return x -> this.apply(f.apply(x));
-	}
-
-	default <V> F<T, V> andThen(F<? super U, ? extends V> f) {
-		return x -> f.apply(this.apply(x));
-	}
-
-	static <T> F<T, T> identity() {
-		return t -> t;
-	}
-
-	static <T, U, V> F<V, U> compose(F<? super T, ? extends U> f, F<? super V, ? extends T> g) {
+	static <T, U, V> Function<V, U> compose(Function<? super T, ? extends U> f, Function<? super V, ? extends T> g) {
 		return x -> f.apply(g.apply(x));
 	}
 
-	static <T, U, V> F<T, V> andThen(F<? super T, ? extends U> f, F<? super U, ? extends V> g) {
+	static <T, U, V> Function<T, V> andThen(Function<? super T, ? extends U> f, Function<? super U, ? extends V> g) {
 		return x -> g.apply(f.apply(x));
 	}
 
-	static <T, U, V> F<F<T, U>, F<F<U, V>, F<T, V>>> compose() {
-		return x -> y -> y.compose(x);
-	}
-
-	static <T, U, V> F<F<T, U>, F<F<V, T>, F<V, U>>> andThen() {
-		return x -> y -> y.andThen(x);
-	}
 
 
 	/**

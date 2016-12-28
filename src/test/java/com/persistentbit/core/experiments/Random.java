@@ -2,9 +2,11 @@ package com.persistentbit.core.experiments;
 
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PStream;
-import com.persistentbit.core.function.F;
+import com.persistentbit.core.exceptions.Try;
+import com.persistentbit.core.function.Function2;
 import com.persistentbit.core.tuples.Tuple2;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -60,17 +62,47 @@ public interface Random<A> extends Function<RNG, Tuple2<A, RNG>>{
 		return a -> b -> f.apply(Tuple2.of(a, b));
 	}
 
+	static <A, R> Function<A, Optional<R>> toOptional(Function<A, R> f) {
+		return x -> {
+			try {
+				return Optional.ofNullable(f.apply(x));
+			} catch(Exception e) {
+				return Optional.empty();
+			}
+		};
+	}
+
+	static <A, B, R> Function<A, Function<B, Optional<R>>> higherToOptional(Function<A, Function<B, R>> f) {
+		return x -> y -> {
+			try {
+				return Optional.ofNullable(f.apply(x).apply(y));
+			} catch(Exception e) {
+				return Optional.empty();
+			}
+		};
+	}
+
+	static Function<Integer, Function<String, Try<Integer>>> parseInt   =
+		Try.higherToTry(r -> s -> Integer.parseInt(s, r));
+	static Function<String, Try<Integer>>                    parseInt10 = parseInt.apply(10);
+	static Function<String, Try<Integer>>                    parseInt16 = parseInt.apply(16);
 
 	static void main(String... args) {
-		PList<Integer>                list     = PList.val(1, 2, 3, 4, 5);
-		String                        identity = "0";
-		F<String, F<Integer, String>> addSI    = s -> i -> "(" + s + " + " + i + ")";
+		Function<String, Function<Integer, Integer>> cpi = Function2.curry(Integer::parseInt);
+
+
+		PList<Integer>                              list     = PList.val(1, 2, 3, 4, 5);
+		String                                      identity = "0";
+		Function<String, Function<Integer, String>> addSI    = s -> i -> "(" + s + " + " + i + ")";
 		System.out.println(list.fold(identity, addSI));
 		System.out.println(
 			PStream.val(1, 2, 3).foldRight("0", i -> s -> "(" + i + " + " + s + ")"));
 
 		//F<Integer,F<String,String>> addIS = i -> s -> "(" + i + " + " + s + ")";
 
+		System.out.println(parseInt10.apply("abc").map(v -> "Result:" + v).orElse("?"));
+		System.out.println(parseInt16.apply("abc").map(v -> "Result:" + v).orElse("?"));
 	}
+
 
 }

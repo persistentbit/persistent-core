@@ -1,7 +1,6 @@
 package com.persistentbit.core.collections;
 
 
-import com.persistentbit.core.function.F;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.*;
@@ -238,6 +237,8 @@ public interface PStream<T> extends Iterable<T>{
 	 * @return The limited stream
 	 */
 	PStream<T> limit(int count);
+
+	PStream<T> until(Predicate<T> until);
 
 	/**
 	 * Get a new PStream where the last item is removed from the stream
@@ -519,9 +520,9 @@ public interface PStream<T> extends Iterable<T>{
 	 *
 	 * @return The end result
 	 *
-	 * @see #foldRight(Object, F)
+	 * @see #foldRight(Object, Function)
 	 */
-	<R> R fold(R init, F<R, F<T, R>> f);
+	<R> R fold(R init, Function<R, Function<T, R>> f);
 
 	/**
 	 * Apply a binary operation to the inital value of this PStream and all the others, starting from the right
@@ -535,9 +536,9 @@ public interface PStream<T> extends Iterable<T>{
 	 *
 	 * @return The end result
 	 *
-	 * @see #fold(Object, F)
+	 * @see #fold(Object, Function)
 	 */
-	<R> R foldRight(R init, F<T, F<R, R>> f);
+	<R> R foldRight(R init, Function<T, Function<R, R>> f);
 
 
 	//TODO implement later

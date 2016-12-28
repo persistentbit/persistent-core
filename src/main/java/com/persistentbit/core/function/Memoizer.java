@@ -15,7 +15,7 @@ import java.util.function.Function;
  * @since 26/12/16
  */
 
-public class Memoizer<T, R> implements F<T, R>{
+public class Memoizer<T, R> implements Function<T, R>{
 
 	private final Map<T, R> cache = new ConcurrentHashMap();
 	private final Function<T, R> f;
@@ -28,12 +28,12 @@ public class Memoizer<T, R> implements F<T, R>{
 		return cache.computeIfAbsent(value, f);
 	}
 
-	static <T, R> F<T, R> of(Function<T, R> f) {
+	static <T, R> Function<T, R> of(Function<T, R> f) {
 		return new Memoizer<>(f);
 	}
 
 	public static void main(String[] args) {
-		F<Integer, F<Integer, Integer>> slowCalc = a -> b -> {
+		Function<Integer, Function<Integer, Integer>> slowCalc = a -> b -> {
 			try {
 				Thread.sleep(500);
 			} catch(InterruptedException e) {
@@ -41,7 +41,8 @@ public class Memoizer<T, R> implements F<T, R>{
 			}
 			return a + b;
 		};
-		F<Integer, F<Integer, Integer>> cachedCalc = Memoizer.of(a -> Memoizer.of(b -> slowCalc.apply(a).apply(b)));
+		Function<Integer, Function<Integer, Integer>> cachedCalc =
+			Memoizer.of(a -> Memoizer.of(b -> slowCalc.apply(a).apply(b)));
 
 		PStream<Integer> range = PStream.sequence(0).limit(10);
 		TimeMeasurement.runAndLog(() ->
