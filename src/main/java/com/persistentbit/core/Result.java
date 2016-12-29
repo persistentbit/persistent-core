@@ -46,7 +46,8 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
      */
     public abstract Optional<T> getOpt();
 
-    public boolean isPresent() {
+
+	public boolean isPresent() {
         return getOpt().isPresent();
     }
 
@@ -67,6 +68,10 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
 
     public abstract <E extends Throwable> Result<T> verify(Predicate<T> verification, Function<T, E> failureExceptionSupplier);
 
+
+	public abstract Result<String> forEachOrErrorMsg(Consumer<? super T> effect);
+
+	public abstract Result<Throwable> forEachOrException(Consumer<? super T> effect);
 
 
     /**
@@ -130,12 +135,6 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
      */
     public abstract void ifEmpty(Runnable r);
 
-    /**
-     * Run code if this is a Success value
-     *
-     * @param f The code to run
-     */
-    public abstract void ifPresent(Consumer<T> f);
 
     /**
      * Run code if this is a Failure result
@@ -310,23 +309,33 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
 
         }
 
-        @Override
-        public void ifPresent(Consumer<T> f) {
-            f.accept(value);
-        }
+
 
         @Override
         public void ifFailure(Consumer<Throwable> e) {
 
         }
 
-        @Override
+
+		@Override
         public Result<T> filter(Predicate<T> filter) {
             return filter.test(value)
                     ? this
                     : empty();
         }
-    }
+
+		@Override
+		public Result<String> forEachOrErrorMsg(Consumer<? super T> effect) {
+			effect.accept(value);
+			return empty();
+		}
+
+		@Override
+		public Result<Throwable> forEachOrException(Consumer<? super T> effect) {
+			effect.accept(value);
+			return empty();
+		}
+	}
 
     public static class Empty<T> extends Result<T> {
         @Override
@@ -374,10 +383,7 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
             r.run();
         }
 
-        @Override
-        public void ifPresent(Consumer<T> f) {
 
-        }
 
         @Override
         public void ifFailure(Consumer<Throwable> e) {
@@ -398,7 +404,17 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
         public <E extends Throwable> Result<T> verify(Predicate<T> verification, Function<T, E> failureExceptionSupplier) {
             return this;
         }
-    }
+
+		@Override
+		public Result<String> forEachOrErrorMsg(Consumer<? super T> effect) {
+			return empty();
+		}
+
+		@Override
+		public Result<Throwable> forEachOrException(Consumer<? super T> effect) {
+			return empty();
+		}
+	}
 
     public static class Failure<T> extends Result<T> {
         private final Throwable exception;
@@ -443,10 +459,7 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
 
         }
 
-        @Override
-        public void ifPresent(Consumer<T> f) {
 
-        }
 
         @Override
         public void ifFailure(Consumer<Throwable> e) {
@@ -487,5 +500,15 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
         public <E extends Throwable> Result<T> verify(Predicate<T> verification, Function<T, E> failureExceptionSupplier) {
             return this;
         }
-    }
+
+		@Override
+		public Result<String> forEachOrErrorMsg(Consumer<? super T> effect) {
+			return Result.success(exception.getMessage());
+		}
+
+		@Override
+		public Result<Throwable> forEachOrException(Consumer<? super T> effect) {
+			return Result.success(exception);
+		}
+	}
 }

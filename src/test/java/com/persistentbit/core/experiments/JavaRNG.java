@@ -1,7 +1,5 @@
 package com.persistentbit.core.experiments;
 
-import com.persistentbit.core.tuples.Tuple2;
-
 import java.util.Random;
 
 /**
@@ -12,18 +10,25 @@ import java.util.Random;
  */
 public class JavaRNG implements RNG{
 
+	private final long   seed;
 	private final Random random;
 
 	private JavaRNG(long seed) {
+		this.seed = seed;
 		this.random = new Random(seed);
 	}
 
 	@Override
-	public Tuple2<Integer, RNG> nextInt() {
-		return Tuple2.of(random.nextInt(), this);
+	public StateTuple<Integer, RNG> nextInt() {
+		return new StateTuple<>(random.nextInt(), this);
 	}
 
 	public static RNG rng(long seed) {
 		return new JavaRNG(seed);
+	}
+
+	@Override
+	public String toString() {
+		return "JavaRNG(seed =" + seed + ")";
 	}
 }

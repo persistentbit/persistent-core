@@ -1,7 +1,5 @@
 package com.persistentbit.core.experiments;
 
-import com.persistentbit.core.tuples.Tuple2;
-
 /**
  * TODOC
  *
@@ -10,5 +8,5 @@ import com.persistentbit.core.tuples.Tuple2;
  */
 public interface RNG{
 
-	Tuple2<Integer, RNG> nextInt();
+	StateTuple<Integer, RNG> nextInt();
 }
