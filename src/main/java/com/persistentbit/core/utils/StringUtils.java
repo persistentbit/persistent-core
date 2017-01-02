@@ -256,4 +256,23 @@ public final class StringUtils{
 		}
 		return str;
 	}
+
+	public static String present(String org, int maxLength){
+		if(org == null){
+			return null;
+		}
+		if(org.length() <=maxLength){
+			return org;
+		}
+		String str = org.substring(0,Math.min(org.length(),maxLength-1));
+
+		String kleiner = str;
+		while(kleiner.length() != 0 && "\t\n\r ".contains(kleiner.substring(kleiner.length()-1)) == false){
+			kleiner = kleiner.substring(0,kleiner.length()-1);
+		}
+		if(kleiner.length() == 0){
+			kleiner = str;
+		}
+		return kleiner + "";
+	}
 }

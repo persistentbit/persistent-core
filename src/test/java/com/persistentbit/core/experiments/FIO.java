@@ -1,6 +1,6 @@
 package com.persistentbit.core.experiments;
 
-import com.persistentbit.core.collections.PStream;
+import com.persistentbit.core.Nothing;
 
 import java.util.function.Function;
 
@@ -33,10 +33,10 @@ public interface FIO<A>{
 		return ioa.flatMap(a -> iob.map(b -> f.apply(a).apply(b)));
 	}
 
-	static <A> FIO<PStream<A>> repeat(int count, FIO<A> io) {
+	/*static <A> FIO<PStream<A>> repeat(int count, FIO<A> io) {
 		PStream<FIO<A>>                               stream = PStream.repeatValue(io).limit(count);
 		Function<A, Function<PStream<A>, PStream<A>>> f      = a -> la -> la.plus(a);
 		FIO<PStream<A>>                               unit   = FIO.unit(PStream.val());
 		return stream.foldRight(unit, f);
-	}
+	}*/
 }

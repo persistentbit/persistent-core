@@ -1,7 +1,6 @@
 package com.persistentbit.core.utils;
 
 
-import com.persistentbit.core.logging.PLog;
 
 import java.util.function.Supplier;
 
@@ -39,36 +38,8 @@ public class TimeMeasurement{
 	this.name = name;
   }
 
-  /**
-   * Run the measurement and log the time using info level to the given log.<br>
-   * The name of the measurement is "TimeMeasurement".<br>
-   *
-   * @param log  The Log
-   * @param code The code to measure
-   * @param <T>  The return Type of the code
-   *
-   * @return The return value of the code
-   */
-  public static <T> T runAndLog(PLog log, Supplier<T> code) {
-	return runAndLog(log, "TimeMeasurement", code);
-  }
 
-  /**
-   * Run the measurement and log the time using info level to the given log
-   *
-   * @param log  The Log
-   * @param name The name of the measurement
-   * @param code The code to measure
-   * @param <T>  The return Type of the code
-   *
-   * @return The return value of the code
-   */
-  public static <T> T runAndLog(PLog log, String name, Supplier<T> code) {
-	TimeMeasurement tm     = new TimeMeasurement(name);
-	T               result = code.get();
-	log.info(tm.done().toString());
-	return result;
-  }
+
 
   /**
    * Ends the measurement and return the result of the measurement.

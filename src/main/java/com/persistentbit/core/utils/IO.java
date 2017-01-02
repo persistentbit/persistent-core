@@ -1,8 +1,10 @@
 package com.persistentbit.core.utils;
 
+import com.persistentbit.core.Nothing;
 import com.persistentbit.core.Result;
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.exceptions.RtIOException;
+import com.persistentbit.core.logging.Logged;
+import com.persistentbit.core.logging.LoggedException;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -22,28 +24,31 @@ public final class IO {
      *
      * @param in  The input stream to read from
      * @param out The destination output stream
-     * @throws RtIOException When error occurred while reading or writing
+     * @throws LoggedException When error occurred while reading or writing
      */
-    public static void copy(InputStream in, OutputStream out) throws RtIOException {
-        try {
-            byte[] buffer = new byte[1024 * 10];
-            while (true) {
-                int c = in.read(buffer);
-                if (c == -1) {
-                    break;
-                }
-                out.write(buffer, 0, c);
-            }
-        } catch (IOException e) {
-            throw new RtIOException("IO error while copying stream.", e);
-        } finally {
+    public static Result<Nothing> copy(InputStream in, OutputStream out){
+        return Logged.function().log(l -> {
             try {
-                in.close();
-            } catch (IOException e) {
-                System.err.println("Error closing stream: " + e.getMessage());
-            }
+                byte[] buffer = new byte[1024 * 10];
+                while (true) {
+                    int c = in.read(buffer);
+                    if (c == -1) {
+                        break;
+                    }
+                    out.write(buffer, 0, c);
+                }
+                return Result.success(Nothing.inst);
+            } finally {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    l.debug("Exception while closing the inputstream");
+                    throw e;
+                }
 
-        }
+            }
+        });
+
 
     }
 
@@ -58,24 +63,27 @@ public final class IO {
 
     }
 
-    public static Result<Reader> fileToReader(File f) {
-        if (f == null) {
-            return Result.failure("File is null");
-        }
-        if (f.exists() == false) {
-            return Result.failure("File does not exist:" + f);
-        }
-        if (f.isFile() == false) {
-            return Result.failure("Not a faile: " + f);
-        }
-        if (f.canRead() == false) {
-            return Result.failure("No read access: " + f);
-        }
-        try {
-            return Result.success(new FileReader(f));
-        } catch (FileNotFoundException e) {
-            return Result.failure("Can't create Reader for file:" + f, e);
-        }
+    public static Result<FileReader> fileToReader(File f) {
+        return Logged.function(f).log(l -> {
+            if (f == null) {
+                return l.<FileReader>fail("File is null");
+            }
+            if (f.exists() == false) {
+                return l.<FileReader>fail("File does not exist:" + f);
+            }
+            if (f.isFile() == false) {
+                return l.<FileReader>fail("Not a file: " + f);
+            }
+            if (f.canRead() == false) {
+                return l.<FileReader>fail("No read access: " + f);
+            }
+            try {
+                return Result.success(new FileReader(f));
+            } catch (FileNotFoundException e) {
+                return l.<FileReader>fail("Can't create Reader for file:" + f, e);
+            }
+        });
+
     }
 
     /**
@@ -86,31 +94,34 @@ public final class IO {
      * @return The String content from the Reader
      */
     public static Result<String> readTextStream(Reader fin) {
-        if (fin == null) {
-            return Result.failure("Reader is null");
-        }
-        try {
-            StringBuilder stringBuffer = new StringBuilder();
-            int c;
-            char[] buffer = new char[1024];
-            do {
-                c = fin.read(buffer);
-                if (c != -1) {
-                    stringBuffer.append(buffer, 0, c);
-                }
+        return Logged.function().log(l -> {
+            if (fin == null) {
+                return l.<String>fail("Reader is null");
             }
-            while (c != -1);
-            return Result.success(stringBuffer.toString());
-        } catch (IOException e) {
-            return Result.failure("Error reading text Reader stream", e);
-        } finally {
             try {
-                fin.close();
+                StringBuilder stringBuffer = new StringBuilder();
+                int c;
+                char[] buffer = new char[1024];
+                do {
+                    c = fin.read(buffer);
+                    if (c != -1) {
+                        stringBuffer.append(buffer, 0, c);
+                    }
+                }
+                while (c != -1);
+                return Result.success(stringBuffer.toString());
             } catch (IOException e) {
-                System.out.println("Error closing stream: " + e.getMessage());
-            }
+                return l.<String>fail("Error reading text Reader stream", e);
+            } finally {
+                try {
+                    fin.close();
+                } catch (IOException e) {
+                    l.<String>fail("Error closing stream: " + e.getMessage());
+                }
 
-        }
+            }
+        });
+
     }
 
     /**
@@ -122,10 +133,13 @@ public final class IO {
      * @return The String content from the InputStream
      */
     public static Result<String> readTextStream(InputStream fin){
-        if(fin == null){
-            return Result.failure("Inputstream is null");
-        }
-        return readTextStream(new InputStreamReader(fin, Charset.forName("UTF-8")));
+        return Logged.function().log(l -> {
+            if(fin == null){
+                return l.<String>fail("Inputstream is null");
+            }
+            return readTextStream(new InputStreamReader(fin, Charset.forName("UTF-8")));
+        });
+
     }
 
 
@@ -138,26 +152,29 @@ public final class IO {
 
 
     public static Result<PList<String>> readLinesFromReader(Reader r) {
-        if (r == null) {
-            return Result.failure("Reader is null");
-        }
-        try (BufferedReader bin = new BufferedReader(r)) {
-            PList<String> lines = PList.empty();
-            while (true) {
-                String line = bin.readLine();
-                if (line == null) {
-                    break;
-                }
-                lines = lines.plus(line);
+        return Logged.function().log(l -> {
+            if (r == null) {
+                return l.<PList<String>>fail("Reader is null");
             }
-            return Result.success(lines);
-        } catch (IOException e) {
-            return Result.failure("Error reading lines from Reader stream", e);
-        }
+            try (BufferedReader bin = new BufferedReader(r)) {
+                PList<String> lines = PList.empty();
+                while (true) {
+                    String line = bin.readLine();
+                    if (line == null) {
+                        break;
+                    }
+                    lines = lines.plus(line);
+                }
+                return Result.success(lines);
+            } catch (IOException e) {
+                return l.<PList<String>>fail("Error reading lines from Reader stream", e);
+            }
+        });
+
     }
 
     public static Result<PList<String>> readLinesFromFile(File file) {
-        return fileToReader(file).flatMap(IO::readLinesFromReader);
+        return Logged.function(file).log(l -> fileToReader(file).flatMap(IO::readLinesFromReader));
     }
 
 
@@ -169,13 +186,13 @@ public final class IO {
      * @param f    The file to write to
      */
     public static void writeFile(String text, File f) {
-        try {
+        Logged.function(StringUtils.present(text,40),f).log(l -> {
             try (FileWriter fileOut = new FileWriter(f)) {
                 fileOut.write(text);
+                return Nothing.inst;
             }
-        } catch (IOException e) {
-            throw new RtIOException("Error while write a text to file " + f.getAbsolutePath(), e);
-        }
+        });
+
     }
 
 

@@ -1,20 +1,16 @@
 package com.persistentbit.core.logging;
 
+import java.util.Optional;
+
 /**
- * TODO: Add comment
+ * TODOC
  *
- * @author Peter Muys
- * @since 13/12/2016
+ * @author petermuys
+ * @since 30/12/16
  */
-public interface LogEntry {
+public interface LogEntry{
+	LogEntry append(LogEntry other);
+	Optional<LogContext> getContext();
 
-    boolean hasError();
 
-	void accept(LogEntryVisitor visitor);
-
-    int getFunctionCallId();
-    int getCallStackLength();
-    long getTimestamp();
-
-	LogEntry asCall(long threadId, int stackLevel);
 }

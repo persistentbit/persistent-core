@@ -1,5 +1,7 @@
 package com.persistentbit.core.experiments;
 
+import com.persistentbit.core.Nothing;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

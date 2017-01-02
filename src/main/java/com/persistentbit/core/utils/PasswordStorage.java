@@ -157,7 +157,7 @@ public final class PasswordStorage {
         try{
             return Result.success(DatatypeConverter.parseBase64Binary(hex));
         }catch (Exception e){
-            return Result.failure("Error parsing base 64",e);
+            return Result.failure(e);
         }
     }
 

@@ -1,7 +1,8 @@
 package com.persistbit.core.collections;
 
+import com.persistentbit.core.Nothing;
 import com.persistentbit.core.collections.PByteList;
-import com.persistentbit.core.logging.PLog;
+import com.persistentbit.core.logging.Logged;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,7 +16,6 @@ import java.util.function.Function;
  */
 public class TestPByteList{
 
-	private static final PLog log = PLog.get(TestPByteList.class);
 
 	@Test
 	public void testBase64() {
@@ -28,11 +28,15 @@ public class TestPByteList{
 	}
 
 	private void testBin(Function<PByteList, String> toString, Function<String, PByteList> fromString) {
-		PByteList bl = PByteList.from(getClass().getResourceAsStream("/programming_is_terrible.pdf"));
-		log.info("Got " + bl.size() + " bytes from pdf");
-		String    value = toString.apply(bl);
-		PByteList newBl = fromString.apply(value);
-		Assert.assertArrayEquals(bl.toArray(), newBl.toArray());
-		Assert.assertEquals(bl, newBl);
+		Logged.function().log(l -> {
+			PByteList bl = PByteList.from(getClass().getResourceAsStream("/programming_is_terrible.pdf"));
+			l.debug("Got " + bl.size() + " bytes from pdf");
+			String    value = toString.apply(bl);
+			PByteList newBl = fromString.apply(value);
+			Assert.assertArrayEquals(bl.toArray(), newBl.toArray());
+			Assert.assertEquals(bl, newBl);
+			return Nothing.inst;
+		});
+
 	}
 }

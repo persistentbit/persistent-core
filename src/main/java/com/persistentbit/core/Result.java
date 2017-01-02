@@ -1,5 +1,8 @@
 package com.persistentbit.core;
 
+import com.persistentbit.core.logging.LogEntry;
+import com.persistentbit.core.logging.LoggedException;
+
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
@@ -19,7 +22,10 @@ import java.util.function.Supplier;
  * @author Peter Muys
  * @since 27/12/2016
  */
-public abstract class Result<T> implements Iterable<T>, Serializable {
+public abstract class Result<T> implements Iterable<T>, Serializable{
+
+
+
 
     /**
      * Map the Success value or return a Failure or a Empty
@@ -45,6 +51,8 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
      * @return Some value for success or an empty optional
      */
     public abstract Optional<T> getOpt();
+
+    public abstract Optional<LogEntry> getLog();
 
 
 	public boolean isPresent() {
@@ -73,7 +81,7 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
 
 	public abstract Result<Throwable> forEachOrException(Consumer<? super T> effect);
 
-
+    public abstract Result<T> withLog(LogEntry log);
     /**
      * Get the Success value or the supplied else value on error or empty
      *
@@ -154,7 +162,11 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
         return new Success<>(value);
     }
 
-    static private final Empty theEmpty = new Empty();
+    public static <U> Success success(U value, LogEntry logEntry){
+        return new Success<>(value,logEntry);
+    }
+
+
 
     /**
      * Create an Empty result
@@ -164,8 +176,21 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
      */
     @SuppressWarnings("unchecked")
     public static <U> Empty<U> empty() {
-        return (Empty<U>) theEmpty;
+        return empty("Empty value");
     }
+    public static <U> Empty<U> empty(String message){
+       return empty(message,null);
+    }
+    public static <U> Empty<U> empty(String message, LogEntry log){
+        return empty(new RuntimeException(message),log);
+    }
+    public static <U> Empty<U> empty(Throwable cause){
+        return empty(cause,null);
+    }
+    public static <U> Empty<U> empty(Throwable cause, LogEntry log){
+        return new Empty<>(cause,log);
+    }
+
 
     /**
      * Create a Success or Empty result
@@ -186,7 +211,11 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
      * @return a Failure result
      */
     public static <U> Failure<U> failure(String error) {
-        return new Failure<>(error);
+        return failure(error,null);
+    }
+
+    public static <U> Failure<U> failure(String error, LogEntry log){
+        return new Failure<>(error,log);
     }
 
     /**
@@ -196,12 +225,12 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
      * @param <U>       The result type
      * @return a Failure result
      */
-    public static <E extends Throwable,U> Failure<U> failure(E exception) {
-        return new Failure<>(exception);
+    public static <U> Failure<U> failure(Throwable exception) {
+        return new Failure<U>(exception,null);
     }
 
-    public static <U> Failure<U> failure(String error,Throwable causeException) {
-        return failure(new RuntimeException(error,causeException));
+    public static <U> Failure<U> failure(Throwable causeException, LogEntry log) {
+        return new Failure<>(causeException,log);
     }
 
     /**
@@ -238,11 +267,26 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
 
     }
 
+
+    /**
+     * A SUCCESS RESULT
+     * @param <T> Result Type
+     */
     public static class Success<T> extends Result<T> {
+        private final LogEntry log;
         private final T value;
 
-        private Success(T value) {
+        private Success(T value,LogEntry log) {
             this.value = Objects.requireNonNull(value, "Success value is null, use an Empty value instead");
+            this.log = log;
+        }
+        private Success(T value){
+            this(value,null);
+        }
+
+        @Override
+        public Result<T> withLog(LogEntry log) {
+            return new Success<>(value,log);
         }
 
         @Override
@@ -250,7 +294,10 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
             return success(mapper.apply(value));
         }
 
-
+        @Override
+        public Optional<LogEntry> getLog() {
+            return Optional.of(log);
+        }
 
         @Override
         public <U> Result<U> flatMap(Function<T, Result<U>> mapper) {
@@ -337,15 +384,46 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
 		}
 	}
 
+    /**
+     * Exception thrown when we try to get a value from an {@link Empty}
+     */
+	public static class EmptyException extends RuntimeException{
+        public EmptyException(){
+            super("Can't get value from an Empty result!");
+        }
+        public EmptyException(Throwable cause){
+            super("Can't get value from an Empty result!",cause);
+        }
+    }
+
+    /**
+     * An EMPTY result.
+     *
+     * @param <T> The non-empty result type.
+     */
     public static class Empty<T> extends Result<T> {
-        @Override
-        public <U> Result<U> map(Function<T, U> mapper) {
-            return new Empty<>();
+        private Throwable exception;
+        private LogEntry log;
+
+        public Empty(Throwable e,LogEntry log){
+            this.exception = e;
+            this.log = log;
+
         }
 
         @Override
-        public <U> Result<U> flatMap(Function<T, Result<U>> mapper) {
-            return new Empty<>();
+        public Result<T> withLog(LogEntry log) {
+            return new Empty<>(exception,log);
+        }
+
+        @Override
+        public <U> Empty<U> map(Function<T, U> mapper) {
+            return new Empty<>(exception,log);
+        }
+
+        @Override
+        public <U> Empty<U> flatMap(Function<T, Result<U>> mapper) {
+            return new Empty<>(exception,log);
         }
 
         @Override
@@ -360,7 +438,7 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
 
         @Override
         public T orElseThrow() {
-            throw new IllegalStateException("Can't get value from an Empty!");
+            throw new EmptyException(new LoggedException(exception,log));
         }
 
         @Override
@@ -384,6 +462,10 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
         }
 
 
+        @Override
+        public Optional<LogEntry> getLog() {
+            return Optional.ofNullable(log);
+        }
 
         @Override
         public void ifFailure(Consumer<Throwable> e) {
@@ -416,28 +498,45 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
 		}
 	}
 
+    /**
+     * Exception thrown when we try to get a value from a {@link Failure}.
+     */
+	public static class FailureException extends RuntimeException{
+        public FailureException(Throwable failureCause){
+            super("Can't get value from a Failure Result",failureCause);
+        }
+    }
+
     public static class Failure<T> extends Result<T> {
         private final Throwable exception;
+        private final LogEntry log;
 
-        public Failure(Throwable exception) {
-            this.exception = Objects.requireNonNull(exception);
+
+        public Failure(Throwable exception,LogEntry log) {
+
+            this.exception = exception;
+            this.log = log;
         }
 
-        public Failure(String error) {
-            this(new IllegalStateException(Objects.requireNonNull(error)));
+        public Failure(String error, LogEntry log) {
+            this(new RuntimeException(error),log);
         }
 
+        @Override
+        public Result<T> withLog(LogEntry log) {
+            return new Failure<T>(exception,log);
+        }
 
         @Override
         @SuppressWarnings("unchecked")
         public <U> Result<U> map(Function<T, U> mapper) {
-            return (Failure<U>) this;
+            return new Failure<>(exception,log);
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public <U> Result<U> flatMap(Function<T, Result<U>> mapper) {
-            return (Failure<U>) this;
+            return new Failure<>(exception,log);
         }
 
         @Override
@@ -451,7 +550,7 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
         }
 
         public T orElseThrow() {
-            throw new IllegalStateException("Failure result", exception);
+            throw new FailureException( new LoggedException(exception,log));
         }
 
         @Override
@@ -459,7 +558,10 @@ public abstract class Result<T> implements Iterable<T>, Serializable {
 
         }
 
-
+        @Override
+        public Optional<LogEntry> getLog() {
+            return Optional.ofNullable(log);
+        }
 
         @Override
         public void ifFailure(Consumer<Throwable> e) {

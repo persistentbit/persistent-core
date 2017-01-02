@@ -1,4 +1,4 @@
-package com.persistentbit.core.experiments;
+package com.persistentbit.core;
 
 /**
  * TODOC
