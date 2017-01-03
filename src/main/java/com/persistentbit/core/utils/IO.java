@@ -3,7 +3,7 @@ package com.persistentbit.core.utils;
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.Result;
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.logging.Logged;
+import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.LoggedException;
 
 import java.io.*;
@@ -27,7 +27,8 @@ public final class IO {
      * @throws LoggedException When error occurred while reading or writing
      */
     public static Result<Nothing> copy(InputStream in, OutputStream out){
-        return Logged.function().log(l -> {
+        return Log.function().code(l -> {
+            l.params(in,out);
             try {
                 byte[] buffer = new byte[1024 * 10];
                 while (true) {
@@ -42,7 +43,7 @@ public final class IO {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    l.debug("Exception while closing the inputstream");
+                    l.warning("Exception while closing the inputstream");
                     throw e;
                 }
 
@@ -59,29 +60,26 @@ public final class IO {
      * @return String with content of the text file
      */
     public static Result<String> readTextFile(File f) {
-        return fileToReader(f).flatMap(IO::readTextStream);
-
+        return Log.function(f).code(l -> {
+            return fileToReader(f).flatMap(IO::readTextStream);
+        });
     }
 
     public static Result<FileReader> fileToReader(File f) {
-        return Logged.function(f).log(l -> {
+        return Log.function(f).code(l -> {
             if (f == null) {
-                return l.<FileReader>fail("File is null");
+                return Result.failure("File is null");
             }
             if (f.exists() == false) {
-                return l.<FileReader>fail("File does not exist:" + f);
+                return Result.failure("File does not exist:" + f);
             }
             if (f.isFile() == false) {
-                return l.<FileReader>fail("Not a file: " + f);
+                return Result.failure("Not a file: " + f);
             }
             if (f.canRead() == false) {
-                return l.<FileReader>fail("No read access: " + f);
+                return Result.failure("No read access: " + f);
             }
-            try {
-                return Result.success(new FileReader(f));
-            } catch (FileNotFoundException e) {
-                return l.<FileReader>fail("Can't create Reader for file:" + f, e);
-            }
+            return Result.success(new FileReader(f));
         });
 
     }
@@ -94,9 +92,9 @@ public final class IO {
      * @return The String content from the Reader
      */
     public static Result<String> readTextStream(Reader fin) {
-        return Logged.function().log(l -> {
+        return Log.function().code(l -> {
             if (fin == null) {
-                return l.<String>fail("Reader is null");
+                return Result.failure("Reader is null");
             }
             try {
                 StringBuilder stringBuffer = new StringBuilder();
@@ -111,12 +109,12 @@ public final class IO {
                 while (c != -1);
                 return Result.success(stringBuffer.toString());
             } catch (IOException e) {
-                return l.<String>fail("Error reading text Reader stream", e);
+                return Result.failure(e);
             } finally {
                 try {
                     fin.close();
                 } catch (IOException e) {
-                    l.<String>fail("Error closing stream: " + e.getMessage());
+                    Result.failure("Error closing stream: " + e.getMessage());
                 }
 
             }
@@ -133,9 +131,9 @@ public final class IO {
      * @return The String content from the InputStream
      */
     public static Result<String> readTextStream(InputStream fin){
-        return Logged.function().log(l -> {
+        return Log.function().code(l -> {
             if(fin == null){
-                return l.<String>fail("Inputstream is null");
+                return Result.failure("Inputstream is null");
             }
             return readTextStream(new InputStreamReader(fin, Charset.forName("UTF-8")));
         });
@@ -144,17 +142,20 @@ public final class IO {
 
 
     public static Result<PList<String>> readLines(String text) {
-        if (text == null) {
-            return Result.empty();
-        }
-        return readLinesFromReader(new StringReader(text));
+        return Log.function(StringUtils.present(text, 40)).code(l -> {
+            if (text == null) {
+                return Result.empty();
+            }
+            return readLinesFromReader(new StringReader(text));
+        });
+
     }
 
 
     public static Result<PList<String>> readLinesFromReader(Reader r) {
-        return Logged.function().log(l -> {
+        return Log.function().code(l -> {
             if (r == null) {
-                return l.<PList<String>>fail("Reader is null");
+                return Result.failure("Reader is null");
             }
             try (BufferedReader bin = new BufferedReader(r)) {
                 PList<String> lines = PList.empty();
@@ -167,14 +168,14 @@ public final class IO {
                 }
                 return Result.success(lines);
             } catch (IOException e) {
-                return l.<PList<String>>fail("Error reading lines from Reader stream", e);
+                return Result.failure(new RuntimeException("Error reading lines from Reader stream", e));
             }
         });
 
     }
 
     public static Result<PList<String>> readLinesFromFile(File file) {
-        return Logged.function(file).log(l -> fileToReader(file).flatMap(IO::readLinesFromReader));
+        return Log.function(file).code(l -> fileToReader(file).flatMap(IO::readLinesFromReader));
     }
 
 
@@ -186,7 +187,7 @@ public final class IO {
      * @param f    The file to write to
      */
     public static void writeFile(String text, File f) {
-        Logged.function(StringUtils.present(text,40),f).log(l -> {
+        Log.function(StringUtils.present(text, 40), f).code(l -> {
             try (FileWriter fileOut = new FileWriter(f)) {
                 fileOut.write(text);
                 return Nothing.inst;

@@ -2,7 +2,7 @@ package com.persistentbit.core.dependencies;
 
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.logging.Logged;
+import com.persistentbit.core.logging.Log;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,7 +37,7 @@ public final class DependencyResolver<VALUE>{
 	 */
 	public static <T> PList<T> resolve(T node, Function<T, PList<T>> getDependencies
 	) throws CircularDependencyException {
-		return Logged.function(node).log(l -> {
+		return Log.function(node).code(l -> {
 			DependencyResolver<T> dr = new DependencyResolver<>(getDependencies);
 			return dr.resolve(node);
 		});
@@ -52,9 +52,9 @@ public final class DependencyResolver<VALUE>{
 	}
 
 	private void resolve(VALUE node, List<VALUE> resolved, Set<VALUE> seen) {
-		Logged.function(node).log(l -> {
+		Log.function(node).code(l -> {
 			seen.add(node);
-			l.debug("Seen",seen);
+			l.info("Seen",seen);
 			for(VALUE edge : getEdges.apply(node)) {
 				if(resolved.contains(edge) == false) {
 					if(seen.contains(edge)) {

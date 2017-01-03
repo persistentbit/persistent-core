@@ -9,16 +9,19 @@ import java.util.Optional;
  * @since 30/12/16
  */
 public class LogEntryMessage implements LogEntry{
+	private final LogMessageLevel level;
 	private final LogContext source;
 	private final String     message;
 
-	private LogEntryMessage(LogContext source, String message) {
+	private LogEntryMessage(LogMessageLevel level, LogContext source, String message) {
+		this.level = level;
 		this.source = source;
 		this.message = message;
 	}
 
-	public static LogEntryMessage of(LogContext source, String message){
-		return new LogEntryMessage(source,message);
+
+	public static LogEntryMessage of(LogMessageLevel level, LogContext source, String message){
+		return new LogEntryMessage(level, source,message);
 	}
 
 	@Override

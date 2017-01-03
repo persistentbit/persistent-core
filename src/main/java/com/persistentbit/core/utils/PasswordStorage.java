@@ -1,6 +1,8 @@
 package com.persistentbit.core.utils;
 
 import com.persistentbit.core.Result;
+import com.persistentbit.core.logging.Log;
+import com.persistentbit.core.logging.LogPrinter;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -50,83 +52,94 @@ public final class PasswordStorage {
 
 
     public static Result<String> createHash(String password){
-        if(password == null){
-            return Result.failure("password is null");
-        }
-        return createHash(password.toCharArray());
+        return Log.function("<password>").code(l -> {
+            if(password == null){
+                return Result.failure("password is null");
+            }
+            return createHash(password.toCharArray());
+        });
     }
 
     public static Result<Boolean> verifyPassword(String password, String correctHash){
-        if(password == null){
-            return Result.failure("password is null");
-        }
-        if(correctHash == null){
-            return Result.failure("correct hash is null");
-        }
-        return verifyPassword(password.toCharArray(), correctHash);
+        return Log.function("<password>",correctHash).code(l -> {
+            if(password == null){
+                return Result.failure("password is null");
+            }
+            if(correctHash == null){
+                return Result.failure("correct hash is null");
+            }
+            return verifyPassword(password.toCharArray(), correctHash);
+        });
+
     }
 
     public static Result<String> createHash(char[] password) {
-        if(password == null){
-            return Result.failure("password is null");
-        }
-        // Generate a random salt
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[SALT_BYTE_SIZE];
-        random.nextBytes(salt);
+        return Log.function("<password>").code(l-> {
+            if(password == null){
+                return Result.failure("password is null");
+            }
+            // Generate a random salt
+            SecureRandom random = new SecureRandom();
+            byte[] salt = new byte[SALT_BYTE_SIZE];
+            random.nextBytes(salt);
 
-        // Hash the password
-        byte[] hash = pbkdf2(password, salt, PBKDF2_ITERATIONS, HASH_BYTE_SIZE);
-        int hashSize = hash.length;
+            // Hash the password
+            byte[] hash = pbkdf2(password, salt, PBKDF2_ITERATIONS, HASH_BYTE_SIZE);
+            int hashSize = hash.length;
 
-        // format: algorithm:iterations:hashSize:salt:hash
-        return Result.success("sha256:" +
-                PBKDF2_ITERATIONS +
-                ":" + hashSize +
-                ":" +
-                toBase64(salt) +
-                ":" +
-                toBase64(hash));
+            // format: algorithm:iterations:hashSize:salt:hash
+            return Result.success("sha256:" +
+                                      PBKDF2_ITERATIONS +
+                                      ":" + hashSize +
+                                      ":" +
+                                      toBase64(salt) +
+                                      ":" +
+                                      toBase64(hash));
+        });
+
     }
 
     public static Result<Boolean> verifyPassword(char[] password, String correctHash) {
-        if (password == null) {
-            return Result.failure("password is null");
-        }
-        if (correctHash == null) {
-            return Result.failure("correctHash is null");
-        }
-        // Decode the hash into its parameters
-        String[] params = correctHash.split(":");
-        if (params.length != HASH_SECTIONS) {
-            return Result.failure(new InvalidHashException("Fields are missing from the password hash."));
-        }
+        return Log.function("<password>",correctHash).code(l-> {
+            if (password == null) {
+                return Result.failure("password is null");
+            }
+            if (correctHash == null) {
+                return Result.failure("correctHash is null");
+            }
+            // Decode the hash into its parameters
+            String[] params = correctHash.split(":");
+            if (params.length != HASH_SECTIONS) {
+                return Result.failure(new InvalidHashException("Fields are missing from the password hash."));
+            }
 
 
-        if (!params[HASH_ALGORITHM_INDEX].equals("sha256")) {
-            return Result.failure(new CannotPerformOperationException("Unsupported hash type."));
-        }
-        return NumberUtils.parsInt(params[ITERATION_INDEX])
+            if (!params[HASH_ALGORITHM_INDEX].equals("sha256")) {
+                return Result.failure(new CannotPerformOperationException("Unsupported hash type."));
+            }
+            return NumberUtils.parsInt(params[ITERATION_INDEX])
                 .mapError(ex -> new InvalidHashException("Could not parse the iteration count as an integer.",ex))
                 .flatMap(iterations -> {
-                if(iterations < 1){
-                    return Result.failure(new InvalidHashException("Invalid number of iterations. Must be >= 1."));
-                }
-                return fromBase64(params[SALT_INDEX]).flatMap(salt ->
-                        fromBase64(params[PBKDF2_INDEX]).flatMap(hash ->
-                                NumberUtils.parsInt(params[HASH_SIZE_INDEX])
-                                        .verify(storedHashSize -> storedHashSize == hash.length,(v)->new InvalidHashException("Hash length doesn't match stored hash length."))
-                                        .flatMap(storedHashSize ->
-                                {
-                                    // Compute the hash of the provided password, using the same salt,
-                                    // iteration count, and hash length
-                                    byte[] testHash = pbkdf2(password, salt, iterations, hash.length);
-                                    // Compare the hashes in constant time. The password is correct if
-                                    // both hashes match.
-                                    return Result.success(slowEquals(hash, testHash));
-                                })
-                        )
-                );
+                    if(iterations < 1){
+                        return Result.failure(new InvalidHashException("Invalid number of iterations. Must be >= 1."));
+                    }
+                    return fromBase64(params[SALT_INDEX]).flatMap(salt ->
+                          fromBase64(params[PBKDF2_INDEX]).flatMap(hash ->
+                               NumberUtils.parsInt(params[HASH_SIZE_INDEX])
+                                   .verify(storedHashSize -> storedHashSize == hash.length,(v)->new InvalidHashException("Hash length doesn't match stored hash length."))
+                                   .flatMap(storedHashSize ->
+                                            {
+                                                // Compute the hash of the provided password, using the same salt,
+                                                // iteration count, and hash length
+                                                byte[] testHash = pbkdf2(password, salt, iterations, hash.length);
+                                                // Compare the hashes in constant time. The password is correct if
+                                                // both hashes match.
+                                                return Result.success(slowEquals(hash, testHash));
+                                            })
+                          )
+                    );
+                });
+
         });
 
     }
@@ -151,14 +164,13 @@ public final class PasswordStorage {
     }
 
     private static Result<byte[]> fromBase64(String hex) {
-        if(hex == null){
-            return Result.failure("bas64 string is null");
-        }
-        try{
+        return Log.function(StringUtils.present(hex,20)).code(l-> {
+            if(hex == null){
+                return Result.failure("bas64 string is null");
+            }
             return Result.success(DatatypeConverter.parseBase64Binary(hex));
-        }catch (Exception e){
-            return Result.failure(e);
-        }
+        });
+
     }
 
     private static boolean slowEquals(byte[] a, byte[] b) {
@@ -194,13 +206,14 @@ public final class PasswordStorage {
 
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
     public static void main(String... args) {
+        LogPrinter lp = LogPrinter.consoleInColor();
         String result = createHash("PeterMuys20").orElseThrow();
         System.out.println(result);
-        System.out.println(createHash((String)null));
-        System.out.println(verifyPassword("PeterMuys20", result));
-        System.out.println(verifyPassword("PeterMuys21", result));
-        System.out.println(verifyPassword("PeterMuys20", null));
-        System.out.println(verifyPassword((String)null , result));
-        System.out.println(verifyPassword("PeterMuys20" , "sha256:1:12:???:base64string"));
+        lp.print(createHash((String)null));
+        lp.print(verifyPassword("PeterMuys20", result));
+        lp.print(verifyPassword("PeterMuys21", result));
+        lp.print(verifyPassword("PeterMuys20", null));
+        lp.print(verifyPassword((String)null , result));
+        lp.print(verifyPassword("PeterMuys20" , "sha256:1:12:???:base64string"));
     }
 }

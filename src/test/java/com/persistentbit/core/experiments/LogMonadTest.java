@@ -2,7 +2,10 @@ package com.persistentbit.core.experiments;
 
 import com.persistentbit.core.Result;
 import com.persistentbit.core.logging.LogPrinter;
-import com.persistentbit.core.logging.Logged;
+import com.persistentbit.core.logging.Log;
+import com.persistentbit.core.utils.IO;
+
+import java.io.File;
 
 
 /**
@@ -12,35 +15,35 @@ import com.persistentbit.core.logging.Logged;
 public class LogMonadTest{
 
 	static public int divide(int a, int b) {
-		return Logged.function(a, b).log(l -> {
-			l.debug("divide ", a, b);
+		return Log.function(a, b).code(l -> {
+			l.info("divide ", a, b);
 			return a / b;
 		});
 	}
 
 	static public int add(int a, int b) {
-		return Logged.function(a, b).log(l -> {
-			l.debug("add", a, b);
+		return Log.function(a, b).code(l -> {
+			l.info("add", a, b);
 			return a + b;
 		});
 	}
 
 	static public int wrongFunction(int a) {
-		return Logged.function(a).log(l -> {
-			l.debug("Started WrongFunction", a);
+		return Log.function(a).code(l -> {
+			l.info("Started WrongFunction", a);
 			throw new RuntimeException("WrongFunction FAILED");
 		});
 	}
 
 	static public int wrongWrongFunction(int a) {
-		return Logged.function(a).log(l -> {
-			l.debug("wrongWrongFunction", a);
+		return Log.function(a).code(l -> {
+			l.info("wrongWrongFunction", a);
 			return wrongFunction(a);
 		});
 	}
 
 	public static Result<Integer> saveDiv(int a, int b) {
-		return Logged.function(a, b).logResult(l -> {
+		return Log.function(a, b).code(l -> {
 			return b == 0
 				? Result.<Integer>failure("Can't divide by 0")
 				: Result.success(a / b);
@@ -53,21 +56,18 @@ public class LogMonadTest{
 	}
 
 	public static Result<Integer> saveDivDiv(int a, int b, int c) {
-		return Logged.function(a, b, c).logResult(l -> {
-			Result<Integer> firstDiv = saveDiv(a, b);
-
-			return l.add(firstDiv).flatMap(divided -> {
-				Result<Integer> secondDiv = saveDiv(divided, c);
-				return l.add(secondDiv);
-			});
-		});
+		return Log.function(a, b, c).code(l ->
+			l.add(saveDiv(a,b)).flatMap(divided ->
+				saveDiv(divided, c)
+			)
+		);
 	}
 
 	static public int addDiv(int a, int b, int c) {
-		return Logged.function(a, b, c).log(l -> {
-			l.debug("addDiv", a, b, c);
+		return Log.function(a, b, c).code(l -> {
+			l.info("addDiv", a, b, c);
 			int added = add(a, b);
-			l.debug("add result=" + added);
+			l.info("add result=" + added);
 			wrongWrongFunction(a);
 			return divide(added, c);
 		});
@@ -84,6 +84,14 @@ public class LogMonadTest{
 
 	public static void main(String[] args) {
 		UserDAO dao = new UserDAO();
+		LogPrinter lp = LogPrinter.consoleInColor();
+		lp.print(dao.getUserById(1).getLog());
+		lp.print(IO.readTextFile(new File("UnknownFile")).getLog());
+		tryIt(() -> {
+
+			IO.readTextFile(new File("UnknownFile")).orElseThrow();
+		});
+
 		try {
 			//tryIt(()-> System.out.println(dao.getUserById(1).orElseThrow()));
 			//tryIt(() ->System.out.println(dao.getUserById(2).orElseThrow()));
@@ -93,7 +101,7 @@ public class LogMonadTest{
 			//tryIt(()->System.out.println(divide(10,2)));
 			//tryIt(()->System.out.println(addDiv(10,2,0)));
 		} catch(Exception e) {
-			LogPrinter.consoleInColor().print(e);
+			lp.print(e);
 		}
 
 	}

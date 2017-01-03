@@ -32,7 +32,7 @@ public class LoggedException extends RuntimeException{
 	}
 
 	public LoggedException(Throwable cause, LogEntry logs) {
-		super(cause);
+		super(cause.getMessage(),cause);
 		/*if(cause instanceof LoggedException){
 			LoggedException lc = (LoggedException)cause;
 			logs = logs.append(lc.logs);

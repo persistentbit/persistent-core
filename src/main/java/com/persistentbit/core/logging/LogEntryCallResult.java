@@ -8,12 +8,14 @@ import java.util.Optional;
  * @author petermuys
  * @since 2/01/17
  */
-public class LogEntryResult implements LogEntry{
-	private LogContext	context;
-	private String value;
+public class LogEntryCallResult implements LogEntry{
+	private final LogContext     context;
+	private final LogResultLevel level;
+	private final String         value;
 
-	public LogEntryResult(LogContext context, String value) {
+	public LogEntryCallResult(LogContext context, LogResultLevel level, String value) {
 		this.context = context;
+		this.level = level;
 		this.value = value;
 	}
 
@@ -25,5 +27,13 @@ public class LogEntryResult implements LogEntry{
 	@Override
 	public Optional<LogContext> getContext() {
 		return Optional.ofNullable(context);
+	}
+
+	public LogResultLevel getLevel() {
+		return level;
+	}
+
+	public String getValue() {
+		return value;
 	}
 }

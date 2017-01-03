@@ -1,14 +1,14 @@
 package com.persistentbit.core.logging;
 
-import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * TODOC
  *
  * @author petermuys
- * @since 2/01/17
+ * @since 3/01/17
  */
-public interface LoggedValue<T extends LoggedValue>{
-	Optional<LogEntry> getLog();
-	T withLogs(LogEntry le);
+public interface LoggedValue<THIS extends LoggedValue>{
+	LogEntry getLog();
+	THIS mapLog(Function<LogEntry,LogEntry> f);
 }

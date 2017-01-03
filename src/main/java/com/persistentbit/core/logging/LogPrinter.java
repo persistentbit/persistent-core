@@ -1,12 +1,16 @@
 package com.persistentbit.core.logging;
 
+import com.persistentbit.core.Result;
 import com.persistentbit.core.utils.IndentOutputStream;
 import com.persistentbit.core.utils.IndentPrintStream;
 
+import java.io.ByteArrayOutputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 /**
  * TODOC
@@ -44,18 +48,52 @@ public class LogPrinter implements LogEntryPrinter{
 		this.msgStyleException = color.fgRed().toString();
 	}
 
+
+	public <R> R executeAndPrint(Callable<R> code){
+		try{
+			R result = code.call();
+			if(result instanceof LoggedValue){
+				print(((LoggedValue) result).getLog());
+			}
+			return result;
+		}catch(Exception e){
+			print(e);
+			return null;
+		}
+	}
+
 	public static LogPrinter consoleInColor(){
 		return new LogPrinter(
 			new AnsiColor(true),
 			new IndentPrintStream(new IndentOutputStream(System.out))
 		);
 	}
+	public static LogPrinter consoleErrorInColor(){
+		return new LogPrinter(
+			new AnsiColor(true),
+			new IndentPrintStream(new IndentOutputStream(System.err))
+		);
+	}
+
+	public static LogPrinter memory(ByteArrayOutputStream bout){
+		return new LogPrinter(
+			new AnsiColor(false),
+			new IndentPrintStream(new IndentOutputStream(bout))
+		);
+	}
 
 
-	public void print(Throwable exception,LogEntry entry) {
+	public <E extends LoggedValue> E print(E lv){
+		print(lv.getLog());
+		return lv;
+	}
+
+
+
+	public void print(LogEntry entry) {
 		switch(entry.getClass().getSimpleName()){
-			case "LogEntryFunction":	print(exception,(LogEntryFunction)entry); break;
-			case "LogEntryGroup" : print(exception,(LogEntryGroup)entry);break;
+			case "LogEntryFunction":	print((LogEntryFunction)entry); break;
+			case "LogEntryGroup" : print((LogEntryGroup)entry);break;
 			case "LogEntryMessage": print((LogEntryMessage)entry);break;
 			case "LogEntryException": print((LogEntryException) entry); break;
 			default:
@@ -65,10 +103,12 @@ public class LogPrinter implements LogEntryPrinter{
 
 	public void print(Throwable exception){
 		if(exception instanceof LoggedException){
-			out.println(msgStyleException + "Logged Exception:");
+			LoggedException le = (LoggedException) exception;
+			String msg = le.getMessage() == null ? "" : le.getMessage();
+			out.println(msgStyleException + "Logged Exception: " + msg);
 			out.indent();
-			print(exception,((LoggedException)exception).getLogs());
-			//print(exception.getStackTrace());
+			print(le.getLogs());
+			print(exception.getStackTrace());
 			//out.indent();
 			//out.outdent();
 
@@ -107,7 +147,9 @@ public class LogPrinter implements LogEntryPrinter{
 
 	}
 
-
+	private void print(LogEntryFunction entry){
+		print(null,entry);
+	}
 
 	private void print(Throwable exception,LogEntryFunction entry){
 
@@ -120,18 +162,26 @@ public class LogPrinter implements LogEntryPrinter{
 			}
 			return clsName.replace('$','.') + "." + fun;
 		}).orElse("unknownFunction");
+
+
+		String duration = entry.getTimestampDone().map( td ->
+					entry.getContext().map(c ->
+						   " " + (td - c.getTimestamp()) + "ms "
+					).orElse("")
+		).orElse("");
+		String returnValue = entry.getResult().map(r -> ": " + r).orElse("");
 		out.println(
 			functionStyle +  functionName +
 				functionParamsStyle + entry.getParams().map(p -> "(" + p + ")").orElse("(?)") +
-				//functionResultStyle + returnValue +
+				functionResultStyle + returnValue +
 				timeStyle + "\t… " + entry.getContext().map(s -> formatTime(s.getTimestamp()) + " ").orElse("") +
-				//durationStyle + durationStr  +
+				durationStyle + duration  +
 				classStyle  +  entry.getContext().map(s -> s.getClassName() + "(" + s.getFileName() + ":" + s.getSourceLine() + ")").orElse("")
 		);
 		out.indent();
-		entry.getLogs().getEntries().forEach(le -> print(exception,le));
-		//out.indent();
-		print(exception.getStackTrace());
+		entry.getLogs().getEntries().forEach(le -> print(le));
+		out.indent();
+		if(exception != null) { print(exception.getStackTrace()); }
 		out.outdent();
 		out.outdent();
 		//if(exception.getMessage() != null){
@@ -150,8 +200,8 @@ public class LogPrinter implements LogEntryPrinter{
 		}
 		out.outdent();*/
 	}
-	private void print(Throwable exception,LogEntryGroup entry){
-		entry.getEntries().forEach(e -> print(exception,e));
+	private void print(LogEntryGroup entry){
+		entry.getEntries().forEach(e -> print(e));
 	}
 	private void print(LogEntryMessage entry){
 		//out.println(entry.getMessage() + "___" + entry.getSource());
@@ -180,5 +230,22 @@ public class LogPrinter implements LogEntryPrinter{
 
 	private String formatTime(long time) {
 		return dateTimeFormatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
+	}
+
+
+	static void testCode(Function<FunctionLogging,Result<?>> testCode){
+		StackTraceElement ste = Thread.currentThread().getStackTrace()[2];
+		LogContext lc = new LogContext(ste);
+		LogEntryFunction lef = LogEntryFunction.of(lc);
+		FunctionLogging fl = new FunctionLogging(lef,2);
+		try{
+			testCode.apply(fl).orElseThrow();
+		}catch(Throwable e){
+			LogPrinter lp = LogPrinter.consoleInColor();
+			lp.print(fl.getLog());
+			lp.print(e);
+			throw e;
+		}
+
 	}
 }

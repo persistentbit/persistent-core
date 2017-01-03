@@ -11,6 +11,6 @@ import java.util.Optional;
 public interface LogEntry{
 	LogEntry append(LogEntry other);
 	Optional<LogContext> getContext();
-
+	default boolean isEmpty() { return false; }
 
 }
