@@ -96,6 +96,10 @@ public class ResultAsync<T> extends Result<T> {
     public Result<T> mapLog(Function<LogEntry, LogEntry> mapper) {
         return new ResultAsync<>(future.thenApply(r -> r.mapLog(mapper)));
     }
+    @Override
+    public Result<T> withLogs(Consumer<LogEntry> effect) {
+        return new ResultAsync<>(future.thenApply(r -> r.withLogs(effect)));
+    }
 
     @Override
     public T orElseThrow() {

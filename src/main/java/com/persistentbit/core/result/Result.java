@@ -103,6 +103,8 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 
     public abstract Result<T> mapLog(Function<LogEntry, LogEntry> mapper);
 
+    public abstract Result<T> withLogs(Consumer<LogEntry> effect);
+
 
     public <U> Result<Tuple2<T, U>> combine(Result<U> otherResult) {
         Result<Tuple2<T, U>> result = flatMap(thisValue ->{

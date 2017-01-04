@@ -1,5 +1,6 @@
 package com.persistentbit.core.result;
 
+import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.LogEntry;
 import com.persistentbit.core.logging.LogEntryEmpty;
 
@@ -34,6 +35,15 @@ public class Success<T> extends Result<T>{
     @Override
     public Result<T> mapLog(Function<LogEntry, LogEntry> mapper) {
         return new Success<>(value,mapper.apply(log));
+    }
+
+    @Override
+    public Result<T> withLogs(Consumer<LogEntry> effect) {
+        return Log.function().code(l -> {
+            effect.accept(log);
+            return Success.this;
+        });
+
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.persistentbit.core.result;
 
+import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.LogEntry;
 import com.persistentbit.core.logging.LoggedException;
 
@@ -28,6 +29,15 @@ public class Empty<T> extends Result<T>{
     @Override
     public Result<T> mapLog(Function<LogEntry, LogEntry> mapper) {
         return new Empty<>(exception,mapper.apply(log));
+    }
+
+    @Override
+    public Result<T> withLogs(Consumer<LogEntry> effect) {
+        return Log.function().code(l -> {
+            effect.accept(log);
+            return Empty.this;
+        });
+
     }
 
     @Override

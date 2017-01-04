@@ -48,6 +48,11 @@ public class LogPrinter implements LogEntryPrinter{
 		this.msgStyleException = color.fgRed().toString();
 	}
 
+	public LogPrinter registerAsGlobalHandler() {
+		Thread.setDefaultUncaughtExceptionHandler((t, e) -> print(e));
+		return this;
+	}
+
 
 	public <R> R executeAndPrint(Callable<R> code){
 		try{
