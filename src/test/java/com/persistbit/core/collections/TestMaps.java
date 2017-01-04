@@ -1,10 +1,10 @@
 package com.persistbit.core.collections;
 
 import com.persistentbit.core.Nothing;
-import com.persistentbit.core.Result;
 import com.persistentbit.core.collections.*;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.LogPrinter;
+import com.persistentbit.core.result.Result;
 import org.junit.Test;
 
 import java.util.*;

@@ -1,7 +1,7 @@
 package com.persistentbit.core.utils;
 
-import com.persistentbit.core.Result;
 import com.persistentbit.core.logging.Log;
+import com.persistentbit.core.result.Result;
 
 /**
  * TODO: Add comment

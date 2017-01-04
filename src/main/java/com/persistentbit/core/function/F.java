@@ -1,6 +1,6 @@
 package com.persistentbit.core.function;
 
-import com.persistentbit.core.Result;
+import com.persistentbit.core.result.Result;
 
 import java.util.Optional;
 import java.util.function.Function;

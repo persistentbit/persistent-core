@@ -1,6 +1,6 @@
 package com.persistentbit.core.logging;
 
-import com.persistentbit.core.Result;
+import com.persistentbit.core.result.Result;
 
 import java.util.function.Function;
 

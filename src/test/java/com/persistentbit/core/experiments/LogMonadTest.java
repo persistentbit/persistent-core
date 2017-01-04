@@ -1,8 +1,8 @@
 package com.persistentbit.core.experiments;
 
-import com.persistentbit.core.Result;
-import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.logging.Log;
+import com.persistentbit.core.logging.LogPrinter;
+import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.IO;
 
 import java.io.File;

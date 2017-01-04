@@ -1,10 +1,10 @@
 package com.persistentbit.core.utils;
 
 import com.persistentbit.core.Nothing;
-import com.persistentbit.core.Result;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.LoggedException;
+import com.persistentbit.core.result.Result;
 
 import java.io.*;
 import java.nio.charset.Charset;
