@@ -1,9 +1,7 @@
 package com.persistentbit.core.result;
 
 import com.persistentbit.core.Nothing;
-import com.persistentbit.core.logging.LogEntry;
-import com.persistentbit.core.logging.LogEntryEmpty;
-import com.persistentbit.core.logging.LoggedValue;
+import com.persistentbit.core.logging.*;
 import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.tuples.Tuple3;
 import com.persistentbit.core.tuples.Tuple4;
@@ -12,6 +10,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -27,6 +26,59 @@ import java.util.function.Supplier;
  * @since 27/12/2016
  */
 public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValue<Result<T>> {
+
+	public static class FLogging extends FunctionLogging{
+
+		public FLogging(LogEntryFunction lef) {
+			super(lef, 2);
+		}
+
+		public <R> Result<R> codeNoResultLog(FunctionLogging.LoggedFunction<Result<R>> code) {
+			try {
+				Result<R> result = code.run(this);
+				functionDoneTimestamp(System.currentTimeMillis());
+				return result;
+			} catch(LoggedException le) {
+				return Result.<R>failure(le).mapLog(l -> le.getLogs());
+			} catch(Exception e) {
+				return Result.failure(e);
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		public <R> Result<R> code(FunctionLogging.LoggedFunction<Result<R>> code) {
+			try {
+				Result<R> result = code.run(this);
+				functionDoneTimestamp(System.currentTimeMillis());
+				functionResult(result);
+				return result.mapLog(e -> {
+					if(e.isEmpty() == false) {
+						return entry.append(e);
+					}
+					return entry;
+				});
+			} catch(LoggedException le) {
+				return Result.<R>failure(le).mapLog(l -> le.getLogs());
+			} catch(Exception e) {
+				return Result.failure(e);
+			}
+		}
+
+	}
+
+	public static Log.FLogging function() {
+		StackTraceElement ste = Thread.currentThread().getStackTrace()[2];
+		LogEntryFunction  fe  = LogEntryFunction.of(new LogContext(ste));
+		return new Log.FLogging(fe);
+	}
+
+	public static Log.FLogging function(Object... params) {
+		StackTraceElement ste = Thread.currentThread().getStackTrace()[2];
+		LogEntryFunction  fe  = LogEntryFunction.of(new LogContext(ste));
+		Log.FLogging      res = new Log.FLogging(fe);
+		res.params(params);
+		return res;
+	}
 
 
     /**
@@ -261,6 +313,10 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
     public static <U> ResultAsync<U> async(Supplier<Result<U>> code) {
         return ResultAsync.of(code);
     }
+
+	public static <U> Result<U> async(Executor executor, Supplier<Result<U>> code) {
+		return Result.function().code(l -> Result.failure("TODO"));
+	}
 
     public static <U> ResultLazy<U> lazy(Supplier<Result<U>> lazy){
         return ResultLazy.of(lazy);
