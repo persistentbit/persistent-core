@@ -4,6 +4,7 @@ import com.persistentbit.core.Nothing;
 import com.persistentbit.core.logging.*;
 import com.persistentbit.core.result.Result;
 
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -115,6 +116,10 @@ public class TestRunner extends LogEntryLogging{
 			return;
 		}
 		throw new RuntimeException("Expected an exception.");
+	}
+
+	public void assertEquals(Object left, Object right) {
+		assertTrue(Objects.equals(left, right), () -> "Objects are not equal");
 	}
 
 	public <T> T runNoException(Callable<T> code) {

@@ -22,8 +22,8 @@ public final class IO{
 	 *
 	 * @param in  The input stream to read from (NOT NULL)
 	 * @param out The destination output stream (NOT NULL)
-	 *
-	 * @Return Result of Output stream
+	 * @param <T> Type of the output stream
+	 * @return Result of Output stream
 	 */
 	public static <T extends OutputStream> Result<T> copy(InputStream in, T out) {
 		return Result.function().code(l -> {
