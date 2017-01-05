@@ -53,14 +53,16 @@ public class TestRunner extends LogEntryLogging{
             fun = tr.entry.withTimestampDone(System.currentTimeMillis());
             LogEntryFunction finalLog = fun
                 .withResultValue("TEST FAILED")
-                .append(le.getLogs());
-            return Result.<TestCase>failure(le).mapLog(l -> finalLog.append(l));
+				.append(le.getLogs())
+				.append(new LogEntryException(le));
+			return Result.<TestCase>failure(le).mapLog(l -> finalLog.append(l));
         }
         catch(Throwable e){
             fun = tr.entry.withTimestampDone(System.currentTimeMillis());
             LogEntryFunction finalLog = fun
-                .withResultValue("TEST FAILED");
-            return Result.<TestCase>failure(e).mapLog(l -> finalLog.append(l));
+				.withResultValue("TEST FAILED")
+				.append(new LogEntryException(e));
+			return Result.<TestCase>failure(e).mapLog(l -> finalLog.append(l));
         }
     }
 
@@ -76,7 +78,6 @@ public class TestRunner extends LogEntryLogging{
         res.ifEmpty(onError);
         res.ifFailure(e -> {
             String msg = "Expected Success, got " + res;
-            error(msg);
             throw new RuntimeException(msg,e);
         });
     }
@@ -86,7 +87,6 @@ public class TestRunner extends LogEntryLogging{
         }
         if(res.isPresent()){
             String msg = "Expected Empty, got " + res;
-            error(msg);
             throw new RuntimeException(msg);
         }
         res.orElseThrow();
@@ -116,7 +116,6 @@ public class TestRunner extends LogEntryLogging{
     }
     public void assertTrue(boolean b, Supplier<String> error){
         if(b == false) {
-            error(error.get());
             throw new RuntimeException(error.get());
         }
     }
