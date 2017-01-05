@@ -1,6 +1,7 @@
 package com.persistentbit.core.testing;
 
-import com.persistentbit.core.logging.LogPrinter;
+import com.persistentbit.core.Nothing;
+import com.persistentbit.core.logging.*;
 import com.persistentbit.core.result.Result;
 
 import java.util.concurrent.Callable;
@@ -13,51 +14,70 @@ import java.util.function.Supplier;
  * @author Peter Muys
  * @since 5/01/2017
  */
-public class TestRunner {
-
-    private TestRunner() {
+public class TestRunner extends LogEntryLogging{
+    private LogEntryFunction entry;
+    private TestRunner(LogEntryFunction entry) {
+        super(2);
+        this.entry = entry;
     }
 
-
-
+    @Override
+    public Nothing add(LogEntry logEntry) {
+        entry = entry.append(logEntry);
+        return Nothing.inst;
+    }
 
     public static void runTest(TestCase testCase){
         runTest(LogPrinter.consoleInColor().registerAsGlobalHandler(),testCase);
     }
     public static void runTest(LogPrinter lp, TestCase testCase){
-        Result<TestCase> resultCaste = getTestRunResult(testCase);
-        resultCaste.ifPresent( cn -> {
-            System.out.println("TEST " + testCase.getName() + " OK");
-        });
-        resultCaste.ifFailure(e -> {
-            System.out.println("TEST " + testCase.getName() + " FAILED");
+        Result<TestCase> resultCase = getTestRunResult(testCase);
 
-        });
-        lp.print(resultCaste.getLog());
+        lp.print(resultCase.getLog());
     }
 
 
     public static  Result<TestCase> getTestRunResult(TestCase testCode){
-        TestRunner tr = new TestRunner();
-        return Result.function(testCode.getName(),testCode.getInfo()).code(l -> {
-            testCode.getTestCode().accept(tr);
-            l.info("Test " + testCode.getName() + " OK");
-            return Result.success(testCode);
-        });
 
+        LogEntryFunction fun = LogEntryFunction.of(testCode.getContext()
+            .withTimestamp(System.currentTimeMillis()))
+            .withParams("\"" + testCode.getName() + "\"");
+
+        TestRunner tr = new TestRunner(fun);
+        try{
+            testCode.getTestCode().accept(tr);
+            fun = tr.entry.withTimestampDone(System.currentTimeMillis());
+            LogEntryFunction finalLog = fun.withResultValue("OK");
+            return Result.success(testCode).mapLog(l -> finalLog.append(l));
+        }catch(LoggedException le){
+            fun = tr.entry.withTimestampDone(System.currentTimeMillis());
+            LogEntryFunction finalLog = fun
+                .withResultValue("TEST FAILED")
+                .append(le.getLogs());
+            return Result.<TestCase>failure(le).mapLog(l -> finalLog.append(l));
+        }
+        catch(Throwable e){
+            fun = tr.entry.withTimestampDone(System.currentTimeMillis());
+            LogEntryFunction finalLog = fun
+                .withResultValue("TEST FAILED");
+            return Result.<TestCase>failure(e).mapLog(l -> finalLog.append(l));
+        }
     }
 
 
 
 
     public void assertSuccess(Result<?> res){
+
         Runnable onError = () -> {
 
             throw new RuntimeException("Expected Success, got " + res);
         };
         res.ifEmpty(onError);
         res.ifFailure(e -> {
-            throw new RuntimeException("Expected Success, got " + res,e);
+            String msg = "Expected Success, got " + res;
+            error(msg);
+            throw new RuntimeException(msg,e);
         });
     }
     public void assertEmpty(Result<?> res){
@@ -65,7 +85,9 @@ public class TestRunner {
             return;
         }
         if(res.isPresent()){
-            throw new RuntimeException("Expected Empty, got " + res);
+            String msg = "Expected Empty, got " + res;
+            error(msg);
+            throw new RuntimeException(msg);
         }
         res.orElseThrow();
     }
@@ -94,6 +116,7 @@ public class TestRunner {
     }
     public void assertTrue(boolean b, Supplier<String> error){
         if(b == false) {
+            error(error.get());
             throw new RuntimeException(error.get());
         }
     }

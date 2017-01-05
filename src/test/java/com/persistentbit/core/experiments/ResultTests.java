@@ -39,10 +39,10 @@ public class ResultTests {
     static public final  TestCase all = TestCase
             .name("All Tests")
             .subTestCases(
-                    testFailureCaseOfResult,
                     exceptionFailTest,
-                    logEntryEmptyAddEmpty
-            );
+                    logEntryEmptyAddEmpty,
+                    testFailureCaseOfResult
+                    );
 
 
     @Test
