@@ -28,7 +28,7 @@ public class LogEntryGroup implements LogEntry{
 
 	@Override
 	public LogEntryGroup append(LogEntry other) {
-		return new LogEntryGroup(this.entries.plus(other));
+		return other.isEmpty() ? this : new LogEntryGroup(this.entries.plus(other));
 	}
 
 	@Override

@@ -66,16 +66,16 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 
 	}
 
-	public static Log.FLogging function() {
+	public static FLogging function() {
 		StackTraceElement ste = Thread.currentThread().getStackTrace()[2];
 		LogEntryFunction  fe  = LogEntryFunction.of(new LogContext(ste));
-		return new Log.FLogging(fe);
+		return new FLogging(fe);
 	}
 
-	public static Log.FLogging function(Object... params) {
+	public static FLogging function(Object... params) {
 		StackTraceElement ste = Thread.currentThread().getStackTrace()[2];
 		LogEntryFunction  fe  = LogEntryFunction.of(new LogContext(ste));
-		Log.FLogging      res = new Log.FLogging(fe);
+		FLogging      res = new FLogging(fe);
 		res.params(params);
 		return res;
 	}
