@@ -277,6 +277,12 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
         return new Empty<>(cause, LogEntryEmpty.inst);
     }
 
+    public static <U> Result<U> fromOpt(Optional<U> optValue){
+    	if(optValue == null){
+    		return Result.failure("optValue is null");
+		}
+		return Result.result(optValue.orElse(null));
+	}
 
     /**
      * Create a Success or Empty result
