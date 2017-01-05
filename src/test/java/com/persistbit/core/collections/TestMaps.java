@@ -2,9 +2,9 @@ package com.persistbit.core.collections;
 
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.collections.*;
-import com.persistentbit.core.logging.Log;
-import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.result.Result;
+import com.persistentbit.core.testing.TestCase;
+import com.persistentbit.core.testing.TestRunner;
 import org.junit.Test;
 
 import java.util.*;
@@ -14,72 +14,73 @@ import java.util.*;
  * @since 9/07/16
  */
 public class TestMaps{
-	static private LogPrinter lp = LogPrinter.consoleInColor();
 
 
-  @Test
-  public void testPMap() {
-	  lp.print(doAddRemove(PMap.empty()));
-  }
+	public static final TestCase pmapTest = TestCase.name("Test PMap/POrderedMap add/remove").code(t -> {
+		t.assertSuccess(doAddRemove(PMap.empty()));
+		t.assertSuccess(doAddRemove(POrderedMap.empty()));
+	});
 
 
+	@Test
+	public void testPMap() {
+		TestRunner.runTest(pmapTest).orElseThrow();
+	}
 
-  private Result<Nothing> doAddRemove(IPMap<Integer, String> empty) {
-	  return Log.function(empty).code(l -> {
-		  Map<Integer, String>   refMap = new LinkedHashMap<>();
-		  IPMap<Integer, String> pmap   = empty;
-		  Random                 r      = new Random(System.currentTimeMillis());
-		  int                    count  = 100000;
-		  l.info("Adding " + count + " elements to a PMap and a java Map");
-		  for(int t = 0; t < count; t++) {
-			  int    key = r.nextInt();
-			  String val = String.valueOf(r.nextGaussian());
-			  refMap.put(key, val);
-			  pmap = pmap.put(key, val);
-		  }
-		  l.info("Adding " + count + " elements to a PMap and a java Map...done");
-		  refMap.put(null, "1234");
-		  pmap = pmap.put(null, "1234");
-		  Set<Integer>     refKeys     = refMap.keySet();
-		  PStream<Integer> pstreamKeys = pmap.keys();
-		  //System.out.println(pstreamKeys);
-		  PSet<Integer> psetKeys = pstreamKeys.pset();
-		  //System.out.println(psetKeys);
-		  Set<Integer> pKeys = psetKeys.toSet();
-		  assert refMap.size() == pmap.size();
 
-		  if(pmap instanceof POrderedMap) {
-			  //Lets check if the order is ok...
-			  Iterator<Integer> refIter = refMap.keySet().iterator();
-			  Iterator<Integer> pIter   = pmap.keys().iterator();
-			  while(refIter.hasNext() && pIter.hasNext()) {
-				  assert Objects.equals(refIter.next(), pIter.next());
+	private static Result<Nothing> doAddRemove(IPMap<Integer, String> empty) {
+		return Result.function(empty).code(l -> {
+			Map<Integer, String>   refMap = new LinkedHashMap<>();
+			IPMap<Integer, String> pmap   = empty;
+			Random                 r      = new Random(System.currentTimeMillis());
+			int                    count  = 5000;
+			l.info("Adding " + count + " elements to a PMap and a java Map");
+			for(int t = 0; t < count; t++) {
+				int    key = r.nextInt();
+				String val = String.valueOf(r.nextGaussian());
+				refMap.put(key, val);
+				pmap = pmap.put(key, val);
+			}
+			l.info("Adding " + count + " elements to a PMap and a java Map...done");
+			refMap.put(null, "1234");
+			pmap = pmap.put(null, "1234");
+			Set<Integer>     refKeys     = refMap.keySet();
+			PStream<Integer> pstreamKeys = pmap.keys();
+			//System.out.println(pstreamKeys);
+			PSet<Integer> psetKeys = pstreamKeys.pset();
+			//System.out.println(psetKeys);
+			Set<Integer> pKeys = psetKeys.toSet();
+			assert refMap.size() == pmap.size();
 
-			  }
-			  assert refIter.hasNext() == pIter.hasNext();
-		  }
+			if(pmap instanceof POrderedMap) {
+				//Lets check if the order is ok...
+				Iterator<Integer> refIter = refMap.keySet().iterator();
+				Iterator<Integer> pIter   = pmap.keys().iterator();
+				while(refIter.hasNext() && pIter.hasNext()) {
+					assert Objects.equals(refIter.next(), pIter.next());
 
-		  if(refKeys.equals(pKeys) == false) {
-			  throw new RuntimeException();
-		  }
+				}
+				assert refIter.hasNext() == pIter.hasNext();
+			}
 
-		  for(Map.Entry<Integer, String> entry : refMap.entrySet()) {
-			  if(pmap.get(entry.getKey()).equals(entry.getValue()) == false) {
-				  throw new RuntimeException(entry.toString());
-			  }
-		  }
-		  for(Map.Entry<Integer, String> entry : pmap.map().entrySet()) {
-			  if(pmap.get(entry.getKey()).equals(entry.getValue()) == false) {
-				  throw new RuntimeException(entry.toString());
-			  }
-		  }
+			if(refKeys.equals(pKeys) == false) {
+				throw new RuntimeException();
+			}
 
-		  return Result.success(Nothing.inst);
-	  });
-  }
+			for(Map.Entry<Integer, String> entry : refMap.entrySet()) {
+				if(pmap.get(entry.getKey()).equals(entry.getValue()) == false) {
+					throw new RuntimeException(entry.toString());
+				}
+			}
+			for(Map.Entry<Integer, String> entry : pmap.map().entrySet()) {
+				if(pmap.get(entry.getKey()).equals(entry.getValue()) == false) {
+					throw new RuntimeException(entry.toString());
+				}
+			}
 
-  @Test
-  public void testPOrderedMap() {
-  	lp.print(doAddRemove(POrderedMap.empty()));
-  }
+			return Result.success(Nothing.inst);
+		});
+	}
+
+
 }

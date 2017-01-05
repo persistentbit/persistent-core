@@ -1,6 +1,7 @@
 package com.persistbit.core.collections;
 
 import com.persistentbit.core.collections.*;
+import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.tuples.Tuple2;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,6 +17,9 @@ import java.util.Collections;
 public class TestPStream{
 
   private static final PStream<Integer> init = PStream.val(4, 10, 2, 8, 100, -2, 0, 1000);
+
+	private static final TestCase headMiddleEnd = TestCase.name()
+
 
   @Test
   public void testHeadMiddleEnd() {

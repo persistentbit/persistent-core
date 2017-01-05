@@ -33,7 +33,7 @@ public class ResultTests {
             .code(t -> {
                 LogEntry le = LogEntryEmpty.inst;
                 le = le.append(le);
-                t.assertTrue(le instanceof  LogEntryEmpty == false);
+                t.assertTrue(le instanceof LogEntryEmpty);
             });
 
     static public final  TestCase all = TestCase
@@ -47,7 +47,7 @@ public class ResultTests {
 
     @Test
     public void testAll() {
-        TestRunner.runTest(all);
+        TestRunner.runTest(all).orElseThrow();
     }
 
     public static void main(String... args) throws Exception {
