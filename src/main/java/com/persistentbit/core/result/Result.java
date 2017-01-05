@@ -144,10 +144,11 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
         return verify(verification, v -> new IllegalStateException("Verification for " + v + " failed:" + errorMessage));
     }
 
+
+
     public abstract <E extends Throwable> Result<T> verify(Predicate<T> verification,
                                                            Function<T, E> failureExceptionSupplier
     );
-
 
     public abstract Result<String> forEachOrErrorMsg(Consumer<? super T> effect);
 
@@ -382,6 +383,15 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
             super("Can't get value from a Failure Result", failureCause);
         }
     }
+	public static <R> Result<R> fromOpt(Optional<R> r){
+    	if(r == null){
+    		return Result.failure("Optional is null");
+		}
+		R value = r.orElse(null);
+    	return result(value);
+	}
 
-
+	public void print(LogPrinter lp){
+    	lp.print(getLog());
+	}
 }

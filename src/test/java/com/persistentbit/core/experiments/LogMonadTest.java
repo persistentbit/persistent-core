@@ -57,7 +57,7 @@ public class LogMonadTest{
 
 	public static Result<Integer> saveDivDiv(int a, int b, int c) {
 		return Log.function(a, b, c).code(l ->
-			l.add(saveDiv(a,b)).flatMap(divided ->
+			saveDiv(a,b).flatMap(divided ->
 				saveDiv(divided, c)
 			)
 		);
