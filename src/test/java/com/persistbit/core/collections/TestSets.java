@@ -4,7 +4,7 @@ import com.persistentbit.core.collections.IPSet;
 import com.persistentbit.core.collections.POrderedSet;
 import com.persistentbit.core.collections.PSet;
 import com.persistentbit.core.collections.PStream;
-import org.junit.Test;
+import com.persistentbit.core.testing.TestCase;
 
 import java.util.*;
 
@@ -14,17 +14,11 @@ import java.util.*;
  */
 public class TestSets{
 
-	@Test
-	public void testPSet() {
-		doAddRemove(PSet.empty());
-	}
+	static final TestCase testPSet = TestCase.name("PSet").code(tr -> doAddRemove(PSet.empty()));
+	static final TestCase testPOrderedSet = TestCase.name("POrderedSet").code(tr -> doAddRemove(PSet.empty()));
 
-	@Test
-	public void testPOrderedSet() {
-		doAddRemove(POrderedSet.empty());
-	}
 
-	private void doAddRemove(IPSet<Integer> empty) {
+	private static void doAddRemove(IPSet<Integer> empty) {
 		Set<Integer>   refMap = new LinkedHashSet<>();
 		IPSet<Integer> pmap   = empty;
 		Random         r      = new Random(System.currentTimeMillis());

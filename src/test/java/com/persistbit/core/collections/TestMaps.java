@@ -5,7 +5,6 @@ import com.persistentbit.core.collections.*;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
-import org.junit.Test;
 
 import java.util.*;
 
@@ -17,15 +16,16 @@ public class TestMaps{
 
 
 	public static final TestCase pmapTest = TestCase.name("Test PMap/POrderedMap add/remove").code(t -> {
-		t.assertSuccess(doAddRemove(PMap.empty()));
-		t.assertSuccess(doAddRemove(POrderedMap.empty()));
+		t.isSuccess(doAddRemove(PMap.empty()));
+		t.isSuccess(doAddRemove(POrderedMap.empty()));
 	});
 
 
-	@Test
-	public void testPMap() {
-		TestRunner.runTest(pmapTest).orElseThrow();
+
+	public void testAll() {
+		TestRunner.runAndPrint(TestMaps.class);
 	}
+
 
 
 	private static Result<Nothing> doAddRemove(IPMap<Integer, String> empty) {

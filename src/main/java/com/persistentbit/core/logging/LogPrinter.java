@@ -4,8 +4,7 @@ import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.IndentOutputStream;
 import com.persistentbit.core.utils.IndentPrintStream;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.Charset;
+import java.io.OutputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -49,10 +48,7 @@ public class LogPrinter implements LogEntryPrinter{
 		this.msgStyleException = color.fgRed().toString();
 	}
 
-	public LogPrinter registerAsGlobalHandler() {
-		Thread.setDefaultUncaughtExceptionHandler((t, e) -> print(e));
-		return this;
-	}
+
 
 
 	public <R> R executeAndPrint(Callable<R> code){
@@ -68,33 +64,35 @@ public class LogPrinter implements LogEntryPrinter{
 		}
 	}
 
-
-
-	public static LogPrinter consoleInColor(){
-		return IndentOutputStream.of(System.out)
-				.flatMap(os-> IndentPrintStream.of(os, Charset.forName("UTF-8")))
-				.map(ips -> new LogPrinter(new AnsiColor(true),ips))
+	private static LogEntryPrinter bufferedPrinter(
+		OutputStream realOut,
+		Function<IndentPrintStream,LogPrinter> printerSupplier
+	){
+		LogPrinterBuffered.RealPrinterSupplier bufferdSupplier = out -> charset ->
+			IndentOutputStream.of(out)
+				.flatMap(os-> IndentPrintStream.of(os, charset))
+				.map(printerSupplier)
 				.orElseThrow();
-	}
-	public static LogPrinter consoleErrorInColor(){
-		return IndentOutputStream.of(System.err)
-				.flatMap(os-> IndentPrintStream.of(os, Charset.forName("UTF-8")))
-				.map(ips -> new LogPrinter(new AnsiColor(true),ips))
-				.orElseThrow();
+		return LogPrinterBuffered.buffered(realOut,bufferdSupplier).orElseThrow();
 	}
 
-	public static LogPrinter memory(ByteArrayOutputStream bout){
+
+	public static LogEntryPrinter consoleInColor(){
+		return bufferedPrinter(System.out,ips -> new LogPrinter(new AnsiColor(true),ips));
+	}
+	public static LogEntryPrinter consoleErrorInColor(){
+		return bufferedPrinter(System.err,ips -> new LogPrinter(new AnsiColor(true),ips));
+	}
+
+	/*public static LogEntryPrinter memory(ByteArrayOutputStream bout){
 		return IndentOutputStream.of(bout)
 				.flatMap(os -> IndentPrintStream.of(os,Charset.forName("UTF-8")))
 				.map(s -> new LogPrinter(new AnsiColor(false),s))
 				.orElseThrow();
-	}
+	}*/
 
 
-	public <E extends LoggedValue> E print(E lv){
-		print(lv.getLog());
-		return lv;
-	}
+
 
 
 
@@ -250,7 +248,7 @@ public class LogPrinter implements LogEntryPrinter{
 		try{
 			testCode.apply(fl).orElseThrow();
 		}catch(Throwable e){
-			LogPrinter lp = LogPrinter.consoleInColor();
+			LogEntryPrinter lp = LogPrinter.consoleInColor();
 			lp.print(fl.getLog());
 			lp.print(e);
 			throw e;

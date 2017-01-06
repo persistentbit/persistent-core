@@ -1,12 +1,12 @@
 package com.persistbit.core;
 
+import com.persistbit.core.utils.TestValue;
 import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestData;
 import com.persistentbit.core.testing.TestRunner;
 import com.persistentbit.core.utils.IO;
-import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,10 +21,10 @@ import java.nio.charset.Charset;
  */
 public class TestUtils{
 
-	private static final TestCase copyTest = TestCase.name("copy").code(t -> {
-		t.assertFailure(IO.copy(null, null));
-		t.assertFailure(IO.copy(new ByteArrayInputStream(new byte[0]), null));
-		t.assertSuccess(
+	static final TestCase copyTest = TestCase.name("copy").code(t -> {
+		t.isFailure(IO.copy(null, null));
+		t.isFailure(IO.copy(new ByteArrayInputStream(new byte[0]), null));
+		t.isSuccess(
 			IO.copy(new ByteArrayInputStream(new byte[0]), new ByteArrayOutputStream())
 				.verify((ByteArrayOutputStream bout) -> t.runNoException(() -> {
 					bout.close();
@@ -35,7 +35,7 @@ public class TestUtils{
 		PStream.sequence(0).limit(1000).forEach(i -> {
 			byte[]               bytesIn = TestData.createRandomBytes(15000);
 			ByteArrayInputStream in      = new ByteArrayInputStream(bytesIn);
-			t.assertSuccess(IO.copy(in, new ByteArrayOutputStream())
+			t.isSuccess(IO.copy(in, new ByteArrayOutputStream())
 								.verify((ByteArrayOutputStream bout) -> t.runNoException(() -> {
 									bout.close();
 									return compareBytes(bout.toByteArray(), bytesIn);
@@ -44,18 +44,18 @@ public class TestUtils{
 
 		});
 	});
-	private static final TestCase readText = TestCase.name("Reading Text").code(t -> {
+	static final TestCase readText = TestCase.name("Reading Text").code(t -> {
 		Charset charset = Charset.defaultCharset();
-		t.assertFailure(IO.readTextFile(null, charset));
-		t.assertFailure(IO.readTextFile(File.listRoots()[0],charset));
-		t.assertSuccess(TestData.createRandomTextFile("readTextFileTest",charset, 10)
+		t.isFailure(IO.readTextFile(null, charset));
+		t.isFailure(IO.readTextFile(File.listRoots()[0], charset));
+		t.isSuccess(TestData.createRandomTextFile("readTextFileTest", charset, 10)
 							.verify(fileAndString -> {
 								String readString = IO.readTextFile(fileAndString._1,charset).orElseThrow();
 								return readString.equals(fileAndString._2);
 							})
 		);
 
-		t.assertSuccess(TestData.createRandomTextFile("readTextFileTest",charset, 10)
+		t.isSuccess(TestData.createRandomTextFile("readTextFileTest", charset, 10)
 							.verify(fileAndString -> {
 								String readString = IO.fileToInputStream(fileAndString._1)
 									.flatMap(is -> IO.inputStreamToReader(is,charset))
@@ -63,6 +63,19 @@ public class TestUtils{
 								return readString.equals(fileAndString._2);
 							})
 		);
+	});
+
+	static final TestCase baseValueClass = TestCase.name("BaseValue").code(tr -> {
+		TestValue t1 = new TestValue(1234, "userX");
+		TestValue t2 = new TestValue(1234, "userX");
+		TestValue t3 = new TestValue(5678, "userY");
+		System.out.println(t1 + ",   " + t2 + ",  " + t3);
+		tr.isTrue(t1.hashCode() == t2.hashCode());
+		tr.isTrue(t1.hashCode() != t3.hashCode());
+		tr.isEquals(t1,t2);
+		tr.isTrue(t1.equals(t3) == false);
+		TestValue t4 = new TestValue(5678, "userY", 1);
+		tr.isTrue(t3.equals(t4));
 	});
 
 
@@ -78,17 +91,15 @@ public class TestUtils{
 		return true;
 	}
 
-	private static final TestCase ioTests = TestCase.name("IO Tests").info("Test for all IO functions").subTestCases(
-		copyTest, readText
-	);
 
-	@Test
-	public void testIO() {
-		TestRunner.runTest(ioTests).orElseThrow();
+
+
+	public void testAll() {
+		TestRunner.runAndPrint(TestUtils.class);
 	}
 
 	public static void main(String... args) throws Exception {
 		LogPrinter.consoleInColor().registerAsGlobalHandler();
-		TestRunner.runTest(ioTests).orElseThrow();
+		new TestUtils().testAll();
 	}
 }

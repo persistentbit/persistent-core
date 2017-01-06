@@ -55,13 +55,13 @@ public class Failure<T> extends Result<T>{
     @Override
     @SuppressWarnings("unchecked")
     public <U> Result<U> map(Function<T, U> mapper) {
-        return new Failure<>(exception, log);
+        return (Result<U>)this;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <U> Result<U> flatMap(Function<T, Result<U>> mapper) {
-        return new Failure<>(exception, log);
+        return (Result<U>)this;
     }
 
     @Override
@@ -91,16 +91,6 @@ public class Failure<T> extends Result<T>{
     @Override
     public void ifFailure(Consumer<Throwable> e) {
         e.accept(exception);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-
-        Failure<?> failure = (Failure<?>) o;
-
-        return exception.equals(failure.exception);
     }
 
     @Override

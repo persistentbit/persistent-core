@@ -155,4 +155,16 @@ public class ResultAsync<T> extends Result<T> {
             return super.combine(otherResult);
         }
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Result == false) { return false; }
+        Result other = (Result)obj;
+        return completed().equals(other.completed());
+    }
+
+    @Override
+    public int hashCode() {
+        return completed().hashCode();
+    }
 }

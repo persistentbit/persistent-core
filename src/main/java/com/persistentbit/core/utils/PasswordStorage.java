@@ -2,6 +2,7 @@ package com.persistentbit.core.utils;
 
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.logging.Log;
+import com.persistentbit.core.logging.LogEntryPrinter;
 import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.result.Result;
 
@@ -210,8 +211,8 @@ public final class PasswordStorage {
 
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
     public static void main(String... args) {
-        LogPrinter lp = LogPrinter.consoleInColor();
-        String result = createHash("PeterMuys20").orElseThrow();
+        LogEntryPrinter lp     = LogPrinter.consoleInColor();
+        String          result = createHash("PeterMuys20").orElseThrow();
         System.out.println(result);
         lp.print(createHash((String)null));
         lp.print(verifyPassword("PeterMuys20", result));

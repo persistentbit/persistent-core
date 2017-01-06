@@ -1,5 +1,6 @@
 package com.persistentbit.core.experiments.unitwork;
 
+import com.persistentbit.core.logging.LogEntryPrinter;
 import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.result.Result;
 
@@ -37,8 +38,8 @@ public class PersonService{
 	}
 
 	public static void main(String[] args) {
-		LogPrinter lp = LogPrinter.consoleInColor().registerAsGlobalHandler();
-		PersonService ps = new PersonService(new Repo());
+		LogEntryPrinter lp = LogPrinter.consoleInColor().registerAsGlobalHandler();
+		PersonService   ps = new PersonService(new Repo());
 		ps.findPeter().print(lp);
 		ps.createPeter().print(lp);
 		ps.findPeter().print(lp);

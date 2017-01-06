@@ -130,4 +130,21 @@ public class ResultLazy<T> extends Result<T>{
     public void ifFailure(Consumer<Throwable> e) {
         getValue().ifFailure(e);
     }
+
+    @Override
+    public String toString() {
+        return "ResultLazy(" + getValue() + ")";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Result == false){ return false; }
+        Result other = (Result)obj;
+        return completed().equals(other.completed());
+    }
+
+    @Override
+    public int hashCode() {
+        return completed().hashCode();
+    }
 }

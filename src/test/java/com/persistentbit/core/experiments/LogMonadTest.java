@@ -1,6 +1,7 @@
 package com.persistentbit.core.experiments;
 
 import com.persistentbit.core.logging.Log;
+import com.persistentbit.core.logging.LogEntryPrinter;
 import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.IO;
@@ -84,8 +85,8 @@ public class LogMonadTest{
 	}
 
 	public static void main(String[] args) {
-		UserDAO dao = new UserDAO();
-		LogPrinter lp = LogPrinter.consoleInColor();
+		UserDAO         dao = new UserDAO();
+		LogEntryPrinter lp  = LogPrinter.consoleInColor();
 		lp.print(dao.getUserById(1).getLog());
 		lp.print(IO.readTextFile(new File("UnknownFile"), Charset.defaultCharset()).getLog());
 		tryIt(() -> {

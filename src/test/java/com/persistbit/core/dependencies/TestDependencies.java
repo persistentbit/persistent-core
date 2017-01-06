@@ -2,37 +2,36 @@ package com.persistbit.core.dependencies;
 
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.dependencies.DependencyResolver;
+import com.persistentbit.core.testing.TestCase;
+import com.persistentbit.core.testing.TestRunner;
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.NoEqual;
-import org.junit.Test;
 
 /**
  * @author petermuys
  * @since 25/09/16
  */
 public class TestDependencies{
+	static final TestCase testDependencies = TestCase.name("Test DependencyResolver").code(tr -> {
+		Node a = new Node("a");
+		Node b = new Node("b");
+		Node c = new Node("c");
+		Node d = new Node("d");
+		Node e = new Node("e");
 
-  @Test
-  public void test() {
-	Node a = new Node("a");
-	Node b = new Node("b");
-	Node c = new Node("c");
-	Node d = new Node("d");
-	Node e = new Node("e");
+		a.add(b);
+		a.add(d);
+		b.add(c);
+		b.add(e);
+		c.add(d);
+		c.add(e);
+		PList<String> resolved = DependencyResolver.resolve(a, Node::getEdges).map(Node::getValue);
+		System.out.println("Resolved: " + resolved);
+		assert resolved.equals(PList.val("d", "e", "c", "b", "a"));
 
-	a.add(b);
-	a.add(d);
-	b.add(c);
-	b.add(e);
-	c.add(d);
-	c.add(e);
-	PList<String> resolved = DependencyResolver.resolve(a, Node::getEdges).map(Node::getValue);
-	System.out.println("Resolved: " + resolved);
-	assert resolved.equals(PList.val("d", "e", "c", "b", "a"));
+		//Check circular dependency...
 
-	//Check circular dependency...
-
-	d.add(b);
+		d.add(b);
 	/*try {
 	  DependencyResolver.resolve(a, Node::getEdges).map(Node::getValue);
 	  assert false;
@@ -40,7 +39,10 @@ public class TestDependencies{
 	  assert ex.getFirstNode().equals(d) || ex.getSecondNode().equals(d);
 	  assert ex.getFirstNode().equals(b) || ex.getSecondNode().equals(b);
 	}*/
+	});
 
+  public void testAll(){
+	  TestRunner.runAndPrint(TestDependencies.class);
   }
 
   public static final class Node extends BaseValueClass{
