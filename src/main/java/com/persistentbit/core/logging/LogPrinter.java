@@ -5,6 +5,7 @@ import com.persistentbit.core.utils.IndentOutputStream;
 import com.persistentbit.core.utils.IndentPrintStream;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -67,24 +68,26 @@ public class LogPrinter implements LogEntryPrinter{
 		}
 	}
 
+
+
 	public static LogPrinter consoleInColor(){
-		return new LogPrinter(
-			new AnsiColor(true),
-			new IndentPrintStream(new IndentOutputStream(System.out))
-		);
+		return IndentOutputStream.of(System.out)
+				.flatMap(os-> IndentPrintStream.of(os, Charset.forName("UTF-8")))
+				.map(ips -> new LogPrinter(new AnsiColor(true),ips))
+				.orElseThrow();
 	}
 	public static LogPrinter consoleErrorInColor(){
-		return new LogPrinter(
-			new AnsiColor(true),
-			new IndentPrintStream(new IndentOutputStream(System.err))
-		);
+		return IndentOutputStream.of(System.err)
+				.flatMap(os-> IndentPrintStream.of(os, Charset.forName("UTF-8")))
+				.map(ips -> new LogPrinter(new AnsiColor(true),ips))
+				.orElseThrow();
 	}
 
 	public static LogPrinter memory(ByteArrayOutputStream bout){
-		return new LogPrinter(
-			new AnsiColor(false),
-			new IndentPrintStream(new IndentOutputStream(bout))
-		);
+		return IndentOutputStream.of(bout)
+				.flatMap(os -> IndentPrintStream.of(os,Charset.forName("UTF-8")))
+				.map(s -> new LogPrinter(new AnsiColor(false),s))
+				.orElseThrow();
 	}
 
 

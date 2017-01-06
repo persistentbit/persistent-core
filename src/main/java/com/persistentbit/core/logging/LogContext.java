@@ -55,6 +55,10 @@ public class LogContext{
 		return timestamp;
 	}
 
+	public LogContext withMethodName(String methodName){
+		return new LogContext(fileName,className,methodName,sourceLine,timestamp);
+	}
+
 	public String toString() {
 		return getClassName() + "." + getMethodName() + "(" + getFileName() + ":" + getSourceLine() + ")";
 	}

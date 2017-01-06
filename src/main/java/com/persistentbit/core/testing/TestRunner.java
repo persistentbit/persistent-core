@@ -73,33 +73,23 @@ public class TestRunner extends LogEntryLogging{
 
 	public void assertSuccess(Result<?> res) {
 
-		Runnable onError = () -> {
-
-			throw new RuntimeException("Expected Success, got " + res);
-		};
-		res.ifEmpty(onError);
-		res.ifFailure(e -> {
-			String msg = "Expected Success, got " + res;
-			throw new RuntimeException(msg, e);
-		});
+		if(res.isPresent() == false){
+			throw new TestException("Expected Success, got " + res,0);
+		}
 	}
 
 	public void assertEmpty(Result<?> res) {
 		if(res.isEmpty()) {
 			return;
 		}
-		if(res.isPresent()) {
-			String msg = "Expected Empty, got " + res;
-			throw new RuntimeException(msg);
-		}
-		res.orElseThrow();
+		throw new TestException("Expected Empty, got " + res);
 	}
 
 	public void assertFailure(Result<?> res) {
 		if(res.isError()) {
 			return;
 		}
-		throw new RuntimeException("Expected Failure, got " + res);
+		throw new TestException("Expected Failure, got " + res);
 	}
 
 	public void assertException(Callable<?> code) {
@@ -111,15 +101,18 @@ public class TestRunner extends LogEntryLogging{
 			code.call();
 		} catch(Exception e) {
 			if(verifyException.test(e) == false) {
-				throw new RuntimeException("Verification of thrown Exception failed.", e);
+				throw new TestException("Verification of thrown Exception failed.", e);
 			}
 			return;
 		}
-		throw new RuntimeException("Expected an exception.");
+		throw new TestException("Expected an exception.");
 	}
 
 	public void assertEquals(Object left, Object right) {
-		assertTrue(Objects.equals(left, right), () -> "Objects are not equal");
+		if(Objects.equals(left,right)){
+			return;
+		}
+		throw new TestException("Objects are not equal:" + left + " != right");
 	}
 
 	public <T> T runNoException(Callable<T> code) {
@@ -127,17 +120,19 @@ public class TestRunner extends LogEntryLogging{
 		try {
 			return code.call();
 		} catch(Exception e) {
-			throw new RuntimeException("Unexpected exception :-)", e);
+			throw new TestException("Unexpected exception :-)", e);
 		}
 	}
 
 	public void assertTrue(boolean b) {
-		assertTrue(b, () -> "Expected condition to be true");
+		if(b == false) {
+			throw new TestException("Expected condition to be true");
+		}
 	}
 
 	public void assertTrue(boolean b, Supplier<String> error) {
 		if(b == false) {
-			throw new RuntimeException(error.get());
+			throw new TestException(error.get());
 		}
 	}
 

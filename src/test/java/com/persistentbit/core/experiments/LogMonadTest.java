@@ -6,6 +6,7 @@ import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.IO;
 
 import java.io.File;
+import java.nio.charset.Charset;
 
 
 /**
@@ -86,10 +87,10 @@ public class LogMonadTest{
 		UserDAO dao = new UserDAO();
 		LogPrinter lp = LogPrinter.consoleInColor();
 		lp.print(dao.getUserById(1).getLog());
-		lp.print(IO.readTextFile(new File("UnknownFile")).getLog());
+		lp.print(IO.readTextFile(new File("UnknownFile"), Charset.defaultCharset()).getLog());
 		tryIt(() -> {
 
-			IO.readTextFile(new File("UnknownFile")).orElseThrow();
+			IO.readTextFile(new File("UnknownFile"),Charset.defaultCharset()).orElseThrow();
 		});
 
 		try {

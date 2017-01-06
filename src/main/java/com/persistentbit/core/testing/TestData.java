@@ -24,16 +24,16 @@ public class TestData{
 		return result;
 	}
 
-	public static String createTestString(int maxSize) {
-		return new String(createRandomBytes(maxSize), Charset.forName("UTF-8"));
+	public static String createTestString(Charset charset, int maxSize) {
+		return new String(createRandomBytes(maxSize), charset);
 	}
 
-	public static Result<Tuple2<File, String>> createRandomTextFile(String namePrefix, int maxSize) {
+	public static Result<Tuple2<File, String>> createRandomTextFile(String namePrefix,Charset charset, int maxSize) {
 		return Result.function().code(l -> {
-			String txt = createTestString(maxSize);
+			String txt = createTestString(charset,maxSize);
 			File   f   = File.createTempFile(namePrefix, ".txt");
 			f.deleteOnExit();
-			IO.writeFile(txt, f);
+			IO.writeFile(txt, f,charset);
 			return Result.success(Tuple2.of(f, txt));
 		});
 

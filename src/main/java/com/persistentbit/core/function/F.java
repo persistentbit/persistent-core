@@ -44,7 +44,7 @@ public interface F {
     }
 
     static <A, R> Function<A, Result<R>> toResult(Function<A, R> f) {
-        return Result.toResult(f);
+        return Result.toResultFunction(f);
     }
 
     static <A, B, R> Function<A, Function<B, Result<R>>> higherToResult(Function<A, Function<B, R>> f) {

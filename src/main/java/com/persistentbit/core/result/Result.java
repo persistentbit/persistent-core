@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -338,17 +339,25 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
      * @param <R> The Result value type
      * @return A new function returning a Result
      */
-    public static <T, R> Function<T, Result<R>> toResult(Function<T, R> f) {
+    public static <T, R> Function<T, Result<R>> toResultFunction(Function<T, R> f) {
         return x -> {
             try {
                 return result(f.apply(x));
-            } catch (RuntimeException e) {
-                return failure(e);
             } catch (Exception e) {
-                return failure(new RuntimeException(e));
+                return failure(e);
             }
         };
 
+    }
+
+    public static <R> Result<R> noExceptions(Callable<R> code){
+        return Result.function().code(l -> {
+            try {
+                return result(code.call());
+            } catch (Exception e) {
+                return failure(e);
+            }
+        });
     }
 
     public static <T, U, R> Function<T, Function<U, Result<R>>> higherToResult(Function<T, Function<U, R>> f) {
@@ -386,7 +395,7 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
     public static class FailureException extends RuntimeException {
 
         public FailureException(Throwable failureCause) {
-            super("Can't get value from a Failure Result", failureCause);
+            super("Can't get value from a Failure Result:" + failureCause.getMessage(), failureCause);
         }
     }
 

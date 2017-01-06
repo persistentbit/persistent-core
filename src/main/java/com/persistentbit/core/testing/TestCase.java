@@ -38,7 +38,7 @@ public class TestCase{
 
         public TestCaseWithName(String name) {
             this.name = name;
-            logContext = new LogContext(Thread.currentThread().getStackTrace()[3]);
+            logContext = new LogContext(Thread.currentThread().getStackTrace()[3]).withMethodName("TestCase");
         }
 
         public TestCaseWithName info(String...info){
@@ -59,7 +59,7 @@ public class TestCase{
                     }
                 }
                 if(failedTestCases.isEmpty() == false){
-                    throw new RuntimeException(
+                    throw new TestException(
                         "Sub Tests failed:" + failedTestCases.toString(", ")
                     );
                 }

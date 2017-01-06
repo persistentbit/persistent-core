@@ -1,6 +1,7 @@
 package com.persistbit.core;
 
 import com.persistentbit.core.collections.PStream;
+import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestData;
 import com.persistentbit.core.testing.TestRunner;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.nio.charset.Charset;
 
 /**
  * TODOC
@@ -43,19 +45,20 @@ public class TestUtils{
 		});
 	});
 	private static final TestCase readText = TestCase.name("Reading Text").code(t -> {
-		t.assertFailure(IO.readTextFile(null));
-		t.assertFailure(IO.readTextFile(File.listRoots()[0]));
-		t.assertSuccess(TestData.createRandomTextFile("readTextFileTest", 10000)
+		Charset charset = Charset.defaultCharset();
+		t.assertFailure(IO.readTextFile(null, charset));
+		t.assertFailure(IO.readTextFile(File.listRoots()[0],charset));
+		t.assertSuccess(TestData.createRandomTextFile("readTextFileTest",charset, 10)
 							.verify(fileAndString -> {
-								String readString = IO.readTextFile(fileAndString._1).orElseThrow();
+								String readString = IO.readTextFile(fileAndString._1,charset).orElseThrow();
 								return readString.equals(fileAndString._2);
 							})
 		);
 
-		t.assertSuccess(TestData.createRandomTextFile("readTextFileTest", 10000)
+		t.assertSuccess(TestData.createRandomTextFile("readTextFileTest",charset, 10)
 							.verify(fileAndString -> {
 								String readString = IO.fileToInputStream(fileAndString._1)
-									.flatMap(is -> IO.inputStreamToReader(is))
+									.flatMap(is -> IO.inputStreamToReader(is,charset))
 									.flatMap(ir -> IO.readTextStream(ir)).orElseThrow();
 								return readString.equals(fileAndString._2);
 							})
@@ -81,6 +84,11 @@ public class TestUtils{
 
 	@Test
 	public void testIO() {
+		TestRunner.runTest(ioTests).orElseThrow();
+	}
+
+	public static void main(String... args) throws Exception {
+		LogPrinter.consoleInColor().registerAsGlobalHandler();
 		TestRunner.runTest(ioTests).orElseThrow();
 	}
 }

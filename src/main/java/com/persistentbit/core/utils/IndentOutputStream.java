@@ -1,8 +1,11 @@
 package com.persistentbit.core.utils;
 
+import com.persistentbit.core.result.Result;
+
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -16,17 +19,24 @@ public class IndentOutputStream extends FilterOutputStream{
     private final Function<String,String> doIndent;
     private final Function<String,String> doOutdent;
     private boolean prevNewLine = false;
-    public IndentOutputStream(OutputStream out,Function<String,String> indent, Function<String,String> outdent) {
-        super(out);
-        this.doIndent = indent;
-        this.doOutdent = outdent;
+    private IndentOutputStream(OutputStream out,Function<String,String> indent, Function<String,String> outdent) {
+        super(Objects.requireNonNull(out));
+        this.doIndent = Objects.requireNonNull(indent);
+        this.doOutdent = Objects.requireNonNull(outdent);
     }
-    public IndentOutputStream(OutputStream out,String indendString) {
-        this(out,s -> s + indendString, s -> s.substring(0,s.length()-indendString.length()));
+
+
+
+    static public Result<IndentOutputStream> of(OutputStream out,Function<String,String> indent, Function<String,String> outdent){
+        return Result.noExceptions(()->new IndentOutputStream(out,indent,outdent));
     }
-    public IndentOutputStream(OutputStream out){
-        this(out,"\t");
+    static public Result<IndentOutputStream> of(OutputStream out, String indentString){
+        return of(out,s -> s + indentString, s -> s.substring(0,s.length()-indentString.length()));
     }
+    static public Result<IndentOutputStream> of(OutputStream out){
+        return of(out,"\t");
+    }
+
     public IndentOutputStream indent() {
         prefix = doIndent.apply(prefix);
         return this;
@@ -49,7 +59,4 @@ public class IndentOutputStream extends FilterOutputStream{
         prevNewLine = b == '\n';
     }
 
-    static public void main(String...args) throws Exception{
-
-    }
 }

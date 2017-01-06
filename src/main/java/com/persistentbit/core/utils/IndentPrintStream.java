@@ -1,7 +1,11 @@
 package com.persistentbit.core.utils;
 
+import com.persistentbit.core.result.Result;
+
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.Objects;
 
 /**
  * PrintStream with indent.
@@ -11,16 +15,17 @@ import java.io.UnsupportedEncodingException;
  * @see IndentOutputStream
  */
 public class IndentPrintStream extends PrintStream{
-    private IndentOutputStream indentOutputStream;
-    public IndentPrintStream(IndentOutputStream out) {
-        super(out,true);
+    private final IndentOutputStream indentOutputStream;
+
+    private IndentPrintStream(IndentOutputStream out, Charset encoding) throws UnsupportedEncodingException {
+        super(Objects.requireNonNull(out), true, Objects.requireNonNull(encoding).name());
         this.indentOutputStream = out;
     }
 
-    public IndentPrintStream(IndentOutputStream out, String encoding) throws UnsupportedEncodingException {
-        super(out, true, encoding);
-        this.indentOutputStream = out;
+    public static Result<IndentPrintStream> of(IndentOutputStream out, Charset encoding){
+        return  Result.noExceptions(()-> new IndentPrintStream(out,encoding));
     }
+
 
     public IndentPrintStream indent() {
         flush();
@@ -34,9 +39,9 @@ public class IndentPrintStream extends PrintStream{
     }
 
     public static void main(String... args) throws Exception {
-        IndentPrintStream ips = new IndentPrintStream(
-                new IndentOutputStream(System.out)
-        );
+        IndentPrintStream ips = IndentOutputStream.of(System.out)
+                .flatMap(os -> IndentPrintStream.of(os,Charset.defaultCharset()))
+                .orElseThrow();
         System.setOut(ips);
         System.out.println("Test");
         ips.indent();
