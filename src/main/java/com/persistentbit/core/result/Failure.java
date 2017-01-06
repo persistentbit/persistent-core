@@ -43,6 +43,11 @@ public class Failure<T> extends Result<T>{
     }
 
     @Override
+    public Result<T> cleanLogsOnPresent() {
+        return this;
+    }
+
+    @Override
     public LogEntry getLog() {
         return log;
     }

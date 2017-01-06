@@ -1,6 +1,7 @@
 package com.persistentbit.core.result;
 
 import com.persistentbit.core.logging.Log;
+import com.persistentbit.core.logging.LogCleaner;
 import com.persistentbit.core.logging.LogEntry;
 import com.persistentbit.core.logging.LogEntryEmpty;
 
@@ -141,5 +142,10 @@ public class Success<T> extends Result<T>{
     public Result<Throwable> forEachOrException(Consumer<? super T> effect) {
         effect.accept(value);
         return empty();
+    }
+
+    @Override
+    public Result<T> cleanLogsOnPresent() {
+        return withLogs(l -> LogCleaner.clean(log));
     }
 }

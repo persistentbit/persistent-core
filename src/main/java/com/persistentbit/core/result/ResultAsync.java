@@ -63,6 +63,11 @@ public class ResultAsync<T> extends Result<T> {
     }
 
     @Override
+    public Result<T> cleanLogsOnPresent() {
+        return new ResultAsync<>(future.thenApplyAsync(r -> r.cleanLogsOnPresent()));
+    }
+
+    @Override
     public Optional<T> getOpt() {
         return Log.function().code(l -> future.get().getOpt());
     }

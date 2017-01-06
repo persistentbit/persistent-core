@@ -6,8 +6,8 @@ package com.persistentbit.core.logging;
  * @author Peter Muys
  * @since 6/01/2017
  */
-public interface LogCleaner {
-    default LogEntry clean(LogEntry logEntry){
+public class LogCleaner {
+    public static LogEntry clean(LogEntry logEntry){
         if(logEntry instanceof LogEntryEmpty){
             return clean((LogEntryEmpty)logEntry);
         } else if(logEntry instanceof LogEntryFunction){
@@ -23,23 +23,23 @@ public interface LogCleaner {
         }
 
     }
-    default LogEntry clean(LogEntryFunction le){
+    public static LogEntry clean(LogEntryFunction le){
         LogEntry cleaned = clean(le.getLogs());
         if(cleaned.isEmpty()){
             return LogEntryEmpty.inst;
         }
         return le.withLogs(cleaned);
     }
-    default LogEntry clean(LogEntryEmpty le){
+    public static LogEntry clean(LogEntryEmpty le){
         return le;
     }
-    default LogEntry clean(LogEntryException le){
+    public static LogEntry clean(LogEntryException le){
         return le;
     }
-    default LogEntry clean(LogEntryGroup le) {
+    public static LogEntry clean(LogEntryGroup le) {
         return le.getEntries().fold(LogEntryEmpty.inst,(a,b)-> a.append(clean(b)));
     }
-    default LogEntry clean(LogEntryMessage le){
+    public static LogEntry clean(LogEntryMessage le){
         switch (le.getLevel()) {
             case error:
             case important:

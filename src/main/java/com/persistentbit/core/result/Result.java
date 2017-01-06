@@ -400,6 +400,9 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
     }
 
 
+    public abstract Result<T> cleanLogsOnPresent();
+
+
 	public void print(LogPrinter lp){
     	lp.print(getLog());
 	}

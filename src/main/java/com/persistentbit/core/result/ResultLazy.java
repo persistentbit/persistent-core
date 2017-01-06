@@ -62,6 +62,11 @@ public class ResultLazy<T> extends Result<T>{
     }
 
     @Override
+    public Result<T> cleanLogsOnPresent() {
+        return new ResultLazy<>( () -> getValue().cleanLogsOnPresent());
+    }
+
+    @Override
     public Optional<T> getOpt() {
         return getValue().getOpt();
     }
