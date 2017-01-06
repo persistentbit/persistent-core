@@ -187,7 +187,8 @@ public class LogPrinter implements LogEntryPrinter{
 				classStyle  +  entry.getContext().map(s -> s.getClassName() + "(" + s.getFileName() + ":" + s.getSourceLine() + ")").orElse("")
 		);
 		out.indent();
-		entry.getLogs().getEntries().forEach(le -> print(le));
+		print(entry.getLogs());
+		//entry.getLogs().getEntries().forEach(le -> print(le));
 		out.indent();
 		if(exception != null) { print(exception.getStackTrace()); }
 		out.outdent();

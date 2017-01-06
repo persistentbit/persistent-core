@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * @author Peter Muys
  * @since 5/01/2017
  */
-public class TestRunner extends LogEntryLogging{
+public class TestRunner extends AbstractLogEntryLogging {
 
 	private LogEntryFunction entry;
 

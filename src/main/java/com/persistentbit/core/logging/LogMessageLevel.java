@@ -7,5 +7,5 @@ package com.persistentbit.core.logging;
  * @since 3/01/17
  */
 public enum  LogMessageLevel{
-	info,warning,error
+	info,important, warning,error
 }

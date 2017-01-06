@@ -8,11 +8,11 @@ import com.persistentbit.core.Nothing;
  * @author petermuys
  * @since 5/01/17
  */
-public abstract class LogEntryLogging{
+public abstract class AbstractLogEntryLogging {
 
 	protected final int stackEntryIndex;
 
-	public LogEntryLogging(int stackEntryIndex) {
+	public AbstractLogEntryLogging(int stackEntryIndex) {
 		this.stackEntryIndex = stackEntryIndex;
 	}
 
@@ -40,6 +40,19 @@ public abstract class LogEntryLogging{
 		StackTraceElement ste = Thread.currentThread().getStackTrace()[stackEntryIndex];
 		String values = objectToString(value) + ", " + objectsToString(otherValues);
 		return add(LogEntryMessage.of(LogMessageLevel.info, new LogContext(ste), objectToString(message) + ": " + values));
+	}
+	public Nothing important(Object message){
+		StackTraceElement ste = Thread.currentThread().getStackTrace()[stackEntryIndex];
+		return add(LogEntryMessage.of(LogMessageLevel.important, new LogContext(ste), objectToString(message)));
+	}
+	public Nothing important(String message, Object value){
+		StackTraceElement ste = Thread.currentThread().getStackTrace()[stackEntryIndex];
+		return add(LogEntryMessage.of(LogMessageLevel.important, new LogContext(ste), objectToString(message) + ": " + objectToString(message)));
+	}
+	public Nothing important(String message, Object value,Object...otherValues){
+		StackTraceElement ste = Thread.currentThread().getStackTrace()[stackEntryIndex];
+		String values = objectToString(value) + ", " + objectsToString(otherValues);
+		return add(LogEntryMessage.of(LogMessageLevel.important, new LogContext(ste), objectToString(message) + ": " + values));
 	}
 	public Nothing warning(Object message){
 		StackTraceElement ste = Thread.currentThread().getStackTrace()[stackEntryIndex];

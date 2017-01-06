@@ -37,4 +37,8 @@ public class LogEntryMessage implements LogEntry{
 	public String getMessage() {
 		return message;
 	}
+
+	public LogMessageLevel getLevel() {
+		return level;
+	}
 }

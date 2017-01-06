@@ -10,12 +10,12 @@ import java.util.Optional;
  */
 public class LogEntryFunction implements LogEntry{
 	private LogContext    source;
-	private LogEntryGroup logs;
+	private LogEntry logs;
 	private String        params;
 	private Long		  timeStampDone;
 	private String		  resultValue;
 
-	private LogEntryFunction(LogContext source, String params, LogEntryGroup logs,Long timeStampDone,String resultValue) {
+	LogEntryFunction(LogContext source, String params, LogEntry logs,Long timeStampDone,String resultValue) {
 		this.source = source;
 		this.params = params;
 		this.logs = logs;
@@ -40,7 +40,7 @@ public class LogEntryFunction implements LogEntry{
 		return Optional.ofNullable(params);
 	}
 
-	public LogEntryGroup getLogs() {
+	public LogEntry getLogs() {
 		return logs;
 	}
 
@@ -61,7 +61,9 @@ public class LogEntryFunction implements LogEntry{
 	public LogEntryFunction withResultValue(String resultValue){
 		return new LogEntryFunction(source,params,logs,timeStampDone,resultValue);
 	}
-
+	public LogEntryFunction withLogs(LogEntry logs){
+		return new LogEntryFunction(source,params,logs,timeStampDone,resultValue);
+	}
 	@Override
 	public String toString() {
 		return "fun " + source.getMethodName() + "(" + getParams().orElse("") + ")" + "{ " + getLogs() + "}";

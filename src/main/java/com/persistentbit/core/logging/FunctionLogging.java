@@ -10,7 +10,7 @@ import java.util.function.Function;
  * @author petermuys
  * @since 3/01/17
  */
-public class FunctionLogging extends LogEntryLogging{
+public class FunctionLogging extends AbstractLogEntryLogging {
 
 	@FunctionalInterface
 	public interface LoggedFunction<R>{
