@@ -127,7 +127,7 @@ public final class POrderedMap<K, V> extends AbstractPStreamDirect<Tuple2<K, V>,
   @Override
   public POrderedMap<K, V> removeKey(Object key) {
 	PList<K> kl = this.order;
-	if(map.containsKey(key) == false) {
+	if(map.containsKey(key)) {
 	  kl = kl.filter(e -> Objects.equals(e, key) == false);
 	}
 	return new POrderedMap<>(map.removeKey(key), kl);

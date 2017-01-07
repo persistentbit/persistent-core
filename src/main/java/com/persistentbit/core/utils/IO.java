@@ -17,6 +17,7 @@ import java.util.Objects;
  */
 public final class IO {
 
+    public static final Charset utf8 = Charset.forName("UTF-8");
 
     /**
      * copy data from in to out. <br>
