@@ -137,11 +137,8 @@ public class ResultAsync<T> extends Result<T> {
     }
 
     @Override
-    public Result<T> ifPresent(Consumer<T> effect) {
-        return new ResultAsync<>(future.thenApply(v -> {
-            v.ifPresent(effect);
-            return v;
-        }));
+    public void ifPresent(Consumer<T> effect) {
+        future.thenAccept(r -> r.ifPresent(effect));
     }
 
     @Override

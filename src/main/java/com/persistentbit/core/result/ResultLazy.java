@@ -117,8 +117,8 @@ public class ResultLazy<T> extends Result<T>{
     }
 
     @Override
-    public Result<T> ifPresent(Consumer<T> effect) {
-        return getValue().ifPresent(effect);
+    public void ifPresent(Consumer<T> effect) {
+        getValue().ifPresent(effect);
     }
 
     @Override

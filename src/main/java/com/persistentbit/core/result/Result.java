@@ -122,8 +122,11 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 	}
 
 	/**
-	 *
-	 * @return
+	 * Wait for this result to complete.<br>
+	 * For lazy results, calculate the value, for async result with
+	 * for the async result to be completed.<br>
+	 * @return The completed result.
+	 * @see #isComplete()
 	 */
 	public Result<T> completed() {
 		return this;
