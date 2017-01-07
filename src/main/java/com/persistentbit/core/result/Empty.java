@@ -40,6 +40,10 @@ public class Empty<T> extends Result<T>{
 
     }
 
+    public Throwable getException() {
+        return exception;
+    }
+
     @Override
     public Result<T> cleanLogsOnPresent() {
         return this;
@@ -126,5 +130,29 @@ public class Empty<T> extends Result<T>{
     @Override
     public Result<Throwable> forEachOrException(Consumer<? super T> effect) {
         return empty();
+    }
+
+    @Override
+    public Result<T> flatMapFailure(Function<? super Failure<T>, Result<T>> mapper
+    ) {
+        return this;
+    }
+
+    @Override
+    public Result<T> flatMapEmpty(Function<? super Empty<T>, Result<T>> mapper
+    ) {
+        if(mapper == null) {
+            return failure("flatMapEmpty function is null");
+        }
+        Result<T> resultValue;
+        try {
+            resultValue = mapper.apply(this);
+        } catch(Exception e) {
+            return failure(e);
+        }
+        if(resultValue == null) {
+            return failure("flatMapEmpty returned a null result");
+        }
+        return resultValue.mapLog(log::append);
     }
 }

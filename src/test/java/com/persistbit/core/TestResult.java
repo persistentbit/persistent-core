@@ -67,6 +67,10 @@ public class TestResult{
 		testGetOpt(tr, successResultLazy, failureResultLazy, emptyResultLazy);
 	});
 
+	static final TestCase testFlatMapError = TestCase.name("flatMapFailure/flatMapEmpty").code(tr -> {
+		tr.warning("TODO test flatMapFailure/flatMapEmpty");
+	});
+
 	private static void testGetOpt(TestRunner tr, Result<Nothing> success, Result<Nothing> failure, Result<Nothing> empty){
 		tr.isTrue(success.getOpt().isPresent());
 		tr.isFalse(failure.getOpt().isPresent());

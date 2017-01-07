@@ -2,6 +2,7 @@ package com.persistentbit.core.utils;
 
 import com.persistentbit.core.NotNullable;
 import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.logging.Log;
 
 import java.util.Objects;
 
@@ -29,36 +30,38 @@ public final class StringUtils{
 	 * @see #unEscapeJavaString(String)
 	 */
 	public static String escapeToJavaString(String s) {
-		Objects.requireNonNull(s, "Can't escape a null string");
-		StringBuilder sb = new StringBuilder(s.length() + 4);
-		for(int t = 0; t < s.length(); t++) {
-			char c = s.charAt(t);
-			if(c == '\t') {
-				sb.append("\\t");
+		return Log.function(s).code(l -> {
+			Objects.requireNonNull(s, "Can't escape a null string");
+			StringBuilder sb = new StringBuilder(s.length() + 4);
+			for(int t = 0; t < s.length(); t++) {
+				char c = s.charAt(t);
+				if(c == '\t') {
+					sb.append("\\t");
+				}
+				else if(c == '\n') {
+					sb.append("\\n");
+				}
+				else if(c == '\r') {
+					sb.append("\\r");
+				}
+				else if(c == '\\') {
+					sb.append("\\\\");
+				}
+				else if(c == '\b') {
+					sb.append("\\b");
+				}
+				else if(c == '\"') {
+					sb.append("\\\"");
+				}
+				else if(c == '\'') {
+					sb.append("\\\'");
+				}
+				else {
+					sb.append(c);
+				}
 			}
-			else if(c == '\n') {
-				sb.append("\\n");
-			}
-			else if(c == '\r') {
-				sb.append("\\r");
-			}
-			else if(c == '\\') {
-				sb.append("\\\\");
-			}
-			else if(c == '\b') {
-				sb.append("\\b");
-			}
-			else if(c == '\"') {
-				sb.append("\\\"");
-			}
-			else if(c == '\'') {
-				sb.append("\\\'");
-			}
-			else {
-				sb.append(c);
-			}
-		}
-		return sb.toString();
+			return sb.toString();
+		});
 	}
 
 	/**
@@ -69,60 +72,62 @@ public final class StringUtils{
 	 * @return The unescaped string
 	 */
 	public static String unEscapeJavaString(String s) {
-		Objects.requireNonNull(s, "Can't unescape a null string");
-		StringBuilder sb          = new StringBuilder(10);
-		boolean       prevSpecial = false;
-		for(int t = 0; t < s.length(); t++) {
-			char c = s.charAt(t);
-			if(prevSpecial) {
-				switch(c) {
-					case 't':
-						sb.append('\t');
-						break;
-					case '\\':
-						sb.append('\\');
-						break;
-					case 'n':
-						sb.append('\n');
-						break;
-					case 'r':
-						sb.append('\r');
-						break;
-					case 'b':
-						sb.append('\b');
-						break;
-					case '\"':
-						sb.append('\"');
-						break;
-					case '\'':
-						sb.append('\'');
-						break;
-					default:
-						sb.append('\\').append(c);
-						break;
-				}
-				prevSpecial = false;
-			}
-			else {
-				if(c == '\\') {
-					prevSpecial = true;
+		return Log.function(s).code(l -> {
+			Objects.requireNonNull(s, "Can't unescape a null string");
+			StringBuilder sb          = new StringBuilder(10);
+			boolean       prevSpecial = false;
+			for(int t = 0; t < s.length(); t++) {
+				char c = s.charAt(t);
+				if(prevSpecial) {
+					switch(c) {
+						case 't':
+							sb.append('\t');
+							break;
+						case '\\':
+							sb.append('\\');
+							break;
+						case 'n':
+							sb.append('\n');
+							break;
+						case 'r':
+							sb.append('\r');
+							break;
+						case 'b':
+							sb.append('\b');
+							break;
+						case '\"':
+							sb.append('\"');
+							break;
+						case '\'':
+							sb.append('\'');
+							break;
+						default:
+							sb.append('\\').append(c);
+							break;
+					}
+					prevSpecial = false;
 				}
 				else {
-					//TOFIX  prevSpecial is always false here
-					if(prevSpecial) {
-						sb.append('\\');
-						prevSpecial = false;
+					if(c == '\\') {
+						prevSpecial = true;
 					}
-					sb.append(c);
+					else {
+						//TOFIX  prevSpecial is always false here
+						if(prevSpecial) {
+							sb.append('\\');
+							prevSpecial = false;
+						}
+						sb.append(c);
+					}
 				}
+
+			}
+			if(prevSpecial) {
+				sb.append('\\');
 			}
 
-		}
-		if(prevSpecial) {
-			sb.append('\\');
-		}
-
-		return sb.toString();
+			return sb.toString();
+		});
 	}
 
 	/**
@@ -275,4 +280,6 @@ public final class StringUtils{
 		}
 		return kleiner + "";
 	}
+
+
 }

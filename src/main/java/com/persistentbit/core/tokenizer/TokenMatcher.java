@@ -1,5 +1,7 @@
 package com.persistentbit.core.tokenizer;
 
+import com.persistentbit.core.result.Result;
+
 import java.util.function.Function;
 
 /**
@@ -18,7 +20,7 @@ public interface TokenMatcher<TT>{
    * @return The new TokenMatcher
    */
   default TokenMatcher<TT> ignore() {
-	return this.map(found -> new TokenFound<>(found.text, found.type, true));
+	  return this.map(found -> Result.success(new TokenFound<>(found.text, found.type, true)));
   }
 
   /**
@@ -28,14 +30,8 @@ public interface TokenMatcher<TT>{
    *
    * @return This mapped token matcher.
    */
-  default TokenMatcher<TT> map(Function<TokenFound<TT>, TokenFound<TT>> mapper) {
-	return code -> {
-	  TokenFound<TT> found = TokenMatcher.this.tryParse(code);
-	  if(found != null) {
-		return mapper.apply(found);
-	  }
-	  return null;
-	};
+  default TokenMatcher<TT> map(Function<TokenFound<TT>, Result<TokenFound<TT>>> mapper) {
+	  return code -> TokenMatcher.this.tryParse(code).flatMap(found -> mapper.apply(found));
   }
 
   /**
@@ -45,7 +41,7 @@ public interface TokenMatcher<TT>{
    *
    * @param code The code to parse
    *
-   * @return null if not able to parse or a valid TokenFound instance.
+   * @return The parsed token or empty
    */
-  TokenFound<TT> tryParse(String code);
+  Result<TokenFound<TT>> tryParse(String code);
 }

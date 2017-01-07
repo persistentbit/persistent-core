@@ -29,7 +29,7 @@ public class Log{
 				R result = code.run(this);
 				functionDoneTimestamp(System.currentTimeMillis());
 				functionResult(result);
-				if(result instanceof LoggedValue){
+				/*if(result instanceof LoggedValue){
 					LoggedValue<?> lv = (LoggedValue)result;
 					return (R) lv.mapLog(e -> {
 						if(e.isEmpty() == false){
@@ -37,7 +37,7 @@ public class Log{
 						}
 						return entry;
 					});
-				}
+				}*/
 				return result;
 			}catch(Exception e){
 				throw new LoggedException(e,entry);

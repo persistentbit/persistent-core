@@ -119,16 +119,16 @@ public final class PasswordStorage {
             if (!params[HASH_ALGORITHM_INDEX].equals("sha256")) {
                 return Result.failure(new CannotPerformOperationException("Unsupported hash type."));
             }
-            return NumberUtils.parsInt(params[ITERATION_INDEX])
-                .mapError(ex -> new InvalidHashException("Could not parse the iteration count as an integer.",ex))
+			return NumberUtils.parseInt(params[ITERATION_INDEX])
+				.mapError(ex -> new InvalidHashException("Could not parse the iteration count as an integer.",ex))
                 .flatMap(iterations -> {
                     if(iterations < 1){
                         return Result.failure(new InvalidHashException("Invalid number of iterations. Must be >= 1."));
                     }
                     return fromBase64(params[SALT_INDEX]).flatMap(salt ->
                           fromBase64(params[PBKDF2_INDEX]).flatMap(hash ->
-                               NumberUtils.parsInt(params[HASH_SIZE_INDEX])
-                                   .verify(storedHashSize -> storedHashSize == hash.length,(v)->new InvalidHashException("Hash length doesn't match stored hash length."))
+																	   NumberUtils.parseInt(params[HASH_SIZE_INDEX])
+																		   .verify(storedHashSize -> storedHashSize == hash.length,(v)->new InvalidHashException("Hash length doesn't match stored hash length."))
                                    .flatMap(storedHashSize ->
                                             {
                                                 // Compute the hash of the provided password, using the same salt,

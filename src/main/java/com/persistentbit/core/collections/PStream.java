@@ -813,4 +813,8 @@ public interface PStream<T> extends Iterable<T>{
 	enum HeadMiddleEnd{
 		head, middle, end, headAndEnd
 	}
+
+
+	PStream<T> limitOnPreviousValue(Predicate<T> stopOnTrue);
+
 }

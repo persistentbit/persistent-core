@@ -60,6 +60,9 @@ public class Success<T> extends Result<T>{
 		if(resultValue == null){
 			return empty("map returned a null value");
 		}
+		if(resultValue == this) {
+			return (Result<U>) this;
+		}
 		return new Success<>(resultValue, log);
 	}
 
@@ -76,6 +79,9 @@ public class Success<T> extends Result<T>{
 		}
 		if(resultValue == null){
 			return failure("flatMap returned a null result");
+		}
+		if(resultValue.getLog().isEmpty() && log.isEmpty()) {
+			return resultValue;
 		}
 		return resultValue.mapLog(log::append);
 	}
@@ -169,5 +175,17 @@ public class Success<T> extends Result<T>{
 	@Override
 	public Result<T> cleanLogsOnPresent() {
 		return withLogs(l -> LogCleaner.clean(log));
+	}
+
+	@Override
+	public Result<T> flatMapFailure(Function<? super Failure<T>, Result<T>> mapper
+	) {
+		return this;
+	}
+
+	@Override
+	public Result<T> flatMapEmpty(Function<? super Empty<T>, Result<T>> mapper
+	) {
+		return this;
 	}
 }

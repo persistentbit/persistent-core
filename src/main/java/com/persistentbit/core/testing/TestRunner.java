@@ -120,7 +120,7 @@ public final class TestRunner extends AbstractLogEntryLogging {
 		throw new TestException("Expected an exception.");
 	}
 
-	public void isEquals(Object left, Object right) {
+	public <X> void isEquals(X left, X right) {
 		if(left != null && left.getClass().isArray()){
 			if(Arrays.deepEquals((Object[])left,(Object[])right)){
 				return;

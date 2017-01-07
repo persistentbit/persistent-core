@@ -1,5 +1,6 @@
 package com.persistentbit.core.result;
 
+import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.logging.*;
 import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.tuples.Tuple3;
@@ -51,12 +52,13 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 				Result<R> result = code.run(this);
 				functionDoneTimestamp(System.currentTimeMillis());
 				functionResult(result);
-				return result.mapLog(e -> {
+				/*return result.mapLog(e -> {
 					if(e.isEmpty() == false) {
 						return entry.append(e);
 					}
 					return entry;
-				});
+				});*/
+				return result;
 			} catch(LoggedException le) {
 				return Result.<R>failure(le).mapLog(l -> le.getLogs());
 			} catch(Exception e) {
@@ -131,6 +133,26 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 	public Result<T> completed() {
 		return this;
 	}
+
+	/**
+	 * FlatMap this result if it is a {@link Failure}
+	 *
+	 * @param mapper Failure mapper
+	 *
+	 * @return The mapped failure or this if it not a failure
+	 */
+	public abstract Result<T> flatMapFailure(Function<? super Failure<T>, Result<T>> mapper);
+
+	/**
+	 * FlatMap this result if it is an {@link Empty}
+	 *
+	 * @param mapper Empty mapper
+	 *
+	 * @return The mapped Empty or this if it not an Empty
+	 */
+	public abstract Result<T> flatMapEmpty(Function<? super Empty<T>, Result<T>> mapper);
+
+
 
 
 	public void ifPresent(Consumer<T> effect) {
@@ -429,5 +451,21 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 
 	public void print(LogEntryPrinter lp) {
 		lp.print(getLog());
+	}
+
+	public static <T> Result<PStream<T>> fromSequence(PStream<Result<T>> stream) {
+		Optional<Result<T>> optWrong = stream.find(Result::isError);
+
+		if(optWrong.isPresent()) {
+			return optWrong.get()
+				.flatMapFailure(f -> Result.failure(
+					new RuntimeException("sequence contains failure", f.getException()))
+				).flatMap(t -> Result.failure("Should not happen"));
+		}
+
+		return Result.success(stream.lazy()
+								  .filter(r -> r.isEmpty() == false)
+								  .map(Result::orElseThrow));
+
 	}
 }

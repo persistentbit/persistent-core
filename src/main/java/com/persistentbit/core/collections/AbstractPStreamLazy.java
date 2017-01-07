@@ -18,9 +18,9 @@ public abstract class AbstractPStreamLazy<T> implements PStreamWithDefaults<T>{
 	if(o instanceof PStream == false) {
 	  return false;
 	}
-
-	Iterator i1 = iterator();
-	Iterator i2 = iterator();
+	  PStream  other = (PStream) o;
+	Iterator   i1    = iterator();
+	  Iterator i2    = other.iterator();
 	while(i1.hasNext() && i2.hasNext()) {
 	  Object v1 = i1.next();
 	  Object v2 = i2.next();

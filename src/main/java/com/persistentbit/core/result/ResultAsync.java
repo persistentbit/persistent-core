@@ -88,6 +88,18 @@ public class ResultAsync<T> extends Result<T> {
     }
 
     @Override
+    public Result<T> flatMapFailure(Function<? super Failure<T>, Result<T>> mapper
+    ) {
+        return new ResultAsync<>(future.thenApply(r -> r.flatMapFailure(mapper)));
+    }
+
+    @Override
+    public Result<T> flatMapEmpty(Function<? super Empty<T>, Result<T>> mapper
+    ) {
+        return new ResultAsync<>(future.thenApply(r -> r.flatMapEmpty(mapper)));
+    }
+
+    @Override
     public Result<String> forEachOrErrorMsg(Consumer<? super T> effect) {
         return new ResultAsync<>(future.thenApply(r -> r.forEachOrErrorMsg(effect)));
     }

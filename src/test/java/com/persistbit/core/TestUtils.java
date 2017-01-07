@@ -7,11 +7,13 @@ import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestData;
 import com.persistentbit.core.testing.TestRunner;
 import com.persistentbit.core.utils.IO;
+import com.persistentbit.core.utils.NumberUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.Comparator;
 
 /**
  * TODOC
@@ -91,6 +93,21 @@ public class TestUtils{
 		return true;
 	}
 
+
+	static final TestCase testNumberUtils = TestCase.name("Test Number Utilities").code(tr -> {
+		tr.isFailure(NumberUtils.numberToBigDecimal(null));
+		Comparator<Number> nc = NumberUtils.numberComparator;
+		tr.isEquals(nc.compare(1, 1.0), 0);
+		tr.isEquals(nc.compare((short) 2, 2.0f), 0);
+		tr.isEquals(nc.compare(1234567l, 1234567), 0);
+		tr.isEquals(nc.compare(1234567l, 1234566), 1);
+		tr.isFailure(NumberUtils.numberToBigDecimal(null));
+		tr.isEquals(NumberUtils.numberToBigDecimal(1234), NumberUtils.numberToBigDecimal(1234.0));
+		tr.isFailure(NumberUtils.parseBigDecimal(null));
+		tr.isFailure(NumberUtils.parseInt(null));
+		tr.isFailure(NumberUtils.parseLong(null));
+		tr.isEquals(NumberUtils.parseLong("1234").orElseThrow(), 1234l);
+	});
 
 
 

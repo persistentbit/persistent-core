@@ -26,6 +26,14 @@ public class TestPStream{
 		return nonLazy.plusAll(nonLazy.map(s -> s.lazy()));
 	}
 
+	static final TestCase limit = TestCase.name("Test limit").code(tr -> {
+		tr.isEquals(init.limitOnPreviousValue(t -> t == 2), PStream.val(4, 10, 2));
+		tr.isEquals(init.limitOnPreviousValue(t -> t == 1001), init);
+		tr.isEquals(init.limitOnPreviousValue(t -> t == 1000), init);
+		tr.isEquals(init.limitOnPreviousValue(t -> t == 4), PStream.val(4));
+		tr.isNotEquals(init.limitOnPreviousValue(t -> t == 4), PStream.val(5));
+	});
+
 
 	static final TestCase headMiddleEnd = TestCase.name("headMiddleEnd").code(t -> {
 		createStreamVersions(PList.val(0, 1, 2, 4)).forEach(l -> {
@@ -206,6 +214,9 @@ public class TestPStream{
 	}
 
 
+	public static void main(String[] args) {
+		TestRunner.runAndPrint(TestPStream.class);
+	}
 
 
 }

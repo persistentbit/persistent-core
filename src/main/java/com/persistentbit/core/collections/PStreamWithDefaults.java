@@ -859,5 +859,54 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
 		};
 	}
 
+	@Override
+	default PStream<T> limitOnPreviousValue(Predicate<T> stopOnCondition) {
+		return new AbstractPStreamLazy<T>(){
+			@Override
+			public boolean isInfinite() {
+				return false;
+			}
 
+			@Override
+			public Iterator<T> iterator() {
+
+				return new Iterator<T>(){
+					Iterator<T> master;
+					T prevValue;
+					boolean hasNext = true;
+
+					private void init() {
+						master = PStreamWithDefaults.this.iterator();
+						hasNext = master.hasNext();
+					}
+
+					@Override
+					public boolean hasNext() {
+						if(master == null) {
+							init();
+						}
+						else {
+							hasNext = hasNext && (stopOnCondition.test(prevValue) == false);
+							hasNext = hasNext && master.hasNext();
+						}
+
+						return hasNext;
+					}
+
+					@Override
+					public T next() {
+						if(master == null) {
+							init();
+						}
+						if(hasNext == false) {
+							throw new IllegalStateException("There is no next value");
+						}
+						prevValue = master.next();
+						return prevValue;
+					}
+				};
+			}
+
+		};
+	}
 }
