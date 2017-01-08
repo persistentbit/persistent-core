@@ -129,18 +129,18 @@ public class ResultLazy<T> extends Result<T>{
 	}
 
 	@Override
-	public void ifPresent(Consumer<T> effect) {
-		getValue().ifPresent(effect);
+	public Result<T> ifPresent(Consumer<Success<T>> effect) {
+		return getValue().ifPresent(effect);
 	}
 
 	@Override
-	public void ifEmpty(Runnable r) {
-		getValue().ifEmpty(r);
+	public Result<T> ifEmpty(Consumer<Empty<T>> effect) {
+		return getValue().ifEmpty(effect);
 	}
 
 	@Override
-	public void ifFailure(Consumer<Throwable> e) {
-		getValue().ifFailure(e);
+	public Result<T> ifFailure(Consumer<Failure<T>> effect) {
+		return getValue().ifFailure(effect);
 	}
 
 	@Override

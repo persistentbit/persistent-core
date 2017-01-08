@@ -141,17 +141,35 @@ public class Success<T> extends Result<T>{
 		return value.hashCode();
 	}
 
-	@Override
-	public void ifEmpty(Runnable r) {
-
-	}
-
 
 	@Override
-	public void ifFailure(Consumer<Throwable> e) {
-
+	public Result<T> ifEmpty(Consumer<Empty<T>> effect) {
+		return this;
 	}
 
+	@Override
+	public Result<T> ifFailure(Consumer<Failure<T>> effect) {
+		return this;
+	}
+
+	@Override
+	public Result<T> ifPresent(Consumer<Success<T>> effect) {
+		return Result.function().code(l -> {
+			if(effect == null) {
+				return Result.failure("ifPresent with null as effect");
+			}
+			try {
+				effect.accept(this);
+				return this;
+			} catch(Exception e) {
+				return Result.failure(e);
+			}
+		});
+	}
+
+	public T getValue() {
+		return value;
+	}
 
 	@Override
 	public Result<T> filter(Predicate<T> filter) {

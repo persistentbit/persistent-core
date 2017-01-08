@@ -130,14 +130,20 @@ public class ResultAsync<T> extends Result<T> {
         return new ResultAsync<>(future.thenApply(r -> r.filter(filter)));
     }
 
+
     @Override
-    public void ifEmpty(Runnable code) {
-        future.thenAccept(r -> r.ifEmpty(code));
+    public Result<T> ifEmpty(Consumer<Empty<T>> effect) {
+        return new ResultAsync<>(future.thenApply(r -> r.ifEmpty(effect)));
     }
 
     @Override
-    public void ifFailure(Consumer<Throwable> code) {
-        future.thenAccept(r -> r.ifFailure(code));
+    public Result<T> ifFailure(Consumer<Failure<T>> effect) {
+        return new ResultAsync<>(future.thenApply(r -> r.ifFailure(effect)));
+    }
+
+    @Override
+    public Result<T> ifPresent(Consumer<Success<T>> effect) {
+        return new ResultAsync<>(future.thenApply(r -> r.ifPresent(effect)));
     }
 
     @Override
@@ -146,11 +152,6 @@ public class ResultAsync<T> extends Result<T> {
             return "ResultAsync(<not done>)";
         }
         return Log.function().code(l-> "ResultAsync(" + future.get() + ")");
-    }
-
-    @Override
-    public void ifPresent(Consumer<T> effect) {
-        future.thenAccept(r -> r.ifPresent(effect));
     }
 
     @Override

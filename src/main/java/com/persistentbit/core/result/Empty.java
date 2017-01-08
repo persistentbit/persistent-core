@@ -95,15 +95,30 @@ public class Empty<T> extends Result<T>{
     }
 
     @Override
-    public void ifEmpty(Runnable r) {
-        r.run();
-    }
+	public Result<T> ifEmpty(Consumer<Empty<T>> effect) {
+		return Result.function().code(l -> {
+			if(effect == null) {
+				return Result.failure("ifEmpty with null as effect");
+			}
+			try {
+				effect.accept(this);
+				return this;
+			} catch(Exception e) {
+				return Result.failure(e);
+			}
+		});
 
+	}
 
     @Override
-    public void ifFailure(Consumer<Throwable> e) {
+	public Result<T> ifFailure(Consumer<Failure<T>> effect) {
+		return this;
+	}
 
-    }
+	@Override
+	public Result<T> ifPresent(Consumer<Success<T>> effect) {
+		return this;
+	}
 
     @Override
     public Result<T> filter(Predicate<T> filter) {

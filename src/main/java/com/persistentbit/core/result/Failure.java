@@ -86,16 +86,31 @@ public class Failure<T> extends Result<T>{
     }
 
     @Override
-    public void ifEmpty(Runnable r) {
-
+    public Result<T> ifEmpty(Consumer<Empty<T>> effect) {
+        return this;
     }
-
-
 
     @Override
-    public void ifFailure(Consumer<Throwable> e) {
-        e.accept(exception);
+    public Result<T> ifFailure(Consumer<Failure<T>> effect) {
+        return Result.function().code(l -> {
+            if(effect == null) {
+                return Result.failure("ifFailure with null as effect");
+            }
+            try {
+                effect.accept(this);
+                return this;
+            } catch(Exception e) {
+                return Result.failure(e);
+            }
+        });
     }
+
+    @Override
+    public Result<T> ifPresent(Consumer<Success<T>> effect) {
+        return this;
+    }
+
+
 
     @Override
     public int hashCode() {

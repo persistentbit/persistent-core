@@ -156,9 +156,6 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 
 
 
-	public void ifPresent(Consumer<T> effect) {
-		getOpt().ifPresent(effect);
-	}
 
 
 	public boolean isPresent() {
@@ -276,17 +273,21 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 	/**
 	 * Run code if this is an Empty result
 	 *
-	 * @param r The code to run
+	 * @param effect The code to run
 	 */
-	public abstract void ifEmpty(Runnable r);
+	public abstract Result<T> ifEmpty(Consumer<Empty<T>> effect);
+
 
 
 	/**
 	 * Run code if this is a Failure result
 	 *
-	 * @param e The Failure exception
+	 * @param effect The Failure exception
 	 */
-	public abstract void ifFailure(Consumer<Throwable> e);
+	public abstract Result<T> ifFailure(Consumer<Failure<T>> effect);
+
+	public abstract Result<T> ifPresent(Consumer<Success<T>> effect);
+
 
 	/**
 	 * Create a Success result
