@@ -40,7 +40,7 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 				functionDoneTimestamp(System.currentTimeMillis());
 				return result;
 			} catch(LoggedException le) {
-				return Result.<R>failure(le).mapLog(l -> le.getLogs());
+				return Result.failure(le.setLogs(entry.append(le.getLogs())));
 			} catch(Exception e) {
 				return Result.failure(e);
 			}
@@ -52,19 +52,10 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 				Result<R> result = code.run(this);
 				functionDoneTimestamp(System.currentTimeMillis());
 				functionResult(result);
-				/*return result.mapLog(e -> {
-					if(e.isEmpty() == false) {
-						return entry.append(e);
-					}
-					return entry;
-				});*/
 				return result.mapLog(resultLog ->
 										 entry.append(resultLog)
 				);
-
-				//return result;
 			} catch(LoggedException le) {
-				//return Result.<R>failure(le).mapLog(l -> entry.append(le.getLogs()));
 				return Result.failure(le.setLogs(entry.append(le.getLogs())));
 			} catch(Exception e) {
 				return Result.failure(new LoggedException(e, entry));
