@@ -45,7 +45,7 @@ public class LogMonadTest{
 	}
 
 	public static Result<Integer> saveDiv(int a, int b) {
-		return Log.function(a, b).code(l -> {
+		return Result.function(a, b).code(l -> {
 			return b == 0
 				? Result.<Integer>failure("Can't divide by 0")
 				: Result.success(a / b);
@@ -54,11 +54,11 @@ public class LogMonadTest{
 	}
 
 	public static Result<Integer> saveAddDiv(int a, int b, int c) {
-		return saveDiv(a + b, c);
+		return Result.function(a, b, c).code(l -> saveDiv(a + b, c));
 	}
 
 	public static Result<Integer> saveDivDiv(int a, int b, int c) {
-		return Log.function(a, b, c).code(l ->
+		return Result.function(a, b, c).code(l ->
 			saveDiv(a,b).flatMap(divided ->
 				saveDiv(divided, c)
 			)
