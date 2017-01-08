@@ -15,6 +15,7 @@ public interface LogEntryPrinter{
 		return lv;
 	}
 
+
 	default LogEntryPrinter registerAsGlobalHandler() {
 		Thread.setDefaultUncaughtExceptionHandler((t, e) -> print(e));
 		return this;

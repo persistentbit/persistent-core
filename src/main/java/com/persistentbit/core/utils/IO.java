@@ -245,7 +245,7 @@ public final class IO {
      * @param charset Character encoding
      */
     public static void writeFile(String text, File f,Charset charset) {
-        Log.function(StringUtils.present(text, 40), f).code(l -> {
+        Log.function(f).code(l -> {
             Objects.requireNonNull(text,"text is null");
             try (Writer fileOut = fileToWriter(f,charset).orElseThrow()) {
                 fileOut.write(text);
@@ -253,6 +253,24 @@ public final class IO {
             }
         });
 
+    }
+
+    public static Result<File> mkdirsIfNotExisting(File f) {
+        return Result.function(f).code(log -> {
+            if(f == null) {
+                return Result.failure("File is null");
+            }
+            if(f.exists()) {
+                if(f.isDirectory() == false) {
+                    return Result.failure("File is not a directory:" + f);
+                }
+                return Result.success(f);
+            }
+            if(f.mkdirs() == false) {
+                return Result.failure("mkdirs() returned false for " + f);
+            }
+            return Result.success(f);
+        });
     }
 
     /**

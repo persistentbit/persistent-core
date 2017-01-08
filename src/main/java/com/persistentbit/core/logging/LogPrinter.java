@@ -33,7 +33,7 @@ public class LogPrinter implements LogEntryPrinter{
 	private final String msgStyleError;
 	private final String msgStyleException;
 
-	private LogPrinter(AnsiColor color, IndentPrintStream out){
+	public LogPrinter(AnsiColor color, IndentPrintStream out) {
 		this.out = out;
 		this.timeStyle = color.faint().fgWhite().toString();
 		this.classStyle = color.faint().fgWhite().toString();

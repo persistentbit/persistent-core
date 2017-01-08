@@ -1,5 +1,7 @@
 package com.persistentbit.core.sourcegen;
 
+import com.persistentbit.core.result.Result;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,14 +72,17 @@ public class SourceGen{
 	return sub;
   }
 
-  public String writeToString() {
-	try(ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
-	  write(bout);
-	  bout.flush();
-	  return bout.toString();
-	} catch(IOException e) {
-	  throw new RuntimeException(e);
-	}
+	public Result<String> writeToString() {
+		return Result.function().code(l -> {
+			try(ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
+				write(bout);
+				bout.flush();
+				return Result.success(bout.toString());
+			} catch(IOException e) {
+				return Result.failure(e);
+			}
+		});
+
   }
 
   public void write(OutputStream out) {

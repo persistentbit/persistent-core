@@ -2,6 +2,7 @@ package com.persistbit.core.tokenizer;
 
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.testing.TestCase;
@@ -47,11 +48,14 @@ public class TestTokenizer{
 		SimpleTokenizer<Integer> tokenizer = createTokenizer();
 
 
+		testTok(tr, " ");
+		testTok(tr, "");
 		testTok(tr, "sin 1234", 1, 7);
 		testTok(tr, "");
 		testTok(tr, "sin", 1);
 		testTok(tr, "cos", 1);
 		testTok(tr, "1234", 7);
+		testTok(tr, " hallo peter + (hoe is het) ", 8, 8, 4, 2, 8, 8, 8, 3);
 		tr.throwsException(() -> {
 			testTok(tr, "!", 0);
 			return Nothing.inst;
@@ -60,11 +64,16 @@ public class TestTokenizer{
 	});
 
 	private static void testTok(TestRunner tr, String text, Integer... tokenTypes) {
-		SimpleTokenizer<Integer> tokenizer = createTokenizer();
-		PList<Token<Integer>>    tokens    =
-			Result.fromSequence(tokenizer.tokenize("test", text)).orElseThrow().plist();
-		tr.info(tokens);
-		tr.isEquals(tokens.map(t -> t.type), PList.val(tokenTypes));
+		SimpleTokenizer<Integer>        tokenizer = createTokenizer();
+		PStream<Result<Token<Integer>>> tokens    = tokenizer.tokenize("test", text);
+		tr.isTrue(tokens.lastOpt().isPresent());
+		tr.isTrue(tokens.lastOpt().get().isEmpty());
+		tr.info(tokens.plist());
+		PList<Token<Integer>> tokenList =
+			Result.fromSequence(tokenizer.tokenize("test", text).filter(t -> t.isEmpty() == false)).orElseThrow()
+				.plist();
+		//tr.info(tokens);
+		tr.isEquals(tokenList.map(t -> t.type), PList.val(tokenTypes));
 	}
 
 	public void testAll() {

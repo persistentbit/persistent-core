@@ -817,4 +817,5 @@ public interface PStream<T> extends Iterable<T>{
 
 	PStream<T> limitOnPreviousValue(Predicate<T> stopOnTrue);
 
+
 }

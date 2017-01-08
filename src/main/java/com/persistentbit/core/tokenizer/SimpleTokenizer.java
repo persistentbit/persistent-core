@@ -189,50 +189,26 @@ public class SimpleTokenizer<TT>{
 	 * @param name       The name of the code or source file
 	 * @param sourceCode The code as a string
 	 *
-	 * @return A list of {@link Token}s corresponding to the source file.
+	 * @return A Result with a list of {@link Token}s corresponding to the source file.
 	 */
 	public Result<PList<Token<TT>>> tokenizeToResult(String name, String sourceCode) {
-		return Result.fromSequence(tokenize(name, sourceCode)).map(p -> p.plist());
+		return Result.fromSequence(
+			tokenize(name, sourceCode))
+			.filter(t -> t.isEmpty() == false)
+			.map(p -> p.plist()
+			);
 	}
 
-	/*public PList<Token<TT>> tokenize(String name, String sourceCode) throws TokenizerException {
-		Result<PList<Token<TT>>> result = Result.function(name,sourceCode).<PList<Token<TT>>>code(log -> {
-			if(name == null){
-				return Result.failure("name for the code is null");
-			}
-			if(sourceCode == null){
-				return Result.failure("The source code  is null");
-			}
 
-			Pos pos = new Pos(name,1,1);
-
-			if(sourceCode.isEmpty()){
-				return Result.success(PList.empty());
-			}
-			Result<Tuple3<String,Pos,TokenFound<TT>>> initToken = processNextToken(pos,sourceCode);
-			PStream<Result<Token<TT>>> ms = PStream
-				//Make a sequence using the Previews processed result
-				.sequence(initToken,
-					prevResult -> prevResult.flatMap(prv -> processNextToken(prv._2,prv._1))
-				)
-				//Filter all ignored tokens
-				.filter(pr -> pr.map(t -> t._3.ignore==false).orElse(true))
-				.filter(pr -> pr.isEmpty() == false)
-				//Limit to Result.empty or Result.failure
-				.peek(t -> System.out.println(t.map(t3 -> "" + t3._2 + ", " + t3._3)))
-				.limitOnPreviousValue(prev ->
-						  prev.map(p -> p._1.isEmpty())
-							  .orElse(true)
-				)
-				//.limit(10)
-				//Convert to the result type
-				.map(pr -> pr.map(t3 -> new Token<>(t3._2, t3._3.type, t3._3.text)))
-				;
-			ms = ms.plist();
-			return Result.fromSequence(ms).map(s -> s.plist());
-		});
-		return result.orElseThrow();
-	}*/
+	/**
+	 * Parse the sourceCode and generate a lazy PStream of tokens.<br>
+	 * Every PStream is ended with a Result.empty to indicate the end of the stream.
+	 *
+	 * @param name       The name of the source code
+	 * @param sourceCode The source code
+	 *
+	 * @return Lazy PStream of token results.
+	 */
 	public PStream<Result<Token<TT>>> tokenize(String name, String sourceCode) {
 		return Log.function(name, sourceCode).code(log -> {
 			Pos pos = new Pos(name, 1, 1);
@@ -243,9 +219,10 @@ public class SimpleTokenizer<TT>{
 				return PStream.val(Result.failure("The source code  is null"));
 			}
 			if(sourceCode.isEmpty()) {
-				return PList.empty();
+				return PList.val(Result.empty("No Source"));
 			}
 			Result<Tuple3<String, Pos, TokenFound<TT>>> initToken = processNextToken(pos, sourceCode);
+
 			PStream<Result<Token<TT>>> resultStream = PStream
 				//Make a sequence using the Previews processed result
 				.sequence(initToken,
@@ -253,14 +230,14 @@ public class SimpleTokenizer<TT>{
 				)
 				//Filter all ignored tokens
 				.filter(pr -> pr.map(t -> t._3.ignore == false).orElse(true))
-				.filter(pr -> pr.isEmpty() == false)
-				.peek(t -> System.out.println(t.map(t3 -> "" + t3._2 + ", " + t3._3)))
+				//.filter(pr -> pr.isEmpty() == false)
+				//.peek(t -> System.out.println(t.map(t3 -> "" + t3._2 + ", " + t3._3)))
 				//Limit to Result.empty or Result.failure
 				.limitOnPreviousValue(prev ->
-										  prev.map(p -> p._1.isEmpty())
-											  .orElse(true)
+										  prev.isPresent() == false
 				)
 				//Convert to the result type
+				//.peek(t -> System.out.println(t.map(t3 -> "" + t3._2 + ", " + t3._3)))
 				.map(pr -> pr.map(t3 -> new Token<>(t3._2, t3._3.type, t3._3.text)));
 			return resultStream;
 		});
@@ -269,7 +246,6 @@ public class SimpleTokenizer<TT>{
 	private Result<Tuple3<String, Pos, TokenFound<TT>>> processNextToken(Pos thisPos, String code) {
 		return findToken(code)
 			.flatMapFailure(f -> Result.failure(new TokenizerException(thisPos, f.getException())))
-			.flatMapEmpty(e -> Result.failure(new TokenizerException(thisPos, e.getException())))
 			.verify(found -> found.skipLength != 0,
 					found -> new TokenizerException(thisPos, "Found a match with length 0. Type=" + found.type)
 			)
@@ -293,13 +269,16 @@ public class SimpleTokenizer<TT>{
 
 	private Result<TokenFound<TT>> findToken(String code) {
 		return Result.function().code(log -> {
+			if(code.isEmpty()) {
+				return Result.empty("code string is empty");
+			}
 			for(TokenMatcher<TT> sup : tokenMatchers) {
 				Result<TokenFound<TT>> result = sup.tryParse(code);
-				if(result.isPresent()) {
+				if(result.isPresent() || result.isError()) {
 					return result;
 				}
 			}
-			return Result.empty("Unknown token:" + code);
+			return Result.failure("Unknown token:" + code);
 		});
 	}
 

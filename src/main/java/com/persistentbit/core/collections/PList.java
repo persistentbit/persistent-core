@@ -1,8 +1,6 @@
 package com.persistentbit.core.collections;
 
 
-import com.persistentbit.core.tuples.Tuple2;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -88,40 +86,6 @@ public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializabl
 		return res.plusAll(iter);
 	}
 
-	@SuppressWarnings("UseOfSystemOutOrSystemErr")
-	public static void main(String... args) {
-		PList<Integer> l = new PList<>();
-		for(int t = 0; t < 100000; t++) {
-			l = l.plus(t);
-		}
-		PList<Integer> l2 = l;
-		for(int t = 0; t < l.size(); t++) {
-			if(l.get(t) != t) {
-				throw new RuntimeException();
-			}
-			l2 = l2.put(t, -t);
-		}
-		for(int t = 0; t < l2.size(); t++) {
-			if(l2.get(t) != -t) {
-				throw new RuntimeException("t=" + t + ", value=" + l2.get(t));
-			}
-		}
-		PList<Integer> p = new PList<>();
-		p = p.plusAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-		System.out.println(p);
-		System.out.println(p.dropLast());
-		System.out.println(p.subList(0, 1));
-		System.out.println(p.map(i -> "(" + i + ")"));
-		System.out.println(p.filter(i -> i % 2 == 0).map(i -> "(" + i + ")"));
-		p = new PList<Integer>().plusAll(4, 1, 2, 7, 0, 3, 10, -5);
-		PStream<Tuple2<Integer, Integer>> p2 = p.sorted().zipWithIndex().plist().reversed();
-		System.out.println(p2);
-		System.out.println(p2.plist());
-
-		System.out
-			.println("AsArrayList: " + p2.groupBy((t) -> t._1).mapValues(v -> v.headOpt().map(i -> i._2).orElse(null))
-				.toList());
-	}
 
 	@Override
 	protected PList<T> toImpl(PStream<T> lazy) {
@@ -130,20 +94,39 @@ public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializabl
 
 	@Override
 	public PStream<T> lazy() {
-		return new AbstractPStreamLazy<T>(){
-			@Override
-			public Iterator<T> iterator() {
-				return PList.this.iterator();
-			}
-
-			@Override
-			public PList<T> plist() {
-				return PList.this;
-			}
-
-		};
+		return new LazyPList(0, size());
 
 	}
+
+	private class LazyPList extends AbstractPStreamLazy<T>{
+
+		private final int start;
+		private final int end;
+
+		public LazyPList(int start, int end) {
+			this.start = start;
+			this.end = end;
+		}
+
+		@Override
+		public Iterator<T> iterator() {
+			return PList.this.rangedIterator(start, end);
+		}
+
+		@Override
+		public PList<T> plist() {
+			return PList.this;
+		}
+
+		@Override
+		public PStream<T> tail() {
+			if(start == end - 1) {
+				throw new IllegalStateException("Tail on empty PStream");
+			}
+			return new LazyPList(start + 1, end);
+		}
+	}
+
 
 	@Override
 	public Iterator<T> iterator() {
@@ -177,6 +160,7 @@ public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializabl
 			}
 		};
 	}
+
 
 	@Override
 	public int size() {

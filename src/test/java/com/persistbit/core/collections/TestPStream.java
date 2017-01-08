@@ -34,6 +34,38 @@ public class TestPStream{
 		tr.isNotEquals(init.limitOnPreviousValue(t -> t == 4), PStream.val(5));
 	});
 
+	static final TestCase testPList = TestCase.name("PList").code(tr -> {
+		PList<Integer> l = new PList<>();
+		for(int t = 0; t < 100000; t++) {
+			l = l.plus(t);
+		}
+		PList<Integer> l2 = l;
+		for(int t = 0; t < l.size(); t++) {
+			if(l.get(t) != t) {
+				throw new RuntimeException();
+			}
+			l2 = l2.put(t, -t);
+		}
+		for(int t = 0; t < l2.size(); t++) {
+			if(l2.get(t) != -t) {
+				throw new RuntimeException("t=" + t + ", value=" + l2.get(t));
+			}
+		}
+		PList<Integer> p = new PList<>();
+		p = p.plusAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+		tr.isEquals(p, PList.val(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+		tr.isEquals(p.dropLast(), PList.val(1, 2, 3, 4, 5, 6, 7, 8, 9));
+		tr.isEquals(p.subList(0, 1), PList.val(1));
+		tr.isEquals(p.map(i -> "(" + i + ")").toString(", "), "(1), (2), (3), (4), (5), (6), (7), (8), (9), (10)");
+		tr.isEquals(p.filter(i -> i % 2 == 0).map(i -> "(" + i + ")").toString(", "), "(2), (4), (6), (8), (10)");
+
+		p = new PList<Integer>().plusAll(4, 1, 2, 7, 0, 3, 10, -5);
+		PStream<Tuple2<Integer, Integer>> p2 = p.sorted().zipWithIndex().plist().reversed();
+		tr.isEquals(p2.toString(", "), "(7,10), (6,7), (5,4), (4,3), (3,2), (2,1), (1,0), (0,-5)");
+		tr.isEquals(p2.plist().toString(", "), "(7,10), (6,7), (5,4), (4,3), (3,2), (2,1), (1,0), (0,-5)");
+
+	});
+
 
 	static final TestCase headMiddleEnd = TestCase.name("headMiddleEnd").code(t -> {
 		createStreamVersions(PList.val(0, 1, 2, 4)).forEach(l -> {

@@ -60,9 +60,10 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 				});*/
 				return result;
 			} catch(LoggedException le) {
-				return Result.<R>failure(le).mapLog(l -> le.getLogs());
+				//return Result.<R>failure(le).mapLog(l -> entry.append(le.getLogs()));
+				return Result.failure(le.setLogs(entry.append(le.getLogs())));
 			} catch(Exception e) {
-				return Result.failure(e);
+				return Result.failure(new LoggedException(e, entry));
 			}
 		}
 

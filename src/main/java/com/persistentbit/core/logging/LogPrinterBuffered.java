@@ -15,16 +15,16 @@ import java.util.function.Function;
  * @author petermuys
  * @since 6/01/17
  */
-public final class LogPrinterBuffered implements LogEntryPrinter{
+public class LogPrinterBuffered implements LogEntryPrinter{
 
 	public interface RealPrinterSupplier extends Function<OutputStream,Function<Charset,LogEntryPrinter>> {};
 
-	private final OutputStream                                  realOutputStream;
-	private final RealPrinterSupplier realPrinterSupplier;
-	private final Charset                                       charset;
+	protected final OutputStream        realOutputStream;
+	private final   RealPrinterSupplier realPrinterSupplier;
+	protected final Charset             charset;
 
-	public LogPrinterBuffered(OutputStream realOutputStream,
-							  RealPrinterSupplier realPrinterSupplier,Charset charset
+	protected LogPrinterBuffered(OutputStream realOutputStream,
+								 RealPrinterSupplier realPrinterSupplier, Charset charset
 	) {
 		this.realOutputStream = Objects.requireNonNull(realOutputStream);
 		this.realPrinterSupplier = Objects.requireNonNull(realPrinterSupplier);
