@@ -1,4 +1,4 @@
-package com.persistentbit.core.printing.printing;
+package com.persistentbit.core.printing;
 
 import java.io.*;
 
@@ -42,9 +42,13 @@ public class PrintTextWriter extends PrintWriter{
     }
 
     public void print(PrintableText printableText) {
-        printableText.accept(this);
+        printableText.print(this);
     }
     public void println(PrintableText printableText) {
-        printableText.accept(this);
+        printableText.print(this);
+    }
+
+    public void indent(PrintableText printableText) {
+        print(PrintableText.indent(printableText));
     }
 }

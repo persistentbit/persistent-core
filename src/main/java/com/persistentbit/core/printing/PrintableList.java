@@ -1,4 +1,4 @@
-package com.persistentbit.core.printing.printing;
+package com.persistentbit.core.printing;
 
 import com.persistentbit.core.collections.PList;
 
@@ -28,13 +28,13 @@ public class PrintableList implements PrintableText{
     }
 
     @Override
-    public void accept(PrintTextWriter printWriter) {
-        printWriter.print(PrintableText.inset("\t",true,out -> {
-            items.zipWithIndex().forEach(zip -> {
+	public void print(PrintTextWriter printWriter) {
+		printWriter.print(PrintableText.indent("\t", true, out -> {
+			items.zipWithIndex().forEach(zip -> {
                 int index = zip._1;
                 PrintableText item = zip._2;
-                out.println(PrintableText.inset("  ",false, itemOut -> {
-                    itemOut.print(bulletCreator.apply(index));
+				out.println(PrintableText.indent("  ", false, itemOut -> {
+					itemOut.print(bulletCreator.apply(index));
                     itemOut.println(item);
                     itemOut.flush();
                 }));

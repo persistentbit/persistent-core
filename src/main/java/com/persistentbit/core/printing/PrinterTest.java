@@ -1,4 +1,4 @@
-package com.persistentbit.core.printing.printing;
+package com.persistentbit.core.printing;
 
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
@@ -7,11 +7,11 @@ public class PrinterTest {
     static private final PrintableText text = out -> {
         out.println();
         out.println("Before Indent");
-        out.println(PrintableText.inset(iout-> {
-            iout.println("First indent");
+		out.println(PrintableText.indent(iout -> {
+			iout.println("First indent");
             iout.println("And The last Line");
-            iout.println(PrintableText.inset(iout2 -> {
-                iout2.println("The second indent");
+			iout.println(PrintableText.indent(iout2 -> {
+				iout2.println("The second indent");
                 iout2.println("Before BulletList");
                 iout2.println(new PrintableList().addItem(bout -> {
                     bout.println("dit is bullet1");
