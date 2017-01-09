@@ -8,6 +8,7 @@ import com.persistentbit.core.result.Result;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * General IO Utilities
@@ -272,6 +273,54 @@ public final class IO {
             return Result.success(f);
         });
     }
+
+    public static FilterWriter  createFilterWriter(Writer writer, Function<String, String> stringFilter){
+        Objects.requireNonNull(writer,"writer");
+        Objects.requireNonNull(stringFilter,"stringFilter");
+        return new FilterWriter(writer) {
+            @Override
+            public void write(int c) throws IOException {
+                out.append(stringFilter.apply(Character.toString((char)c)));
+            }
+
+            @Override
+            public void write(char[] cbuf, int off, int len) throws IOException {
+                out.append(stringFilter.apply(new String(cbuf,off,len)));
+            }
+
+            @Override
+            public void write(String str, int off, int len) throws IOException {
+                out.append(stringFilter.apply(str.substring(off,off + len)));
+            }
+        };
+    }
+
+    public static FilterWriter  createIndentFilterWriter(Writer writer, String indentString,boolean indentFirstLine, String newLineString){
+        return createFilterWriter(writer,new Function<String,String>(){
+
+            private boolean prevNl = indentFirstLine;
+            @Override
+            public String apply(String s) {
+                if(s.isEmpty()){
+                    return s;
+                }
+                if(prevNl){
+                    s = indentString + s;
+                }
+                prevNl = s.endsWith(newLineString);
+                if(prevNl){
+                    s = s.substring(0,s.length()- newLineString.length());
+                    return s.replace(newLineString, newLineString + indentString) + newLineString;
+                }
+                return s.replace(newLineString,newLineString +  indentString);
+
+            }
+        });
+    }
+    public static FilterWriter  createIndentFilterWriter(Writer writer, String indentString,boolean indentFirstLine){
+        return createIndentFilterWriter(writer,indentString,indentFirstLine,System.lineSeparator());
+    }
+
 
     /**
      * Convert a path to the system by replacing slashes with
