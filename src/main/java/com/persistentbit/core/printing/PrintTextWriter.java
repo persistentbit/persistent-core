@@ -46,6 +46,7 @@ public class PrintTextWriter extends PrintWriter{
     }
     public void println(PrintableText printableText) {
         printableText.print(this);
+        println();
     }
 
     public void indent(PrintableText printableText) {

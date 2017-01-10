@@ -24,7 +24,7 @@ public class JavaDoc implements PrintableText{
 	@Override
 	public void print(PrintTextWriter out) {
 		out.println("/**");
-		out.println(PrintableText.indent(" * ", true, content));
+		out.print(PrintableText.indent(" * ", true, content));
 		out.println(" */");
 	}
 }

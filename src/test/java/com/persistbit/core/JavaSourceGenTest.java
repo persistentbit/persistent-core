@@ -40,6 +40,13 @@ public class JavaSourceGenTest{
 						out.println("return new TestClass();");
 					})
 			)
+			.addMethod(JavaFunction.name("toString")
+					.annotation("@Override")
+					.result("String")
+					.content((PrintableText) out -> {
+						out.println("return \"TestCase[\" + id + \"]\";");
+					})
+			)
 			.addMethod(funTestAll);
 		String txt = cls.printToString();
 		l.info(txt);
