@@ -2,8 +2,6 @@ package com.persistentbit.core.utils;
 
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.logging.Log;
-import com.persistentbit.core.logging.LogEntryPrinter;
-import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.result.Result;
 
 import javax.crypto.SecretKeyFactory;
@@ -209,6 +207,7 @@ public final class PasswordStorage {
         }
     }
 
+    /*
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
     public static void main(String... args) {
         LogEntryPrinter lp     = LogPrinter.consoleInColor();
@@ -220,5 +219,5 @@ public final class PasswordStorage {
         lp.print(verifyPassword("PeterMuys20", null));
         lp.print(verifyPassword((String)null , result));
         lp.print(verifyPassword("PeterMuys20" , "sha256:1:12:???:base64string"));
-    }
+    }*/
 }

@@ -1,8 +1,7 @@
 package com.persistentbit.core.experiments;
 
+import com.persistentbit.core.exceptions.ExceptionPrinter;
 import com.persistentbit.core.logging.Log;
-import com.persistentbit.core.logging.LogEntryPrinter;
-import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.IO;
 
@@ -80,15 +79,17 @@ public class LogMonadTest{
 		try {
 			run.run();
 		} catch(Exception e) {
-			LogPrinter.consoleInColor().print(e);
+			ExceptionPrinter.createDefault(true).print(e);
 		}
 	}
 
 	public static void main(String[] args) {
 		UserDAO         dao = new UserDAO();
-		LogEntryPrinter lp  = LogPrinter.consoleInColor();
-		lp.print(dao.getUserById(1).getLog());
-		lp.print(IO.readTextFile(new File("UnknownFile"), Charset.defaultCharset()).getLog());
+		//LogEntryPrinter lp  = LogPrinter.consoleInColor();
+		ExceptionPrinter ep = ExceptionPrinter.createDefault(true);
+		System.out.println(dao.getUserById(1).getLog().asPrintable(true).printToString());
+		System.out.println(IO.readTextFile(new File("UnknownFile"), Charset.defaultCharset()).getLog().asPrintable(true)
+							   .printToString());
 		tryIt(() -> {
 
 			IO.readTextFile(new File("UnknownFile"),Charset.defaultCharset()).orElseThrow();
@@ -103,7 +104,7 @@ public class LogMonadTest{
 			//tryIt(()->System.out.println(divide(10,2)));
 			//tryIt(()->System.out.println(addDiv(10,2,0)));
 		} catch(Exception e) {
-			lp.print(e);
+			ep.print(e);
 		}
 
 	}

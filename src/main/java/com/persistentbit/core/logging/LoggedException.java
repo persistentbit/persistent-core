@@ -1,6 +1,9 @@
 package com.persistentbit.core.logging;
 
+import com.persistentbit.core.exceptions.SpecificExceptionPrinter;
 import com.persistentbit.core.logging.entries.LogEntry;
+import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
+import com.persistentbit.core.printing.PrintableText;
 
 /**
  * @author petermuys
@@ -35,18 +38,7 @@ public class LoggedException extends RuntimeException{
 
 	public LoggedException(Throwable cause, LogEntry logs) {
 		super(cause.getMessage(),cause);
-		/*if(cause instanceof LoggedException){
-			LoggedException lc = (LoggedException)cause;
-			logs = logs.append(lc.logs);
-			//logs = logs.append(LogEntry.of(lc.logs.get().map(s -> "  " + s)));
-			//lc.logs = LogEntryMonoid.of(lc.logs.get().head());
-			//initCause(lc.getCause());
-		} else {
-			logs = logs.append(new LogEntryException(cause));
-			//logs = logs.append("EXC " + cause.getMessage());
-			initCause(cause);
-		}
-		//initCause(cause);*/
+
 		this.logs = logs;
 	}
 
@@ -55,4 +47,24 @@ public class LoggedException extends RuntimeException{
 	}
 
 
+	public static SpecificExceptionPrinter<LoggedException> createExceptionPrinter(boolean color) {
+		LogEntryDefaultFormatting format =
+			color ? LogEntryDefaultFormatting.colors : LogEntryDefaultFormatting.noColors;
+		return (exception, rootPrinter) -> out -> {
+			out.println(format.msgStyleException + "Logged Exception: " + exception.getMessage());
+			out.print(PrintableText.indent(indent -> {
+				indent.print(exception.getLogs().asPrintable(color));
+				for(StackTraceElement element : exception.getStackTrace()) {
+					indent.println(format.classStyle + element.getClassName() + "." + element.getMethodName()
+									   + "(" + element.getFileName() + ":" + element.getLineNumber() + ")"
+					);
+				}
+				Throwable cause = exception.getCause();
+				if(cause != null) {
+					indent.println(format.msgStyleException + " caused by..");
+					indent.println(rootPrinter.asPrintable(cause).printToString());
+				}
+			}));
+		};
+	}
 }

@@ -1,9 +1,8 @@
 package com.persistentbit.core.testing;
 
 import com.persistentbit.core.Nothing;
+import com.persistentbit.core.exceptions.ExceptionPrinter;
 import com.persistentbit.core.logging.AbstractLogEntryLogging;
-import com.persistentbit.core.logging.LogEntryPrinter;
-import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.logging.LoggedException;
 import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.logging.entries.LogEntryException;
@@ -36,9 +35,24 @@ public final class TestRunner extends AbstractLogEntryLogging {
 		return Nothing.inst;
 	}
 
+	public static void runAndPrint(ExceptionPrinter ep, TestCase testCase) {
+		Result<TestCase> resultCase = getTestRunResult(testCase);
+		System.out.println(resultCase.getLog().asPrintable(true).printToString());
+		resultCase.ifFailure(f -> {
+			ep.print(f.getException());
+		});
 
+	}
 
-	public static void runAndPrint(TestCase testCase, LogEntryPrinter printer){
+	public static void runAndPrint(TestCase testCase) {
+		runAndPrint(ExceptionPrinter.createDefault(true), testCase);
+	}
+
+	public static void runAndPrint(Class testClass) {
+		runAndPrint(TestCase.forTestClass(testClass));
+	}
+
+	/*public static void runAndPrint(TestCase testCase, LogEntryPrinter printer){
 		Result<TestCase> resultCase = getTestRunResult(testCase);
 		printer.print(resultCase.getLog());
 		resultCase.orElseThrow();
@@ -58,7 +72,7 @@ public final class TestRunner extends AbstractLogEntryLogging {
 	public static final LogEntryPrinter defaultTestRunPrinter() {
 		return LogPrinter.consoleInColor();
 	}
-
+	*/
 
 	public static Result<TestCase> getTestRunResult(TestCase testCode) {
 

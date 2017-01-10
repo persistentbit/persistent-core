@@ -1,4 +1,4 @@
-package com.persistentbit.core.logging;
+package com.persistentbit.core.utils;
 
 /**
  * Helper class for styling text in terminal using ansi codes.

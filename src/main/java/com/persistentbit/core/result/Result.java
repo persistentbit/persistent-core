@@ -1,7 +1,10 @@
 package com.persistentbit.core.result;
 
 import com.persistentbit.core.collections.PStream;
-import com.persistentbit.core.logging.*;
+import com.persistentbit.core.logging.FunctionLogging;
+import com.persistentbit.core.logging.LogContext;
+import com.persistentbit.core.logging.LoggedException;
+import com.persistentbit.core.logging.LoggedValue;
 import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.logging.entries.LogEntryEmpty;
 import com.persistentbit.core.logging.entries.LogEntryFunction;
@@ -449,9 +452,6 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 	public abstract Result<T> cleanLogsOnPresent();
 
 
-	public void print(LogEntryPrinter lp) {
-		lp.print(getLog());
-	}
 
 	public static <T> Result<PStream<T>> fromSequence(PStream<Result<T>> stream) {
 		Optional<Result<T>> optWrong = stream.find(Result::isError);

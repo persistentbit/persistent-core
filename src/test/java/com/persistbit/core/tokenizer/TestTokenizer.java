@@ -3,7 +3,6 @@ package com.persistbit.core.tokenizer;
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PStream;
-import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
@@ -81,7 +80,6 @@ public class TestTokenizer{
 	}
 
 	public static void main(String[] args) {
-		LogPrinter.consoleInColor().registerAsGlobalHandler();
 		new TestTokenizer().testAll();
 	}
 }

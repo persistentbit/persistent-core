@@ -2,7 +2,6 @@ package com.persistbit.core;
 
 import com.persistbit.core.utils.TestValue;
 import com.persistentbit.core.collections.PStream;
-import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestData;
 import com.persistentbit.core.testing.TestRunner;
@@ -116,7 +115,6 @@ public class TestUtils{
 	}
 
 	public static void main(String... args) throws Exception {
-		LogPrinter.consoleInColor().registerAsGlobalHandler();
 		new TestUtils().testAll();
 	}
 }

@@ -1,6 +1,6 @@
 package com.persistentbit.core.logging.printing;
 
-import com.persistentbit.core.logging.AnsiColor;
+import com.persistentbit.core.utils.AnsiColor;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -27,7 +27,8 @@ public class LogEntryDefaultFormatting {
     public final String msgStyleError;
     public final String msgStyleException;
     public final boolean hasColor;
-    public LogEntryDefaultFormatting(AnsiColor color) {
+
+    private LogEntryDefaultFormatting(AnsiColor color) {
         hasColor = color.isActive();
         this.timeStyle = color.faint().fgWhite().toString();
         this.classStyle = color.faint().fgWhite().toString();
@@ -50,5 +51,6 @@ public class LogEntryDefaultFormatting {
         return dateTimeFormatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
     }
 
-
+    public static final LogEntryDefaultFormatting colors   = new LogEntryDefaultFormatting(new AnsiColor(true));
+    public static final LogEntryDefaultFormatting noColors = new LogEntryDefaultFormatting(new AnsiColor(false));
 }

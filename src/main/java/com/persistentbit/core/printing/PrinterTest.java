@@ -1,7 +1,6 @@
 package com.persistentbit.core.printing;
 
 import com.persistentbit.core.testing.TestCase;
-import com.persistentbit.core.testing.TestRunner;
 
 public class PrinterTest {
     static private final PrintableText text = out -> {
@@ -36,6 +35,6 @@ public class PrinterTest {
     });
 
     public static void main(String... args) throws Exception {
-        TestRunner.runAndPrint(PrinterTest.class);
+        //TestRunner.runAndPrint(PrinterTest.class);
     }
 }

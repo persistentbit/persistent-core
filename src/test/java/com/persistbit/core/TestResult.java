@@ -3,7 +3,6 @@ package com.persistbit.core;
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.logging.LogContext;
 import com.persistentbit.core.logging.LogMessageLevel;
-import com.persistentbit.core.logging.LogPrinter;
 import com.persistentbit.core.logging.entries.LogEntryMessage;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.testing.TestCase;
@@ -134,7 +133,6 @@ public class TestResult{
 	}
 
 	public static void main(String[] args) {
-		LogPrinter.consoleInColor().registerAsGlobalHandler();
 		new TestResult().testAll();
 	}
 }
