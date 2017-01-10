@@ -1,14 +1,11 @@
 package com.persistentbit.core.logging;
 
 import com.persistentbit.core.logging.entries.*;
-import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
-import com.persistentbit.core.printing.PrintableText;
-import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.IndentOutputStream;
 import com.persistentbit.core.utils.IndentPrintStream;
+import com.persistentbit.core.utils.ToDo;
 
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -79,7 +76,10 @@ public class LogPrinter implements LogEntryPrinter{
 				.orElseThrow();
 		return LogPrinterBuffered.buffered(realOut,bufferdSupplier).orElseThrow();
 	}
-
+	public static LogEntryPrinter consoleInColor(){
+			throw new ToDo();
+	}
+/*
 
 	public static LogEntryPrinter consoleInColor(){
 		return new LogEntryPrinter() {
@@ -148,7 +148,7 @@ public class LogPrinter implements LogEntryPrinter{
 		};
 	}
 
-
+*/
 
 
 	public void print(LogEntry entry) {
@@ -282,19 +282,5 @@ public class LogPrinter implements LogEntryPrinter{
 	}
 
 
-	static void testCode(Function<FunctionLogging,Result<?>> testCode){
-		StackTraceElement ste = Thread.currentThread().getStackTrace()[2];
-		LogContext lc = new LogContext(ste);
-		LogEntryFunction lef = LogEntryFunction.of(lc);
-		FunctionLogging fl = new FunctionLogging(lef,2);
-		try{
-			testCode.apply(fl).orElseThrow();
-		}catch(Throwable e){
-			LogEntryPrinter lp = LogPrinter.consoleInColor();
-			lp.print(fl.getLog());
-			lp.print(e);
-			throw e;
-		}
 
-	}
 }
