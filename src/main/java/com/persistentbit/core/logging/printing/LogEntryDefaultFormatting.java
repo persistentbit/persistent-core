@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
  * @author Peter Muys
  * @since 10/01/2017
  */
-public class LogEntryDefaultFormatting implements LogEntryFormatting{
+public class LogEntryDefaultFormatting {
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM hh:mm:ss.SSS");
     public final String timeStyle;
     public final String classStyle;

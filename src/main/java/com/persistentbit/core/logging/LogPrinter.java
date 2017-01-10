@@ -1,11 +1,14 @@
 package com.persistentbit.core.logging;
 
 import com.persistentbit.core.logging.entries.*;
+import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
+import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.IndentOutputStream;
 import com.persistentbit.core.utils.IndentPrintStream;
 
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -79,20 +82,71 @@ public class LogPrinter implements LogEntryPrinter{
 
 
 	public static LogEntryPrinter consoleInColor(){
-		return bufferedPrinter(System.out,ips -> new LogPrinter(new AnsiColor(true),ips));
+		return new LogEntryPrinter() {
+			@Override
+			public void print(LogEntry entry) {
+				if(entry != null){
+					entry.asPrintable(true)
+				}
+			}
+
+			@Override
+			public void print(Throwable exception) {
+				throw new RuntimeException(".print TODO: Not yet implemented");
+			}
+		}
+		//return bufferedPrinter(System.out,ips -> new LogPrinter(new AnsiColor(true),ips));
 	}
 	public static LogEntryPrinter consoleErrorInColor(){
-		return bufferedPrinter(System.err,ips -> new LogPrinter(new AnsiColor(true),ips));
+		//return bufferedPrinter(System.err,ips -> new LogPrinter(new AnsiColor(true),ips));
 	}
 
-	/*public static LogEntryPrinter memory(ByteArrayOutputStream bout){
-		return IndentOutputStream.of(bout)
-				.flatMap(os -> IndentPrintStream.of(os,Charset.forName("UTF-8")))
-				.map(s -> new LogPrinter(new AnsiColor(false),s))
-				.orElseThrow();
-	}*/
+	public static LogEntryPrinter console(PrintStream printStream, boolean inColor){
+		return new LogEntryPrinter() {
+			LogEntryDefaultFormatting formatting = new LogEntryDefaultFormatting(new AnsiColor(inColor));
+			@Override
+			public void print(LogEntry entry) {
+				if(entry != null){
+					printStream.print(entry.asPrintable(inColor).printToString());
+				}
+			}
+
+			@Override
+			public void print(Throwable exception) {
+				throw new RuntimeException(".print TODO: Not yet implemented");
+			}
+
+			static 	private void print(PrintStream out, LogEntryDefaultFormatting formatting, Throwable exception){
+				if(exception instanceof LoggedException){
+					LoggedException le = (LoggedException) exception;
+					String msg = le.getMessage() == null ? "" : le.getMessage();
+					out.println(formatting.msgStyleException + "Logged Exception: " + msg);
+					out.print(PrintableText.indent( iout ->
+								iout.print(le.getLogs().asPrintable(formatting.hasColor))
+							).printToString()
+					);
+					out.indent();
+					print(le.getLogs());
+					print(exception.getStackTrace());
 
 
+				} else {
+					out.println(msgStyleException + exception.getMessage() + msgStyleInfo + " " + exception.getClass().getName());
+					out.indent();
+					print(exception.getStackTrace());
+					out.outdent();
+
+				}
+				if(exception.getCause() != null){
+					out.println(msgStyleException + " caused by..");
+					out.indent();
+					print(exception.getCause());
+					out.outdent();
+				}
+
+			}
+		};
+	}
 
 
 
@@ -116,20 +170,7 @@ public class LogPrinter implements LogEntryPrinter{
 			out.indent();
 			print(le.getLogs());
 			print(exception.getStackTrace());
-			//out.indent();
-			//out.outdent();
 
-			//out.outdent();
-			//out.outdent();
-			/*out.indent();
-			print(exception.getStackTrace());
-			out.outdent();
-			if(exception.getCause() != null){
-				out.println(msgStyleException + " caused by..");
-				out.indent();
-				print(exception.getCause());
-				out.outdent();
-			}*/
 
 		} else {
 			out.println(msgStyleException + exception.getMessage() + msgStyleInfo + " " + exception.getClass().getName());
