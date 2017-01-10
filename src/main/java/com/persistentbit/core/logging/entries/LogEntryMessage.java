@@ -2,6 +2,7 @@ package com.persistentbit.core.logging.entries;
 
 import com.persistentbit.core.logging.LogContext;
 import com.persistentbit.core.logging.LogMessageLevel;
+import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
 import com.persistentbit.core.printing.PrintableText;
 
 import java.util.Optional;
@@ -12,7 +13,7 @@ import java.util.Optional;
  * @author petermuys
  * @since 30/12/16
  */
-public class LogEntryMessage implements LogEntry{
+public class LogEntryMessage extends AbstractLogEntry{
 	private final LogMessageLevel level;
 	private final LogContext source;
 	private final String     message;
@@ -46,15 +47,15 @@ public class LogEntryMessage implements LogEntry{
 		return level;
 	}
 
+
 	@Override
-	public PrintableText asPrintable(boolean color) {
+	protected PrintableText asPrintable(LogEntryDefaultFormatting formatting) {
 		return out -> {
 			out.println(
-					msgStyleDebug +  entry.getMessage() +
-
-							timeStyle + "\t… " + entry.getContext().map(s -> formatTime(s.getTimestamp()) + " ").orElse("") +
-							classStyle  +  entry.getContext().map(s -> s.getClassName() + "(" + s.getFileName() + ":" + s.getSourceLine() + ")").orElse("")
+					formatting.msgStyleDebug +  getMessage() +
+							formatting.timeStyle + "\t… " + getContext().map(s -> formatting.formatTime(s.getTimestamp()) + " ").orElse("") +
+							formatting.classStyle  +  getContext().map(s -> s.getClassName() + "(" + s.getFileName() + ":" + s.getSourceLine() + ")").orElse("")
 			);
-		}
+		};
 	}
 }

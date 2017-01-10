@@ -15,6 +15,8 @@ public class AnsiColor {
         this.cmdString = cmdString;
     }
 
+
+
     public AnsiColor(boolean active) {
         this(active, "");
     }
@@ -23,6 +25,9 @@ public class AnsiColor {
         this(true);
     }
 
+    public boolean isActive() {
+        return active;
+    }
 
     private AnsiColor add(String cmdCode) {
         return new AnsiColor(active, cmdString.isEmpty() ? cmdCode : cmdString + ";" + cmdCode);

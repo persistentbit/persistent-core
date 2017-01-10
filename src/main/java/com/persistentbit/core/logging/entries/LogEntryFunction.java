@@ -1,7 +1,7 @@
 package com.persistentbit.core.logging.entries;
 
 import com.persistentbit.core.logging.LogContext;
-import com.persistentbit.core.logging.printing.LogEntryFormatting;
+import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
 import com.persistentbit.core.printing.PrintableText;
 
 import java.util.Optional;
@@ -12,7 +12,7 @@ import java.util.Optional;
  * @author petermuys
  * @since 30/12/16
  */
-public class LogEntryFunction implements LogEntry{
+public class LogEntryFunction extends AbstractLogEntry{
 	private LogContext source;
 	private LogEntry logs;
 	private String        params;
@@ -68,13 +68,37 @@ public class LogEntryFunction implements LogEntry{
 	public LogEntryFunction withLogs(LogEntry logs){
 		return new LogEntryFunction(source,params,logs,timeStampDone,resultValue);
 	}
-	@Override
-	public String toString() {
-		return "fun " + source.getMethodName() + "(" + getParams().orElse("") + ")" + "{ " + getLogs() + "}";
-	}
 
 	@Override
-	public PrintableText asPrintable(LogEntryFormatting formatting) {
-		throw new RuntimeException("LogEntryFunction.asPrintable TODO: Not yet implemented");
+	protected PrintableText asPrintable(LogEntryDefaultFormatting formatting) {
+		return out -> {
+
+			String functionName = getContext().map(s -> {
+				String fun = s.getMethodName();
+				String clsName = s.getClassName();
+				int i = clsName.lastIndexOf('.');
+				if(i >=0){
+					clsName = clsName.substring(i+1);
+				}
+				return clsName.replace('$','.') + "." + fun;
+			}).orElse("unknownFunction");
+
+
+			String duration = getTimestampDone().map( td ->
+					getContext().map(c ->
+							" " + (td - c.getTimestamp()) + "ms "
+					).orElse("")
+			).orElse("");
+			String returnValue = getResult().map(r -> ": " + r).orElse("");
+			out.println(
+					formatting.functionStyle +  functionName +
+							formatting.functionParamsStyle + getParams().map(p -> "(" + p + ")").orElse("(?)") +
+							formatting.functionResultStyle + returnValue +
+							formatting.timeStyle + "\t… " + getContext().map(s -> formatting.formatTime(s.getTimestamp()) + " ").orElse("") +
+							formatting.durationStyle + duration  +
+							formatting.classStyle  +  getContext().map(s -> s.getClassName() + "(" + s.getFileName() + ":" + s.getSourceLine() + ")").orElse("")
+			);
+			out.print(PrintableText.indent(getLogs().asPrintable(formatting.hasColor)));
+		};
 	}
 }

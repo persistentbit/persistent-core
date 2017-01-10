@@ -1,7 +1,7 @@
 package com.persistentbit.core.logging.entries;
 
 import com.persistentbit.core.logging.LogContext;
-import com.persistentbit.core.logging.printing.LogEntryFormatting;
+import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
 import com.persistentbit.core.printing.PrintableText;
 
 import java.util.Optional;
@@ -12,7 +12,7 @@ import java.util.Optional;
  * @author petermuys
  * @since 3/01/17
  */
-public class LogEntryEmpty implements LogEntry{
+public class LogEntryEmpty extends AbstractLogEntry{
 	public static final LogEntryEmpty inst = new LogEntryEmpty();
 
 	private LogEntryEmpty(){
@@ -34,13 +34,9 @@ public class LogEntryEmpty implements LogEntry{
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		return "LogEntryEmpty()";
-	}
 
 	@Override
-	public PrintableText asPrintable(LogEntryFormatting formatting) {
+	protected PrintableText asPrintable(LogEntryDefaultFormatting formatting) {
 		return PrintableText.empty;
 	}
 }
