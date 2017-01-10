@@ -1,5 +1,7 @@
 package com.persistentbit.core.logging.printing;
 
+import com.persistentbit.core.utils.ToDo;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -18,13 +20,13 @@ public class LogEntryDefaultFormatting implements LogEntryFormatting{
         return dateTimeFormatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
     }
     public String styleException(String exception){
-
+        throw new ToDo();
     }
     public String styleInfo(String info){
-
+        throw new ToDo();
     }
     public String styleClassName(String className){
-
+        throw new ToDo();
     }
 
 }
