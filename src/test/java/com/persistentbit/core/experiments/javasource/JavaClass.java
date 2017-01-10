@@ -100,6 +100,10 @@ public class JavaClass extends BaseValueClass implements PrintableText{
 		return copyWith("methods", methods.plus(method));
 	}
 
+	public JavaClass addField(Object field){
+		return copyWith("fields", fields.plus(PrintableText.from(field)));
+	}
+
 	@Override
 	public void print(PrintTextWriter out) {
 		out.println("package " + typeName.packageName + ";");
@@ -124,7 +128,10 @@ public class JavaClass extends BaseValueClass implements PrintableText{
 	private void printContent(PrintTextWriter out) {
 		out.println(PrintableText.indent(cout -> {
 			cout.println();
-			fields.forEach(f -> cout.println(f));
+			fields.forEach(f -> {
+				cout.println(f);
+
+			});
 			cout.println();
 			methods.forEach(m -> {
 				cout.println(m);

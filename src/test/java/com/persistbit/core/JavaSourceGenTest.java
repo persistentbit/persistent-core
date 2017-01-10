@@ -2,6 +2,7 @@ package com.persistbit.core;
 
 import com.persistentbit.core.experiments.javasource.JavaClass;
 import com.persistentbit.core.experiments.javasource.JavaDoc;
+import com.persistentbit.core.experiments.javasource.JavaField;
 import com.persistentbit.core.experiments.javasource.JavaFunction;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.testing.TestCase;
@@ -25,6 +26,7 @@ public class JavaSourceGenTest{
 	static final TestCase classGen = TestCase.name("Java Class generator").code(l -> {
 		JavaClass cls = JavaClass.of("com.persistentbit.experiments.tests", "TestClass")
 			.javaDoc("Hello world!" + System.lineSeparator())
+			.addField(JavaField.of("Integer","id").annotate("@Id").init("null"))
 			.addMethod(JavaFunction.name("TestClass")
 						   .asConstructor()
 						   .doc(JavaDoc.of(jdoc -> {
@@ -32,7 +34,11 @@ public class JavaSourceGenTest{
 						   }))
 			)
 			.addMethod(JavaFunction.name("of")
-						   .asStatic()
+					.asStatic()
+					.result("TestClass")
+					.content((PrintableText) out -> {
+						out.println("return new TestClass();");
+					})
 			)
 			.addMethod(funTestAll);
 		String txt = cls.printToString();

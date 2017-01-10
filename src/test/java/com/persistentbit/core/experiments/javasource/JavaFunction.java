@@ -14,13 +14,14 @@ public class JavaFunction extends BaseValueClass implements PrintableText{
 
 	private final PrintableText javaDoc;
 	private final String        access;
+	private final boolean		isAbstract;
 	private final boolean       isStatic;
 	private final PrintableText result;
 	private final String        name;
 	private final PrintableText params;
 	private final PrintableText content;
 
-	public JavaFunction(PrintableText javaDoc, String access, boolean isStatic,
+	public JavaFunction(PrintableText javaDoc, String access, boolean isStatic, boolean isAbstract,
 						PrintableText result,
 						String name,
 						PrintableText params,
@@ -29,6 +30,7 @@ public class JavaFunction extends BaseValueClass implements PrintableText{
 		this.javaDoc = javaDoc;
 		this.access = access;
 		this.isStatic = isStatic;
+		this.isAbstract = isAbstract;
 		this.result = result;
 		this.name = name;
 		this.params = params;
@@ -48,6 +50,10 @@ public class JavaFunction extends BaseValueClass implements PrintableText{
 		return copyWith("result", PrintableText.from(value));
 	}
 
+	public JavaFunction content(Object value){
+		return copyWith("content",PrintableText.from(value));
+	}
+
 	public JavaFunction asStatic() {
 		return copyWith("isStatic", true);
 	}
@@ -55,18 +61,22 @@ public class JavaFunction extends BaseValueClass implements PrintableText{
 
 	public static JavaFunction name(String functionName) {
 		return new JavaFunction(
-			empty, "public", false, PrintableText.fromString("void"), functionName,
+			empty, "public", false,false, PrintableText.fromString("void"), functionName,
 			PrintableText.fromString("()"),
 			empty
 		);
 	}
 
+	public JavaFunction asAbstract() {
+		return copyWith("isAbstract",true);
+	}
 
 	@Override
 	public void print(PrintTextWriter out) {
 		out.print(javaDoc);
 		out.print(access);
 		out.print(isStatic ? " static" : "");
+		out.print(isAbstract ? " abstract" : "");
 		out.print(" " + result.printToString());
 		out.print(" " + name);
 		out.print(params);
