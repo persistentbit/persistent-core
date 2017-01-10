@@ -1,5 +1,7 @@
 package com.persistentbit.core.logging;
 
+import com.persistentbit.core.logging.entries.LogEntry;
+
 /**
  * @author petermuys
  * @since 30/12/16

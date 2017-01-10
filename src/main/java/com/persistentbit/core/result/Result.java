@@ -2,6 +2,9 @@ package com.persistentbit.core.result;
 
 import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.logging.*;
+import com.persistentbit.core.logging.entries.LogEntry;
+import com.persistentbit.core.logging.entries.LogEntryEmpty;
+import com.persistentbit.core.logging.entries.LogEntryFunction;
 import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.tuples.Tuple3;
 import com.persistentbit.core.tuples.Tuple4;

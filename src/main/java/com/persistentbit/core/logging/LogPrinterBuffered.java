@@ -1,6 +1,7 @@
 package com.persistentbit.core.logging;
 
 import com.persistentbit.core.Nothing;
+import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.result.Result;
 
 import java.io.ByteArrayOutputStream;

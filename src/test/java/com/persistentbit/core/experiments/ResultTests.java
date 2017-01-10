@@ -1,7 +1,7 @@
 package com.persistentbit.core.experiments;
 
-import com.persistentbit.core.logging.LogEntry;
-import com.persistentbit.core.logging.LogEntryEmpty;
+import com.persistentbit.core.logging.entries.LogEntry;
+import com.persistentbit.core.logging.entries.LogEntryEmpty;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;

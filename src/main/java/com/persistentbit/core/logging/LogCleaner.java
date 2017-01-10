@@ -1,5 +1,7 @@
 package com.persistentbit.core.logging;
 
+import com.persistentbit.core.logging.entries.*;
+
 /**
  * TODO: Add comment
  *

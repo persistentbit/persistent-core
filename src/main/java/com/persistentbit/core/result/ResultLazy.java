@@ -1,6 +1,6 @@
 package com.persistentbit.core.result;
 
-import com.persistentbit.core.logging.LogEntry;
+import com.persistentbit.core.logging.entries.LogEntry;
 
 import java.util.Optional;
 import java.util.function.Consumer;

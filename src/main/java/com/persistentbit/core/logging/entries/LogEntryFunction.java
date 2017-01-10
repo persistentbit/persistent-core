@@ -1,4 +1,6 @@
-package com.persistentbit.core.logging;
+package com.persistentbit.core.logging.entries;
+
+import com.persistentbit.core.logging.LogContext;
 
 import java.util.Optional;
 
@@ -9,7 +11,7 @@ import java.util.Optional;
  * @since 30/12/16
  */
 public class LogEntryFunction implements LogEntry{
-	private LogContext    source;
+	private LogContext source;
 	private LogEntry logs;
 	private String        params;
 	private Long		  timeStampDone;

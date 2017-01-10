@@ -2,8 +2,8 @@ package com.persistentbit.core.result;
 
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.LogCleaner;
-import com.persistentbit.core.logging.LogEntry;
-import com.persistentbit.core.logging.LogEntryEmpty;
+import com.persistentbit.core.logging.entries.LogEntry;
+import com.persistentbit.core.logging.entries.LogEntryEmpty;
 
 import java.util.Objects;
 import java.util.Optional;

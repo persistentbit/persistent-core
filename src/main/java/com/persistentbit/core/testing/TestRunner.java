@@ -1,7 +1,13 @@
 package com.persistentbit.core.testing;
 
 import com.persistentbit.core.Nothing;
-import com.persistentbit.core.logging.*;
+import com.persistentbit.core.logging.AbstractLogEntryLogging;
+import com.persistentbit.core.logging.LogEntryPrinter;
+import com.persistentbit.core.logging.LogPrinter;
+import com.persistentbit.core.logging.LoggedException;
+import com.persistentbit.core.logging.entries.LogEntry;
+import com.persistentbit.core.logging.entries.LogEntryException;
+import com.persistentbit.core.logging.entries.LogEntryFunction;
 import com.persistentbit.core.result.Result;
 
 import java.util.Arrays;

@@ -1,7 +1,7 @@
 package com.persistentbit.core.result;
 
 import com.persistentbit.core.logging.Log;
-import com.persistentbit.core.logging.LogEntry;
+import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.Optional;
