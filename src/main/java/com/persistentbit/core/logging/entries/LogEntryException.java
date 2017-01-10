@@ -1,6 +1,8 @@
 package com.persistentbit.core.logging.entries;
 
 import com.persistentbit.core.logging.LogContext;
+import com.persistentbit.core.logging.printing.LogEntryFormatting;
+import com.persistentbit.core.printing.PrintableText;
 
 import java.util.Optional;
 
@@ -35,5 +37,17 @@ public class LogEntryException implements LogEntry{
 
 	public Throwable getCause() {
 		return cause;
+	}
+
+	@Override
+	public PrintableText asPrintable(LogEntryFormatting formatting) {
+		return out -> {
+			out.println(
+					msgStyleError +  entry.getCause().getMessage() +
+							timeStyle + "\t… " + entry.getContext().map(s -> formatTime(s.getTimestamp()) + " ").orElse("") +
+							classStyle  +  entry.getContext().map(s -> s.getClassName() + "(" + s.getFileName() + ":" + s.getSourceLine() + ")").orElse("")
+			);
+			print(entry.getCause());
+		};
 	}
 }

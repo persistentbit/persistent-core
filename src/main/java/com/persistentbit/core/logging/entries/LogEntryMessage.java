@@ -2,6 +2,7 @@ package com.persistentbit.core.logging.entries;
 
 import com.persistentbit.core.logging.LogContext;
 import com.persistentbit.core.logging.LogMessageLevel;
+import com.persistentbit.core.printing.PrintableText;
 
 import java.util.Optional;
 
@@ -43,5 +44,17 @@ public class LogEntryMessage implements LogEntry{
 
 	public LogMessageLevel getLevel() {
 		return level;
+	}
+
+	@Override
+	public PrintableText asPrintable(boolean color) {
+		return out -> {
+			out.println(
+					msgStyleDebug +  entry.getMessage() +
+
+							timeStyle + "\t… " + entry.getContext().map(s -> formatTime(s.getTimestamp()) + " ").orElse("") +
+							classStyle  +  entry.getContext().map(s -> s.getClassName() + "(" + s.getFileName() + ":" + s.getSourceLine() + ")").orElse("")
+			);
+		}
 	}
 }

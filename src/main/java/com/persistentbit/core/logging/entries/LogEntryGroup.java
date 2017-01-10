@@ -2,6 +2,7 @@ package com.persistentbit.core.logging.entries;
 
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.LogContext;
+import com.persistentbit.core.printing.PrintableText;
 
 import java.util.Optional;
 
@@ -41,5 +42,10 @@ public class LogEntryGroup implements LogEntry{
 
 	public PList<LogEntry> getEntries() {
 		return entries;
+	}
+
+	@Override
+	public PrintableText asPrintable(boolean color) {
+		throw new RuntimeException("LogEntryGroup.asPrintable TODO: Not yet implemented");
 	}
 }
