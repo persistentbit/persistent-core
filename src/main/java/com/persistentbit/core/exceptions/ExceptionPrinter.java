@@ -1,5 +1,6 @@
 package com.persistentbit.core.exceptions;
 
+import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.printing.PrintableText;
 
 /**
@@ -14,12 +15,7 @@ public interface ExceptionPrinter{
 	PrintableText asPrintable(Throwable exception);
 
 	default <T extends Throwable> ExceptionPrinter orIf(Class<T> cls, SpecificExceptionPrinter<T> ep) {
-		return (exception) -> {
-			if(cls.isAssignableFrom(exception.getClass())) {
-				return ep.asPrintable((T) exception, this);
-			}
-			return asPrintable(exception);
-		};
+		return new ExpectionPrinterSwitcher(this, PMap.empty()).orIf(cls,ep);
 	}
 
 	default void print(Throwable e) {
