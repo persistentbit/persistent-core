@@ -1,5 +1,6 @@
 package com.persistbit.core.tokenizer;
 
+import com.persistbit.core.CoreTest;
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PStream;
@@ -76,7 +77,7 @@ public class TestTokenizer{
 	}
 
 	public void testAll() {
-		TestRunner.runAndPrint(TestTokenizer.class);
+		CoreTest.runTests(TestTokenizer.class);
 	}
 
 	public static void main(String[] args) {

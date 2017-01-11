@@ -3,10 +3,7 @@ package com.persistentbit.core;
 import com.persistentbit.core.exceptions.DefaultExceptionPrinter;
 import com.persistentbit.core.exceptions.ExceptionPrinter;
 import com.persistentbit.core.logging.LoggedException;
-import com.persistentbit.core.logging.entries.LogEntryEmpty;
-import com.persistentbit.core.logging.entries.LogEntryException;
-import com.persistentbit.core.logging.entries.LogEntryFunction;
-import com.persistentbit.core.logging.entries.LogEntryGroup;
+import com.persistentbit.core.logging.entries.*;
 import com.persistentbit.core.logging.printing.DefaultLogPrinter;
 import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
 import com.persistentbit.core.logging.printing.LogPrinter;
@@ -24,10 +21,11 @@ public final class ModuleCore {
                 : LogEntryDefaultFormatting.noColors;
 
         return DefaultLogPrinter.forLogEntry()
+                .orIf(LogEntryGroup.class, DefaultLogPrinter.forLogEntryGroup(format))
                 .orIf(LogEntryEmpty.class, DefaultLogPrinter.forLogEntryEmpty(format))
                 .orIf(LogEntryException.class, DefaultLogPrinter.forLogEntryException(format))
                 .orIf(LogEntryFunction.class, DefaultLogPrinter.forLogEntryFunction(format))
-                .orIf(LogEntryGroup.class, DefaultLogPrinter.forLogEntryGroup(format))
+                .orIf(LogEntryMessage.class, DefaultLogPrinter.forLogEntryMessage(format))
                 ;
     }
     public static ExceptionPrinter createExceptionPrinter(LogPrinter logPrinter, boolean color) {

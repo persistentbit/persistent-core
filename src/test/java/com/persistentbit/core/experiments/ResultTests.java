@@ -1,10 +1,10 @@
 package com.persistentbit.core.experiments;
 
+import com.persistbit.core.CoreTest;
 import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.logging.entries.LogEntryEmpty;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.testing.TestCase;
-import com.persistentbit.core.testing.TestRunner;
 
 
 /**
@@ -46,7 +46,7 @@ public class ResultTests {
 
 
     public void testAll() {
-        TestRunner.runAndPrint(ResultTests.class);
+        CoreTest.runTests(ResultTests.class);
     }
 
     public static void main(String... args) throws Exception {

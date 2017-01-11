@@ -4,7 +4,6 @@ import com.persistbit.core.utils.TestValue;
 import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestData;
-import com.persistentbit.core.testing.TestRunner;
 import com.persistentbit.core.utils.IO;
 import com.persistentbit.core.utils.NumberUtils;
 
@@ -111,7 +110,7 @@ public class TestUtils{
 
 
 	public void testAll() {
-		TestRunner.runAndPrint(TestUtils.class);
+		CoreTest.runTests(TestUtils.class);
 	}
 
 	public static void main(String... args) throws Exception {

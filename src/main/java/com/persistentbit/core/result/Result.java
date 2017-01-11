@@ -275,6 +275,7 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 	 * Run code if this is an Empty result
 	 *
 	 * @param effect The code to run
+	 * @return Same result like this
 	 */
 	public abstract Result<T> ifEmpty(Consumer<Empty<T>> effect);
 
@@ -284,6 +285,7 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 	 * Run code if this is a Failure result
 	 *
 	 * @param effect The Failure exception
+	 * @return Same result like this
 	 */
 	public abstract Result<T> ifFailure(Consumer<Failure<T>> effect);
 

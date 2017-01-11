@@ -1,8 +1,8 @@
 package com.persistbit.core.collections;
 
 
+import com.persistbit.core.CoreTest;
 import com.persistentbit.core.testing.TestCase;
-import com.persistentbit.core.testing.TestRunner;
 
 import java.util.Date;
 
@@ -34,6 +34,6 @@ public class TestImTools{
 
 
 	public void testAll() {
-		TestRunner.runAndPrint(TestImTools.class);
+		CoreTest.runTests(TestImTools.class);
 	}
 }

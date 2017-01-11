@@ -129,7 +129,7 @@ public class TestResult{
 
 
 	public void testAll(){
-		TestRunner.runAndPrint(TestResult.class);
+		CoreTest.runTests(TestResult.class);
 	}
 
 	public static void main(String[] args) {

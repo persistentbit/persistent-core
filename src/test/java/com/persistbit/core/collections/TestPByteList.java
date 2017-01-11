@@ -1,5 +1,6 @@
 package com.persistbit.core.collections;
 
+import com.persistbit.core.CoreTest;
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.collections.PByteList;
 import com.persistentbit.core.logging.Log;
@@ -26,7 +27,7 @@ public class TestPByteList{
 
 
 	public void testAll() {
-		TestRunner.runAndPrint(TestPByteList.class);
+		CoreTest.runTests(TestPByteList.class);
 	}
 
 

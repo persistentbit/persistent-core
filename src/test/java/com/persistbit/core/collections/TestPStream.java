@@ -1,5 +1,6 @@
 package com.persistbit.core.collections;
 
+import com.persistbit.core.CoreTest;
 import com.persistentbit.core.collections.*;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
@@ -224,7 +225,7 @@ public class TestPStream{
 
 
 	public void testAll() {
-		TestRunner.runAndPrint(TestPStream.class);
+		CoreTest.runTests(TestPStream.class);
 	}
 
 
@@ -247,7 +248,7 @@ public class TestPStream{
 
 
 	public static void main(String[] args) {
-		TestRunner.runAndPrint(TestPStream.class);
+		CoreTest.runTests(TestPStream.class);
 	}
 
 

@@ -1,9 +1,9 @@
 package com.persistbit.core.dependencies;
 
+import com.persistbit.core.CoreTest;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.dependencies.DependencyResolver;
 import com.persistentbit.core.testing.TestCase;
-import com.persistentbit.core.testing.TestRunner;
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.NoEqual;
 
@@ -42,7 +42,7 @@ public class TestDependencies{
 	});
 
   public void testAll(){
-	  TestRunner.runAndPrint(TestDependencies.class);
+	  CoreTest.runTests(TestDependencies.class);
   }
 
   public static final class Node extends BaseValueClass{

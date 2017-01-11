@@ -7,6 +7,7 @@ import com.persistentbit.core.logging.LoggedException;
 import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.logging.entries.LogEntryException;
 import com.persistentbit.core.logging.entries.LogEntryFunction;
+import com.persistentbit.core.logging.printing.LogPrinter;
 import com.persistentbit.core.result.Result;
 
 import java.util.Arrays;
@@ -35,44 +36,17 @@ public final class TestRunner extends AbstractLogEntryLogging {
 		return Nothing.inst;
 	}
 
-	public static void runAndPrint(ExceptionPrinter ep, TestCase testCase) {
+	public static void runAndPrint(LogPrinter logPrinter, ExceptionPrinter ep, TestCase testCase) {
 		Result<TestCase> resultCase = getTestRunResult(testCase);
-		System.out.println(resultCase.getLog().asPrintable(true).printToString());
+		System.out.println(logPrinter.asPrintable(resultCase.getLog()).printToString());
 		resultCase.ifFailure(f -> {
 			ep.print(f.getException());
 		});
 
 	}
-
-	public static void runAndPrint(TestCase testCase) {
-		runAndPrint(ExceptionPrinter.createDefault(true), testCase);
+	public static void runAndPrint(LogPrinter logPrinter, ExceptionPrinter ep, Class testClass) {
+		runAndPrint(logPrinter,ep,TestCase.forTestClass(testClass));
 	}
-
-	public static void runAndPrint(Class testClass) {
-		runAndPrint(TestCase.forTestClass(testClass));
-	}
-
-	/*public static void runAndPrint(TestCase testCase, LogEntryPrinter printer){
-		Result<TestCase> resultCase = getTestRunResult(testCase);
-		printer.print(resultCase.getLog());
-		resultCase.orElseThrow();
-	}
-
-	public static void runAndPrint(Class testClass, LogEntryPrinter printer){
-		runAndPrint(TestCase.forTestClass(testClass),printer);
-	}
-
-	public static void runAndPrint(TestCase testCase) {
-		runAndPrint(testCase,defaultTestRunPrinter());
-	}
-	public static void runAndPrint(Class testClass){
-		runAndPrint(testClass,defaultTestRunPrinter());
-	}
-
-	public static final LogEntryPrinter defaultTestRunPrinter() {
-		return LogPrinter.consoleInColor();
-	}
-	*/
 
 	public static Result<TestCase> getTestRunResult(TestCase testCode) {
 

@@ -1,10 +1,10 @@
 package com.persistbit.core.collections;
 
+import com.persistbit.core.CoreTest;
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.collections.*;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.testing.TestCase;
-import com.persistentbit.core.testing.TestRunner;
 
 import java.util.*;
 
@@ -23,7 +23,7 @@ public class TestMaps{
 
 
 	public void testAll() {
-		TestRunner.runAndPrint(TestMaps.class);
+		CoreTest.runTests(TestMaps.class);
 	}
 
 

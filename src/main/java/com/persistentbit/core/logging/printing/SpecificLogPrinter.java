@@ -16,11 +16,12 @@ public interface SpecificLogPrinter<E extends LogEntry>{
 
 
 	default <T extends E> SpecificLogPrinter<E> orIf(Class<T> cls, SpecificLogPrinter<T> ep) {
+		SpecificLogPrinter self = this;
 		return (logEntry, rootPrinter) -> {
 			if(cls.isAssignableFrom(logEntry.getClass())) {
 				return ep.asPrintable((T) logEntry, rootPrinter);
 			}
-			return asPrintable(logEntry, rootPrinter);
+			return self.asPrintable(logEntry, rootPrinter);
 		};
 	}
 

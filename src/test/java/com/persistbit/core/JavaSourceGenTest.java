@@ -6,7 +6,6 @@ import com.persistentbit.core.experiments.javasource.JavaField;
 import com.persistentbit.core.experiments.javasource.JavaFunction;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.testing.TestCase;
-import com.persistentbit.core.testing.TestRunner;
 
 /**
  * TODOC
@@ -54,7 +53,7 @@ public class JavaSourceGenTest{
 
 
 	public void testAll() {
-		TestRunner.runAndPrint(JavaSourceGenTest.class);
+		CoreTest.runTests(JavaSourceGenTest.class);
 	}
 
 	public static void main(String[] args) {
