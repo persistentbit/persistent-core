@@ -2,8 +2,6 @@ package com.persistentbit.core.logging.entries;
 
 import com.persistentbit.core.logging.LogContext;
 import com.persistentbit.core.logging.LogMessageLevel;
-import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
-import com.persistentbit.core.printing.PrintableText;
 
 import java.util.Optional;
 
@@ -48,14 +46,5 @@ public class LogEntryMessage extends AbstractLogEntry{
 	}
 
 
-	@Override
-	protected PrintableText asPrintable(LogEntryDefaultFormatting formatting) {
-		return out -> {
-			out.println(
-					formatting.msgStyleDebug +  getMessage() +
-							formatting.timeStyle + "\t… " + getContext().map(s -> formatting.formatTime(s.getTimestamp()) + " ").orElse("") +
-							formatting.classStyle  +  getContext().map(s -> s.getClassName() + "(" + s.getFileName() + ":" + s.getSourceLine() + ")").orElse("")
-			);
-		};
-	}
+
 }

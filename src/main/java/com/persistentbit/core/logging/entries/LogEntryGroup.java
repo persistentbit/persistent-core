@@ -2,8 +2,6 @@ package com.persistentbit.core.logging.entries;
 
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.LogContext;
-import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
-import com.persistentbit.core.printing.PrintableText;
 
 import java.util.Optional;
 
@@ -43,9 +41,4 @@ public class LogEntryGroup extends AbstractLogEntry{
 	}
 
 
-
-	@Override
-	protected PrintableText asPrintable(LogEntryDefaultFormatting formatting) {
-		return out -> entries.forEach(le -> out.print(le.asPrintable(formatting.hasColor)));
-	}
 }

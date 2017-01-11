@@ -1,7 +1,5 @@
 package com.persistentbit.core.exceptions;
 
-import com.persistentbit.core.logging.LoggedException;
-import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
 import com.persistentbit.core.printing.PrintableText;
 
 /**
@@ -33,11 +31,5 @@ public interface ExceptionPrinter{
 		return this;
 	}
 
-	static ExceptionPrinter createDefault(boolean color) {
-		LogEntryDefaultFormatting format =
-			color ? LogEntryDefaultFormatting.colors : LogEntryDefaultFormatting.noColors;
-		ExceptionPrinter          def    = new DefaultExceptionPrinter(format);
-		def = def.orIf(LoggedException.class, LoggedException.createExceptionPrinter(color));
-		return def;
-	}
+
 }

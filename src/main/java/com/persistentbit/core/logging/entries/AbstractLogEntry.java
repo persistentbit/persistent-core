@@ -1,7 +1,7 @@
 package com.persistentbit.core.logging.entries;
 
-import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
-import com.persistentbit.core.printing.PrintableText;
+import com.persistentbit.core.ModuleCore;
+import com.persistentbit.core.logging.printing.LogPrinter;
 
 /**
  * TODO: Add comment
@@ -10,16 +10,12 @@ import com.persistentbit.core.printing.PrintableText;
  * @since 10/01/2017
  */
 public abstract class AbstractLogEntry implements LogEntry{
-
+    static private LogPrinter toStringPrinter = ModuleCore.createLogPrinter(false);
 
     @Override
     public String toString() {
-        return printString(false);
+        return toStringPrinter.asPrintable(this).printToString();
     }
 
-    @Override
-    public PrintableText asPrintable(boolean color) {
-        return asPrintable(color ? LogEntryDefaultFormatting.colors : LogEntryDefaultFormatting.noColors);
-    }
-    protected abstract PrintableText asPrintable(LogEntryDefaultFormatting formatting);
+
 }

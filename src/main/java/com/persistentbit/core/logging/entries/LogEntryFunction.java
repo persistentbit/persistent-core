@@ -1,8 +1,6 @@
 package com.persistentbit.core.logging.entries;
 
 import com.persistentbit.core.logging.LogContext;
-import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
-import com.persistentbit.core.printing.PrintableText;
 
 import java.util.Optional;
 
@@ -69,36 +67,5 @@ public class LogEntryFunction extends AbstractLogEntry{
 		return new LogEntryFunction(source,params,logs,timeStampDone,resultValue);
 	}
 
-	@Override
-	protected PrintableText asPrintable(LogEntryDefaultFormatting formatting) {
-		return out -> {
 
-			String functionName = getContext().map(s -> {
-				String fun = s.getMethodName();
-				String clsName = s.getClassName();
-				int i = clsName.lastIndexOf('.');
-				if(i >=0){
-					clsName = clsName.substring(i+1);
-				}
-				return clsName.replace('$','.') + "." + fun;
-			}).orElse("unknownFunction");
-
-
-			String duration = getTimestampDone().map( td ->
-					getContext().map(c ->
-							" " + (td - c.getTimestamp()) + "ms "
-					).orElse("")
-			).orElse("");
-			String returnValue = getResult().map(r -> ": " + r).orElse("");
-			out.println(
-					formatting.functionStyle +  functionName +
-							formatting.functionParamsStyle + getParams().map(p -> "(" + p + ")").orElse("(?)") +
-							formatting.functionResultStyle + returnValue +
-							formatting.timeStyle + "\t… " + getContext().map(s -> formatting.formatTime(s.getTimestamp()) + " ").orElse("") +
-							formatting.durationStyle + duration  +
-							formatting.classStyle  +  getContext().map(s -> s.getClassName() + "(" + s.getFileName() + ":" + s.getSourceLine() + ")").orElse("")
-			);
-			out.print(PrintableText.indent(getLogs().asPrintable(formatting.hasColor)));
-		};
-	}
 }

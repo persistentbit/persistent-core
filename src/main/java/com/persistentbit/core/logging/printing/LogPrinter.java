@@ -13,4 +13,15 @@ import com.persistentbit.core.printing.PrintableText;
 public interface LogPrinter{
 
 	PrintableText asPrintable(LogEntry logEntry);
+
+	default <T extends LogEntry> LogPrinter orIf(Class<T> cls, SpecificLogPrinter<T> ep) {
+		return (logEntry) -> {
+			if(cls.isAssignableFrom(logEntry.getClass())) {
+				return ep.asPrintable((T) logEntry, this);
+			}
+			return asPrintable(logEntry);
+		};
+	}
+
+
 }

@@ -9,11 +9,11 @@ import com.persistentbit.core.printing.PrintableText;
  * @author petermuys
  * @since 10/01/17
  */
-final class DefaultExceptionPrinter implements ExceptionPrinter{
+public final class DefaultExceptionPrinter implements ExceptionPrinter{
 
 	private final LogEntryDefaultFormatting format;
 
-	DefaultExceptionPrinter(LogEntryDefaultFormatting format) {
+	public DefaultExceptionPrinter(LogEntryDefaultFormatting format) {
 		this.format = format;
 	}
 
