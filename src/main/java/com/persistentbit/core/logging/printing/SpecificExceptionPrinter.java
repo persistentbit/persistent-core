@@ -1,4 +1,4 @@
-package com.persistentbit.core.exceptions;
+package com.persistentbit.core.logging.printing;
 
 import com.persistentbit.core.printing.PrintableText;
 
@@ -12,7 +12,7 @@ import com.persistentbit.core.printing.PrintableText;
 public interface SpecificExceptionPrinter<E extends Throwable>{
 
 
-	PrintableText asPrintable(E exception, ExceptionPrinter rootPrinter);
+	PrintableText asPrintable(E exception, LogPrinter rootPrinter);
 
 
 	default <T extends E> SpecificExceptionPrinter<E> orIf(Class<T> cls, SpecificExceptionPrinter<T> ep) {

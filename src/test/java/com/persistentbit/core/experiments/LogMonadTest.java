@@ -80,17 +80,15 @@ public class LogMonadTest{
 		try {
 			run.run();
 		} catch(Exception e) {
-			CoreTest.testExceptionPrinter.print(e);
+			CoreTest.testLogPrinter.print(e);
 		}
 	}
 
 	public static void main(String[] args) {
 		UserDAO         dao = new UserDAO();
 		LogPrinter lp = CoreTest.testLogPrinter;
-
-		System.out.println(lp.asPrintable(dao.getUserById(1).getLog()).printToString());
-		System.out.println(lp.asPrintable(IO.readTextFile(new File("UnknownFile"), Charset.defaultCharset()).getLog())
-							   .printToString());
+		lp.print(dao.getUserById(1).getLog());
+		lp.print(IO.readTextFile(new File("UnknownFile"), Charset.defaultCharset()).getLog());
 		tryIt(() -> {
 
 			IO.readTextFile(new File("UnknownFile"),Charset.defaultCharset()).orElseThrow();
@@ -105,7 +103,7 @@ public class LogMonadTest{
 			//tryIt(()->System.out.println(divide(10,2)));
 			//tryIt(()->System.out.println(addDiv(10,2,0)));
 		} catch(Exception e) {
-			CoreTest.testExceptionPrinter.print(e);
+			CoreTest.testLogPrinter.print(e);
 		}
 
 	}

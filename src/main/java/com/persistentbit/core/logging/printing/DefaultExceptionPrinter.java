@@ -1,6 +1,5 @@
-package com.persistentbit.core.exceptions;
+package com.persistentbit.core.logging.printing;
 
-import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
 import com.persistentbit.core.printing.PrintableText;
 
 /**
@@ -9,7 +8,7 @@ import com.persistentbit.core.printing.PrintableText;
  * @author petermuys
  * @since 10/01/17
  */
-public final class DefaultExceptionPrinter implements ExceptionPrinter{
+public final class DefaultExceptionPrinter implements SpecificExceptionPrinter<Throwable> {
 
 	private final LogEntryDefaultFormatting format;
 
@@ -18,23 +17,24 @@ public final class DefaultExceptionPrinter implements ExceptionPrinter{
 	}
 
 	@Override
-	public PrintableText asPrintable(Throwable exception) {
+	public PrintableText asPrintable(Throwable exception, LogPrinter rootPrinter) {
 		return out -> {
 
 			out.println(format.msgStyleException + exception.getMessage() + format.msgStyleInfo + " " + exception
-				.getClass().getName());
+					.getClass().getName());
 			out.print(PrintableText.indent(indent -> {
 				for(StackTraceElement element : exception.getStackTrace()) {
 					indent.println(format.classStyle + element.getClassName() + "." + element.getMethodName()
-									   + "(" + element.getFileName() + ":" + element.getLineNumber() + ")"
+							+ "(" + element.getFileName() + ":" + element.getLineNumber() + ")"
 					);
 				}
 				Throwable cause = exception.getCause();
 				if(cause != null) {
 					indent.println(format.msgStyleException + " caused by..");
-					indent.println(asPrintable(cause).printToString());
+					indent.println(rootPrinter.printableException(cause).printToString());
 				}
 			}));
 		};
 	}
+
 }

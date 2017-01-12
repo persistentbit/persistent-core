@@ -1,9 +1,8 @@
 package com.persistentbit.core;
 
-import com.persistentbit.core.exceptions.DefaultExceptionPrinter;
-import com.persistentbit.core.exceptions.ExceptionPrinter;
 import com.persistentbit.core.logging.LoggedException;
 import com.persistentbit.core.logging.entries.*;
+import com.persistentbit.core.logging.printing.DefaultExceptionPrinter;
 import com.persistentbit.core.logging.printing.DefaultLogPrinter;
 import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
 import com.persistentbit.core.logging.printing.LogPrinter;
@@ -15,6 +14,22 @@ import com.persistentbit.core.logging.printing.LogPrinter;
  * @since 11/01/2017
  */
 public final class ModuleCore {
+    public static LogPrinter createLogPrinter(boolean hasColor){
+        LogEntryDefaultFormatting format = hasColor
+                ? LogEntryDefaultFormatting.colors
+                : LogEntryDefaultFormatting.noColors;
+
+        return LogPrinter.create()
+                .logIf(LogEntryGroup.class, DefaultLogPrinter.forLogEntryGroup(format))
+                .logIf(LogEntryEmpty.class, DefaultLogPrinter.forLogEntryEmpty(format))
+                .logIf(LogEntryException.class, DefaultLogPrinter.forLogEntryException(format))
+                .logIf(LogEntryFunction.class, DefaultLogPrinter.forLogEntryFunction(format))
+                .logIf(LogEntryMessage.class, DefaultLogPrinter.forLogEntryMessage(format))
+                .logIf(LoggedException.class, LoggedException.createExceptionPrinter(format))
+                .logIf(Throwable.class, new DefaultExceptionPrinter(format))
+                ;
+    }
+    /*
     public static LogPrinter createLogPrinter(boolean hasColor){
         LogEntryDefaultFormatting format = hasColor
                 ? LogEntryDefaultFormatting.colors
@@ -41,5 +56,5 @@ public final class ModuleCore {
 
         return new DefaultExceptionPrinter(format)
                 .orIf(LoggedException.class,LoggedException.createExceptionPrinter(createLogPrinter(color),color));
-    }
+    }*/
 }

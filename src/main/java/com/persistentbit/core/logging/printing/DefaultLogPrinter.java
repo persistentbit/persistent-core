@@ -15,9 +15,6 @@ public class DefaultLogPrinter {
 
 
 
-    static public LogPrinter forLogEntry() {
-        return (logEntry) -> PrintableText.fromString(logEntry.toString());
-    }
 
     public static SpecificLogPrinter<LogEntryEmpty> forLogEntryEmpty(LogEntryDefaultFormatting format) {
         return (logEntry, rootPrinter) -> PrintableText.empty;
@@ -32,7 +29,7 @@ public class DefaultLogPrinter {
                                     format.classStyle + logEntry.getContext().map(s -> s.getClassName() + "(" + s.getFileName() + ":" + s.getSourceLine() + ")").orElse("")
                     );
                     out.println("PRINTING TODO: " + logEntry.getCause());
-                    //out.print(logEntry.getCause());
+                    out.println(rootPrinter.printableException(logEntry.getCause()));
                 };
     }
 
@@ -79,14 +76,14 @@ public class DefaultLogPrinter {
                                     format.durationStyle + duration +
                                     format.classStyle + logEntry.getContext().map(s -> s.getClassName() + "(" + s.getFileName() + ":" + s.getSourceLine() + ")").orElse("")
                     );
-                    out.print(PrintableText.indent(rootPrinter.asPrintable(logEntry.getLogs())));
+                    out.print(PrintableText.indent(rootPrinter.printableLog(logEntry.getLogs())));
                 };
     }
 
     public static SpecificLogPrinter<LogEntryGroup> forLogEntryGroup(LogEntryDefaultFormatting format) {
         return (logEntry, rootPrinter) ->
                 (PrintTextWriter out) -> logEntry.getEntries().forEach(le ->
-                        out.print(rootPrinter.asPrintable(le))
+                        out.print(rootPrinter.printableLog(le))
                 )
                 ;
     }
