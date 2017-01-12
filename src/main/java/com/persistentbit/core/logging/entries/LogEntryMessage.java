@@ -1,6 +1,5 @@
 package com.persistentbit.core.logging.entries;
 
-import com.persistentbit.core.logging.LogContext;
 import com.persistentbit.core.logging.LogMessageLevel;
 
 import java.util.Optional;

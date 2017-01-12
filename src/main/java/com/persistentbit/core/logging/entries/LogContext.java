@@ -1,4 +1,4 @@
-package com.persistentbit.core.logging;
+package com.persistentbit.core.logging.entries;
 
 /**
  * TODOC

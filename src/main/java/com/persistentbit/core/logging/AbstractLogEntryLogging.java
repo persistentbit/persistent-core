@@ -1,7 +1,9 @@
 package com.persistentbit.core.logging;
 
 import com.persistentbit.core.Nothing;
+import com.persistentbit.core.logging.entries.LogContext;
 import com.persistentbit.core.logging.entries.LogEntry;
+import com.persistentbit.core.logging.entries.LogEntryException;
 import com.persistentbit.core.logging.entries.LogEntryMessage;
 
 /**
@@ -71,6 +73,11 @@ public abstract class AbstractLogEntryLogging {
 	public Nothing error(String message, Object value){
 		StackTraceElement ste = Thread.currentThread().getStackTrace()[stackEntryIndex];
 		return add(LogEntryMessage.of(LogMessageLevel.error, new LogContext(ste), objectToString(message) + ": " + objectToString(message)));
+	}
+
+	public Nothing exception(Throwable cause) {
+		StackTraceElement ste = Thread.currentThread().getStackTrace()[stackEntryIndex];
+		return add(new LogEntryException(new LogContext(ste), cause));
 	}
 
 

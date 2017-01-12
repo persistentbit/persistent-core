@@ -1,7 +1,6 @@
 package com.persistentbit.core.logging.entries;
 
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.logging.LogContext;
 
 import java.util.Optional;
 

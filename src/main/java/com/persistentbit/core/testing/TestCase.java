@@ -2,7 +2,7 @@ package com.persistentbit.core.testing;
 
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PStream;
-import com.persistentbit.core.logging.LogContext;
+import com.persistentbit.core.logging.entries.LogContext;
 import com.persistentbit.core.result.Result;
 
 import java.lang.reflect.Modifier;

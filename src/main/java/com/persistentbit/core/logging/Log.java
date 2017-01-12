@@ -1,5 +1,6 @@
 package com.persistentbit.core.logging;
 
+import com.persistentbit.core.logging.entries.LogContext;
 import com.persistentbit.core.logging.entries.LogEntryFunction;
 
 /**

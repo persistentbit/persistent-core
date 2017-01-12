@@ -28,8 +28,7 @@ public class DefaultLogPrinter {
                                     format.timeStyle + "\t… " + logEntry.getContext().map(s -> format.formatTime(s.getTimestamp()) + " ").orElse("") +
                                     format.classStyle + logEntry.getContext().map(s -> s.getClassName() + "(" + s.getFileName() + ":" + s.getSourceLine() + ")").orElse("")
                     );
-                    out.println("PRINTING TODO: " + logEntry.getCause());
-                    out.println(rootPrinter.printableException(logEntry.getCause()));
+                    out.print(PrintableText.indent(rootPrinter.printableException(logEntry.getCause())));
                 };
     }
 
