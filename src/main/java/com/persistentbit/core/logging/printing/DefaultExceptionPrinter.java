@@ -30,7 +30,7 @@ public final class DefaultExceptionPrinter implements SpecificExceptionPrinter<T
 				}
 				Throwable cause = exception.getCause();
 				if(cause != null) {
-					indent.println(format.msgStyleException + " caused by..");
+					out.println(format.msgStyleException + "caused by...");
 					indent.println(rootPrinter.printableException(cause).printToString());
 				}
 			}));

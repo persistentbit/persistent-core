@@ -45,11 +45,11 @@ public class LogMonadTest{
 	}
 
 	public static Result<Integer> saveDiv(int a, int b) {
-		return Result.function(a, b).code(l -> {
-			return b == 0
-				? Result.<Integer>failure("Can't divide by 0")
-				: Result.success(a / b);
-		});
+		return Result.function(a, b).code(l ->
+			b == 0
+				? Result.failure("Can't divide by 0")
+				: Result.success(a / b)
+		);
 
 	}
 
