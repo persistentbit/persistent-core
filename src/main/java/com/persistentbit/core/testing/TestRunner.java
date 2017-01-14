@@ -77,10 +77,7 @@ public final class TestRunner extends AbstractLogEntryLogging {
 
 
 	public void isSuccess(Result<?> res) {
-
-		if(res.isPresent() == false){
-			throw new TestException("Expected Success, got " + res,0);
-		}
+		res.orElseThrow();
 	}
 
 	public void isEmpty(Result<?> res) {
