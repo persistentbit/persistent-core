@@ -8,6 +8,7 @@ import com.persistentbit.core.logging.entries.LogEntryException;
 import com.persistentbit.core.logging.entries.LogEntryFunction;
 import com.persistentbit.core.logging.printing.LogPrinter;
 import com.persistentbit.core.result.Result;
+import com.persistentbit.core.utils.NumberUtils;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -108,6 +109,10 @@ public final class TestRunner extends AbstractLogEntryLogging {
 			return;
 		}
 		throw new TestException("Expected an exception.");
+	}
+
+	public void isNumbersEquals(Number left, Number right) {
+		isTrue(NumberUtils.numberComparator.compare(left, right) == 0);
 	}
 
 	public <X> void isEquals(X left, X right) {
