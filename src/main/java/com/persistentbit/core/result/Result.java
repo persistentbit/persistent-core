@@ -376,7 +376,7 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 	}
 
 	public static <U> Result<U> async(Executor executor, Supplier<Result<U>> code) {
-		return Result.function().code(l -> Result.failure("TODO"));
+		return ResultAsync.of(executor, code);
 	}
 
 	public static <U> ResultLazy<U> lazy(Supplier<Result<U>> lazy) {

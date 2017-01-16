@@ -6,6 +6,7 @@ import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -30,6 +31,10 @@ public class ResultAsync<T> extends Result<T> {
 
     static public <T> ResultAsync<T> of(Supplier<Result<T>> supplier){
         return of(CompletableFuture.supplyAsync(supplier));
+    }
+
+    static public <T> ResultAsync<T> of(Executor executor, Supplier<Result<T>> supplier) {
+        return of(CompletableFuture.supplyAsync(supplier, executor));
     }
 
     @Override

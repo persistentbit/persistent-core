@@ -1,5 +1,7 @@
 package com.persistentbit.core.logging.entries;
 
+import com.persistentbit.core.ModuleCore;
+
 /**
  * TODO: Add comment
  *
@@ -11,8 +13,9 @@ public abstract class AbstractLogEntry implements LogEntry{
 
     @Override
     public String toString() {
-        return getClass().getSimpleName()+ "[]";
-    }
+		//return getClass().getSimpleName()+ "[]";
+		return ModuleCore.createLogPrinter(true).printableLog(this).printToString();
+	}
 
 
 }
