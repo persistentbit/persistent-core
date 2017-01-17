@@ -21,7 +21,7 @@ public class Success<T> extends Result<T>{
 	private final LogEntry log;
 	private final T        value;
 
-	private Success(T value, LogEntry log) {
+	public Success(T value, LogEntry log) {
 		this.value = Objects.requireNonNull(value, "Success value is null, use an Empty value instead");
 		this.log = Objects.requireNonNull(log, "Log must be non null");
 	}

@@ -13,7 +13,7 @@ import java.util.Optional;
 public class LogEntryGroup extends AbstractLogEntry{
 	private final PList<LogEntry> entries;
 
-	private LogEntryGroup(PList<LogEntry> entries) {
+	public LogEntryGroup(PList<LogEntry> entries) {
 		this.entries = entries;
 	}
 

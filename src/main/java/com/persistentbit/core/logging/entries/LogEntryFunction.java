@@ -15,7 +15,7 @@ public class LogEntryFunction extends AbstractLogEntry{
 	private Long		  timeStampDone;
 	private String		  resultValue;
 
-	LogEntryFunction(LogContext source, String params, LogEntry logs,Long timeStampDone,String resultValue) {
+	public LogEntryFunction(LogContext source, String params, LogEntry logs,Long timeStampDone,String resultValue) {
 		this.source = source;
 		this.params = params;
 		this.logs = logs;
@@ -23,7 +23,7 @@ public class LogEntryFunction extends AbstractLogEntry{
 		this.resultValue = resultValue;
 	}
 	static public LogEntryFunction of(LogContext source){
-		return new LogEntryFunction(source,null,LogEntryGroup.empty(),null,null);
+		return new LogEntryFunction(source,null,LogEntryEmpty.inst,null,null);
 	}
 
 	@Override
