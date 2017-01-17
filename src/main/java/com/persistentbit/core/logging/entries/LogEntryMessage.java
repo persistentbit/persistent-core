@@ -15,7 +15,7 @@ public class LogEntryMessage extends AbstractLogEntry{
 	private final LogContext source;
 	private final String     message;
 
-	private LogEntryMessage(LogMessageLevel level, LogContext source, String message) {
+	public LogEntryMessage(LogMessageLevel level, LogContext source, String message) {
 		this.level = level;
 		this.source = source;
 		this.message = message;

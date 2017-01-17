@@ -91,7 +91,14 @@ public class Empty<T> extends Result<T>{
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Empty;
+        if(obj == this) {
+            return true;
+        }
+        if(obj instanceof Result == false) {
+            return false;
+        }
+        Result res = (Result) obj;
+        return res.completed().isEmpty();
     }
 
     @Override

@@ -128,11 +128,15 @@ public class Success<T> extends Result<T>{
 	@Override
 	public boolean equals(Object o) {
 		if(this == o) return true;
-		if(o instanceof Success == false) return false;
+		if(o instanceof Result == false) return false;
 
-		Success<?> success = (Success<?>) o;
+		Result<?> result = (Result<?>) o;
+		result = result.completed();
+		if(result.isPresent() == false) {
+			return false;
+		}
 
-		return value.equals(success.value);
+		return value.equals(result.orElseThrow());
 	}
 
 	@Override

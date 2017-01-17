@@ -11,7 +11,7 @@ import java.util.Optional;
 public class LogEntryEmpty extends AbstractLogEntry{
 	public static final LogEntryEmpty inst = new LogEntryEmpty();
 
-	private LogEntryEmpty(){
+	public LogEntryEmpty() {
 
 	}
 

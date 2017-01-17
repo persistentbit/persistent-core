@@ -110,7 +110,17 @@ public class Failure<T> extends Result<T>{
         return this;
     }
 
-
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == this) {
+            return true;
+        }
+        if(obj instanceof Result == false) {
+            return false;
+        }
+        Result res = (Result) obj;
+        return res.completed().isError();
+    }
 
     @Override
     public int hashCode() {
