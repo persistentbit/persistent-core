@@ -52,7 +52,7 @@ public final class TestRunner extends AbstractLogEntryLogging {
 
 		LogEntryFunction fun = LogEntryFunction.of(testCode.getContext()
 													   .withTimestamp(System.currentTimeMillis()))
-			.withParams("\"" + testCode.getName() + "\"");
+			.withParamsString("\"" + testCode.getName() + "\"");
 
 		TestRunner tr = new TestRunner(fun);
 		try {

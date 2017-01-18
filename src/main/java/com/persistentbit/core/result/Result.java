@@ -456,6 +456,16 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 
 	public abstract Result<T> cleanLogsOnPresent();
 
+	public Result<T>	logFunction(Object...parameters){
+		LogContext lc = new LogContext(Thread.currentThread().getStackTrace()[2]);
+		LogEntryFunction fun =
+				LogEntryFunction.of(lc)
+					.withParams(parameters)
+					.withResultValue(this.toString())
+				;
+		return mapLog(l -> fun.append(l));
+	}
+
 
 
 	public static <T> Result<PStream<T>> fromSequence(PStream<Result<T>> stream) {

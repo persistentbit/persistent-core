@@ -1,5 +1,7 @@
 package com.persistentbit.core.logging.entries;
 
+import com.persistentbit.core.logging.AbstractLogEntryLogging;
+
 import java.util.Optional;
 
 /**
@@ -23,7 +25,7 @@ public class LogEntryFunction extends AbstractLogEntry{
 		this.resultValue = resultValue;
 	}
 	static public LogEntryFunction of(LogContext source){
-		return new LogEntryFunction(source,null,LogEntryEmpty.inst,null,null);
+		return new LogEntryFunction(source,null,LogEntryGroup.empty(),null,null);
 	}
 
 	@Override
@@ -55,9 +57,14 @@ public class LogEntryFunction extends AbstractLogEntry{
 	public LogEntryFunction	withTimestampDone(long timeStampDone){
 		return new LogEntryFunction(source,params,logs,timeStampDone,resultValue);
 	}
-	public LogEntryFunction withParams(String params){
+	public LogEntryFunction withParamsString(String params){
 		return new LogEntryFunction(source,params,logs,timeStampDone,resultValue);
 	}
+
+	public LogEntryFunction withParams(Object...params){
+		return withParamsString(AbstractLogEntryLogging.objectsToString(params));
+	}
+
 	public LogEntryFunction withResultValue(String resultValue){
 		return new LogEntryFunction(source,params,logs,timeStampDone,resultValue);
 	}

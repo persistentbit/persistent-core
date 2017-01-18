@@ -52,7 +52,7 @@ public class FunctionLogging extends AbstractLogEntryLogging {
 
 
 	public FunctionLogging params(Object...params){
-		map(e -> e.withParams(objectsToString(params)));
+		map(e -> e.withParamsString(objectsToString(params)));
 		return this;
 	}
 
