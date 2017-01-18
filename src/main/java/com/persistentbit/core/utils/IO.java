@@ -7,6 +7,8 @@ import com.persistentbit.core.result.Result;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -19,6 +21,9 @@ import java.util.function.Function;
 public final class IO {
 
     public static final Charset utf8 = Charset.forName("UTF-8");
+
+
+
 
     /**
      * copy data from in to out. <br>
@@ -212,11 +217,14 @@ public final class IO {
 
 
     public static Result<FileOutputStream> fileToOutputStream(File f){
+        return fileToOutputStream(f,false).logFunction(f);
+    }
+    public static Result<FileOutputStream> fileToOutputStream(File f, boolean append){
         return Result.function(f).code(l -> {
-           if(f == null){
-               return Result.failure("File is null");
-           }
-           return Result.success(new FileOutputStream(f));
+            if(f == null){
+                return Result.failure("File is null");
+            }
+            return Result.success(new FileOutputStream(f,append));
         });
     }
 
@@ -231,11 +239,11 @@ public final class IO {
             return Result.success(new OutputStreamWriter(out,charset));
         });
     }
-
     public static Result<Writer> fileToWriter(File f, Charset charset){
-        return Result.function(f,charset).code(l -> {
-           return  fileToOutputStream(f).flatMap(os-> outputStreamToWriter(os,charset));
-        });
+        return fileToWriter(f,charset).logFunction(f,charset);
+    }
+    public static Result<Writer> fileToWriter(File f, Charset charset, boolean append){
+        return fileToOutputStream(f,append).flatMap(os-> outputStreamToWriter(os,charset)).logFunction(f,charset,append);
     }
 
     /**
@@ -338,6 +346,21 @@ public final class IO {
         return path;
     }
 
+    public static Result<File> createDayFile(File rootPath, String prefix, String postfix){
+        if(rootPath == null){
+            return Result.<File>failure("rootPath is null").logFunction(rootPath,prefix,postfix);
+        }
+        if(prefix == null){
+            return Result.<File>failure("prefix is null").logFunction(rootPath,prefix,postfix);
+        }
+        if(postfix == null){
+            return Result.<File>failure("postfix is null").logFunction(rootPath,prefix,postfix);
+        }
+        return IO.mkdirsIfNotExisting(rootPath)
+                .map(rp ->
+                        new File(rp,prefix + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + postfix)
+                ).logFunction(rootPath,prefix,postfix);
 
+    }
 
 }

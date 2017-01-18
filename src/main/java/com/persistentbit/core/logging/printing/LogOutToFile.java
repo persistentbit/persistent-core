@@ -1,0 +1,77 @@
+package com.persistentbit.core.logging.printing;
+
+import com.persistentbit.core.logging.entries.LogEntry;
+import com.persistentbit.core.printing.PrintableText;
+import com.persistentbit.core.utils.IO;
+
+import java.io.File;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.util.function.Function;
+
+/**
+ * TODO: Add comment
+ *
+ * @author Peter Muys
+ * @since 18/01/2017
+ */
+public class LogOutToFile implements LogOut{
+    private final LogPrinter logPrinter;
+    private final Charset charset;
+    private final Function<Object,File> fileSupplier;
+
+    public LogOutToFile(Charset charset, LogPrinter logPrinter, Function<Object, File> fileSupplier) {
+        this.charset = charset;
+        this.logPrinter = logPrinter;
+        this.fileSupplier = fileSupplier;
+    }
+
+    public static LogOutToFile perDay(LogPrinter logPrinter, File rootPath, String appName){
+        return new LogOutToFile(
+                Charset.defaultCharset(),
+                logPrinter,
+                dayFileSupplier(rootPath,appName + "_",".log.txt")
+        );
+    }
+
+    public static Function<Object,File> dayFileSupplier(File rootPath, String prefix, String postfix){
+        return value -> IO.createDayFile(rootPath,prefix,postfix)
+                .logFunction(rootPath,prefix,postfix)
+                .orElseThrow();
+    }
+
+
+    @Override
+    public void print(LogEntry logEntry) {
+        doPrint(logEntry,logPrinter.printableLog(logEntry));
+    }
+
+    @Override
+    public void print(Throwable exception) {
+        doPrint(exception, logPrinter.printableException(exception));
+    }
+
+    private File            currentFile;
+    private Writer currentWriter;
+    private synchronized void doPrint(Object value, PrintableText printableText){
+        try {
+            File f = fileSupplier.apply(value);
+            if (f.equals(currentFile) == false) {
+                if (currentFile != null) {
+                    currentWriter.close();
+                    currentWriter = null;
+                }
+                currentFile = null;
+
+                currentWriter = IO.fileToWriter(f, charset,true).orElseThrow();
+                currentFile = f;
+            }
+            if(currentWriter != null) {
+                currentWriter.write(printableText.printToString());
+                currentWriter.flush();
+            }
+        }catch(Throwable t){
+            System.err.println(logPrinter.printableException(t));
+        }
+    }
+}
