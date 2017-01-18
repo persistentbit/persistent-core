@@ -45,23 +45,23 @@ public class LogMonadTest{
 	}
 
 	public static Result<Integer> saveDiv(int a, int b) {
-		return Result.function(a, b).code(l ->
+		return
 			b == 0
-				? Result.failure("Can't divide by 0")
-				: Result.success(a / b)
-		);
+				? Result.<Integer>failure("Can't divide by 0").logFunction(a,b)
+				: Result.success(a / b).logFunction(a,b)
+		;
 
 	}
 
 	public static Result<Integer> saveAddDiv(int a, int b, int c) {
-		return Result.function(a, b, c).code(l -> saveDiv(a + b, c));
+		return saveDiv(a + b, c).logFunction(a,b,c);
 	}
 
 	public static Result<Integer> saveDivDiv(int a, int b, int c) {
-		return Result.function(a, b, c).code(l ->
-			saveDiv(a,b).flatMap(divided ->
-				saveDiv(divided, c)
-			)
+		return
+			saveDiv(a,b)
+					.flatMap(divided ->	saveDiv(divided, c)
+					.logFunction(a,b,c)
 		);
 	}
 

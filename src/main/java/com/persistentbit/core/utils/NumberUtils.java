@@ -16,39 +16,36 @@ import java.util.Comparator;
 public final class NumberUtils {
 
 	public static Result<Integer> parseInt(String str) {
-		return Result.function(str).code(l -> {
-			if(str == null){
-				return Result.failure("string is null");
-			}
-			try{
-				return Result.success(Integer.parseInt(str));
-			}catch (RuntimeException e){
-				return Result.failure(e);
-			}
-		});
+		if(str == null){
+			return Result.<Integer>failure("string is null").logFunction();
+		}
+		try{
+			return Result.success(Integer.parseInt(str)).logFunction(str);
+		}catch (RuntimeException e){
+			return Result.<Integer>failure(e).logFunction(str);
+		}
+
 	}
 
 	public static Result<Long> parseLong(String str) {
-		return Result.function(str).code(l -> {
-			if(str == null) {
-				return Result.failure("string is null");
-			}
-			try {
-				return Result.success(Long.parseLong(str));
-			} catch(RuntimeException e) {
-				return Result.failure(e);
-			}
-		});
+		if(str == null) {
+			return Result.<Long>failure("string is null").logFunction(str);
+		}
+		try {
+			return Result.success(Long.parseLong(str)).logFunction(str);
+		} catch(RuntimeException e) {
+			return Result.<Long>failure(e).logFunction(str);
+		}
 	}
 
 	public static Result<BigDecimal> parseBigDecimal(String str) {
 		if(str == null) {
-			return Result.failure("string is null");
+			return Result.<BigDecimal>failure("string is null").logFunction(str);
 		}
 		try {
-			return Result.success(new BigDecimal(str));
+			return Result.success(new BigDecimal(str)).logFunction(str);
 		} catch(final NumberFormatException e) {
-			return Result.failure(e);
+			return Result.<BigDecimal>failure(e).logFunction(str);
 		}
 
 	}
@@ -88,29 +85,27 @@ public final class NumberUtils {
 	 * @return The resulting {@link BigDecimal}
 	 */
 	public static Result<BigDecimal> numberToBigDecimal(Number number) {
-		return Result.function(number).code(l -> {
-			if(number == null) {
-				return Result.failure("number should not be null");
-			}
+		if(number == null) {
+			return Result.<BigDecimal>failure("number should not be null").logFunction(number);
+		}
 
-			if(number instanceof BigDecimal) {
-				return Result.success((BigDecimal) number);
-			}
+		if(number instanceof BigDecimal) {
+			return Result.success((BigDecimal) number).logFunction(number);
+		}
 
-			if(number instanceof BigInteger) {
-				return Result.success(new BigDecimal((BigInteger) number));
-			}
-			if(number instanceof Byte
+		if(number instanceof BigInteger) {
+			return Result.success(new BigDecimal((BigInteger) number)).logFunction(number);
+		}
+		if(number instanceof Byte
 				|| number instanceof Short
 				|| number instanceof Integer
 				|| number instanceof Long
 				) {
-				return Result.success(new BigDecimal(number.longValue()));
-			}
-			if(number instanceof Float || number instanceof Double) {
-				return Result.success(new BigDecimal(number.doubleValue()));
-			}
-			return parseBigDecimal(number.toString());
-		});
+			return Result.success(new BigDecimal(number.longValue())).logFunction(number);
+		}
+		if(number instanceof Float || number instanceof Double) {
+			return Result.success(new BigDecimal(number.doubleValue())).logFunction(number);
+		}
+		return parseBigDecimal(number.toString()).logFunction(number);
 	}
 }
