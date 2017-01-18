@@ -12,7 +12,7 @@ import com.persistentbit.core.printing.PrintableText;
 public interface SpecificExceptionPrinter<E extends Throwable>{
 
 
-	PrintableText asPrintable(E exception, LogPrinter rootPrinter);
+	PrintableText asPrintable(E exception, LogFormatter rootPrinter);
 
 
 	default <T extends E> SpecificExceptionPrinter<E> orIf(Class<T> cls, SpecificExceptionPrinter<T> ep) {

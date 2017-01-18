@@ -240,7 +240,7 @@ public final class IO {
         });
     }
     public static Result<Writer> fileToWriter(File f, Charset charset){
-        return fileToWriter(f,charset).logFunction(f,charset);
+        return fileToWriter(f, charset, false).logFunction(f, charset);
     }
     public static Result<Writer> fileToWriter(File f, Charset charset, boolean append){
         return fileToOutputStream(f,append).flatMap(os-> outputStreamToWriter(os,charset)).logFunction(f,charset,append);

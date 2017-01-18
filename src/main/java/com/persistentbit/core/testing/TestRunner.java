@@ -6,7 +6,7 @@ import com.persistentbit.core.logging.LoggedException;
 import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.logging.entries.LogEntryException;
 import com.persistentbit.core.logging.entries.LogEntryFunction;
-import com.persistentbit.core.logging.printing.LogPrinter;
+import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.NumberUtils;
 
@@ -36,16 +36,17 @@ public final class TestRunner extends AbstractLogEntryLogging {
 		return Nothing.inst;
 	}
 
-	public static void runAndPrint(LogPrinter logPrinter, TestCase testCase) {
+	public static void runAndPrint(LogPrint logPrint, TestCase testCase) {
 		Result<TestCase> resultCase = getTestRunResult(testCase);
-		logPrinter.print(resultCase.getLog());
+		logPrint.print(resultCase.getLog());
 		resultCase.ifFailure(f -> {
-			logPrinter.print(f.getException());
+			logPrint.print(f.getException());
 		});
 
 	}
-	public static void runAndPrint(LogPrinter logPrinter, Class testClass) {
-		runAndPrint(logPrinter,TestCase.forTestClass(testClass));
+
+	public static void runAndPrint(LogPrint logPrint, Class testClass) {
+		runAndPrint(logPrint, TestCase.forTestClass(testClass));
 	}
 
 	public static Result<TestCase> getTestRunResult(TestCase testCode) {

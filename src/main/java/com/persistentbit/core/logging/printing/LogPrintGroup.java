@@ -9,19 +9,21 @@ import com.persistentbit.core.logging.entries.LogEntry;
  * @author Peter Muys
  * @since 18/01/2017
  */
-public class LogOutGroup implements LogOut{
-    private PList<LogOut> items;
+public class LogPrintGroup implements LogPrint{
 
-    public LogOutGroup(PList<LogOut> items) {
+    private PList<LogPrint> items;
+
+    public LogPrintGroup(PList<LogPrint> items) {
         this.items = items;
     }
-    public LogOutGroup(){
+
+    public LogPrintGroup() {
         this(PList.empty());
     }
 
     @Override
-    public LogOut add(LogOut other){
-        return new LogOutGroup(items.plus(other));
+    public LogPrint add(LogPrint other) {
+        return new LogPrintGroup(items.plus(other));
     }
 
     @Override

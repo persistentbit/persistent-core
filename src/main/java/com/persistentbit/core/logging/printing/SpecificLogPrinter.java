@@ -12,7 +12,7 @@ import com.persistentbit.core.printing.PrintableText;
 @FunctionalInterface
 public interface SpecificLogPrinter<E extends LogEntry>{
 
-	PrintableText asPrintable(E logEntry, LogPrinter rootPrinter);
+	PrintableText asPrintable(E logEntry, LogFormatter rootPrinter);
 
 
 	default <T extends E> SpecificLogPrinter<E> orIf(Class<T> cls, SpecificLogPrinter<T> ep) {

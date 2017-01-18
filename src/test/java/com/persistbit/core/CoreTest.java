@@ -1,7 +1,9 @@
 package com.persistbit.core;
 
 import com.persistentbit.core.ModuleCore;
-import com.persistentbit.core.logging.printing.LogPrinter;
+import com.persistentbit.core.logging.printing.LogFormatter;
+import com.persistentbit.core.logging.printing.LogPrint;
+import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
 
@@ -12,12 +14,14 @@ import com.persistentbit.core.testing.TestRunner;
  * @since 11/01/2017
  */
 public abstract class CoreTest {
-    static public LogPrinter testLogPrinter = ModuleCore.createLogPrinter(true);
+
+    static public LogFormatter testLogFormatter = ModuleCore.createLogFormatter(true);
+    static public LogPrint     testLogPrint     = LogPrintStream.sysOut(testLogFormatter);
 
     static public void runTests(TestCase testCase){
-        TestRunner.runAndPrint(testLogPrinter,testCase);
+        TestRunner.runAndPrint(testLogPrint, testCase);
     }
     static public void runTests(Class testClass){
-        TestRunner.runAndPrint(testLogPrinter,testClass);
+        TestRunner.runAndPrint(testLogPrint, testClass);
     }
 }

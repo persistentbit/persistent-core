@@ -2,7 +2,7 @@ package com.persistentbit.core.experiments;
 
 import com.persistbit.core.CoreTest;
 import com.persistentbit.core.logging.Log;
-import com.persistentbit.core.logging.printing.LogPrinter;
+import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.IO;
 
@@ -80,13 +80,13 @@ public class LogMonadTest{
 		try {
 			run.run();
 		} catch(Exception e) {
-			CoreTest.testLogPrinter.print(e);
+			CoreTest.testLogPrint.print(e);
 		}
 	}
 
 	public static void main(String[] args) {
-		UserDAO         dao = new UserDAO();
-		LogPrinter lp = CoreTest.testLogPrinter;
+		UserDAO  dao = new UserDAO();
+		LogPrint lp  = CoreTest.testLogPrint;
 		lp.print(dao.getUserById(1).getLog());
 		lp.print(IO.readTextFile(new File("UnknownFile"), Charset.defaultCharset()).getLog());
 		tryIt(() -> {
@@ -103,7 +103,7 @@ public class LogMonadTest{
 			//tryIt(()->System.out.println(divide(10,2)));
 			//tryIt(()->System.out.println(addDiv(10,2,0)));
 		} catch(Exception e) {
-			CoreTest.testLogPrinter.print(e);
+			CoreTest.testLogPrint.print(e);
 		}
 
 	}

@@ -11,28 +11,34 @@ import com.persistentbit.core.printing.PrintableText;
  * @since 30/12/16
  */
 
-public final class LogPrinter {
+public final class LogFormatter{
     private POrderedMap<Class, SpecificExceptionPrinter> exceptionPrinters;
     private POrderedMap<Class, SpecificLogPrinter>          logPrinters;
 
-    private LogPrinter(POrderedMap<Class, SpecificExceptionPrinter> exceptionPrinters, POrderedMap<Class, SpecificLogPrinter> logPrinters) {
+    private LogFormatter(POrderedMap<Class, SpecificExceptionPrinter> exceptionPrinters,
+                         POrderedMap<Class, SpecificLogPrinter> logPrinters
+    ) {
         this.exceptionPrinters = exceptionPrinters;
         this.logPrinters = logPrinters;
     }
-    private LogPrinter() {
+
+    private LogFormatter() {
         this(POrderedMap.empty(),POrderedMap.empty());
     }
-    public static LogPrinter create() {
-        return new LogPrinter();
+
+    public static LogFormatter create() {
+        return new LogFormatter();
     }
 
 
-    public <T extends LogEntry> LogPrinter logIf(Class<T> logEntry, SpecificLogPrinter<T> specificLogPrinter){
-        return new LogPrinter(exceptionPrinters,logPrinters.put(logEntry,specificLogPrinter));
+    public <T extends LogEntry> LogFormatter logIf(Class<T> logEntry, SpecificLogPrinter<T> specificLogPrinter) {
+        return new LogFormatter(exceptionPrinters, logPrinters.put(logEntry, specificLogPrinter));
     }
 
-    public <T extends Throwable> LogPrinter logIf(Class<T> exception, SpecificExceptionPrinter<T> specificExceptionPrinter){
-        return new LogPrinter(exceptionPrinters.put(exception, specificExceptionPrinter),logPrinters);
+    public <T extends Throwable> LogFormatter logIf(Class<T> exception,
+                                                    SpecificExceptionPrinter<T> specificExceptionPrinter
+    ) {
+        return new LogFormatter(exceptionPrinters.put(exception, specificExceptionPrinter), logPrinters);
     }
 
     public PrintableText    printableLog(LogEntry logEntry){
@@ -59,15 +65,5 @@ public final class LogPrinter {
                                 .orElse(PrintableText.from(exception))
                 );
     }
-    public void print(LogEntry logEntry){
-        System.out.println(printableLog(logEntry).printToString());
-    }
-    public void print(Throwable exception){
-        System.out.println(printableException(exception).printToString());
-    }
 
-    public LogPrinter registerAsGlobalHandler() {
-        Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> print(exception));
-        return this;
-    }
 }

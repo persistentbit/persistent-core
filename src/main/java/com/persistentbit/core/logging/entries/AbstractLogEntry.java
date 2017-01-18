@@ -13,7 +13,7 @@ public abstract class AbstractLogEntry implements LogEntry{
 
     @Override
     public String toString() {
-		return ModuleCore.createLogPrinter(false).printableLog(this).printToString();
+		return ModuleCore.createLogFormatter(false).printableLog(this).printToString();
 	}
 
 

@@ -15,22 +15,23 @@ import java.util.function.Function;
  * @author Peter Muys
  * @since 18/01/2017
  */
-public class LogOutToFile implements LogOut{
-    private final LogPrinter logPrinter;
-    private final Charset charset;
-    private final Function<Object,File> fileSupplier;
+public class LogPrintToFile implements LogPrint{
 
-    public LogOutToFile(Charset charset, LogPrinter logPrinter, Function<Object, File> fileSupplier) {
-        this.charset = charset;
-        this.logPrinter = logPrinter;
-        this.fileSupplier = fileSupplier;
+	private final LogFormatter          logFormatter;
+	private final Charset               charset;
+	private final Function<Object,File> fileSupplier;
+
+	public LogPrintToFile(Charset charset, LogFormatter logFormatter, Function<Object, File> fileSupplier) {
+		this.charset = charset;
+		this.logFormatter = logFormatter;
+		this.fileSupplier = fileSupplier;
     }
 
-    public static LogOutToFile perDay(LogPrinter logPrinter, File rootPath, String appName){
-        return new LogOutToFile(
-                Charset.defaultCharset(),
-                logPrinter,
-                dayFileSupplier(rootPath,appName + "_",".log.txt")
+	public static LogPrintToFile perDay(LogFormatter logFormatter, File rootPath, String appName) {
+		return new LogPrintToFile(
+			Charset.defaultCharset(),
+			logFormatter,
+			dayFileSupplier(rootPath,appName + "_",".log.txt")
         );
     }
 
@@ -43,13 +44,13 @@ public class LogOutToFile implements LogOut{
 
     @Override
     public void print(LogEntry logEntry) {
-        doPrint(logEntry,logPrinter.printableLog(logEntry));
-    }
+		doPrint(logEntry, logFormatter.printableLog(logEntry));
+	}
 
     @Override
     public void print(Throwable exception) {
-        doPrint(exception, logPrinter.printableException(exception));
-    }
+		doPrint(exception, logFormatter.printableException(exception));
+	}
 
     private File            currentFile;
     private Writer currentWriter;
@@ -71,7 +72,7 @@ public class LogOutToFile implements LogOut{
                 currentWriter.flush();
             }
         }catch(Throwable t){
-            System.err.println(logPrinter.printableException(t));
-        }
+			System.err.println(logFormatter.printableException(t));
+		}
     }
 }

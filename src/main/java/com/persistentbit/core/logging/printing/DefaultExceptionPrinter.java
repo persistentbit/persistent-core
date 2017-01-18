@@ -17,7 +17,7 @@ public final class DefaultExceptionPrinter implements SpecificExceptionPrinter<T
 	}
 
 	@Override
-	public PrintableText asPrintable(Throwable exception, LogPrinter rootPrinter) {
+	public PrintableText asPrintable(Throwable exception, LogFormatter rootPrinter) {
 		return out -> {
 
 			out.println(format.msgStyleException + exception.getMessage() + format.msgStyleInfo + " " + exception

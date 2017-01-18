@@ -6,7 +6,7 @@ import com.persistentbit.core.logging.entries.*;
 import com.persistentbit.core.logging.printing.DefaultExceptionPrinter;
 import com.persistentbit.core.logging.printing.DefaultLogPrinter;
 import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
-import com.persistentbit.core.logging.printing.LogPrinter;
+import com.persistentbit.core.logging.printing.LogFormatter;
 
 import java.util.Optional;
 
@@ -17,12 +17,13 @@ import java.util.Optional;
  * @since 11/01/2017
  */
 public final class ModuleCore {
-    public static LogPrinter createLogPrinter(boolean hasColor){
+
+    public static LogFormatter createLogFormatter(boolean hasColor) {
         LogEntryDefaultFormatting format = hasColor
                 ? LogEntryDefaultFormatting.colors
                 : LogEntryDefaultFormatting.noColors;
 
-        return LogPrinter.create()
+        return LogFormatter.create()
                 //LogEntries
                 .logIf(LogEntryGroup.class, DefaultLogPrinter.forLogEntryGroup(format))
                 .logIf(LogEntryEmpty.class, DefaultLogPrinter.forLogEntryEmpty(format))
