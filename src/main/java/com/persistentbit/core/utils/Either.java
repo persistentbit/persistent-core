@@ -1,4 +1,4 @@
-package com.persistentbit.core.experiments;
+package com.persistentbit.core.utils;
 
 import java.io.Serializable;
 import java.util.Objects;
