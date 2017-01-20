@@ -113,7 +113,12 @@ public class Success<T> extends Result<T>{
 
 	@Override
 	public String toString() {
-		return "Success(" + value + ")";
+
+		try {
+			return "Success(" + value + ")";
+		} catch(Exception e) {
+			return "Success(<Message to string failed for class " + value.getClass() + ">)";
+		}
 	}
 
 	@Override

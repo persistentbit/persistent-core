@@ -90,7 +90,7 @@ public abstract class AbstractLogEntryLogging {
 		try{
 			return message.toString();
 		}catch(Exception e){
-			return "<Message to string failed>";
+			return "<Message to string failed for class " + message.getClass() + ">";
 		}
 	}
 	public static  final String objectsToString(Object...others){

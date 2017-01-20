@@ -81,7 +81,7 @@ public class Empty<T> extends Result<T>{
 
     @Override
     public String toString() {
-        return "Empty()";
+        return "Empty(" + exception.getMessage() + ")";
     }
 
     @Override
