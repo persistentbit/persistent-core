@@ -72,15 +72,21 @@ public final class TestCase{
 			this.variants = variants;
 		}
 
+		public TestCaseWithVariants<V> variant(Supplier<? extends V> variant) {
+			return new TestCaseWithVariants<>(name, info, variants.plus(variant));
+		}
+
 		public TestCase code(Function<V, TestCode> theCode) {
 			LogContext logContext =
-				new LogContext(Thread.currentThread().getStackTrace()[3]).withMethodName("TestCase With Variants");
+				new LogContext(Thread.currentThread().getStackTrace()[2]).withMethodName("TestCase With Variants");
 
-			PList<TestCase> subTestCodes = variants.map(sup -> {
-				V variant = sup.get();
-				return new TestCase(name + " with variant " + variant, info == null ? "?" : info, logContext, theCode
-					.apply(variant));
-			});
+			PList<TestCase> subTestCodes = variants.map(sup ->
+															new TestCase(name + " with variant ", info == null ? "?" : info, logContext, tr -> {
+																V variant = sup.get();
+																tr.info("Variant: " + variant);
+																theCode.apply(variant).accept(tr);
+															})
+			);
 
 			TestCode testCode = subTestsCode(subTestCodes.toArray(new TestCase[0]));
 			return new TestCase(name, info == null ? "?" : info, logContext, testCode);
@@ -108,8 +114,12 @@ public final class TestCase{
 			return new TestCase(name, info == null ? "?" : info, logContext, testCode);
 		}
 
-		public <V> TestCaseWithVariants<V> withVariants(Supplier<? extends V>... variants) {
-			return new TestCaseWithVariants<>(name, info, PList.val(variants));
+		public <V> TestCaseWithVariants<V> withVariants(Iterable<Supplier<? extends V>> variants) {
+			return new TestCaseWithVariants<>(name, info, PStream.from(variants).plist());
+		}
+
+		public <V> TestCaseWithVariants<V> withVariants() {
+			return withVariants(PList.empty());
 		}
 
 		public TestCase subTestCases(TestCase... testCases) {

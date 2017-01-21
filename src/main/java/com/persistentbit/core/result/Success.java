@@ -214,4 +214,11 @@ public class Success<T> extends Result<T>{
 	) {
 		return this;
 	}
+
+	@Override
+	public <U> U match(Function<Success<T>, U> onSuccess, Function<Empty<T>, U> onEmpty,
+					   Function<Failure<T>, U> onFailure
+	) {
+		return Log.function(this).code(l -> onSuccess.apply(this));
+	}
 }

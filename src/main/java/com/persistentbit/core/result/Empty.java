@@ -177,4 +177,11 @@ public class Empty<T> extends Result<T>{
         }
         return resultValue.mapLog(log::append);
     }
+
+    @Override
+    public <U> U match(Function<Success<T>, U> onSuccess, Function<Empty<T>, U> onEmpty,
+                       Function<Failure<T>, U> onFailure
+    ) {
+        return Log.function(this).code(l -> onEmpty.apply(this));
+    }
 }

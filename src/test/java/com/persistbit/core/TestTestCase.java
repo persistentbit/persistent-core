@@ -1,5 +1,6 @@
 package com.persistbit.core;
 
+import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.testing.TestCase;
 
 /**
@@ -12,7 +13,7 @@ public class TestTestCase{
 
 
 	static final TestCase withVariants = TestCase.name("Check test case variants")
-		.withVariants(() -> 1, () -> 2, () -> 3).code(i -> tr -> {
+		.withVariants(PList.val(() -> 1.0, () -> 2.0, () -> 3.0)).code(i -> tr -> {
 			tr.info("Variant " + i);
 		});
 

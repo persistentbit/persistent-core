@@ -1,5 +1,6 @@
 package com.persistentbit.core.result;
 
+import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.entries.LogEntry;
 
 import java.util.Optional;
@@ -158,5 +159,12 @@ public class ResultLazy<T> extends Result<T>{
 	@Override
 	public int hashCode() {
 		return completed().hashCode();
+	}
+
+	@Override
+	public <U> U match(Function<Success<T>, U> onSuccess, Function<Empty<T>, U> onEmpty,
+					   Function<Failure<T>, U> onFailure
+	) {
+		return Log.function(this).code(l -> completed().match(onSuccess, onEmpty, onFailure));
 	}
 }

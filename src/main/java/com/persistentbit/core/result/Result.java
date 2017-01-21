@@ -453,6 +453,11 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 		}
 	}
 
+	public abstract <U> U match(
+		Function<Success<T>, U> onSuccess,
+		Function<Empty<T>, U> onEmpty,
+		Function<Failure<T>, U> onFailure
+	);
 
 	public abstract Result<T> cleanLogsOnPresent();
 

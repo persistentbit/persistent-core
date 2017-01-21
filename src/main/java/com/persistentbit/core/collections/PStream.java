@@ -384,6 +384,11 @@ public interface PStream<T> extends Iterable<T>{
 	 */
 	PStream<T> filterNotContainedIn(PStream<? extends T> others);
 
+
+	static <K, V> PMap<K, V> toMap(PStream<Tuple2<K, V>> stream) {
+		return stream.groupByOneValue(t -> t._1, t -> t._2);
+	}
+
 	/**
 	 * Group the elements in this PStream by generating a key to group on.<br>
 	 * This will create a PMap with the generated key and a PList of items for that value.

@@ -41,8 +41,11 @@ public final class TestRunner extends AbstractLogEntryLogging {
 		logPrint.print(resultCase.getLog());
 		resultCase.ifFailure(f -> {
 			logPrint.print(f.getException());
-		});
 
+		});
+		if(resultCase.isError()) {
+			throw new TestException("TestCase failed:" + testCase.getName());
+		}
 	}
 
 	public static void runAndPrint(LogPrint logPrint, Class testClass) {

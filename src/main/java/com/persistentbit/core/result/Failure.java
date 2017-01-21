@@ -42,6 +42,7 @@ public class Failure<T> extends Result<T>{
 
     }
 
+
     public Throwable getException() {
         return exception;
     }
@@ -181,5 +182,12 @@ public class Failure<T> extends Result<T>{
     public Result<T> flatMapEmpty(Function<? super Empty<T>, Result<T>> mapper
     ) {
         return this;
+    }
+
+    @Override
+    public <U> U match(Function<Success<T>, U> onSuccess, Function<Empty<T>, U> onEmpty,
+                       Function<Failure<T>, U> onFailure
+    ) {
+        return Log.function(this).code(l -> onFailure.apply(this));
     }
 }
