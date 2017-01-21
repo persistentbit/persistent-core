@@ -7,6 +7,8 @@ import com.persistentbit.core.result.Result;
 
 import java.lang.reflect.Modifier;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A TestCase instance represents some Test code with a name and some optional info.<br>
@@ -55,6 +57,35 @@ public final class TestCase{
 		return new TestCase(name,info,logContext,testCode);
 	}
 
+	public static class TestCaseWithVariants<V>{
+
+		private final String                       name;
+		private final String                       info;
+		private final PList<Supplier<? extends V>> variants;
+
+
+		public TestCaseWithVariants(String name, String info,
+									PList<Supplier<? extends V>> variants
+		) {
+			this.name = name;
+			this.info = info;
+			this.variants = variants;
+		}
+
+		public TestCase code(Function<V, TestCode> theCode) {
+			LogContext logContext =
+				new LogContext(Thread.currentThread().getStackTrace()[3]).withMethodName("TestCase With Variants");
+
+			PList<TestCase> subTestCodes = variants.map(sup -> {
+				V variant = sup.get();
+				return new TestCase(name + " with variant " + variant, info == null ? "?" : info, logContext, theCode
+					.apply(variant));
+			});
+
+			TestCode testCode = subTestsCode(subTestCodes.toArray(new TestCase[0]));
+			return new TestCase(name, info == null ? "?" : info, logContext, testCode);
+		}
+	}
 
 
 	public static class TestCaseWithName{
@@ -75,6 +106,10 @@ public final class TestCase{
 
 		public TestCase code(TestCode testCode) {
 			return new TestCase(name, info == null ? "?" : info, logContext, testCode);
+		}
+
+		public <V> TestCaseWithVariants<V> withVariants(Supplier<? extends V>... variants) {
+			return new TestCaseWithVariants<>(name, info, PList.val(variants));
 		}
 
 		public TestCase subTestCases(TestCase... testCases) {
