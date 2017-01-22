@@ -6,6 +6,7 @@ import com.persistentbit.core.logging.entries.LogEntry;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -174,6 +175,23 @@ public class Empty<T> extends Result<T>{
         }
         if(resultValue == null) {
             return failure("flatMapEmpty returned a null result");
+        }
+        return resultValue.mapLog(log::append);
+    }
+
+    @Override
+    public Result<T> flatMapNoSuccess(BiFunction<Result<T>, Throwable, Result<T>> mapper) {
+        if(mapper == null) {
+            return failure("flatMapNoSuccess function is null");
+        }
+        Result<T> resultValue;
+        try {
+            resultValue = mapper.apply(this, getException());
+        } catch(Exception e) {
+            return failure(e);
+        }
+        if(resultValue == null) {
+            return failure("flatMapNoSuccess returned a null result");
         }
         return resultValue.mapLog(log::append);
     }

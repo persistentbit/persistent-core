@@ -4,10 +4,7 @@ import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.entries.LogEntry;
 
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * TODO: Add comment
@@ -72,6 +69,11 @@ public class ResultLazy<T> extends Result<T>{
 	@Override
 	public Result<T> flatMapEmpty(Function<? super Empty<T>, Result<T>> mapper) {
 		return new ResultLazy<>(() -> getValue().flatMapEmpty(mapper));
+	}
+
+	@Override
+	public Result<T> flatMapNoSuccess(BiFunction<Result<T>, Throwable, Result<T>> mapper) {
+		return new ResultLazy<>(() -> getValue().flatMapNoSuccess(mapper));
 	}
 
 	@Override

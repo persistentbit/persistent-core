@@ -1,6 +1,6 @@
 package com.persistentbit.core.utils;
 
-import com.persistentbit.core.Nothing;
+import com.persistentbit.core.OK;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.result.Result;
 
@@ -60,7 +60,7 @@ public final class PasswordStorage {
         });
     }
 
-    public static Result<Nothing> verifyPassword(String password, String correctHash){
+    public static Result<OK> verifyPassword(String password, String correctHash) {
         return Log.function("<password>",correctHash).code(l -> {
             if(password == null){
                 return Result.failure("password is null");
@@ -99,7 +99,7 @@ public final class PasswordStorage {
 
     }
 
-    public static Result<Nothing> verifyPassword(char[] password, String correctHash) {
+    public static Result<OK> verifyPassword(char[] password, String correctHash) {
         return Log.function("<password>",correctHash).code(l-> {
             if (password == null) {
                 return Result.failure("password is null");
@@ -135,7 +135,7 @@ public final class PasswordStorage {
                                                 // Compare the hashes in constant time. The password is correct if
                                                 // both hashes match.
                                                 if(slowEquals(hash,testHash)){
-                                                    return Result.success(Nothing.inst);
+                                                    return OK.result;
                                                 }
                                                 return Result.failure("HashVerification failed");
                                             })

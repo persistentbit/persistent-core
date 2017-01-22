@@ -18,10 +18,7 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * A Result represents the result of a function.<br>
@@ -157,8 +154,14 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 	 */
 	public abstract Result<T> flatMapEmpty(Function<? super Empty<T>, Result<T>> mapper);
 
-
-
+	/**
+	 * FlatMap this result if it is an {@link Empty} or a {@link Failure}
+	 *
+	 * @param mapper Empty/Failure mapper
+	 *
+	 * @return The mapped Empty/Failer or this if it a Success
+	 */
+	public abstract Result<T> flatMapNoSuccess(BiFunction<Result<T>, Throwable, Result<T>> mapper);
 
 
 
@@ -426,7 +429,6 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 		};
 
 	}
-
 
 	/**
 	 * Exception thrown when we try to get a value from an {@link Empty}

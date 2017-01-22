@@ -6,6 +6,7 @@ import com.persistentbit.core.logging.entries.LogEntryEmpty;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -56,7 +57,7 @@ public class Success<T> extends Result<T>{
 		} catch(Exception e) {
 			return failure(e);
 		}
-		if(resultValue == null){
+		if(resultValue == null) {
 			return empty("map returned a null value");
 		}
 		if(resultValue == this) {
@@ -67,7 +68,7 @@ public class Success<T> extends Result<T>{
 
 	@Override
 	public <U> Result<U> flatMap(Function<T, Result<U>> mapper) {
-		if(mapper == null){
+		if(mapper == null) {
 			return failure("flatMap function is null");
 		}
 		Result<U> resultValue;
@@ -76,7 +77,7 @@ public class Success<T> extends Result<T>{
 		} catch(Exception e) {
 			return failure(e);
 		}
-		if(resultValue == null){
+		if(resultValue == null) {
 			return failure("flatMap returned a null result");
 		}
 		if(resultValue.getLog().isEmpty() && log.isEmpty()) {
@@ -204,14 +205,18 @@ public class Success<T> extends Result<T>{
 	}
 
 	@Override
-	public Result<T> flatMapFailure(Function<? super Failure<T>, Result<T>> mapper
-	) {
+	public Result<T> flatMapFailure(Function<? super Failure<T>, Result<T>> mapper) {
 		return this;
 	}
 
 	@Override
 	public Result<T> flatMapEmpty(Function<? super Empty<T>, Result<T>> mapper
 	) {
+		return this;
+	}
+
+	@Override
+	public Result<T> flatMapNoSuccess(BiFunction<Result<T>, Throwable, Result<T>> mapper) {
 		return this;
 	}
 

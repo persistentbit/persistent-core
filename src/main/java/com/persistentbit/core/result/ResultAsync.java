@@ -7,10 +7,7 @@ import com.persistentbit.core.tuples.Tuple2;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * TODO: Add comment
@@ -102,6 +99,11 @@ public class ResultAsync<T> extends Result<T> {
     public Result<T> flatMapEmpty(Function<? super Empty<T>, Result<T>> mapper
     ) {
         return new ResultAsync<>(future.thenApply(r -> r.flatMapEmpty(mapper)));
+    }
+
+    @Override
+    public Result<T> flatMapNoSuccess(BiFunction<Result<T>, Throwable, Result<T>> mapper) {
+        return new ResultAsync<>(future.thenApply(r -> r.flatMapNoSuccess(mapper)));
     }
 
     @Override
