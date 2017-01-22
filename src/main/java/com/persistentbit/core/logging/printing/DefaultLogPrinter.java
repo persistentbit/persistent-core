@@ -57,7 +57,9 @@ public class DefaultLogPrinter {
                         if (i >= 0) {
                             clsName = clsName.substring(i + 1);
                         }
-                        return clsName.replace('$', '.') + "." + fun;
+                        clsName = clsName.replace('$', '.');
+                        clsName = logEntry.getThisContainer().orElse(clsName);
+                        return clsName + "." + fun;
                     }).orElse("unknownFunction");
 
 

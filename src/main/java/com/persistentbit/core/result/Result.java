@@ -52,6 +52,11 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 			}
 		}
 
+		public FLogging withThis(Object thisContainer) {
+			entry = entry.withThis(thisContainer == null ? "null" : thisContainer.toString());
+			return this;
+		}
+
 		@SuppressWarnings("unchecked")
 		public <R> Result<R> code(FunctionLogging.LoggedFunction<Result<R>> code) {
 			try {
@@ -69,6 +74,7 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 		}
 
 	}
+
 
 	public static FLogging function() {
 		StackTraceElement ste = Thread.currentThread().getStackTrace()[2];
