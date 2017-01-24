@@ -13,8 +13,6 @@ import com.persistentbit.core.tuples.Tuple3;
 import com.persistentbit.core.tuples.Tuple4;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
@@ -29,7 +27,7 @@ import java.util.function.*;
  * @author Peter Muys
  * @since 27/12/2016
  */
-public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValue<Result<T>>{
+public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 
 	public static class FLogging extends FunctionLogging{
 
@@ -102,8 +100,8 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 	public abstract <U> Result<U> map(Function<T, U> mapper);
 
 	/**
-	 * Flatmap the Success value or return a Failure or a Empty
-	 *
+	 * Flatmap the Success value or return a Failure or a Empty.<br>
+	 * The new Result's LogEntry is this {@link LogEntry} with the mapped appended.<br>
 	 * @param mapper the value mapper
 	 * @param <U>    The resulting value type
 	 *
@@ -170,28 +168,64 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 	public abstract Result<T> flatMapNoSuccess(BiFunction<Result<T>, Throwable, Result<T>> mapper);
 
 
-
+	/**
+	 * Is this a {@link Success} value?
+	 * @return true if we have a result value.
+	 */
 	public boolean isPresent() {
 		return getOpt().isPresent();
 	}
 
+	/**
+	 * is this an {@link Empty} value?
+	 * @return true if empty
+	 */
 	public abstract boolean isEmpty();
 
+	/**
+	 * Is this a {@link Failure} value ?
+	 * @return true if failure
+	 */
 	public boolean isError() {
 		return !isPresent() && !isEmpty();
 	}
 
+	/**
+	 * If this is a {@link Failure}, map the causing Exception.
+	 * @param mapper The Exception mapper
+	 * @return A failure with the new Exception
+	 */
 	public abstract Result<T> mapError(Function<Throwable, ? extends Throwable> mapper);
 
+	/**
+	 * If this is a {@link Success}, verify the value
+	 * @param verification The verification Predicate
+	 * @return The Verified {@link Success} or a {@link Failure}
+	 */
 	public Result<T> verify(Predicate<T> verification) {
 		return verify(verification, v -> new IllegalStateException("Verification for " + v + " failed!"));
 	}
 
+	/**
+	 * If this is a {@link Success}, verify the value
+	 * @param verification The verification Predicate
+	 * @param errorMessage The Exception Error message
+	 * @return The Verified {@link Success} or a {@link Failure}
+	 */
 	public Result<T> verify(Predicate<T> verification, String errorMessage) {
 		return verify(verification, v -> new IllegalStateException("Verification for " + v + " failed:" + errorMessage));
 	}
 
 
+
+
+	/**
+	 * If this is a {@link Success}, verify the value
+	 * @param verification The verification Predicate
+	 * @param failureExceptionSupplier A supplier for a Failure Exception incase the verification returns false
+	 * @param <E> The Exception type
+	 * @return The Verified {@link Success} or a {@link Failure}
+	 */
 	public abstract <E extends Throwable> Result<T> verify(Predicate<T> verification,
 														   Function<T, E> failureExceptionSupplier
 	);
@@ -200,25 +234,58 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 
 	public abstract Result<Throwable> forEachOrException(Consumer<? super T> effect);
 
+	/**
+	 * Returns a new {@link Result} with the Logs mapped
+	 * @param mapper The Log mapper
+	 * @return a new Result
+	 */
 	public abstract Result<T> mapLog(Function<LogEntry, LogEntry> mapper);
 
+	/**
+	 * Execute an effect with the Log
+	 * @param effect The effect, taking a {@link LogEntry} as input
+	 * @return this.
+	 */
 	public abstract Result<T> withLogs(Consumer<LogEntry> effect);
 
 
+	/**
+	 * Combine this Result with an other Result into a Result with a Tuple2 of this and the other result
+	 * @param otherResult The Other result
+	 * @param <U> The type of the other result
+	 * @return The combined result
+	 */
 	public <U> Result<Tuple2<T, U>> combine(Result<U> otherResult) {
-		Result<Tuple2<T, U>> result = flatMap(thisValue -> {
-			return otherResult.flatMap(otherValue -> {
-				return Result.success(Tuple2.of(thisValue, otherValue));
-			});
-		});
-		return result;
+		return flatMap(thisValue ->
+			otherResult.flatMap(otherValue ->
+				Result.success(Tuple2.of(thisValue, otherValue))
+			)
+		);
 	}
 
+	/**
+	 * Combine this Result with 2 other Results into a Result with a Tuple3.<br>
+	 * @param rb other Result
+	 * @param rc other Result
+	 * @param <B> Type of rb
+	 * @param <C> Type of rc
+	 * @return a Tuple3 result
+	 */
 	public <B, C> Result<Tuple3<T, B, C>> combine(Result<B> rb, Result<C> rc) {
 		return combine(rb).combine(rc)
 			.map(t -> Tuple3.of(t._1._1, t._1._2, t._2));
 	}
 
+	/**
+	 * Combine this Result with 3 other Results into a Result with a Tuple4.<br>
+	 * @param rb other Result
+	 * @param rc other Result
+	 * @param rd other Result
+	 * @param <B> Type of rb
+	 * @param <C> Type of rc
+	 * @param <D> Type of rd
+	 * @return a Tuple4 result
+	 */
 	public <B, C, D> Result<Tuple4<T, B, C, D>> combine(Result<B> rb, Result<C> rc, Result<D> rd) {
 		return combine(rb, rc).combine(rd).map(t -> Tuple4.of(t._1._1, t._1._2, t._1._3, t._2));
 	}
@@ -267,10 +334,11 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 	 */
 	public abstract T orElseThrow();
 
+	/*
 	@Override
 	public Iterator<T> iterator() {
 		return getOpt().map(v -> Collections.singletonList(v).iterator()).orElseGet(Collections::emptyIterator);
-	}
+	}*/
 
 
 	/**
@@ -301,6 +369,11 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 	 */
 	public abstract Result<T> ifFailure(Consumer<Failure<T>> effect);
 
+	/**
+	 * Run code if this is a {@link Success} result
+	 * @param effect The effect code taking a {@link Success} as parameter
+	 * @return this result
+	 */
 	public abstract Result<T> ifPresent(Consumer<Success<T>> effect);
 
 
@@ -318,28 +391,40 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 
 
 	/**
-	 * Create an Empty result
+	 * Create an Empty result with a RuntimeException with message "Empty value".<br>
 	 *
 	 * @param <U> The normal value type
 	 *
-	 * @return an Empty
+	 * @return an {@link Empty}
 	 */
 	@SuppressWarnings("unchecked")
 	public static <U> Empty<U> empty() {
 		return empty("Empty value");
 	}
 
+	/**
+	 * Create an Empty result with a RuntimeException with the given message.<br>
+	 * @param message The exception message
+	 * @param <U> The type of the Empty
+	 * @return The empty
+	 */
 	public static <U> Empty<U> empty(String message) {
 		return new Empty<>(new RuntimeException(message), LogEntryEmpty.inst);
 	}
 
+	/**
+	 * Create an Empty result with a given Throwable cause.<br>
+	 * @param cause The cause for the empty
+	 * @param <U> The type of Result
+	 * @return The new Empty
+	 */
 	public static <U> Empty<U> empty(Throwable cause) {
 		return new Empty<>(cause, LogEntryEmpty.inst);
 	}
 
 	public static <U> Result<U> fromOpt(Optional<U> optValue) {
 		if(optValue == null) {
-			return Result.failure("optValue is null");
+			return Result.<U>failure("optValue is null").logFunction("null");
 		}
 		return Result.result(optValue.orElse(null));
 	}
@@ -395,7 +480,7 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 
 	/**
 	 * Create a new Function, returning a Result over the return type of the supplied function.<br>
-	 *
+	 * If an exception is thrown by the function, a {@link Failure} is returned.
 	 * @param f   The function to convert
 	 * @param <T> The function argument type
 	 * @param <R> The Result value type
@@ -413,14 +498,17 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 
 	}
 
+	/**
+	 * Run the supplied function, returning the return value wrapped in a {@link Result}.<br>
+	 * An Exception is automatically converted to a {@link Failure} result
+	 * @param code The function to run
+	 * @param <R> The result type of the function
+	 * @return A Result of type R
+	 */
 	public static <R> Result<R> noExceptions(Callable<R> code) {
-		return Result.function().code(l -> {
-			try {
-				return result(code.call());
-			} catch(Exception e) {
-				return failure(e);
-			}
-		});
+		return Result.function().code(l ->
+			result(code.call())
+		);
 	}
 
 	public static <T, U, R> Function<T, Function<U, Result<R>>> higherToResult(Function<T, Function<U, R>> f) {
@@ -461,11 +549,14 @@ public abstract class Result<T> implements Iterable<T>, Serializable, LoggedValu
 		}
 	}
 
+
 	public abstract <U> U match(
 		Function<Success<T>, U> onSuccess,
 		Function<Empty<T>, U> onEmpty,
 		Function<Failure<T>, U> onFailure
 	);
+
+
 
 	public abstract Result<T> cleanLogsOnPresent();
 
