@@ -1,8 +1,10 @@
 package com.persistentbit.core.utils;
 
 import com.persistentbit.core.Nothing;
+import com.persistentbit.core.OK;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.Log;
+import com.persistentbit.core.result.Failure;
 import com.persistentbit.core.result.Result;
 
 import java.io.*;
@@ -11,6 +13,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * General IO Utilities
@@ -33,9 +36,10 @@ public final class IO {
      * @param out The destination output stream (NOT NULL)
      * @param <T> Type of the output stream
      * @return Result of Output stream
+     * @see #copyAndClose(InputStream, OutputStream)
      */
     public static <T extends OutputStream> Result<T> copy(InputStream in, T out) {
-        return Result.function().code(l -> {
+        return closeAfter(in,()->Result.function().code(l -> {
             l.params(in, out);
             if (in == null) {
                 return Result.failure("in parameter can't be null");
@@ -43,28 +47,65 @@ public final class IO {
             if (out == null) {
                 return Result.failure("out parameter can't be null");
             }
-            try {
-                byte[] buffer = new byte[1024 * 10];
-                while (true) {
-                    int c = in.read(buffer);
-                    if (c == -1) {
-                        break;
-                    }
-                    out.write(buffer, 0, c);
+            byte[] buffer = new byte[1024 * 10];
+            while (true) {
+                int c = in.read(buffer);
+                if (c == -1) {
+                    break;
                 }
-                return Result.success(out);
-            } finally {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    Result.failure(e);
-
-                }
-
+                out.write(buffer, 0, c);
             }
+            return Result.success(out);
+        }));
+    }
+
+    /**
+     * copy data from in to out. <br>
+     * When done, closes in and out
+     * @param in The InputStream
+     * @param out The OutputStream
+     * @param <T> The type of the OutputStream
+     * @return OK when copy and close succeeded
+     */
+    public static <T extends OutputStream> Result<OK> copyAndClose(InputStream in, T out){
+        return Result.function().code(l ->
+              closeAfter(out,()-> copy(in,out)).flatMap(out2 -> OK.result)
+        );
+    }
+
+    /**
+     * Closes a Closable, mapping a thrown IO Exception to a {@link Failure}
+     * @param closeable The closeable (nullable)
+     * @return OK if success or Failure on Exception
+     */
+    public static Result<OK> close(Closeable closeable){
+        return Result.function().code(l -> {
+            if(closeable == null){
+                return OK.result;
+            }
+            closeable.close();
+            return OK.result;
         });
+    }
 
-
+    /**
+     * Executes some code returning a {@link Result}
+     * and then closes the provided {@link Closeable}.<br>
+     * If the close failed, then the result is mapped to a {@link Failure}
+     * @param closeable The Closable to close after the code
+     * @param before The code to run before the close
+     * @param <T> The type of the Result
+     * @return The Result of the before code combined with the closing
+     */
+    public static <T> Result<T> closeAfter(Closeable closeable, Supplier<Result<T>> before){
+        return Result.function().code(l -> {
+                Result<T> res = before.get();
+                return res.match(
+                    onSuccess -> close(closeable).flatMap(ok -> onSuccess),
+                    onEmpty -> close(closeable).flatMap(ok -> onEmpty),
+                    onFailure -> close(closeable).flatMap(ok -> onFailure)
+                );
+        });
     }
 
     public static Result<FileInputStream> fileToInputStream(File f) {
