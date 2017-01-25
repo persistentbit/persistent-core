@@ -4,6 +4,9 @@ import com.persistentbit.core.NotNullable;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.Log;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -262,6 +265,7 @@ public final class StringUtils{
 		return str;
 	}
 
+	@Deprecated
 	public static String present(String org, int maxLength){
 		if(org == null){
 			return null;
@@ -281,5 +285,51 @@ public final class StringUtils{
 		return kleiner + "";
 	}
 
+	/**
+	 * Split a text into lines with a maximum length.
+	 * @param longString      The String to split
+	 * @param whiteSpaceRegEx Regular Expression for finding the split locations
+	 * @param splitLongWords  Split words longer that the maximum length ?
+	 * @param maxLength The maximum length per lines
+	 * @return List of lines
+	 */
+	public static List<String> splitStringOnMaxLength(
+			String longString,
+			String whiteSpaceRegEx,
+			boolean splitLongWords,
+			int maxLength
+	){
+		Objects.requireNonNull(longString,"longString");
+		if(maxLength <1){
+			throw new IllegalArgumentException("maxLength must be >=1");
+		}
+		if(longString.length()<=maxLength){
+			return Arrays.asList(longString);
+		}
+
+		List<String> lines = new ArrayList<>();
+		String currentLine="";
+		for(String word : longString.split(whiteSpaceRegEx)){
+			String newLine = (currentLine.isEmpty() ? word : currentLine + " " + word);
+			if(newLine.length() < maxLength){
+				currentLine = newLine;
+			} else {
+				if(currentLine.isEmpty() == false) {
+					lines.add(currentLine);
+				}
+				currentLine = word;
+				if(splitLongWords) {
+					while (currentLine.length() > maxLength) {
+						lines.add(currentLine.substring(0, maxLength));
+						currentLine = currentLine.substring(maxLength);
+					}
+				}
+			}
+		}
+		if(currentLine.isEmpty() == false){
+			lines.add(currentLine);
+		}
+		return lines;
+	}
 
 }
