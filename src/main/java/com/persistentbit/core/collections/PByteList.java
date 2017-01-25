@@ -67,6 +67,11 @@ public final class PByteList extends AbstractIPList<Byte, PByteList> implements 
 		return new PByteList(Arrays.copyOf(bytes,bytes.length));
 	}
 
+	public static PByteList from(byte[] bytes, int offset, int length) {
+		byte[] newArr = new byte[length];
+		System.arraycopy(bytes, offset, newArr, 0, length);
+		return new PByteList(newArr);
+	}
 
 	/**
 	 * Get the data as a InputStream.<br>

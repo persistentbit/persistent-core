@@ -9,8 +9,11 @@ import com.persistentbit.core.result.Result;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -171,16 +174,12 @@ public final class IO {
             } catch (IOException e) {
                 return Result.failure(e);
             } finally {
-                try {
-                    fin.close();
-                } catch (IOException e) {
-                    Result.failure("Error closing stream: " + e.getMessage());
-                }
-
+                IO.close(fin).orElseThrow();
             }
         });
 
     }
+
 
     /**
      * Read an InputStream into a String.<br>
@@ -402,6 +401,62 @@ public final class IO {
                         new File(rp,prefix + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + postfix)
                 ).logFunction(rootPath,prefix,postfix);
 
+    }
+
+    /**
+     * Get the System Temp folder
+     *
+     * @return The temp folder result
+     *
+     * @see #createTempDir(String)
+     */
+    public static Result<File> getSystemTempDir() {
+        return Result.success(new File(System.getProperty("java.io.tmpdir")))
+            .verify(f -> f.exists(), "Temp directory does not exist")
+            .verify(f -> f.canWrite(), "Can't write in Temp directory")
+            .logFunction();
+    }
+
+    /**
+     * Create a new folder in the system Temp folder
+     *
+     * @param baseName The base name for the temp folder
+     *
+     * @return The new temp folder {@link File}
+     *
+     * @see #getSystemTempDir()
+     */
+    public static Result<File> createTempDir(String baseName) {
+        return getSystemTempDir()
+            .flatMap(tmpBase ->
+                         Result.noExceptions(() ->
+                                                 Files.createTempDirectory(tmpBase.toPath(), baseName).toFile())
+            );
+    }
+
+    /**
+     * Delete a directory with all it's content
+     *
+     * @param dirToDelete The directory to delete
+     *
+     * @return Ok result
+     */
+    public static Result<OK> deleteDirRecursive(File dirToDelete) {
+        return Result.function(dirToDelete).code(l -> {
+            if(dirToDelete == null) {
+                return Result.failure("dirToDelete is null");
+            }
+            if(dirToDelete.isDirectory() == false) {
+                return Result.failure("Not a directory:" + dirToDelete);
+            }
+
+            Files.walk(dirToDelete.toPath())
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .peek(f -> l.info("Deleting " + f))
+                .forEach(File::delete);
+            return OK.result;
+        });
     }
 
 }
