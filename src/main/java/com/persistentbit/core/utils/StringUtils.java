@@ -4,9 +4,7 @@ import com.persistentbit.core.NotNullable;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.Log;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.text.Normalizer;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -367,4 +365,67 @@ public final class StringUtils{
 		return lines;
 	}
 
+	public static String deleteWhitespace(String str){
+		Objects.requireNonNull(str);
+		int cnt = str.length();
+		if(cnt == 0){
+			return str;
+		}
+		char[] dest = new char[cnt];
+		int resultLength = 0;
+		for(int i=0; i<cnt; i++){
+			if (!Character.isWhitespace(str.charAt(i))) {
+				dest[resultLength++] = str.charAt(i);
+			}
+		}
+		if(resultLength == cnt){
+			return str;
+		}
+		return new String(dest,0,resultLength);
+	}
+
+
+	/**
+	 * Convert a String to a Searchable version without accents,spaces, all uppercasel
+	 * @param normalString The String to convert
+	 * @return The Searchable version.
+	 */
+	public static String createSearchableString(String normalString)
+	{
+		Objects.requireNonNull(normalString, "omschrijving");
+		if(normalString.trim().length() == 0){
+			return "";
+		}
+		String alfaKey;
+
+		alfaKey = deleteWhitespace(normalString);//delete alle whitespaces
+		//replace alle speciale leestekens op een letter door de gewone letter
+		alfaKey = alfaKey.replaceAll("\\p{Punct}", "");//delete alle andere non-word characters
+
+		//ae oe ed. symbolen opvangen en replace door equivalent bv ae symbool word ae letters
+		alfaKey = alfaKey.replaceAll("\306", "AE");
+		alfaKey = alfaKey.replaceAll("\346", "ae");
+		alfaKey = alfaKey.replaceAll("\330", "O");
+		alfaKey = alfaKey.replaceAll("\370", "o");
+		alfaKey = alfaKey.replaceAll("\226", "OE");
+		alfaKey = alfaKey.replaceAll("\234", "oe");
+		alfaKey = alfaKey.replaceAll("\320", "D");
+		alfaKey = alfaKey.replaceAll("\360", "d");
+
+		char[] normalized = Normalizer.normalize(alfaKey, Normalizer.Form.NFD).toCharArray();
+		if (normalized.length > alfaKey.length())//accented letters vervangen door gewone letters (bv é -> e)
+		{
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < normalized.length; i++)
+			{
+				String str = Character.toString(normalized[i]);
+				str = str.replaceAll("\\W", "");//de accented vervangen door een lege string
+				sb.append(str);
+			}
+
+			alfaKey = sb.toString();
+		}
+
+		return alfaKey.toUpperCase();
+	}
 }
