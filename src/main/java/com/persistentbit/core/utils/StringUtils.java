@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * General String utilities, because we all have to have our own  StringUtils version
@@ -285,49 +286,83 @@ public final class StringUtils{
 		return kleiner + "";
 	}
 
+
 	/**
-	 * Split a text into lines with a maximum length.
+	 * Split text on '-' and ' '.<br>
+	 *
+	 * @param longString The text to split
+	 * @param maxLength  The maximum length per line
+	 * @return the result stream
+	 */
+	public static PList<String> splitOnWhitespaceAndHyphen(String longString, int maxLength){
+		return splitStringOnMaxLength(
+				longString,
+				"(?<=\\-)|(?<=\\s)",
+				false,
+				maxLength,
+				s -> s.trim()
+		);
+
+	}
+
+
+
+	/**
+	 * Split a text into lines with a maximum length.<br>
+	 * Expects a regular expression to find the split point.<br>
+	 * This regular expression should keep te delimiter, so use something
+	 * like (?=char) or (?&lt;=char) as regular expression.
+	 * Example with space and '-' as delimiters: '(?&lt;=\-)|(?&lt;=\s)"
 	 * @param longString      The String to split
 	 * @param whiteSpaceRegEx Regular Expression for finding the split locations
 	 * @param splitLongWords  Split words longer that the maximum length ?
 	 * @param maxLength The maximum length per lines
 	 * @return List of lines
 	 */
-	public static List<String> splitStringOnMaxLength(
+	public static PList<String> splitStringOnMaxLength(
 			String longString,
 			String whiteSpaceRegEx,
 			boolean splitLongWords,
-			int maxLength
+			int maxLength,
+			Function<String,String> postProcessLine
+
 	){
 		Objects.requireNonNull(longString,"longString");
+
 		if(maxLength <1){
 			throw new IllegalArgumentException("maxLength must be >=1");
 		}
+
 		if(longString.length()<=maxLength){
-			return Arrays.asList(longString);
+			return PList.val(longString);
 		}
 
-		List<String> lines = new ArrayList<>();
+		PList<String> lines = PList.empty();
 		String currentLine="";
 		for(String word : longString.split(whiteSpaceRegEx)){
-			String newLine = (currentLine.isEmpty() ? word : currentLine + " " + word);
-			if(newLine.length() < maxLength){
+			String newLine = (currentLine.isEmpty() ? word : currentLine + word);
+			String newLineProcessed = postProcessLine.apply(newLine);
+			if(newLineProcessed.length() <= maxLength){
 				currentLine = newLine;
 			} else {
-				if(currentLine.isEmpty() == false) {
-					lines.add(currentLine);
+				newLineProcessed = postProcessLine.apply(currentLine);
+				if(newLineProcessed.isEmpty() == false) {
+					lines = lines.plus(newLineProcessed);
 				}
 				currentLine = word;
+
 				if(splitLongWords) {
-					while (currentLine.length() > maxLength) {
-						lines.add(currentLine.substring(0, maxLength));
+					newLineProcessed = postProcessLine.apply(currentLine);
+					while (newLineProcessed.length() > maxLength) {
+						lines = lines.plus(postProcessLine.apply(currentLine.substring(0, maxLength)));
 						currentLine = currentLine.substring(maxLength);
+						newLineProcessed = postProcessLine.apply(currentLine);
 					}
 				}
 			}
 		}
 		if(currentLine.isEmpty() == false){
-			lines.add(currentLine);
+			lines = lines.plus(currentLine);
 		}
 		return lines;
 	}
