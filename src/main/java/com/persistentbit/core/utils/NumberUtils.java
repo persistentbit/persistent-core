@@ -5,6 +5,7 @@ import com.persistentbit.core.result.Result;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.util.Comparator;
 
 /**
@@ -108,4 +109,18 @@ public final class NumberUtils {
 		}
 		return parseBigDecimal(number.toString()).logFunction(number);
 	}
+
+	/**
+	 * Convert a computer size into a human readable String
+	 * with 'kB','MB',...'TB'  units
+	 * @param size The size in bytes
+	 * @return The readable version.
+	 */
+	public static String	readableComputerSize(long size){
+		if(size <= 0) return "0";
+		final String[] units = new String[] { "B", "kB", "MB", "GB", "TB" };
+		int digitGroups = (int) (Math.log10(size)/Math.log10(1000));
+		return new DecimalFormat("#,##0.#").format(size/Math.pow(1000, digitGroups)) + " " + units[digitGroups];
+	}
+
 }

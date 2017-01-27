@@ -140,9 +140,7 @@ public final class IO {
 
 
     public static Result<Reader> fileToReader(File f, Charset charset) {
-        return Log.function(f).code(l -> {
-            return fileToInputStream(f).flatMap(is -> inputStreamToReader(is, charset));
-        });
+        return fileToInputStream(f).flatMap(is -> inputStreamToReader(is, charset)).logFunction(f,charset);
     }
 
 
@@ -199,6 +197,9 @@ public final class IO {
                 return Result.failure("Charset is null");
             }
             return inputStreamToReader(fin,charset)
+                    .flatMapNoSuccess((r,e) ->
+                        close(fin).flatMap(ok -> r)
+                    )
                     .flatMap(IO::readTextStream);
         });
 
@@ -459,4 +460,49 @@ public final class IO {
         });
     }
 
+    /**
+     * Read a class path resource as a String
+     * @param classPathResource The resource name
+     * @param charset The char encoding
+     * @return The String result
+     */
+    public Result<String>   readClassPathResource(String classPathResource,Charset charset){
+        return Result.function(classPathResource,charset).code(l-> {
+            if(classPathResource == null){
+                return Result.failure("classPathResource is null");
+            }
+            if(charset == null){
+                return Result.failure("charset is null");
+            }
+            InputStream in = IO.class.getResourceAsStream(classPathResource);
+            if(in == null){
+                return Result.failure("Classpath resource not found:" + classPathResource);
+            }
+            return readTextStream(in,charset);
+        });
+    }
+
+    public  static Result<String>  getReadableFileSize(File file){
+        return Result.function(file).code(l -> {
+            if(file == null){
+                return Result.failure("file is null");
+            }
+            if(file.exists() == false){
+                return Result.failure("File does not exist: " + file);
+            }
+            if(file.canRead() == false){
+                return Result.failure("Can't read file: " + file);
+            }
+            return Result.success(NumberUtils.readableComputerSize(file.length()));
+        });
+    }
+
+    public static void main(String... args) throws Exception {
+        for(File f : new File("d:\\").listFiles()){
+            if(f.isDirectory()){
+                continue;
+            }
+            System.out.println(f.getName() + " " + f.length() + ", " + getReadableFileSize(f));
+        }
+    }
 }
