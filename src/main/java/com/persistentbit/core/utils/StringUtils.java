@@ -315,6 +315,7 @@ public final class StringUtils{
 	 * @param whiteSpaceRegEx Regular Expression for finding the split locations
 	 * @param splitLongWords  Split words longer that the maximum length ?
 	 * @param maxLength The maximum length per lines
+	 * @param postProcessLine Function used for building the final line out of the constructed line. Could be used to trim the resulting line
 	 * @return List of lines
 	 */
 	public static PList<String> splitStringOnMaxLength(

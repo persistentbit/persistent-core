@@ -466,7 +466,7 @@ public final class IO {
      * @param charset The char encoding
      * @return The String result
      */
-    public Result<String>   readClassPathResource(String classPathResource,Charset charset){
+    public static Result<String> readClassPathResource(String classPathResource, Charset charset) {
         return Result.function(classPathResource,charset).code(l-> {
             if(classPathResource == null){
                 return Result.failure("classPathResource is null");
