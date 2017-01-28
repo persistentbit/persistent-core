@@ -421,6 +421,15 @@ public final class IO {
             .logFunction();
     }
 
+	public static Result<File> getUserHomeDir() {
+		return Result.success(new File(System.getProperty("user.home")))
+			.verify(f -> f.exists(), "User home directory does not exist")
+			.verify(f -> f.canWrite(), "Can't write to the user home directory")
+			.logFunction();
+	}
+
+
+
     /**
      * Create a new folder in the system Temp folder
      *
