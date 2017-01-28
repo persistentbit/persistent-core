@@ -313,13 +313,15 @@ public final class IO {
             }
             if(f.exists()) {
                 if(f.isDirectory() == false) {
-                    return Result.failure("File is not a directory:" + f);
+                    return Result.failure("File is not a directory:" + f.getAbsolutePath());
                 }
+                log.info("Dir already exists:" + f.getAbsolutePath());
                 return Result.success(f);
             }
             if(f.mkdirs() == false) {
-                return Result.failure("mkdirs() returned false for " + f);
+                return Result.failure("mkdirs() returned false for " + f.getAbsolutePath());
             }
+            log.info("Dir created: " + f.getAbsolutePath());
             return Result.success(f);
         });
     }
