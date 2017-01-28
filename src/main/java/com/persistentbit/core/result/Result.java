@@ -498,6 +498,7 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 
 	}
 
+
 	/**
 	 * Run the supplied function, returning the return value wrapped in a {@link Result}.<br>
 	 * An Exception is automatically converted to a {@link Failure} result

@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -467,20 +468,66 @@ public final class IO {
      * @return The String result
      */
     public static Result<String> readClassPathResource(String classPathResource, Charset charset) {
-        return Result.function(classPathResource,charset).code(l-> {
+        return Result.function(classPathResource, charset).code(l-> {
             if(classPathResource == null){
                 return Result.failure("classPathResource is null");
             }
             if(charset == null){
                 return Result.failure("charset is null");
             }
+            return getClassPathResourceReader(classPathResource, charset)
+                .flatMap(IO::readTextStream);
+        });
+    }
+
+    public static Result<InputStream> getClassPathResourceStream(String classPathResource) {
+        return Result.function(classPathResource).code(l -> {
+            if(classPathResource == null) {
+                return Result.failure("classPathResource is null");
+            }
             InputStream in = IO.class.getResourceAsStream(classPathResource);
             if(in == null){
                 return Result.failure("Classpath resource not found:" + classPathResource);
             }
-            return readTextStream(in,charset);
+            return Result.success(in);
         });
     }
+
+    public static Result<Reader> getClassPathResourceReader(String classPathResource, Charset charset) {
+        return Result.function(classPathResource).code(l -> {
+            if(classPathResource == null) {
+                return Result.failure("classPathResource is null");
+            }
+            if(charset == null) {
+                return Result.failure("charset is null");
+            }
+            return getClassPathResourceStream(classPathResource)
+                .flatMap(stream -> inputStreamToReader(stream, charset));
+        });
+    }
+
+
+    public static Result<Properties> readClassPathProperties(String classPathResource, Charset charset) {
+        return Result.function(classPathResource, charset).code(l -> {
+            if(classPathResource == null) {
+                return Result.failure("classPathResource is null");
+            }
+            if(charset == null) {
+                return Result.failure("charset is null");
+            }
+            return getClassPathResourceReader(classPathResource, charset)
+                .flatMap(reader -> {
+                    Properties props = new Properties();
+                    return closeAfter(reader, () -> Result.noExceptions(() -> {
+                        props.load(reader);
+                        return props;
+                    }));
+                });
+
+        });
+
+    }
+
 
     public  static Result<String>  getReadableFileSize(File file){
         return Result.function(file).code(l -> {
