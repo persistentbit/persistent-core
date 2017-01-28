@@ -516,16 +516,31 @@ public final class IO {
                 return Result.failure("charset is null");
             }
             return getClassPathResourceReader(classPathResource, charset)
-                .flatMap(reader -> {
-                    Properties props = new Properties();
-                    return closeAfter(reader, () -> Result.noExceptions(() -> {
-                        props.load(reader);
-                        return props;
-                    }));
-                });
+                .flatMap(IO::readProperties);
 
         });
 
+    }
+
+    /**
+     * Try reading a properties file from a Reader, closing the Reader when finished.<br>
+     *
+     * @param reader The Reader for the properties. Automatically closed
+     *
+     * @return The Result {@link Properties}
+     */
+    public static Result<Properties> readProperties(Reader reader) {
+        return Result.function(reader).code(l -> {
+            if(reader == null) {
+                return Result.failure("reader is null");
+            }
+            Properties props = new Properties();
+
+            return closeAfter(reader, () -> Result.noExceptions(() -> {
+                props.load(reader);
+                return props;
+            }));
+        });
     }
 
 
