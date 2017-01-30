@@ -909,4 +909,12 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
 
 		};
 	}
+
+	@Override
+	default <A, B> Tuple2<PStream<A>, PStream<B>> unzip(Function<T, Tuple2<A, B>> unzipper) {
+		return Tuple2.of(
+				map(t -> unzipper.apply(t)._1),
+				map(t -> unzipper.apply(t)._2)
+		);
+	}
 }

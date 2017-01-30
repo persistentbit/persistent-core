@@ -321,8 +321,14 @@ public interface PStream<T> extends Iterable<T>{
 	 */
 	PStream<Tuple2<Integer, T>> zipWithIndex();
 
-	// todo add later
-	// <A,B> Tuple2<PStream<A>,PStream<B>> unzip(Function<T,Tuple2<A,B>> unzipper);
+	/**
+	 * Unzip this stream into 2 streams
+	 * @param unzipper The unzip function
+	 * @param <A> Type of first Stream
+	 * @param <B> Type of second Stream
+	 * @return Tuple of 2 streams
+	 */
+	<A,B> Tuple2<PStream<A>,PStream<B>> unzip(Function<T,Tuple2<A,B>> unzipper);
 
 	/**
 	 * Return an instance of this PStream as a java Stream

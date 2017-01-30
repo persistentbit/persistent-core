@@ -1,7 +1,7 @@
 package com.persistentbit.core.testing;
 
 /**
- * TODO: Add comment
+ * Runtime Exception for Tests
  *
  * @author Peter Muys
  * @since 6/01/2017
