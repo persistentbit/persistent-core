@@ -6,7 +6,8 @@ import com.persistentbit.core.logging.entries.LogEntry;
 import java.util.Optional;
 
 /**
- * TODO: Add comment
+ * Class to clean a LogEntry if there are no
+ * important messages.
  *
  * @author Peter Muys
  * @since 12/01/2017
