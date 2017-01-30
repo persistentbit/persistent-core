@@ -7,10 +7,12 @@ import java.util.Optional;
 import java.util.function.*;
 
 /**
- * TODO: Add comment
+ * A Lazy result delays the computation of the Result value.<br>
+ * The result supplier is only invoked when the actual value is needed.<br>
  *
  * @author Peter Muys
  * @since 4/01/2017
+ * @see Result
  */
 public class ResultLazy<T> extends Result<T>{
 

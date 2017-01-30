@@ -11,7 +11,7 @@ import com.persistentbit.core.logging.printing.LogFormatter;
 import java.util.Optional;
 
 /**
- * TODO: Add comment
+ * Global settings for this persistent-core module.
  *
  * @author Peter Muys
  * @since 11/01/2017

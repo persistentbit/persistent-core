@@ -9,7 +9,7 @@ import java.text.DecimalFormat;
 import java.util.Comparator;
 
 /**
- * TODO: Add comment
+ * General utility functions for Java Numbers
  *
  * @author Peter Muys
  * @since 28/12/2016

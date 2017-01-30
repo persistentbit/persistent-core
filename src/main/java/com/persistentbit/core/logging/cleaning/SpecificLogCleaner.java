@@ -5,10 +5,11 @@ import com.persistentbit.core.logging.entries.LogEntry;
 import java.util.Optional;
 
 /**
- * TODO: Add comment
+ * Log cleaner for a specific {@link LogEntry}
  *
  * @author Peter Muys
  * @since 12/01/2017
+ * @see LogCleaner
  */
 @FunctionalInterface
 public interface SpecificLogCleaner <T extends LogEntry> {

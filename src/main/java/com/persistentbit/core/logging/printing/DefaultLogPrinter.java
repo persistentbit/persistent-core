@@ -5,7 +5,7 @@ import com.persistentbit.core.printing.PrintTextWriter;
 import com.persistentbit.core.printing.PrintableText;
 
 /**
- * TODO: Add comment
+ * Default LogPrinter
  *
  * @author Peter Muys
  * @since 11/01/2017

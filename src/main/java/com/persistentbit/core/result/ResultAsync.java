@@ -10,8 +10,9 @@ import java.util.concurrent.Executor;
 import java.util.function.*;
 
 /**
- * TODO: Add comment
- *
+ * A Result that get's it Result value from a {@link CompletableFuture}.
+ * @see #completed()
+ * @see #isComplete()
  * @author Peter Muys
  * @since 4/01/2017
  */
@@ -49,6 +50,10 @@ public class ResultAsync<T> extends Result<T> {
         return Log.function().code(l -> future.get().isComplete());
     }
 
+    /**
+     * Execute the completable future to get the result value
+     * @return The result value
+     */
     @Override
     public Result<T> completed() {
         return Log.function().code(l -> future.get().completed());
