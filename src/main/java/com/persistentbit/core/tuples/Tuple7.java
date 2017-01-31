@@ -6,6 +6,7 @@ import com.persistentbit.core.properties.FieldNames;
 
 import java.io.Serializable;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * @author Peter Muys
@@ -166,4 +167,30 @@ public class Tuple7<T1, T2, T3, T4, T5, T6, T7> implements Comparable<Tuple7<T1,
 	public <R> R map(Function7<T1, T2, T3, T4, T5, T6, T7, R> map) {
 		return map.apply(_1, _2, _3, _4, _5, _6, _7);
 	}
+
+	public <R1> Tuple7<R1, T2, T3, T4,T5,T6,T7> map1(Function<T1, R1> map) {
+		return Tuple7.of(map.apply(_1), _2, _3, _4,_5,_6,_7);
+	}
+
+	public <R2> Tuple7<T1, R2, T3, T4,T5,T6,T7> map2(Function<T2, R2> map) {
+		return Tuple7.of(_1, map.apply(_2), _3, _4,_5,_6,_7);
+	}
+
+	public <R3> Tuple7<T1, T2, R3, T4,T5,T6,T7> map3(Function<T3, R3> map) {
+		return Tuple7.of(_1, _2, map.apply(_3), _4,_5,_6,_7);
+	}
+
+	public <R4> Tuple7<T1, T2, T3, R4,T5,T6,T7> map4(Function<T4, R4> map) {
+		return Tuple7.of(_1, _2, _3, map.apply(_4),_5,_6,_7);
+	}
+	public <R5> Tuple7<T1, T2, T3, T4,R5,T6,T7> map5(Function<T5, R5> map) {
+		return Tuple7.of(_1, _2, _3,_4, map.apply(_5),_6,_7);
+	}
+	public <R6> Tuple7<T1, T2, T3, T4,T5,R6,T7> map6(Function<T6, R6> map) {
+		return Tuple7.of(_1, _2, _3,_4,_5, map.apply(_6),_7);
+	}
+	public <R7> Tuple7<T1, T2, T3, T4,T5,T6,R7> map7(Function<T7, R7> map) {
+		return Tuple7.of(_1, _2, _3,_4,_5, _6, map.apply(_7));
+	}
+
 }

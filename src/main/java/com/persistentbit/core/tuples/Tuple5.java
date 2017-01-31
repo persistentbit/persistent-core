@@ -6,6 +6,7 @@ import com.persistentbit.core.properties.FieldNames;
 
 import java.io.Serializable;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * @author Peter Muys
@@ -136,4 +137,23 @@ public class Tuple5<T1, T2, T3, T4, T5> implements Comparable<Tuple5<T1, T2, T3,
   public <R> R map(Function5<T1, T2, T3, T4, T5, R> map) {
 	return map.apply(_1, _2, _3, _4, _5);
   }
+
+    public <R1> Tuple5<R1, T2, T3, T4,T5> map1(Function<T1, R1> map) {
+        return Tuple5.of(map.apply(_1), _2, _3, _4,_5);
+    }
+
+    public <R2> Tuple5<T1, R2, T3, T4,T5> map2(Function<T2, R2> map) {
+        return Tuple5.of(_1, map.apply(_2), _3, _4,_5);
+    }
+
+    public <R3> Tuple5<T1, T2, R3, T4,T5> map3(Function<T3, R3> map) {
+        return Tuple5.of(_1, _2, map.apply(_3), _4,_5);
+    }
+
+    public <R4> Tuple5<T1, T2, T3, R4,T5> map4(Function<T4, R4> map) {
+        return Tuple5.of(_1, _2, _3, map.apply(_4),_5);
+    }
+    public <R5> Tuple5<T1, T2, T3, T4,R5> map5(Function<T5, R5> map) {
+        return Tuple5.of(_1, _2, _3,_4, map.apply(_5));
+    }
 }
