@@ -26,4 +26,16 @@ public class TestValue extends BaseValueClass{
 	this.name = name;
 	this.extra = extra;
   }
+
+	public Integer getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public int getExtra() {
+		return extra;
+	}
 }
