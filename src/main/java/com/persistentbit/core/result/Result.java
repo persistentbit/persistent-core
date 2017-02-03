@@ -29,6 +29,10 @@ import java.util.function.*;
  */
 public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 
+	public static <T> Failure<T> TODO() {
+		return Result.failure("TODO");
+	}
+
 	public static class FLogging extends FunctionLogging{
 
 		public FLogging(LogEntryFunction lef, int stackEntryIndex) {

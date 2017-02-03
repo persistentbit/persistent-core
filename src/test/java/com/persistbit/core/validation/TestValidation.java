@@ -23,9 +23,15 @@ public class TestValidation{
 		Validator.<TestValue>notNull()
 			.and(v -> v.getName(), "name", StringValidator.minLength(1).and(StringValidator.maxLength(10)))
 			.validateToResult("TestValue", tv).orElseThrow();
-		tr.info(Validator.<TestValue>notNull()
+		tr.isFalse(Validator.<TestValue>notNull()
 			.and(v -> v.getName(), "name", StringValidator.minLength(10))
-			.validateToResult("TestValue", tv));
+			.validate("TestValue", tv).isEmpty());
+		Validator.<TestValue>notNull()
+			.and(v -> v.getName(), "name", StringValidator.mustContainAll(true, "et", "er"))
+			.validateToResult("TestValue", tv).orElseThrow();
+		tr.isFalse(Validator.<TestValue>notNull()
+			.and(v -> v.getName(), "name", StringValidator.mustContainAll(true, "et", "er", "a", "p"))
+			.validate("TestValue", tv).isEmpty());
 	});
 
 	public void testAll() {

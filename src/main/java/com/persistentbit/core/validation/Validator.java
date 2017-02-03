@@ -2,6 +2,7 @@ package com.persistentbit.core.validation;
 
 import com.persistentbit.core.OK;
 import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.language.Msg;
 import com.persistentbit.core.result.Result;
 
 import java.util.Optional;
@@ -39,7 +40,7 @@ public interface Validator<T>{
 			PList<ValidationResult> res      = validate(name, item);
 			S                       subValue = subGetter.apply(item);
 			if(subValue == null) {
-				return res.plus(new ValidationResult(name + "." + subName, "Item is not defined"));
+				return res.plus(new ValidationResult(name + "." + subName, Msg.en("Item is not defined")));
 			}
 			return res.plusAll(simpleValidator.toValidator().validate(name + "." + subName, subValue));
 		};

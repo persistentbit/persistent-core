@@ -15,7 +15,7 @@ public class NotNullValidator<T> implements Validator<T>{
 	@Override
 	public PList<ValidationResult> validate(String name, T item) {
 		return item == null
-			? PList.val(new ValidationResult(name, "Item is not defined."))
+			? PList.val(new ValidationResult(name, ValidationResult.itemIsNull))
 			: PList.empty();
 	}
 

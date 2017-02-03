@@ -1,5 +1,6 @@
 package com.persistentbit.core.validation;
 
+import com.persistentbit.core.language.Msg;
 import com.persistentbit.core.utils.BaseValueClass;
 
 import java.util.function.Function;
@@ -12,10 +13,12 @@ import java.util.function.Function;
  */
 public class ValidationResult extends BaseValueClass{
 
-	private final String name;
-	private final String errorMessage;
+	static final Msg itemIsNull = Msg.en("Item is not defined.");
 
-	public ValidationResult(String name, String errorMessage) {
+	private final String name;
+	private final Msg errorMessage;
+
+	public ValidationResult(String name, Msg errorMessage) {
 		this.name = name;
 		this.errorMessage = errorMessage;
 	}
