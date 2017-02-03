@@ -3,6 +3,7 @@ package com.persistentbit.core.validation;
 import com.persistentbit.core.language.Msg;
 import com.persistentbit.core.utils.BaseValueClass;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -19,12 +20,21 @@ public class ValidationResult extends BaseValueClass{
 	private final Msg errorMessage;
 
 	public ValidationResult(String name, Msg errorMessage) {
-		this.name = name;
-		this.errorMessage = errorMessage;
+		this.name = Objects.requireNonNull(name);
+		this.errorMessage = Objects.requireNonNull(errorMessage);
 	}
 
 	public ValidationResult mapName(Function<String, String> nameMapper) {
 		return new ValidationResult(nameMapper.apply(name), errorMessage);
+	}
+
+
+	public String getName() {
+		return name;
+	}
+
+	public Msg getErrorMessage() {
+		return errorMessage;
 	}
 
 	@Override

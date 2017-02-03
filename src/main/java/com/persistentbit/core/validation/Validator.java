@@ -2,6 +2,7 @@ package com.persistentbit.core.validation;
 
 import com.persistentbit.core.OK;
 import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.language.Msg;
 import com.persistentbit.core.result.Result;
 
@@ -71,5 +72,13 @@ public interface Validator<T>{
 
 	static <T> Validator<T> maybeNull() {
 		return new MaybeNullValidator<>();
+	}
+
+
+	static <ERR> PMap<String, PList<ERR>> validationResultAsErrorMap(PList<ValidationResult> validationResults,
+																	 Function<Msg, ERR> errorMapper
+	) {
+		return validationResults
+			.groupBy(ValidationResult::getName, vr -> errorMapper.apply(vr.getErrorMessage()));
 	}
 }

@@ -45,15 +45,19 @@ public class PhoneValidator{
 			if(res == null) {
 				return Result.failure("Phone number is null");
 			}
+			res = res.trim();
 			if(res.startsWith("00")) {
 				res = "+" + res.substring(2);
 			}
 			// +123 nr...
 			// 0123456
-			res = res.substring(0, 6) + res.substring(6).replace(" ", "");
+			if(res.length() > 6) {
+				res = res.substring(0, 6) + res.substring(6).replace(" ", "");
+			}
 			res = res.replace("(", "");
 			res = res.replace(")", "");
 			res = res.replace(".", "");
+			res = res.replace("-", "");
 			return Result.success(res);
 		});
 	}

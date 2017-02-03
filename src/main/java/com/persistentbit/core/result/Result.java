@@ -113,6 +113,25 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	 */
 	public abstract <U> Result<U> flatMap(Function<T, Result<U>> mapper);
 
+
+	public Result<T> flatMapIfTrue(Predicate<T> isTrue, Function<T, Result<T>> mapper) {
+		return flatMap(value -> {
+			if(isTrue.test(value)) {
+				return mapper.apply(value);
+			}
+			return Result.success(value);
+		});
+	}
+
+	public Result<T> mapIfTrue(Predicate<T> isTrue, Function<T, T> mapper) {
+		return map(value -> {
+			if(isTrue.test(value)) {
+				return mapper.apply(value);
+			}
+			return value;
+		});
+	}
+
 	/**
 	 * Convert this result to an optional.<br>
 	 *
