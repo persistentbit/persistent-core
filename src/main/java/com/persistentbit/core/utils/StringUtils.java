@@ -2,6 +2,7 @@ package com.persistentbit.core.utils;
 
 import com.persistentbit.core.NotNullable;
 import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.logging.Log;
 
 import java.text.Normalizer;
@@ -428,5 +429,23 @@ public final class StringUtils{
 		}
 
 		return alfaKey.toUpperCase();
+	}
+
+	public static final String NL = System.lineSeparator();
+
+	public static String join(String joinWith, String... textParts) {
+		return join(joinWith, PStream.val(textParts));
+	}
+
+	public static String join(String joinWith, Iterable<String> textParts) {
+		return PStream.from(textParts).toString(joinWith);
+	}
+
+	public static String joinLines(String... textParts) {
+		return join(NL, textParts);
+	}
+
+	public static String joinLines(Iterable<String> textParts) {
+		return join(NL, textParts);
 	}
 }
