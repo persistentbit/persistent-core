@@ -2,6 +2,7 @@ package com.persistentbit.core.utils;
 
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.OK;
+import com.persistentbit.core.collections.PByteList;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.result.Failure;
@@ -176,6 +177,24 @@ public final class IO {
             }
         });
 
+    }
+
+    /**
+     * Read all bytes from an InputStream and closes the inputStream when done
+     *
+     * @param in The inputStream
+     *
+     * @return a Result of {@link PByteList}
+     */
+    public static Result<PByteList> readBytes(InputStream in) {
+        return Result.function(in).code(l -> {
+            if(in == null) {
+                return Result.failure("in is null");
+            }
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            return copyAndClose(in, bout)
+                .map(ok -> PByteList.from(bout.toByteArray()));
+        });
     }
 
 
