@@ -587,6 +587,9 @@ public final class IO {
 
     /**
      * Resolve . and .. in a resource name
+     * @param baseName The base URL in case the sub does not begin with a '/'
+     * @param sub The name to resolve
+     * @return The result resolved resource name
      */
     public static Result<String> resolveResourceName(String baseName, String sub) {
         return Result.function(baseName, sub).code(l -> {
