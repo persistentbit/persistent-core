@@ -8,14 +8,13 @@ import com.persistentbit.core.result.Failure;
 import com.persistentbit.core.result.Result;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -567,6 +566,53 @@ public final class IO {
                 return Result.failure("Can't read file: " + file);
             }
             return Result.success(NumberUtils.readableComputerSize(file.length()));
+        });
+    }
+
+    /**
+     * Convert an Url string to an URL
+     *
+     * @param urlString The String to convert
+     *
+     * @return A Result with an URL or a failure on error
+     */
+    public static Result<URL> asURL(String urlString) {
+        return Result.function(urlString).code(l -> {
+            if(urlString == null) {
+                return Result.failure("path is null");
+            }
+            return Result.success(new URL(urlString));
+        });
+    }
+
+    /**
+     * Resolve . and .. in a resource name
+     */
+    public static Result<String> resolveResourceName(String baseName, String sub) {
+        return Result.function(baseName, sub).code(l -> {
+            String all;
+            if(sub.startsWith("/")) {
+                all = sub;
+            }
+            else {
+                all = baseName + "/" + sub;
+            }
+            List<String> elements = new ArrayList<>();
+            for(String element : all.split("/")) {
+                if(element.equals(".") || element.equals("")) {
+                    continue;
+                }
+                if(element.equals("..")) {
+                    if(elements.size() == 0) {
+                        return Result.failure("Invalid: " + sub + ", not enough base parts in " + baseName);
+                    }
+                    elements.remove(elements.size() - 1);
+                }
+                else {
+                    elements.add(element);
+                }
+            }
+            return Result.success("/" + StringUtils.join("/", elements));
         });
     }
 

@@ -21,6 +21,13 @@ import java.util.Comparator;
  */
 public class TestUtils{
 
+	static final TestCase resolveResourceNameTest = TestCase.name("Resolve resourceName").code(tr -> {
+		tr.isEquals(IO.resolveResourceName("/cv.city", "test/../hello").orElseThrow(), "/cv.city/hello");
+		tr.isEquals(IO.resolveResourceName("/cv.city", "././test/../hello").orElseThrow(), "/cv.city/hello");
+		tr.isFailure(IO.resolveResourceName("/cv.city", "../../test/../hello"));
+
+	});
+
 	static final TestCase copyTest = TestCase.name("copy").code(t -> {
 		t.isFailure(IO.copy(null, null));
 		t.isFailure(IO.copy(new ByteArrayInputStream(new byte[0]), null));

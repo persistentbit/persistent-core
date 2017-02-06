@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Iterator;
@@ -99,6 +100,17 @@ public final class PByteList extends AbstractIPList<Byte, PByteList> implements 
 		StringBuilder sb = new StringBuilder(size() * 2);
 		forEach(b -> sb.append(StringUtils.padLeft(Integer.toHexString(b & 0xff), 2, '0')));
 		return sb.toString();
+	}
+
+	/**
+	 * Convert this bytelist to a String
+	 *
+	 * @param encoding Charset encoding
+	 *
+	 * @return The String
+	 */
+	public String toText(Charset encoding) {
+		return new String(data, encoding);
 	}
 
 	public static PByteList fromHexString(String hexEncodedString) {

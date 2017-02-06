@@ -28,7 +28,7 @@ public class Memoizer<T, R> implements Function<T, R>{
 		return cache.computeIfAbsent(value, f);
 	}
 
-	static <T, R> Function<T, R> of(Function<T, R> f) {
+	public static <T, R> Function<T, R> of(Function<T, R> f) {
 		return new Memoizer<>(f);
 	}
 
