@@ -9,6 +9,7 @@ import com.persistentbit.core.result.Failure;
 import com.persistentbit.core.result.Result;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -602,6 +603,19 @@ public final class IO {
             }
             return Result.success(new URL(urlString));
         });
+    }
+
+    public static Result<URI> asURI(File file) {
+        return Result.function(file).code(l -> {
+            if(file == null) {
+                return Result.failure("file is null");
+            }
+            return Result.noExceptions(file::toURI);
+        });
+    }
+
+    public static Result<URL> asURL(File file) {
+        return asURI(file).flatMap(uri -> Result.noExceptions(uri::toURL)).logFunction(file);
     }
 
     /**
