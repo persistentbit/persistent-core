@@ -6,6 +6,7 @@ import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.tuples.Tuple3;
 
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -188,12 +189,13 @@ public class SimpleTokenizer<TT>{
 	 *
 	 * @param name       The name of the code or source file
 	 * @param sourceCode The code as a string
+	 * @param endMarker  Token type for end-of-file
 	 *
 	 * @return A Result with a list of {@link Token}s corresponding to the source file.
 	 */
-	public Result<PList<Token<TT>>> tokenizeToResult(String name, String sourceCode) {
+	public Result<PList<Token<TT>>> tokenizeToResult(String name, String sourceCode, TT endMarker) {
 		return Result.fromSequence(
-			tokenize(name, sourceCode))
+			PStream.from(tokenize(name, sourceCode,endMarker)))
 			.filter(t -> t.isEmpty() == false)
 			.map(p -> p.plist()
 			);
@@ -206,21 +208,23 @@ public class SimpleTokenizer<TT>{
 	 *
 	 * @param name       The name of the source code
 	 * @param sourceCode The source code
+	 * @param endMarker  Token type for end-of-file
 	 *
 	 * @return Lazy PStream of token results.
 	 */
-	public PStream<Result<Token<TT>>> tokenize(String name, String sourceCode) {
+	public Iterator<Result<Token<TT>>> tokenize(String name, String sourceCode, TT endMarker) {
 		return Log.function(name, sourceCode).code(log -> {
-			Pos pos = new Pos(name, 1, 1);
+
 			if(name == null) {
-				return PStream.val(Result.failure("name for the code is null"));
+				return PList.val(Result.failure("name for the code is null")).iterator();
 			}
 			if(sourceCode == null) {
-				return PStream.val(Result.failure("The source code  is null"));
+				return PList.val(Result.failure("The source code  is null")).iterator();
 			}
-			if(sourceCode.isEmpty()) {
-				return PList.val(Result.empty("No Source"));
-			}
+
+
+			return new TokenIterator(sourceCode,endMarker);
+/*
 			Result<Tuple3<String, Pos, TokenFound<TT>>> initToken = processNextToken(pos, sourceCode);
 
 			PStream<Result<Token<TT>>> resultStream = PStream
@@ -239,17 +243,69 @@ public class SimpleTokenizer<TT>{
 				//Convert to the result type
 				//.peek(t -> System.out.println(t.map(t3 -> "" + t3._2 + ", " + t3._3)))
 				.map(pr -> pr.map(t3 -> new Token<>(t3._2, t3._3.type, t3._3.text)));
-			return resultStream;
+			return resultStream;*/
 		});
 	}
 
-	private Result<Tuple3<String, Pos, TokenFound<TT>>> processNextToken(Pos thisPos, String code) {
+	private class TokenIterator implements Iterator<Result<Token<TT>>>{
+		private TT endMarker;
+		private Result<Token<TT>> nextToken;
+		private boolean hasNext;
+		public TokenIterator(String name, String sourceCode, TT endMarker){
+			this.endMarker = endMarker;
+			Pos pos = new Pos(name, 1, 1);
+			Result<Tuple3<String, Pos, TokenFound<TT>>> initToken = processNextToken(pos, sourceCode);
+			findNext();
+		}
+		private void findNext() {
+
+		}
+		@Override
+		public boolean hasNext() {
+			return hasNext;
+		}
+
+		@Override
+		public Result<Token<TT>> next() {
+			if(hasNext == false){
+				throw new IllegalStateException("There is no next!");
+			}
+			Result<Token<TT>> result = nextToken;
+			findNext();
+			return result;
+		}
+	}
+
+	private Tuple3<String, Pos, Result<TokenFound<TT>>> processNextToken(Pos thisPos, String code) {
+		Result<TokenFound<TT>> found = findToken(code);
+		if(found.isError()){
+			return Tuple3.of(code,thisPos, found.map(v -> null));
+		}
+		if(found.isEmpty()){
+			return Tuple3.of(code,thisPos,found);
+		}
+		TokenFound<TT> token = found.orElseThrow();
+		String skipString = code.substring(0, token.skipLength);
+		int    nlCount    = newLineCount(skipString);
+		Pos    newPos     = thisPos;
+		if(nlCount > 0) {
+			int lastNl = skipString.lastIndexOf('\n');
+			newPos = newPos.withLineNumber(newPos.lineNumber + nlCount);
+			newPos = newPos.withColumn(token.skipLength - lastNl);
+		}
+		else {
+			newPos = newPos.withColumn(newPos.column + token.skipLength);
+		}
+		String newCode = code.substring(token.skipLength);
+		return Tuple3.of(newCode, newPos, Result.success(token));
+
+
 		return findToken(code)
 			.flatMapFailure(f -> Result.failure(new TokenizerException(thisPos, f.getException())))
 			.verify(found -> found.skipLength != 0,
 					found -> new TokenizerException(thisPos, "Found a match with length 0. Type=" + found.type)
 			)
-			.map(found -> {
+			.flatMap(found -> {
 				String skipString = code.substring(0, found.skipLength);
 				int    nlCount    = newLineCount(skipString);
 				Pos    newPos     = thisPos;
