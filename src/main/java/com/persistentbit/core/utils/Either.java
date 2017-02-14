@@ -7,15 +7,29 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * TODOC
- *
+ * Either 1 of 2 possible values.<br>
+ * The two values are named left and right.<br>
+ * The convention is to use the left value when there is an error
+ * and the right value when everything is alRIGHT.
  * @author petermuys
  * @since 27/12/16
  */
 public abstract class Either<T, U> implements Serializable{
 
+	/**
+	 * Map the value of right
+	 * @param f mapper function
+	 * @param <B> The new Right value type
+	 * @return The new Either
+	 */
 	public abstract <B> Either<T, B> map(Function<U, B> f);
 
+	/**
+	 * Flatmap the right value
+	 * @param f the mapper
+	 * @param <B> the new type for the right value
+	 * @return The new Either
+	 */
 	public abstract <B> Either<T, B> flatMap(Function<U, Either<T, B>> f);
 
 	public abstract U orElse(U elseValue);
@@ -45,6 +59,9 @@ public abstract class Either<T, U> implements Serializable{
 		public <B> Either<T, B> flatMap(Function<U, Either<T, B>> f) {
 			return new Left<>(value);
 		}
+
+
+
 
 		@Override
 		public Optional<T> leftOpt() {

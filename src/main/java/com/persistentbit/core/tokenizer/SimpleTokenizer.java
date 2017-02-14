@@ -6,7 +6,6 @@ import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.tuples.Tuple3;
 
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -90,85 +89,85 @@ public class SimpleTokenizer<TT>{
 	@SuppressWarnings("BooleanParameter")
 	public static <TT> TokenMatcher<TT> stringMatcher(TT type, char stringDelimiter, boolean multiLine) {
 		return code ->
-			Result.function(code, type, stringDelimiter, multiLine).code(log -> {
-				if(code == null) {
-					return Result.failure("code is null");
-				}
-				int  i     = 0;
-				char start = code.charAt(i++);
-				if(start != stringDelimiter) {
-					return Result.empty();
-				}
-				StringBuilder sb = new StringBuilder(10);
-				try {
-					sb.append(start);
-					char c = code.charAt(i);
-					while(c != start && (multiLine == true || (c != '\n'))) {
-						if(c == '\\') {
-							c = code.charAt(++i);//skip \
-							switch(c) {
-								case '\\':
-									c = code.charAt(++i);
-									sb.append('\\');
-									break;
-								case '\"':
-									c = code.charAt(++i);
-									sb.append('\"');
-									break;
-								case '\'':
-									c = code.charAt(++i);
-									sb.append('\'');
-									break;
-								case 'b':
-									c = code.charAt(++i);
-									sb.append('\b');
-									break;
-								case 'r':
-									c = code.charAt(++i);
-									sb.append('\r');
-									break;
-								case 'n':
-									c = code.charAt(++i);
-									sb.append('\n');
-									break;
-								case 't':
-									c = code.charAt(++i);
-									sb.append('\t');
-									break;
-								case '/':
-									c = code.charAt(++i);
-									sb.append('/');
-									break;
-								case 'u':
-									c = code.charAt(++i);//skip u
-									String hn = Character.toString(c);
-									c = code.charAt(++i);
-									hn += c;
-									c = code.charAt(++i);
-									hn += c;
-									c = code.charAt(++i);
-									hn += c;
-									c = code.charAt(++i);
-									sb.append(Character.toChars(Integer.parseInt(hn, 16)));
-									break;
-								default:
-									return Result.failure("Invalid escape sequence: \\" + c);
+				Result.function(code, type, stringDelimiter, multiLine).code(log -> {
+					if(code == null) {
+						return Result.failure("code is null");
+					}
+					int  i     = 0;
+					char start = code.charAt(i++);
+					if(start != stringDelimiter) {
+						return Result.empty();
+					}
+					StringBuilder sb = new StringBuilder(10);
+					try {
+						sb.append(start);
+						char c = code.charAt(i);
+						while(c != start && (multiLine == true || (c != '\n'))) {
+							if(c == '\\') {
+								c = code.charAt(++i);//skip \
+								switch(c) {
+									case '\\':
+										c = code.charAt(++i);
+										sb.append('\\');
+										break;
+									case '\"':
+										c = code.charAt(++i);
+										sb.append('\"');
+										break;
+									case '\'':
+										c = code.charAt(++i);
+										sb.append('\'');
+										break;
+									case 'b':
+										c = code.charAt(++i);
+										sb.append('\b');
+										break;
+									case 'r':
+										c = code.charAt(++i);
+										sb.append('\r');
+										break;
+									case 'n':
+										c = code.charAt(++i);
+										sb.append('\n');
+										break;
+									case 't':
+										c = code.charAt(++i);
+										sb.append('\t');
+										break;
+									case '/':
+										c = code.charAt(++i);
+										sb.append('/');
+										break;
+									case 'u':
+										c = code.charAt(++i);//skip u
+										String hn = Character.toString(c);
+										c = code.charAt(++i);
+										hn += c;
+										c = code.charAt(++i);
+										hn += c;
+										c = code.charAt(++i);
+										hn += c;
+										c = code.charAt(++i);
+										sb.append(Character.toChars(Integer.parseInt(hn, 16)));
+										break;
+									default:
+										return Result.failure("Invalid escape sequence: \\" + c);
+								}
+							}
+							else {
+
+								sb.append(c);
+								c = code.charAt(++i);
 							}
 						}
-						else {
+						++i;
+						return Result.success(new TokenFound<>(sb.append(start).toString(), type, false, i));
 
-							sb.append(c);
-							c = code.charAt(++i);
-						}
+					} catch(StringIndexOutOfBoundsException e) {
+						return Result.failure(new RuntimeException("Unclosed string", e));
 					}
-					++i;
-					return Result.success(new TokenFound<>(sb.append(start).toString(), type, false, i));
 
-				} catch(StringIndexOutOfBoundsException e) {
-					return Result.failure(new RuntimeException("Unclosed string", e));
-				}
-
-			});
+				});
 
 	}
 
@@ -189,16 +188,15 @@ public class SimpleTokenizer<TT>{
 	 *
 	 * @param name       The name of the code or source file
 	 * @param sourceCode The code as a string
-	 * @param endMarker  Token type for end-of-file
 	 *
 	 * @return A Result with a list of {@link Token}s corresponding to the source file.
 	 */
-	public Result<PList<Token<TT>>> tokenizeToResult(String name, String sourceCode, TT endMarker) {
+	public Result<PList<Token<TT>>> tokenizeToResult(String name, String sourceCode) {
 		return Result.fromSequence(
-			PStream.from(tokenize(name, sourceCode,endMarker)))
-			.filter(t -> t.isEmpty() == false)
-			.map(p -> p.plist()
-			);
+				tokenize(name, sourceCode))
+				.filter(t -> t.isEmpty() == false)
+				.map(p -> p.plist()
+				);
 	}
 
 
@@ -208,118 +206,64 @@ public class SimpleTokenizer<TT>{
 	 *
 	 * @param name       The name of the source code
 	 * @param sourceCode The source code
-	 * @param endMarker  Token type for end-of-file
 	 *
 	 * @return Lazy PStream of token results.
 	 */
-	public Iterator<Result<Token<TT>>> tokenize(String name, String sourceCode, TT endMarker) {
+	public PStream<Result<Token<TT>>> tokenize(String name, String sourceCode) {
 		return Log.function(name, sourceCode).code(log -> {
-
+			Pos pos = new Pos(name, 1, 1);
 			if(name == null) {
-				return PList.val(Result.failure("name for the code is null")).iterator();
+				return PStream.val(Result.failure("name for the code is null"));
 			}
 			if(sourceCode == null) {
-				return PList.val(Result.failure("The source code  is null")).iterator();
+				return PStream.val(Result.failure("The source code  is null"));
 			}
-
-
-			return new TokenIterator(sourceCode,endMarker);
-/*
+			if(sourceCode.isEmpty()) {
+				return PList.val(Result.empty("No Source"));
+			}
 			Result<Tuple3<String, Pos, TokenFound<TT>>> initToken = processNextToken(pos, sourceCode);
 
 			PStream<Result<Token<TT>>> resultStream = PStream
-				//Make a sequence using the Previews processed result
-				.sequence(initToken,
-						  prevResult -> prevResult.flatMap(prv -> processNextToken(prv._2, prv._1))
-				)
-				//Filter all ignored tokens
-				.filter(pr -> pr.map(t -> t._3.ignore == false).orElse(true))
-				//.filter(pr -> pr.isEmpty() == false)
-				//.peek(t -> System.out.println(t.map(t3 -> "" + t3._2 + ", " + t3._3)))
-				//Limit to Result.empty or Result.failure
-				.limitOnPreviousValue(prev ->
-										  prev.isPresent() == false
-				)
-				//Convert to the result type
-				//.peek(t -> System.out.println(t.map(t3 -> "" + t3._2 + ", " + t3._3)))
-				.map(pr -> pr.map(t3 -> new Token<>(t3._2, t3._3.type, t3._3.text)));
-			return resultStream;*/
+					//Make a sequence using the Previews processed result
+					.sequence(initToken,
+							prevResult -> prevResult.flatMap(prv -> processNextToken(prv._2, prv._1))
+					)
+					//Filter all ignored tokens
+					.filter(pr -> pr.map(t -> t._3.ignore == false).orElse(true))
+					//.filter(pr -> pr.isEmpty() == false)
+					//.peek(t -> System.out.println(t.map(t3 -> "" + t3._2 + ", " + t3._3)))
+					//Limit to Result.empty or Result.failure
+					.limitOnPreviousValue(prev ->
+							prev.isPresent() == false
+					)
+					//Convert to the result type
+					//.peek(t -> System.out.println(t.map(t3 -> "" + t3._2 + ", " + t3._3)))
+					.map(pr -> pr.map(t3 -> new Token<>(t3._2, t3._3.type, t3._3.text)));
+			return resultStream;
 		});
 	}
 
-	private class TokenIterator implements Iterator<Result<Token<TT>>>{
-		private TT endMarker;
-		private Result<Token<TT>> nextToken;
-		private boolean hasNext;
-		public TokenIterator(String name, String sourceCode, TT endMarker){
-			this.endMarker = endMarker;
-			Pos pos = new Pos(name, 1, 1);
-			Result<Tuple3<String, Pos, TokenFound<TT>>> initToken = processNextToken(pos, sourceCode);
-			findNext();
-		}
-		private void findNext() {
-
-		}
-		@Override
-		public boolean hasNext() {
-			return hasNext;
-		}
-
-		@Override
-		public Result<Token<TT>> next() {
-			if(hasNext == false){
-				throw new IllegalStateException("There is no next!");
-			}
-			Result<Token<TT>> result = nextToken;
-			findNext();
-			return result;
-		}
-	}
-
-	private Tuple3<String, Pos, Result<TokenFound<TT>>> processNextToken(Pos thisPos, String code) {
-		Result<TokenFound<TT>> found = findToken(code);
-		if(found.isError()){
-			return Tuple3.of(code,thisPos, found.map(v -> null));
-		}
-		if(found.isEmpty()){
-			return Tuple3.of(code,thisPos,found);
-		}
-		TokenFound<TT> token = found.orElseThrow();
-		String skipString = code.substring(0, token.skipLength);
-		int    nlCount    = newLineCount(skipString);
-		Pos    newPos     = thisPos;
-		if(nlCount > 0) {
-			int lastNl = skipString.lastIndexOf('\n');
-			newPos = newPos.withLineNumber(newPos.lineNumber + nlCount);
-			newPos = newPos.withColumn(token.skipLength - lastNl);
-		}
-		else {
-			newPos = newPos.withColumn(newPos.column + token.skipLength);
-		}
-		String newCode = code.substring(token.skipLength);
-		return Tuple3.of(newCode, newPos, Result.success(token));
-
-
+	private Result<Tuple3<String, Pos, TokenFound<TT>>> processNextToken(Pos thisPos, String code) {
 		return findToken(code)
-			.flatMapFailure(f -> Result.failure(new TokenizerException(thisPos, f.getException())))
-			.verify(found -> found.skipLength != 0,
-					found -> new TokenizerException(thisPos, "Found a match with length 0. Type=" + found.type)
-			)
-			.flatMap(found -> {
-				String skipString = code.substring(0, found.skipLength);
-				int    nlCount    = newLineCount(skipString);
-				Pos    newPos     = thisPos;
-				if(nlCount > 0) {
-					int lastNl = skipString.lastIndexOf('\n');
-					newPos = newPos.withLineNumber(newPos.lineNumber + nlCount);
-					newPos = newPos.withColumn(found.skipLength - lastNl);
-				}
-				else {
-					newPos = newPos.withColumn(newPos.column + found.skipLength);
-				}
-				String newCode = code.substring(found.skipLength);
-				return Tuple3.of(newCode, newPos, found);
-			});
+				.flatMapFailure(f -> Result.failure(new TokenizerException(thisPos, f.getException())))
+				.verify(found -> found.skipLength != 0,
+						found -> new TokenizerException(thisPos, "Found a match with length 0. Type=" + found.type)
+				)
+				.map(found -> {
+					String skipString = code.substring(0, found.skipLength);
+					int    nlCount    = newLineCount(skipString);
+					Pos    newPos     = thisPos;
+					if(nlCount > 0) {
+						int lastNl = skipString.lastIndexOf('\n');
+						newPos = newPos.withLineNumber(newPos.lineNumber + nlCount);
+						newPos = newPos.withColumn(found.skipLength - lastNl);
+					}
+					else {
+						newPos = newPos.withColumn(newPos.column + found.skipLength);
+					}
+					String newCode = code.substring(found.skipLength);
+					return Tuple3.of(newCode, newPos, found);
+				});
 
 	}
 
