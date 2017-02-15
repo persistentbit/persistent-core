@@ -69,6 +69,11 @@ public class ResultLazy<T> extends Result<T>{
 	}
 
 	@Override
+	public Optional<Throwable> getEmptyOrFailureException() {
+		return getValue().getEmptyOrFailureException();
+	}
+
+	@Override
 	public Result<T> flatMapEmpty(Function<? super Empty<T>, Result<T>> mapper) {
 		return new ResultLazy<>(() -> getValue().flatMapEmpty(mapper));
 	}

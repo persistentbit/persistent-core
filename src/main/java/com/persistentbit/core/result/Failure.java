@@ -43,6 +43,10 @@ public class Failure<T> extends Result<T>{
 
     }
 
+    @Override
+    public Optional<Throwable> getEmptyOrFailureException() {
+        return Optional.of(getException());
+    }
 
     public Throwable getException() {
         return exception;

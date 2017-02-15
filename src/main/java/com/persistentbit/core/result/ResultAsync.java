@@ -43,6 +43,11 @@ public class ResultAsync<T> extends Result<T> {
     }
 
     @Override
+    public Optional<Throwable> getEmptyOrFailureException() {
+        return Log.function().code(l -> future.get().getEmptyOrFailureException());
+    }
+
+    @Override
     public boolean isComplete() {
         if(future.isDone() == false){
             return false;

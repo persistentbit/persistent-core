@@ -172,6 +172,8 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	 */
 	public abstract Result<T> flatMapFailure(Function<? super Failure<T>, Result<T>> mapper);
 
+	public abstract Optional<Throwable> getEmptyOrFailureException();
+
 	/**
 	 * FlatMap this result if it is an {@link Empty}
 	 *

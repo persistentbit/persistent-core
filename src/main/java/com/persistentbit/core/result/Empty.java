@@ -41,6 +41,11 @@ public class Empty<T> extends Result<T>{
 
     }
 
+    @Override
+    public Optional<Throwable> getEmptyOrFailureException() {
+        return Optional.of(exception);
+    }
+
     public Throwable getException() {
         return exception;
     }
