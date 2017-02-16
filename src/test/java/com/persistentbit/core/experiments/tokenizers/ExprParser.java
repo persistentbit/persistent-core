@@ -1,12 +1,17 @@
 package com.persistentbit.core.experiments.tokenizers;
 
 import com.persistentbit.core.ModuleCore;
+import com.persistentbit.core.OK;
 import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.result.Result;
+import com.persistentbit.core.tokenizers.Parser;
+import com.persistentbit.core.tokenizers.ParserException;
+import com.persistentbit.core.tokenizers.Token;
 import com.persistentbit.core.utils.BaseValueClass;
 
 import java.util.Iterator;
+import java.util.function.Supplier;
 
 /**
  * TODO: Add comment
@@ -14,7 +19,7 @@ import java.util.Iterator;
  * @author Peter Muys
  * @since 15/02/2017
  */
-public class ExprParser extends Parser<ExprToken>{
+public class ExprParser extends Parser<ExprToken> {
 
     public interface LExpr{
 
@@ -45,14 +50,38 @@ public class ExprParser extends Parser<ExprToken>{
         }
     }
 
-
     public ExprParser(Iterator<Token<ExprToken>> tokensIterator) {
         super(tokensIterator);
     }
 
 
+    public Result<OK> parseEof() {
+        return Result.function().code(l -> {
+           if(current != ExprToken.eof){
+               return error("Expected an end-of-file");
+           }
+           return OK.result;
+        });
+    }
+
+    public <T> Result<T> parseEof(Supplier<Result<T>> parseBefore){
+        return parseBefore.get().flatMap(r -> parseEof().map(ok -> r));
+    }
+
+    protected  Result<Token<ExprToken>> parseToken(ExprToken tokenType, String message){
+        if(current != tokenType){
+            return error(message);
+        }
+        Token<ExprToken> res = currentToken;
+        next();
+        return Result.success(res);
+    }
+
     static public Result<LExpr> parse(String name, String code){
-        return new ExprParser(ExprTokenizer.tokenize(name,code)).parseExpr();
+        ExprParser parser = new ExprParser(ExprTokenizer.tokenize(name,code));
+        return parser
+                .parseExpr()
+                .flatMap(r -> parser.parseEof().map(ok -> r));
     }
 
     public Result<LName>    parseName(){
@@ -81,12 +110,25 @@ public class ExprParser extends Parser<ExprToken>{
 
         });
     }
+
+    public Result<LExpr> parseGroup(){
+        return Result.function().code(l -> {
+           if(current != ExprToken.tOpen){
+               return error("Expected '('");
+           }
+           next();
+           return parseExpr()
+                   .flatMap(e -> parseToken(ExprToken.tClose,"Expected ')'").map(ok -> e));
+        });
+    }
+
     public Result<LExpr> parseExpr() {
         return Result.function().code(l -> {
            switch (current){
                case tLambda: return parseLambda().map(v -> v);
                case tName: return parseName().map(v -> v);
                case eof: return Result.empty(new ParserException(currentToken.pos,"End of File"));
+               case tOpen: return parseGroup().map(v->v);
                default: return error("Unexpected token");
            }
         });
@@ -94,7 +136,10 @@ public class ExprParser extends Parser<ExprToken>{
 
     public static void main(String... args) throws Exception {
         LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
-        String code = "\\hello.hello";
-        System.out.println(ExprParser.parse("test",code).orElseThrow());
+        String code = "\\hello.(hello)";
+        System.out.println(ExprParser
+                .parse("test",code)
+                .orElseThrow()
+        );
     }
 }

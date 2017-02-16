@@ -1,4 +1,4 @@
-package com.persistentbit.core.experiments.tokenizers;
+package com.persistentbit.core.tokenizers;
 
 import com.persistentbit.core.result.Result;
 
@@ -38,6 +38,16 @@ public class Parser<TT> {
         String text = currentText;
         next();
         return text;
+    }
+    protected Result<Token<TT>> parseTokenType(TT tokenType, String errorMessage){
+        return Result.function().code(l -> {
+            if(current != tokenType){
+                return error(errorMessage);
+            }
+            Token<TT> res = currentToken;
+            next();
+            return Result.success(res);
+        });
     }
     protected <X> Result<X> error(Pos pos, String msg){
         return Result.failure(new ParserException(pos, msg));

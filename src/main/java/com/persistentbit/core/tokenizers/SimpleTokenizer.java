@@ -1,4 +1,4 @@
-package com.persistentbit.core.experiments.tokenizers;
+package com.persistentbit.core.tokenizers;
 
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.Log;

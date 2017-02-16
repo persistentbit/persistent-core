@@ -1,8 +1,4 @@
-package com.persistentbit.core.experiments.tokenizers;
-
-import com.persistentbit.core.tokenizers.SimpleTokenizer;
-import com.persistentbit.core.tokenizers.Token;
-import com.persistentbit.core.tokenizers.Tokenizer;
+package com.persistentbit.core.tokenizers;
 
 import java.util.Iterator;
 

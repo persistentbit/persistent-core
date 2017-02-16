@@ -1,4 +1,4 @@
-package com.persistentbit.core.experiments.tokenizers;
+package com.persistentbit.core.tokenizers;
 
 /**
  * TODO: Add comment

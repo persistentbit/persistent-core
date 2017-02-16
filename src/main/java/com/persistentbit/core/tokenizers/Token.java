@@ -1,4 +1,4 @@
-package com.persistentbit.core.experiments.tokenizers;
+package com.persistentbit.core.tokenizers;
 
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.Either;
@@ -9,7 +9,7 @@ import com.persistentbit.core.utils.Either;
  * @author Peter Muys
  */
 public class Token<TT> extends BaseValueClass {
-    static class Data<TT> extends BaseValueClass {
+    public static class Data<TT> extends BaseValueClass {
         public final TT type;
         public final String text;
 
