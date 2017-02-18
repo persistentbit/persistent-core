@@ -26,7 +26,15 @@ import java.util.regex.Pattern;
 public class SimpleTokenizer<TT>{
 
 
-	private PList<TokenMatcher<TT>> tokenMatchers = PList.empty();
+	private final PList<TokenMatcher<TT>> tokenMatchers;
+
+	private SimpleTokenizer(PList<TokenMatcher<TT>> matchers) {
+		this.tokenMatchers = matchers;
+	}
+
+	public SimpleTokenizer() {
+		this(PList.empty());
+	}
 
 	/**
 	 * Add a token matcher to the list of matchers
@@ -36,10 +44,9 @@ public class SimpleTokenizer<TT>{
 	 * @return this.
 	 */
 	public SimpleTokenizer<TT> add(TokenMatcher<TT> tokenMatcher) {
-		return Log.function(tokenMatcher).code(l -> {
-			tokenMatchers = tokenMatchers.plus(Objects.requireNonNull(tokenMatcher));
-			return this;
-		});
+		return Log.function(tokenMatcher).code(l ->
+			new SimpleTokenizer<>(tokenMatchers.plus(Objects.requireNonNull(tokenMatcher)))
+		);
 	}
 
 	/**
@@ -47,16 +54,16 @@ public class SimpleTokenizer<TT>{
 	 *
 	 * @param regex The regular Expression to match
 	 * @param type  The resulting token type
-	 * @param <TT>  The Type of the Token Type
+	 * @param <T>  The Type of the Token Type
 	 *
 	 * @return The TokenMatcher
 	 */
-	public static <TT> TokenMatcher<TT> regExMatcher(String regex, TT type) {
-		return new TokenMatcher<TT>(){
+	public static <T> TokenMatcher<T> regExMatcher(String regex, T type) {
+		return new TokenMatcher<T>(){
 			private final Pattern pattern = Pattern.compile("\\A(" + regex + ")", Pattern.DOTALL | Pattern.MULTILINE);
 
 			@Override
-			public Result<TokenFound<TT>> tryParse(String code) {
+			public Result<TokenFound<T>> tryParse(String code) {
 				return Result.function(code).code(l -> {
 					if(code == null) {
 						return Result.failure("code is null");

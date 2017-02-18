@@ -21,26 +21,27 @@ public class TestTokenizer{
 
 
 	private static SimpleTokenizer<Integer> createTokenizer() {
-		SimpleTokenizer<Integer> tokenizer = new SimpleTokenizer<>();
-		tokenizer.add(SimpleTokenizer.regExMatcher("(\\s)+", -1).ignore());
-		tokenizer.add(SimpleTokenizer.stringMatcher(-2, '\"', false));
-		tokenizer.add(SimpleTokenizer.stringMatcher(-2, '\'', false));
-		tokenizer.add("/\\*.*\\*/", -9); //comment
-		tokenizer.add("\\(", 2); // open bracket
-		tokenizer.add("\\)", 3); // close bracket
-		tokenizer.add("[+-]", 4); // plus or minus
-		tokenizer.add("[*/]", 5); // multiply or divide
-		tokenizer.add("\\^", 6); // raised
-		tokenizer.add("[0-9]+", 7); // integer number
-		tokenizer.add(SimpleTokenizer.regExMatcher("[a-zA-Z][a-zA-Z0-9_]*", 8).map(found -> {
-			switch(found.text) {
-				case "sin":
-				case "cos":
-					return Result.success(new TokenFound<>(found.text, 1, found.ignore));
-				default:
-					return Result.success(found);
-			}
-		})); // variable
+		SimpleTokenizer<Integer> tokenizer = new SimpleTokenizer<Integer>()
+			.add(SimpleTokenizer.regExMatcher("(\\s)+", -1).ignore())
+			.add(SimpleTokenizer.stringMatcher(-2, '\"', false))
+			.add(SimpleTokenizer.stringMatcher(-2, '\'', false))
+			.add("/\\*.*\\*/", -9) //comment
+			.add("\\(", 2) // open bracket
+			.add("\\)", 3) // close bracket
+			.add("[+-]", 4) // plus or minus
+			.add("[*/]", 5) // multiply or divide
+			.add("\\^", 6) // raised
+			.add("[0-9]+", 7) // integer number
+			.add(SimpleTokenizer.regExMatcher("[a-zA-Z][a-zA-Z0-9_]*", 8).map(found -> {
+				switch(found.text) {
+					case "sin":
+					case "cos":
+						return Result.success(new TokenFound<>(found.text, 1, found.ignore));
+					default:
+						return Result.success(found);
+				}
+			})) // variable
+			;
 		return tokenizer;
 	}
 

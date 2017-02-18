@@ -1,5 +1,6 @@
 package com.persistentbit.core.scripts;
 
+import com.persistentbit.core.Lazy;
 import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.result.Result;
 
@@ -16,10 +17,15 @@ public class ScriptEngineEval implements ScriptEval{
 
 	private final ScriptEngine scriptEngine;
 	private final PMap<String, Object> context;
-
+	private final Lazy<Bindings> bindings;
 	private ScriptEngineEval(ScriptEngine scriptEngine, PMap<String, Object> context) {
 		this.scriptEngine = Objects.requireNonNull(scriptEngine);
 		this.context = Objects.requireNonNull(context);
+		this.bindings = new Lazy<>(() -> {
+			Bindings engineScope = new SimpleScriptContext().getBindings(ScriptContext.ENGINE_SCOPE);
+			context.forEach(keyValue -> engineScope.put(keyValue._1, keyValue._2));
+			return engineScope;
+		});
 	}
 
 	public static ScriptEngineEval javascript() {
@@ -34,12 +40,11 @@ public class ScriptEngineEval implements ScriptEval{
 		return new ScriptEngineEval(scriptEngine, context.plusAll(contextValues));
 	}
 
+
 	@Override
 	public Result<Object> apply(String script) {
-		return Result.function(script).code(l -> {
-			Bindings engineScope = new SimpleScriptContext().getBindings(ScriptContext.ENGINE_SCOPE);
-			context.forEach(keyValue -> engineScope.put(keyValue._1, keyValue._2));
-			return Result.result(scriptEngine.eval(script, engineScope));
-		});
+		return Result.function(script).code(l ->
+			Result.result(scriptEngine.eval(script, bindings.get()))
+		);
 	}
 }
