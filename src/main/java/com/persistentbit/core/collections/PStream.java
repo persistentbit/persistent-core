@@ -105,6 +105,13 @@ public interface PStream<T> extends Iterable<T>{
 		}
 		return PList.<T>empty().plusAll(iter).lazy();
 	}
+	static <T> PStream<T> from(Iterator<T> iterator){
+		PList<T> res = PList.empty();
+		while(iterator.hasNext()){
+			res = res.plus(iterator.next());
+		}
+		return res;
+	}
 
 	/**
 	 * Get a lazy version of this stream (if it is not already lazy).<br>

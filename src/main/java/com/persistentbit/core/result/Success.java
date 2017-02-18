@@ -47,6 +47,11 @@ public class Success<T> extends Result<T>{
 	}
 
 	@Override
+	public Optional<Throwable> getEmptyOrFailureException() {
+		return Optional.empty();
+	}
+
+	@Override
 	public <U> Result<U> map(Function<T, U> mapper) {
 		if(mapper == null) {
 			return Result.failure("map function is null");

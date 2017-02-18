@@ -1,4 +1,4 @@
-package com.persistentbit.core.tokenizer;
+package com.persistentbit.core.tokenizers;
 
 import com.persistentbit.core.utils.BaseValueClass;
 

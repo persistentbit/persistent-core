@@ -448,4 +448,15 @@ public final class StringUtils{
 	public static String joinLines(Iterable<String> textParts) {
 		return join(NL, textParts);
 	}
+
+	public static int countCharOccurrence(String text, char c){
+		int count = 0;
+		int len = Objects.requireNonNull(text).length();
+		for(int i = 0; i < len; i++) {
+			if(text.charAt(i) == c) {
+				count++;
+			}
+		}
+		return count;
+	}
 }
