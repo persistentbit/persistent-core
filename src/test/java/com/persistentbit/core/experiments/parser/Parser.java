@@ -1,12 +1,14 @@
 package com.persistentbit.core.experiments.parser;
 
-import com.persistentbit.core.OK;
+import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * TODOC
@@ -22,55 +24,28 @@ public interface Parser<T>{
 
 
 	default <U> Parser<U> skipAndThen(Parser<U> nextParser){
-		return andThen(Objects.requireNonNull(nextParser)).map(t -> t._2).parserName("skipAndThan");
+		return andThen(Objects.requireNonNull(nextParser)).map(t -> t._2);
 	}
 	default Parser<T> andThenSkip(Parser<?> nextParser){
-		return andThen(nextParser).map(t -> t._1)
-								  .parserName(this.toString() + ".andThenSkip(" + nextParser + "." + nextParser
-									  .toString());
+		return andThen(nextParser).map(t -> t._1);
 	}
 
 	default Parser<T> skipWhiteSpace() {
-		return whiteSpace().skipAndThen(this);
+		return Scan.whiteSpace.skipAndThen(this);
 	}
 
-	static Parser<String> whiteSpace() {
-		return source -> {
-			String res = "";
-			while(Character.isWhitespace((char) source.current())) {
-				res = res + ((char) source.current());
-				source = source.next();
-			}
-			return ParseResult.success(source, res);
-		};
-	}
 
-	default Parser<T> parserName(String name) {
-		Parser<T> self = this;
-		return new Parser<T>(){
-			@Override
-			public ParseResult<T> parse(ParseSource source) {
-				return self.parse(source);
-			}
 
-			@Override
-			public String toString() {
-				return name;
-			}
-		};
-	}
 
-	static Parser<OK> eof() {
-		return source -> {
-			if(source.current() == ParseSource.EOF) {
-				return ParseResult.success(source, OK.inst);
-			}
-			return ParseResult.failure(source, "Expected end-of-file!");
-		};
-	}
+
+
 
 	default Parser<T> andThenEof() {
-		return andThenSkip(eof());
+		return andThenSkip(Scan.eof);
+	}
+
+	static <R> Parser<R> lazy(Supplier<Parser<R>> supplier){
+		return source -> supplier.get().parse(source);
 	}
 
 	default <U> Parser<Tuple2<T, U>> andThen(Parser<U> nextParser) {
@@ -87,7 +62,7 @@ public interface Parser<T>{
 			}
 			return ParseResult.success(nextResult.getSource(),Tuple2.of(thisResult.getValue(),nextResult.getValue()));
 		};
-		return parser.parserName(this + ".andThen(" + nextParser + ")");
+		return parser;
 	}
 
 	default <R> Parser<R> map(Function<T,R> mapper){
@@ -106,22 +81,85 @@ public interface Parser<T>{
 			return ParseResult.success(res.getSource().getSnapshot(), Optional.empty());
 		});
 	}
+	static <R> Parser<R> when(String errorMessage, Predicate<ParseSource> predicate, Parser<R> parse){
+		return source -> {
+			source = source.withSnapshot();
+			if(predicate.test(source)){
+				return parse.parse(source.getSnapshot());
+			}
+			return ParseResult.failure(source.getSnapshot(),errorMessage);
+		};
+	}
 
+	static <R> Parser<PList<R>> zeroOrMore(Parser<R> parser){
+		return source -> {
+			PList res = PList.empty();
+			while(true){
+				ParseResult<R> itemRes = parser.parse(source.withSnapshot());
+				if(itemRes.isFailure()){
+					return ParseResult.success(source.getSnapshot(),res);
+				}
+				source = source.resolved();
+			}
+		};
+	}
+	static <R> Parser<PList<R>> oneOrMore(String errorMessage,Parser<R> parser){
+		return source -> {
+			ParseResult<PList<R>> res = zeroOrMore(parser).parse(source);
+			if(res.isFailure()){
+				return res;
+			}
+			PList<R> list = res.getValue();
+			if(list.isEmpty()){
+				return ParseResult.failure(res.getSource(),errorMessage);
+			}
+			return res;
+		};
+	}
 
-	default Parser<T> or(Parser<T> other){
+	static <R> Parser<PList<R>> zeroOrMoreSep(Parser<R> parser,Parser<?> separator){
+		return parser.optional().map(opt -> opt.map(v -> PList.val(v)).orElse(PList.empty()))
+			.andThen(zeroOrMore(separator.skipAndThen(parser)))
+			.map(t -> t._1.plusAll(t._2));
+	}
+
+	static <R> Parser<PList<R>> oneOrMoreSep(Parser<R> parser, Parser<?> separator){
+		return parser
+			.andThen(zeroOrMore(separator.skipAndThen(parser)))
+			.map(t -> PList.val(t._1).plusAll(t._2));
+	}
+
+	/*default Parser<T> or(String errorMessage,Parser<T> ... others){
 		Parser<T> self = this;
-		return Log.function().code(l -> source -> {
+		return source -> {
 
 			ParseResult<T> thisResult = self.parse(source.withSnapshot());
 			if(thisResult.isSuccess()){
 				return ParseResult.success(thisResult.getSource().resolved(),thisResult.getValue());
 			}
 			source = thisResult.getSource().getSnapshot();
-			ParseResult<T> otherResult = other.parse(source);
-			if(otherResult.isSuccess()) {
-				return ParseResult.success(otherResult.getSource().resolved(), otherResult.getValue());
+			for(Parser<T> other : others){
+				ParseResult<T> otherResult = other.parse(source.withSnapshot());
+				if(otherResult.isSuccess()) {
+					return ParseResult.success(otherResult.getSource().resolved(), otherResult.getValue());
+				}
+				source = otherResult.getSource().getSnapshot();
 			}
-			return ParseResult.failure(source.getSnapshot(), "No match beteen " + self + " and " + other);
-		});
+
+			return ParseResult.failure(source, errorMessage);
+		};
+	}*/
+	static <R> Parser<R> or(String errorMessage, Parser<R>... others){
+		return source -> {
+			source = source.withSnapshot();
+			for(Parser<R> other : others){
+				ParseResult<R> otherResult = other.parse(source);
+				if(otherResult.isSuccess()) {
+					return ParseResult.success(otherResult.getSource().resolved(), otherResult.getValue());
+				}
+				source = otherResult.getSource().getSnapshot();
+			}
+			return ParseResult.failure(source, errorMessage);
+		};
 	}
 }

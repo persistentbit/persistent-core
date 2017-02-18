@@ -1,5 +1,8 @@
 package com.persistentbit.core.collections;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 /**
  * User: petermuys
  * Date: 6/07/16
@@ -11,4 +14,9 @@ public interface IPList<T> extends PStream<T>{
 
   IPList<T> put(int index, T value);
 
+  <R> R match(
+     Supplier<R> emptyList,
+     Function<T,R>  singleton,
+     Function<T,Function<IPList<T>,R>> headTail
+  );
 }

@@ -11,6 +11,8 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Iterator;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A IPList based on a java byte array byte[]
@@ -237,5 +239,18 @@ public final class PByteList extends AbstractIPList<Byte, PByteList> implements 
 	@Override
 	public int hashCode() {
 		return Arrays.hashCode(data);
+	}
+
+	@Override
+	public <R> R match(Supplier<R> emptyList, Function<Byte, R> singleton,
+					   Function<Byte, Function<IPList<Byte>, R>> headTail
+	) {
+		if(isEmpty()){
+			return emptyList.get();
+		}
+		if(size() == 1){
+			return singleton.apply(head());
+		}
+		return headTail.apply(head()).apply(from(data,1,data.length-1));
 	}
 }

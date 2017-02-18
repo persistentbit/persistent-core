@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Copyright(c) Peter Muys.
@@ -562,5 +563,17 @@ public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializabl
 		public void add(T t) {
 			changeError();
 		}
+	}
+
+	@Override
+	public <R> R match(Supplier<R> emptyList, Function<T, R> singleton, Function<T, Function<IPList<T>, R>> headTail
+	) {
+		if(isEmpty()){
+			return emptyList.get();
+		}
+		if(size() == 1){
+			return singleton.apply(head());
+		}
+		return headTail.apply(head()).apply(tail().plist());
 	}
 }

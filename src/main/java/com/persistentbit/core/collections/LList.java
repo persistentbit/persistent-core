@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author Peter Muys
@@ -74,6 +76,12 @@ public abstract class LList<E> extends AbstractIPList<E, LList<E>> implements Se
 	public LList constAll(Iterable right) {
 	  return PStream.from(right).llist();
 	}
+
+	  @Override
+	  public Object match(Supplier emptyList, Function singleton, Function headTail
+	  ) {
+		  return emptyList.get();
+	  }
   };
 
   @Override
@@ -218,6 +226,15 @@ public abstract class LList<E> extends AbstractIPList<E, LList<E>> implements Se
 	public String toString() {
 	  return head + " :: " + tail;
 	}
+
+	  @Override
+	  public <R> R match(Supplier<R> emptyList, Function<E, R> singleton, Function<E, Function<IPList<E>, R>> headTail
+	  ) {
+		  if(tail.isEmpty()){
+		  	return singleton.apply(head);
+		  }
+		  return headTail.apply(head).apply(tail);
+	  }
   }
 
 

@@ -14,18 +14,16 @@ public abstract class ParseResult<T>{
 
 	private ParseResult(){}
 
-	static <R> ParseFailure<R>	failure(ParseSource source, String errorMessage){
-		return new ParseFailure<>(source, errorMessage);
+	public static <R> ParseFailure<R>	failure(ParseSource source, String errorMessage){
+		return new ParseFailure<>(source, new RuntimeException(source.getPosition().toString() + ": " + errorMessage));
 	}
-	static <R> ParseSuccess<R> success(ParseSource source, R value) {
+	public static <R> ParseSuccess<R> success(ParseSource source, R value) {
 		return new ParseSuccess<>(source, value);
 	}
 
 	public abstract T getValue();
 
-	public String getError() {
-		throw new ToDo();
-	}
+	public abstract RuntimeException getError();
 
 	public abstract ParseSource getSource();
 
@@ -79,16 +77,21 @@ public abstract class ParseResult<T>{
 		) {
 			return new ParseSuccess<>(sourceMapper.apply(source), value);
 		}
+
+		@Override
+		public RuntimeException getError() {
+			return new RuntimeException("Can't get Error on a success");
+		}
 	}
 
 	public static class ParseFailure<T> extends ParseResult<T>{
 
 		private final ParseSource source;
-		private final String errorMessage;
+		private final RuntimeException errorMessage;
 
-		public ParseFailure(ParseSource source, String errorMessage) {
+		public ParseFailure(ParseSource source, RuntimeException errorMessage) {
 			this.source = source;
-			this.errorMessage = errorMessage;
+			this.errorMessage = new RuntimeException(errorMessage);
 		}
 
 		@Override
@@ -107,7 +110,12 @@ public abstract class ParseResult<T>{
 
 		@Override
 		public T getValue() {
-			throw new RuntimeException(source.getPosition() + ": " + errorMessage);
+			throw new RuntimeException(source.getPosition() + ": Can't get value from a failure",errorMessage);
+		}
+
+		@Override
+		public RuntimeException getError() {
+			return errorMessage;
 		}
 
 		@Override

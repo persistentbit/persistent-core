@@ -125,4 +125,8 @@ public class ParseSource{
 		return new ParseSource(iterator,newChar,newPos,null);
 	}
 
+	@Override
+	public String toString() {
+		return "ParseSource[" + getPosition() +", current=" + (char)current() + "]";
+	}
 }
