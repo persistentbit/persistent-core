@@ -60,6 +60,16 @@ public interface Parser<T>{
 	}
 
 	default Parser<T> or(Parser<T> other){
-		throw new ToDo();
+		Parser<T> self = this;
+		return source -> {
+			ParseSource snapSource = source.withSnapshot();
+			ParseResult<T> thisResult = self.parse(snapSource);
+			if(thisResult.isSuccess()){
+				return ParseResult.success(thisResult.getSource().resolved(),thisResult.getValue());
+			}
+			sna
+			ParseResult<T> otherResult = other.parse(thisResult.getSource().getSnapshot());
+			if(otherResult)
+		};
 	}
 }
