@@ -1,5 +1,6 @@
 package com.persistentbit.core;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -21,7 +22,19 @@ public class Lazy<T> implements Supplier<T>{
    * @param supplier The master supplier
    */
   public Lazy(Supplier<T> supplier) {
-	this.supplier = supplier;
+	  this.supplier = Objects.requireNonNull(supplier);
+  }
+
+	/**
+	 * Create a new Lazy value
+	 *
+	 * @param supplier The value supplier
+	 * @param <R>      Type of the value
+	 *
+	 * @return a new Lazy Object
+	 */
+	public static <R> Lazy<R> code(Supplier<R> supplier) {
+		return new Lazy<>(supplier);
   }
 
   /**

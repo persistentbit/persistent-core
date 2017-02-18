@@ -1,6 +1,14 @@
 package com.persistentbit.core.experiments.parser;
 
+import com.persistentbit.core.ModuleCore;
+import com.persistentbit.core.logging.Log;
+import com.persistentbit.core.logging.printing.LogPrint;
+import com.persistentbit.core.logging.printing.LogPrintStream;
+import com.persistentbit.core.testing.TestCase;
+import com.persistentbit.core.testing.TestRunner;
 import com.persistentbit.core.utils.NumberUtils;
+
+import java.util.Optional;
 
 /**
  * TODOC
@@ -20,6 +28,11 @@ public class ParserTest{
 		public GroupExpr(Expr expr) {
 			this.expr = expr;
 		}
+
+		@Override
+		public String toString() {
+			return "(" + expr + ")";
+		}
 	}
 
 	static class ConstExpr implements Expr{
@@ -28,13 +41,24 @@ public class ParserTest{
 		public ConstExpr(Object value) {
 			this.value = value;
 		}
+
+		@Override
+		public String toString() {
+			return value.toString();
+		}
 	}
 
 	static class VarExpr implements Expr{
-		private String varName;
+
+		private final String varName;
 
 		public VarExpr(String varName) {
 			this.varName = varName;
+		}
+
+		@Override
+		public String toString() {
+			return varName;
 		}
 	}
 
@@ -48,12 +72,17 @@ public class ParserTest{
 			this.binOp = binOp;
 			this.right = right;
 		}
+
+		@Override
+		public String toString() {
+			return left + " " + binOp + " " + right;
+		}
 	}
 
 
 
 	public static Parser<String> parseTerminal(String keyword){
-		return source -> {
+		Parser<String> parser = source -> {
 			for(int t=0; t< keyword.length(); t++){
 				char c = keyword.charAt(t);
 				int sc = source.current();
@@ -64,13 +93,14 @@ public class ParserTest{
 			}
 			return ParseResult.success(source, keyword);
 		};
+		return parser.parserName("TERM[" + keyword + "]");
 	}
 
 	public static Parser<Integer> parseIntegerLiteral(){
-		return source -> {
+		Parser<Integer> parser = source -> {
 			String result = "";
 			while(Character.isDigit(source.current())){
-				result = result + source.current();
+				result = result + (char) source.current();
 				source = source.next();
 			}
 			if(result.isEmpty()){
@@ -78,70 +108,109 @@ public class ParserTest{
 			}
 			return ParseResult.success(source,NumberUtils.parseInt(result).orElseThrow());
 		};
+		return parser.parserName("<IntegerLiteral>");
 	}
 
-	public static Parser<Expr> parseExpr = parseSimpleExpr();
+
+	public static Parser<Expr> parseFactorExpr = source -> Log.function().code(l -> {
+		return
+			parseTerminal("(")
+				.skipAndThen(parseExpr())
+				.andThenSkip(parseTerminal(")"))
+				.map(e -> (Expr)new GroupExpr(e))
+				.or(parseVar())
+				.or(parseConst())
+				.skipWhiteSpace()
+				.parse(source);
+	});
+
+	public static Parser<Expr> parseTermExpr = source -> {
+		return parseBinOp(
+			parseFactorExpr,
+			parseTerminal("*")
+				.or(parseTerminal("/"))
+				.or(parseTerminal("and")),
+			parseFactorExpr
+		).skipWhiteSpace().parserName("parseTermExpr").parse(source);
+	};
+	public static Parser<Expr> parseSimpleExpr = source -> {
+		Parser<Expr> parser = parseBinOp(
+			parseTermExpr,
+			parseTerminal("+")
+				.or(parseTerminal("-"))
+				.or(parseTerminal("or"))
+				.skipWhiteSpace(),
+			parseTermExpr
+		).skipWhiteSpace();
+		return parser.parserName("parseSimpleExpr").parse(source);
+	};
+
+	public static Parser<Expr> parseExpr() {
+		return parseSimpleExpr;
+	}
 
 
-
-	public static Parser<Expr> parseBinOp(Parser<Expr> left, Parser<String> op, Parser<Expr> right){
-		return left.andThen(
+	public static Parser<Expr> parseBinOp(Parser<Expr> left, Parser<String> op, Parser<Expr> right) {
+		Parser<Expr> parser = source -> {
+			ParseResult<Expr> leftRes = left.parse(source);
+			if(leftRes.isFailure()) {
+				return leftRes;
+			}
+			while(true) {
+				ParseResult<Optional<String>> opRes = op.optional().parse(leftRes.getSource());
+				if(opRes.isFailure()) {
+					return opRes.map(v -> null);
+				}
+				String opResValue = opRes.getValue().orElse(null);
+				if(opResValue == null) {
+					return leftRes;
+				}
+				ParseResult<Expr> rightRes = right.parse(opRes.getSource());
+				if(rightRes.isFailure()) {
+					return rightRes;
+				}
+				leftRes = ParseResult
+					.success(rightRes.getSource(), new BinOpExpr(leftRes.getValue(), opResValue, rightRes.getValue()));
+			}
+		};
+		return parser.parserName("parseBinOp(" + left + ", " + op + ", " + right);
+		/*return left.andThen(
 			op.andThen(right).optional()
 		).map(t -> {
 			if(t._2.isPresent() == false){
 				return t._1;
 			}
 			return new BinOpExpr(t._1,t._2.get()._1,t._2.get()._2);
-		});
+		});*/
 	}
 
-	public static Parser<Expr> parseSimpleExpr(){
 
-		return parseBinOp(
-			parseTermExpr(),
-			parseTerminal("+")
-				.or(parseTerminal("-"))
-				.or(parseTerminal("or"))
-				.skipWhiteSpace(),
-			parseTermExpr()
-		).skipWhiteSpace();
-	}
 
-	public static Parser<Expr> parseTermExpr() {
-		return parseBinOp(
-			parseFactorExpr(),
-			parseTerminal("*")
-				.or(parseTerminal("/"))
-				.or(parseTerminal("and")),
-			parseFactorExpr()
-		).skipWhiteSpace();
-	}
 
-	public static Parser<Expr> parseFactorExpr() {
-		return
-			parseTerminal("(")
-				.skipAndThen(parseExpr)
-				.andThenSkip(parseTerminal(")"))
-				.map(e -> (Expr)new GroupExpr(e))
-			.or(parseVar())
-			.or(parseConst())
-			.skipWhiteSpace();
-	}
 
 	public static Parser<Expr> parseVar(){
-		return parseIdentifier().map(name -> new VarExpr(name));
+		return parseIdentifier().parserName("parseVar").map(name -> new VarExpr(name));
 	}
 
 	public static Parser<Expr> parseConst(){
-		return parseIntegerLiteral().map(value -> new ConstExpr(value));
+		return parseIntegerLiteral().parserName("parseConst").map(value -> new ConstExpr(value));
 	}
 
 	public static Parser<String> parseIdentifier(){
 		return source -> ParseResult.failure(source,"Not implemented");
 	}
 
+	static final TestCase simpleExpr = TestCase.name("parse simple expression").code(tr -> {
+		String source = "(1+2)*3-varName1";
+		tr.info(parseExpr().andThenEof().parse(ParseSource.asSource("test", source)).getValue());
+	});
+
+	public void testAll() {
+		TestRunner.runAndPrint(LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)), ParserTest.class);
+	}
+
 	public static void main(String[] args) {
-		String source="1+2*3";
-		parseExpr.parse(ParseSource.asSource("test",source));
+		LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
+		new ParserTest().testAll();
 	}
 }
