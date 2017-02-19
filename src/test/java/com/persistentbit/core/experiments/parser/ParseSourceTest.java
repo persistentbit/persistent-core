@@ -32,6 +32,27 @@ public class ParseSourceTest{
 		source = source.next();
 		tr.isEquals(source.current(), (int) '3');
 		tr.isEquals(source.getPosition(), new Position("test", 1, 3));
+
+		source = ParseSource.asSource("test", "12345679*");
+		tr.isEquals(source.current(),(int)'1');
+		source = source.next(); //2
+		tr.isEquals(source.current(),(int)'2');
+		source = source.withSnapshot();
+		tr.isEquals(source.current(),(int)'2');
+		source = source.next(); //3
+		tr.isEquals(source.current(),(int)'3');
+		source = source.next(); //4
+		tr.isEquals(source.current(),(int)'4');
+		source = source.withSnapshot();
+		tr.isEquals(source.current(),(int)'4');
+		source = source.next(); //5
+		tr.isEquals(source.current(),(int)'5');
+		source = source.next(); //6
+		tr.isEquals(source.current(),(int)'6');
+		source = source.getSnapshot(); //4
+		tr.isEquals(source.current(),(int)'4');
+		source = source.getSnapshot(); //2
+		tr.isEquals(source.current(),(int)'2');
 	});
 
 

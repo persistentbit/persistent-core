@@ -3,6 +3,7 @@ package com.persistentbit.core.experiments.parser;
 import com.persistentbit.core.collections.PList;
 
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * TODOC
@@ -16,38 +17,27 @@ public class ParseSource{
 	private final Iterator<Character> iterator;
 	private final int currentChar;
 	private final Position position;
-	private final Snapshot snapshot;
+	private String snapshotExtra;
+	private final ParseSource snapshot;
 
-	static private class Snapshot{
-		public final int currentChar;
-		public final Position position;
-		public final PList<Integer> handled;
 
-		public Snapshot(int currentChar, Position position,
-						PList<Integer> handled
-		) {
-			this.currentChar = currentChar;
-			this.position = position;
-			this.handled = handled;
-		}
-
-	}
 
 	private ParseSource(Iterator<Character> iterator, int currentChar,
-					   Position position,
-					   Snapshot snapshot
+					   Position position, String snapshotExtra, ParseSource snapshot
 	) {
-		this.iterator = iterator;
+		this.iterator = Objects.requireNonNull(iterator);
 		this.currentChar = currentChar;
-		this.position = position;
+		this.position = Objects.requireNonNull(position);
+		this.snapshotExtra = Objects.requireNonNull(snapshotExtra);
 		this.snapshot = snapshot;
 	}
 
 	public ParseSource(String sourceName, Iterator<Character> iterator){
 		this(
 			iterator,
-			iterator.hasNext() ? iterator.next() : EOF,
+			iterator.hasNext() ? (int)iterator.next() : EOF,
 			new Position(sourceName,1, 1),
+			"",
 			null
 		);
 	}
@@ -69,10 +59,13 @@ public class ParseSource{
 			}
 		);
 	}
+	private void addChar(char c){
+		snapshotExtra += c;
+	}
 
 	public ParseSource	withSnapshot(){
 		return new ParseSource(
-			iterator,currentChar,position,new Snapshot(currentChar,position,PList.empty())
+			iterator,currentChar,position,snapshotExtra,this
 		);
 	}
 	public ParseSource getSnapshot(){
