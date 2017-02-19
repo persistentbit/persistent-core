@@ -1,9 +1,13 @@
-package com.persistentbit.core.experiments.parser;
+package com.persistbit.core.parser;
 
 import com.persistentbit.core.ModuleCore;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.logging.printing.LogPrintStream;
+import com.persistentbit.core.parser.ParseResult;
+import com.persistentbit.core.parser.Parser;
+import com.persistentbit.core.parser.Scan;
+import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
 
@@ -84,32 +88,33 @@ public class ParserTest{
 
 	public static Parser<Expr> parseFactorExpr = source -> Log.function().code(l -> {
 		return
-			Parser.or("Expected a Variable or a literal or (<expr>)!",
+			Parser.or(
 					  Scan.term("(")
 						  .skipAndThen(parseExpr())
 						  .andThenSkip(Scan.term(")"))
 						  .map(e -> (Expr) new GroupExpr(e)),
 					  parseVar(),
 					  parseConst()
-			)
-				.skipWhiteSpace()
-				.parse(source);
+			).onErrorAddMessage("Expected a Variable or a literal or (<expr>)!")
+				  .skipWhiteSpace()
+				  .parse(source);
 	});
 
 	public static Parser<Expr> parseTermExpr   = source -> {
 		return parseBinOp(
 			parseFactorExpr,
-			Parser.or("Expected a expression term operator",
+			Parser.or(
 					  Scan.term("*"), Scan.term("/"), Scan.term("and")
-			),
+			).onErrorAddMessage("Expected a expression term operator"),
 			parseFactorExpr
 		).skipWhiteSpace().parse(source);
 	};
 	public static Parser<Expr> parseSimpleExpr = source -> {
 		Parser<Expr> parser = parseBinOp(
 			parseTermExpr,
-			Parser.or("Expectedd a term operator", Scan.term("+"), Scan.term("-"), Scan.term("or"))
-				.skipWhiteSpace(),
+			Parser.or(Scan.term("+"), Scan.term("-"), Scan.term("or"))
+				  .onErrorAddMessage("Expectedd a term operator")
+				  .skipWhiteSpace(),
 			parseTermExpr
 		).skipWhiteSpace();
 		return parser.parse(source);
@@ -165,8 +170,8 @@ public class ParserTest{
 
 
 	static final TestCase simpleExpr = TestCase.name("parse simple expression").code(tr -> {
-		String source = "(1+2)*varName/3-4+(1234/1*0)";
-		tr.info(parseExpr().andThenEof().parse(ParseSource.asSource("test", source)).getValue());
+		String source = "(1+2)*varName/3-4+(1234/1*0)-name";
+		tr.info(parseExpr().andThenEof().parse(Source.asSource("test", source)).getValue());
 	});
 
 	public void testAll() {
