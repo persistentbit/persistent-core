@@ -118,7 +118,7 @@ public class Scan{
 	/**
 	 * One of CR, LF, CR-LF
 	 */
-	static Parser<String> nl = source -> {
+	public static Parser<String> nl = source -> {
 		char c = source.current();
 		if(c != '\r' && c != '\n'){
 			return ParseResult.failure(source,"CR or LF expected");
@@ -137,7 +137,7 @@ public class Scan{
 	/**
 	 * The rest of the current line without the newLine
 	 */
-	static Parser<String> restOfLine = source -> {
+	public static Parser<String> restOfLine = source -> {
 		String res = "";
 		while(source.current() != Source.EOF && source.current()!='\r' && source.current()!='\n'){
 			res += source.current();
