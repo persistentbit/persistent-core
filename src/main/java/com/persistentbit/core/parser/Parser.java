@@ -2,7 +2,6 @@ package com.persistentbit.core.parser;
 
 import com.persistentbit.core.OK;
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.parser.source.Position;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.tuples.Tuple2;
@@ -37,28 +36,17 @@ public interface Parser<T>{
 	}
 
 	default Parser<T> andThenSkip(Parser<?> nextParser) {
-		return Parser.named(this + ".andThenSkip(" + nextParser + ")", andThen(nextParser).map(t -> t._1));
+		return  andThen(nextParser).map(t -> t._1);
 	}
 
 
-	default Parser<T> skipWhiteSpace() {
-		return Parser.named(this + ".skipWhiteSpace", Scan.whiteSpace.skipAndThen(this));
+	default Parser<T> skip(Parser<?> skip) {
+		return skip.skipAndThen(this);
 	}
 
 
-	static <R> Parser<R> named(String name, Parser<R> parser) {
-		return new Parser<R>(){
-			@Override
-			public ParseResult<R> parse(Source source) {
-				return parser.parse(source);
-			}
 
-			@Override
-			public String toString() {
-				return name;
-			}
-		};
-	}
+
 
 	default Parser<T> onErrorAddMessage(String errorMessage) {
 		Parser<T> self = this;
@@ -69,19 +57,15 @@ public interface Parser<T>{
 		};
 	}
 
-	default Parser<T> withName(String name) {
-		return named(name, this);
-	}
-
 	default Parser<T> andThenEof() {
-		return Parser.named(this + ".andThenEof()", andThenSkip(Scan.eof));
+		return andThenSkip(Scan.eof);
 	}
 
 
 	default <U> Parser<Tuple2<T, U>> andThen(Parser<U> nextParser) {
 		Objects.requireNonNull(nextParser);
 		Parser<T> self = this;
-		return Parser.named(self + ".andThen(" + nextParser + ")", source -> {
+		return source -> {
 			ParseResult<T> thisResult = self.parse(source);
 			if(thisResult.isFailure()) {
 				return thisResult.map(v -> null);
@@ -91,52 +75,67 @@ public interface Parser<T>{
 				return nextResult.map(v -> null);
 			}
 			return ParseResult.success(nextResult.getSource(), Tuple2.of(thisResult.getValue(), nextResult.getValue()));
-		});
+		};
 	}
 
 	default <R> Parser<R> map(Function<T, R> mapper) {
 		Parser<T> self = this;
-		return named(self + ".map(...)", source -> self.parse(source).map(mapper));
-
+		return source -> self.parse(source).map(mapper);
 	}
+
+	default Parser<WithPos<T>>	withPos(){
+		Parser<T> self = this;
+		return source -> {
+			Position pos = source.getPosition();
+			return self.map(v -> new WithPos<>(pos,v))
+					.parse(source);
+		};
+	}
+
+
+
 
 	default Parser<Optional<T>> optional() {
 		Parser<T> self = this;
-		return Parser.named("optionalOf(" + this + ")", source -> {
+		return source -> {
 			ParseResult<T> res = self.parse(source);
 			if(res.isSuccess()) {
 				return res.map(Optional::ofNullable);
 			}
 			return ParseResult.success(source, Optional.empty());
-		});
+		};
 	}
 
 	static <R> Parser<R> when(String errorMessage, Predicate<Source> predicate, Parser<R> parse) {
-		return named("when(" + parse + ")", source -> {
+		return source -> {
 			if(predicate.test(source)) {
 				return parse.parse(source);
 			}
 			return ParseResult.failure(source, errorMessage);
-		});
+		};
 	}
 
 	@SuppressWarnings("unchecked")
 	static <R> Parser<PList<R>> zeroOrMore(Parser<R> parser) {
-		return named("zeroOrMore(" + parser + ")", source -> {
+		return source -> {
 			PList res = PList.empty();
-			while(true) {
+			while(source.current() != Source.EOF) {
 				ParseResult<R> itemRes = parser.parse(source);
 				if(itemRes.isFailure()) {
 					return ParseResult.success(source, res);
 				}
 				res = res.plus(itemRes.getValue());
+				if(source.getPosition() == itemRes.getSource().getPosition()){
+					break;
+				}
 				source = itemRes.getSource();
 			}
-		});
+			return ParseResult.success(source,res);
+		};
 	}
 
 	static <R> Parser<PList<R>> oneOrMore(String errorMessage, Parser<R> parser) {
-		return named("oneOrMore(" + parser + ")", source -> {
+		return source -> {
 			ParseResult<PList<R>> res = zeroOrMore(parser).parse(source);
 			if(res.isFailure()) {
 				return res;
@@ -146,28 +145,25 @@ public interface Parser<T>{
 				return ParseResult.failure(source, errorMessage);
 			}
 			return res;
-		});
+		};
 	}
 
 	static <R> Parser<PList<R>> zeroOrMoreSep(Parser<R> parser, Parser<?> separator) {
-		return named("zeroOrMoreSep(" + parser + "," + separator + ")",
+		return
 			parser.optional().map(opt -> opt.map(v -> PList.val(v)).orElse(PList.empty()))
 				  .andThen(zeroOrMore(separator.skipAndThen(parser)))
-				  .map(t -> t._1.plusAll(t._2))
-		);
+				  .map(t -> t._1.plusAll(t._2));
 	}
 
 	static <R> Parser<PList<R>> oneOrMoreSep(Parser<R> parser, Parser<?> separator) {
-		return named("oneOrMoreSep(" + parser + "," + separator + ")",
-			parser
+		return parser
 				.andThen(zeroOrMore(separator.skipAndThen(parser)))
-				.map(t -> PList.val(t._1).plusAll(t._2))
-		);
+				.map(t -> PList.val(t._1).plusAll(t._2));
 	}
 
 
 	static <R> Parser<R> or(Parser<R>... others) {
-		return Parser.named("or(" + PStream.from(others).toString(", ") + ")", source -> {
+		return source -> {
 
 			ParseResult<R> longestResult = null;
 			for(Parser<R> other : others) {
@@ -192,7 +188,7 @@ public interface Parser<T>{
 				longestResult = ParseResult.failure(source, "No parsers defined for Or parser");
 			}
 			return longestResult;
-		});
+		};
 	}
 
 	static <R> Parser<R> toDo(String message) {
@@ -200,13 +196,13 @@ public interface Parser<T>{
 	}
 
 	static Parser<OK> not(String errorMessage, Parser<?> parserNot) {
-		return Parser.named("not(" + parserNot + ")", source -> {
+		return source -> {
 			ParseResult<?> res = parserNot.parse(source);
 			if(res.isFailure()) {
 				return ParseResult.success(source, OK.inst);
 			}
 			return ParseResult.failure(source, errorMessage);
-		});
+		};
 	}
 
 	default Parser<T> verify(String errorMessage, Predicate<T> predicate) {

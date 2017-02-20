@@ -7,11 +7,15 @@ import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.Parser;
 import com.persistentbit.core.parser.Scan;
+import com.persistentbit.core.parser.WithPos;
+import com.persistentbit.core.parser.source.Position;
 import com.persistentbit.core.parser.source.Source;
+import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * TODOC
@@ -19,167 +23,267 @@ import java.util.Optional;
  * @author petermuys
  * @since 17/02/17
  */
-public class ParserTest{
+public class ParserTest {
 
-	interface Expr{
+    interface Expr {
+        <R> R match(
+                Function<GroupExpr,R> groupExpr,
+                Function<ConstExpr,R> constExpr,
+                Function<VarExpr,R>   varExpr,
+                Function<BinOpExpr, R> binOpExpr
+        );
+    }
+    static abstract class BaseExpr implements Expr{
+        private final Position pos;
+        BaseExpr(Position pos){
+            this.pos = pos;
+        }
 
-	}
+        public abstract <R> R match(
+                Function<GroupExpr,R> groupExpr,
+                Function<ConstExpr,R> constExpr,
+                Function<VarExpr,R>   varExpr,
+                Function<BinOpExpr, R> binOpExpr
+        );
 
-	static class GroupExpr implements Expr{
+        public Optional<Position> getPos(){
+            return Optional.ofNullable(pos);
+        }
+    }
 
-		private final Expr expr;
+    static class GroupExpr extends BaseExpr {
 
-		public GroupExpr(Expr expr) {
-			this.expr = expr;
-		}
+        private final Expr expr;
 
-		@Override
-		public String toString() {
-			return "(" + expr + ")";
-		}
-	}
+        public GroupExpr(Position pos, Expr expr) {
+            super(pos);
+            this.expr = expr;
+        }
 
-	static class ConstExpr implements Expr{
+        @Override
+        public String toString() {
+            return "(" + expr + ")";
+        }
 
-		private final Object value;
+        @Override
+        public <R> R match(Function<GroupExpr, R> groupExpr, Function<ConstExpr, R> constExpr, Function<VarExpr, R> varExpr, Function<BinOpExpr, R> binOpExpr) {
+            return groupExpr.apply(this);
+        }
+    }
 
-		public ConstExpr(Object value) {
-			this.value = value;
-		}
+    static class ConstExpr extends BaseExpr {
 
-		@Override
-		public String toString() {
-			return value.toString();
-		}
-	}
+        private final Object value;
 
-	static class VarExpr implements Expr{
+        public ConstExpr(Position pos, Object value) {
+            super(pos);
+            this.value = value;
+        }
 
-		private final String varName;
+        public Object getValue() {
+            return value;
+        }
 
-		public VarExpr(String varName) {
-			this.varName = varName;
-		}
+        @Override
+        public String toString() {
+            return value.toString();
+        }
 
-		@Override
-		public String toString() {
-			return varName;
-		}
-	}
+        @Override
+        public <R> R match(Function<GroupExpr, R> groupExpr, Function<ConstExpr, R> constExpr, Function<VarExpr, R> varExpr, Function<BinOpExpr, R> binOpExpr) {
+            return constExpr.apply(this);
+        }
+    }
 
-	static class BinOpExpr implements Expr{
+    static class VarExpr extends BaseExpr {
 
-		private final Expr   left;
-		private final String binOp;
-		private final Expr   right;
+        private final String varName;
 
-		public BinOpExpr(Expr left, String binOp, Expr right) {
-			this.left = left;
-			this.binOp = binOp;
-			this.right = right;
-		}
+        public VarExpr(Position pos, String varName) {
+            super(pos);
+            this.varName = varName;
+        }
 
-		@Override
-		public String toString() {
-			return left + " " + binOp + " " + right;
-		}
-	}
+        @Override
+        public String toString() {
+            return varName;
+        }
 
+        @Override
+        public <R> R match(Function<GroupExpr, R> groupExpr, Function<ConstExpr, R> constExpr, Function<VarExpr, R> varExpr, Function<BinOpExpr, R> binOpExpr) {
+            return varExpr.apply(this);
+        }
+    }
 
-	public static Parser<Expr> parseFactorExpr = source -> Log.function().code(l -> {
-		return
-			Parser.or(
-					  Scan.term("(")
-						  .skipAndThen(parseExpr())
-						  .andThenSkip(Scan.term(")"))
-						  .map(e -> (Expr) new GroupExpr(e)),
-					  parseVar(),
-					  parseConst()
-			).onErrorAddMessage("Expected a Variable or a literal or (<expr>)!")
-				  .skipWhiteSpace()
-				  .parse(source);
-	});
+    static class BinOpExpr extends BaseExpr {
 
-	public static Parser<Expr> parseTermExpr   = source -> {
-		return parseBinOp(
-			parseFactorExpr,
-			Parser.or(
-					  Scan.term("*"), Scan.term("/"), Scan.term("and")
-			).onErrorAddMessage("Expected a expression term operator"),
-			parseFactorExpr
-		).skipWhiteSpace().parse(source);
-	};
-	public static Parser<Expr> parseSimpleExpr = source -> {
-		Parser<Expr> parser = parseBinOp(
-			parseTermExpr,
-			Parser.or(Scan.term("+"), Scan.term("-"), Scan.term("or"))
-				  .onErrorAddMessage("Expectedd a term operator")
-				  .skipWhiteSpace(),
-			parseTermExpr
-		).skipWhiteSpace();
-		return parser.parse(source);
-	};
+        private final Expr left;
+        private final String binOp;
+        private final Expr right;
 
-	public static Parser<Expr> parseExpr() {
-		return parseSimpleExpr;
-	}
+        public BinOpExpr(Position pos, Expr left, String binOp, Expr right) {
+            super(pos);
+            this.left = left;
+            this.binOp = binOp;
+            this.right = right;
+        }
 
+        @Override
+        public String toString() {
+            return left + " " + binOp + " " + right;
+        }
 
-	public static Parser<Expr> parseBinOp(Parser<Expr> left, Parser<String> op, Parser<Expr> right) {
-		Parser<Expr> parser = source -> {
-			ParseResult<Expr> leftRes = left.parse(source);
-			if(leftRes.isFailure()) {
-				return leftRes;
-			}
-			while(true) {
-				ParseResult<Optional<String>> opRes = op.optional().parse(leftRes.getSource());
-				if(opRes.isFailure()) {
-					return opRes.map(v -> null);
-				}
-				String opResValue = opRes.getValue().orElse(null);
-				if(opResValue == null) {
-					return leftRes;
-				}
-				ParseResult<Expr> rightRes = right.parse(opRes.getSource());
-				if(rightRes.isFailure()) {
-					return rightRes;
-				}
-				leftRes = ParseResult
-					.success(rightRes.getSource(), new BinOpExpr(leftRes.getValue(), opResValue, rightRes.getValue()));
-			}
-		};
-		return parser;
-		/*return left.andThen(
-			op.andThen(right).optional()
-		).map(t -> {
-			if(t._2.isPresent() == false){
-				return t._1;
-			}
-			return new BinOpExpr(t._1,t._2.get()._1,t._2.get()._2);
-		});*/
-	}
+        @Override
+        public <R> R match(Function<GroupExpr, R> groupExpr, Function<ConstExpr, R> constExpr, Function<VarExpr, R> varExpr, Function<BinOpExpr, R> binOpExpr) {
+            return binOpExpr.apply(this);
+        }
+    }
 
+    public static Parser<String> ws = Scan.whiteSpace;
+    public static Parser<String> term(String term) {
+        return Scan.term(term).skip(ws);
+    }
 
-	public static Parser<Expr> parseVar() {
-		return Scan.identifier.map(name -> new VarExpr(name));
-	}
+    public static Parser<Expr> parseFactorExpr = source -> Log.function().code(l -> {
+        return
+                Parser.or(
+                        term("(")
+                                .skipAndThen(parseExpr())
+                                .andThenSkip(term(")"))
+                                .withPos()
+                                .map(e -> (Expr) new GroupExpr(e.pos,e.value)),
+                        parseVar(),
+                        parseConst()
+                ).onErrorAddMessage("Expected a Variable or a literal or (<expr>)!")
+                        .skip(ws)
+                        .onErrorAddMessage("Expected an expression factor")
+                        .parse(source);
+    });
 
-	public static Parser<Expr> parseConst() {
-		return Scan.integerLiteral.map(value -> new ConstExpr(value));
-	}
+    public static Parser<Expr> parseTermExpr = source -> {
+        return parseBinOp(
+                parseFactorExpr,
+                Parser.or(
+                        term("*"), term("/"), term("and")
+                ).onErrorAddMessage("Expected an expression term operator").skip(ws),
+                parseFactorExpr
+        )
+                .skip(ws)
+                .onErrorAddMessage("Expected an expression term")
+                .parse(source);
+    };
+    public static Parser<Expr> parseSimpleExpr = source -> {
+        Parser<Expr> parser = parseBinOp(
+                parseTermExpr,
+                Parser.or(term("+"), term("-"), term("or"))
+                        .onErrorAddMessage("Expectedd a term operator")
+                        .skip(ws),
+                parseTermExpr
+        ).skip(ws);
+        return parser.parse(source);
+    };
+
+    public static Parser<Expr> parseExpr() {
+        return parseSimpleExpr;
+    }
 
 
-	static final TestCase simpleExpr = TestCase.name("parse simple expression").code(tr -> {
-		String source = "(1+2)*varName/3-4+(1234/1*0)-name";
-		tr.info(parseExpr().andThenEof().parse(Source.asSource("test", source)).getValue());
-	});
+    public static Parser<Expr> parseBinOp(Parser<Expr> left, Parser<String> op, Parser<Expr> right) {
+        return source -> {
+            ParseResult<WithPos<Expr>> leftRes = left.withPos().parse(source);
+            if (leftRes.isFailure()) {
+                return leftRes.map(v -> v.value);
+            }
+            while (true) {
+                ParseResult<Optional<String>> opRes = op.optional().parse(leftRes.getSource());
+                if (opRes.isFailure()) {
+                    return opRes.map(v -> null);
+                }
+                String opResValue = opRes.getValue().orElse(null);
+                if (opResValue == null) {
+                    return leftRes.map(v -> v.value);
+                }
+                ParseResult<Expr> rightRes = right.parse(opRes.getSource());
+                if (rightRes.isFailure()) {
+                    return rightRes;
+                }
+                Position leftPos = leftRes.getValue().pos;
+                leftRes = ParseResult.success(
+                        rightRes.getSource(),
+                        new WithPos(
+                                leftPos,
+                                new BinOpExpr(leftPos, leftRes.getValue().value, opResValue, rightRes.getValue()))
+                );
+            }
+        };
+    }
 
-	public void testAll() {
-		TestRunner.runAndPrint(LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)), ParserTest.class);
-	}
 
-	public static void main(String[] args) {
-		LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
-		new ParserTest().testAll();
-	}
+    public static Parser<Expr> parseVar() {
+        return Scan.identifier.withPos().map(name -> new VarExpr(name.pos,name.value));
+    }
+
+    public static Parser<Expr> parseConst() {
+        return Scan.integerLiteral.withPos().map(value -> new ConstExpr(value.pos,value.value));
+    }
+
+
+    static final TestCase simpleExpr = TestCase.name("parse simple expression").code(tr -> {
+        String source = "(  1 + 2  ) * varName / 3 - 4 + ( 1234 / 1 * 0 ) - name";
+        tr.info("org: " + source);
+        Expr expr = parseExpr().andThenEof().parse(Source.asSource("test", source)).getValue();
+        tr.info(expr);
+        tr.info(new Printer().print(expr).printToString());
+    });
+
+    static class Printer{
+
+        public PrintableText print(Expr expr){
+            return expr.match(
+                gr -> group(gr),
+                ce -> constExpr(ce),
+                var -> varExpr(var),
+                binOp -> binOpExpr(binOp)
+            );
+        }
+        private PrintableText group(GroupExpr v){
+            return out ->{
+              out.println("group: " + v.getPos().get());
+              out.indent(in -> {
+                  in.print(print(v.expr));
+              });
+            };
+        }
+        private PrintableText constExpr(ConstExpr v){
+            return out-> {
+              out.println("const: " + v.getPos().get());
+              out.indent(in -> in.print(v.getValue()));
+            };
+        }
+        private PrintableText varExpr(VarExpr v){
+            return out-> {
+                out.println("const: " + v.getPos().get());
+                out.indent(in -> in.print(v.toString()));
+            };
+        }
+        private PrintableText binOpExpr(BinOpExpr v){
+            return out ->{
+                out.println("Op " + v + ": " + v.getPos().get());
+                out.indent(in -> {
+                    in.println(print(v.left));
+                    in.println(print(v.right));
+                });
+            };
+        }
+
+    }
+
+    public void testAll() {
+        TestRunner.runAndPrint(LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)), ParserTest.class);
+    }
+
+    public static void main(String[] args) {
+        LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
+        new ParserTest().testAll();
+    }
 }
