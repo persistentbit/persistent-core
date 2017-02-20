@@ -24,8 +24,8 @@ public class Token<TT> extends BaseValueClass {
      */
     public final Pos pos;
     /**
-     * The result or an error message
-     */
+	 * The result orOf an error message
+	 */
     public final Either<String,Data<TT>>    result;
 
     private Token(Pos pos, Either<String,Data<TT>> result){

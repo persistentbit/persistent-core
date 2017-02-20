@@ -1,6 +1,7 @@
 package com.persistentbit.core.parser.source;
 
 import com.persistentbit.core.parser.Parser;
+import com.persistentbit.core.utils.StringUtils;
 
 import java.util.Objects;
 
@@ -15,37 +16,52 @@ public class Source{
 
 	public static final char EOF = 0;
 
-	private final ImmutableIterator<Character> iterator;
-	private final Position position;
+	private final String source;
+	private final int sourcePos;
 
+	public final char current;
+	public final Position position;
 
-	private Source(ImmutableIterator<Character> iterator, Position position) {
-		this.iterator = Objects.requireNonNull(iterator);
+	private Source(String source, int sourcePos, Position position) {
+		this.source = Objects.requireNonNull(source);
+		this.sourcePos = sourcePos;
 		this.position = Objects.requireNonNull(position);
+		this.current = sourcePos < source.length()
+			? source.charAt(sourcePos)
+			: EOF;
 	}
 
-	public Source(String sourceName, ImmutableIterator<Character> iterator) {
-		this(iterator, new Position(sourceName, 1, 1));
-	}
+
 
 	public static Source asSource(String name, String source) {
-		return new Source(name, new StringImmutableIterator(source));
+		return new Source(source, 0, new Position(name, 1, 1));
 	}
 
-	public Position getPosition() {
-		return position;
-	}
-
-	public char current() {
-		return iterator.orElse(EOF);
+	public boolean isEOF() {
+		return sourcePos >= source.length();
 	}
 
 	public Source next() {
-		return new Source(iterator.next(), position.incForChar(current()));
+		if(isEOF()) {
+			return this;
+		}
+		return new Source(source, sourcePos + 1, position.incForChar(current));
+	}
+
+	public Source next(int count) {
+		Source res = this;
+		for(int t = 0; t < count; t++) {
+			res = res.next();
+		}
+		return res;
+	}
+
+	public String rest() {
+		return isEOF() ? "" : source.substring(sourcePos);
 	}
 
 	@Override
 	public String toString() {
-		return "ParseSource[" + getPosition() + ", current=" + current() + "]";
+		return "Source[" + position + ", current=" + StringUtils.escapeToJavaString("" + current) + "]";
 	}
 }

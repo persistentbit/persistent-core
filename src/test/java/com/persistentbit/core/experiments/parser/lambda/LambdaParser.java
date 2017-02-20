@@ -19,8 +19,8 @@ public class LambdaParser {
 
     static Parser<LambdaExpr> expr() {
         return source ->
-                Parser.or(
-                        application,
+			Parser.orOf(
+				application,
                         lambda,
                         def,
                         var
@@ -29,26 +29,26 @@ public class LambdaParser {
 
     static Parser<String> defStart =
             Scan.term("def")
-                    .skipAndThen(Scan.whiteSpace)
-                    .onErrorAddMessage("Excpected 'def'");
+				.skipAnd(Scan.whiteSpace)
+				.onErrorAddMessage("Excpected 'def'");
 
     static Parser<LambdaExpr> def = source ->
             defStart
-                    .skipAndThen(Scan.identifier)
-                    .andThenSkip(Scan.whiteSpace)
-                    .andThenSkip(Scan.term("="))
-                    .andThenSkip(Scan.whiteSpace)
-                    .andThen(expr())
-                    .<LambdaExpr>map(t -> new LambdaExpr.Define(t._1, t._2))
+				.skipAnd(Scan.identifier)
+				.skip(Scan.whiteSpace)
+				.skip(Scan.term("="))
+				.skip(Scan.whiteSpace)
+				.and(expr())
+				.<LambdaExpr>map(t -> new LambdaExpr.Define(t._1, t._2))
                     .onErrorAddMessage("Expected a definition!")
                     .parse(source);
 
     static <T> Parser<T> group(Parser<T> parser) {
         return Scan.term("(")
 
-                .skipAndThen(parser)
-                .andThenSkip(Scan.term(")"))
-                .onErrorAddMessage("Expected a group")
+				   .skipAnd(parser)
+				   .skip(Scan.term(")"))
+				   .onErrorAddMessage("Expected a group")
                 ;
 
     }
@@ -60,13 +60,13 @@ public class LambdaParser {
         }
         source = funRes.getSource();
         ParseResult<PList<LambdaExpr>> restRes =
-                Parser.oneOrMore("Expected application parameter", Scan.whiteSpace.skipAndThen(expr())).parse(source);
-        if (restRes.isFailure()) {
+			Parser.oneOrMore("Expected application parameter", Scan.whiteSpace.skipAnd(expr())).parse(source);
+		if (restRes.isFailure()) {
             return restRes.map(v -> null);
         }
         /*ParseResult<PList<LambdaExpr>> restRes =
-            Scan.whiteSpace
-				.skipAndThen(expr())
+			Scan.whiteSpace
+				.skipAnd(expr())
 				.map(v -> PList.val(v))
 				.parse(funRes.getSource());
 		*/
@@ -79,23 +79,23 @@ public class LambdaParser {
 
 
     static Parser<String> lambdaStart =
-            Parser.or(Scan.term("\\"), Scan.term("λ")).onErrorAddMessage("Expected '\\' or 'λ'")
-                    .onErrorAddMessage("Expected a Lambda start symbol");
+		Parser.orOf(Scan.term("\\"), Scan.term("λ")).onErrorAddMessage("Expected '\\' orOf 'λ'")
+			  .onErrorAddMessage("Expected a Lambda start symbol");
 
     static Parser<LambdaExpr> lambda = source ->
             lambdaStart
-                    .skipAndThen(Scan.identifier)
-                    .andThenSkip(Scan.term("."))
-                    .andThen(expr())
-                    .<LambdaExpr>map(t -> new LambdaExpr.Lambda(t._1, t._2))
+				.skipAnd(Scan.identifier)
+				.skip(Scan.term("."))
+				.and(expr())
+				.<LambdaExpr>map(t -> new LambdaExpr.Lambda(t._1, t._2))
                     .onErrorAddMessage("Expected a lambda exception")
                     .parse(source);
 
 
     static Parser<LambdaExpr> var =
             Parser.not("Unexpected keyword", Scan.term("def"))
-                    .skipAndThen(Scan.identifier)
-                    .<LambdaExpr>map(name -> new LambdaExpr.Var(name));
+				  .skipAnd(Scan.identifier)
+				.<LambdaExpr>map(name -> new LambdaExpr.Var(name));
 
 
     public static void main(String[] args) {

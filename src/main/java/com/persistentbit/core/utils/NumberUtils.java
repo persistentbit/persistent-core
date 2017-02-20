@@ -28,6 +28,19 @@ public final class NumberUtils {
 
 	}
 
+	public static Result<Integer> parseHexInt(String str) {
+		if(str == null) {
+			return Result.<Integer>failure("string is null").logFunction();
+		}
+		try {
+			return Result.success(Integer.parseInt(str, 16)).logFunction(str);
+		} catch(RuntimeException e) {
+			return Result.<Integer>failure(e).logFunction(str);
+		}
+
+	}
+
+
 	public static Result<Long> parseLong(String str) {
 		if(str == null) {
 			return Result.<Long>failure("string is null").logFunction(str);
@@ -36,6 +49,17 @@ public final class NumberUtils {
 			return Result.success(Long.parseLong(str)).logFunction(str);
 		} catch(RuntimeException e) {
 			return Result.<Long>failure(e).logFunction(str);
+		}
+	}
+
+	public static Result<Double> parseDouble(String str) {
+		if(str == null) {
+			return Result.<Double>failure("string is null").logFunction(str);
+		}
+		try {
+			return Result.success(Double.parseDouble(str)).logFunction(str);
+		} catch(RuntimeException e) {
+			return Result.<Double>failure(e).logFunction(str);
 		}
 	}
 

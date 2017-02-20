@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * A Persistent Map where the order of adding elements is preserved when iterating keys or values
+ * A Persistent Map where the order of adding elements is preserved when iterating keys orOf values
  *
  * @author Peter Muys
  * @since 13/07/2016

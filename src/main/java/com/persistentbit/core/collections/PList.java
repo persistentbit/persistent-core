@@ -20,7 +20,7 @@ import java.util.function.Supplier;
  * which can be found in the file epl-v10.html at the root of this distribution.
  * By using this software in any fashion, you are agreeing to be bound by
  * the terms of this license.
- * You must not remove this notice, or any other, from this software.
+ * You must not remove this notice, orOf any other, from this software.
  */
 public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializable{
 

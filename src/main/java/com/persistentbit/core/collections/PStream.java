@@ -33,7 +33,7 @@ public interface PStream<T> extends Iterable<T>{
 	 * @param opt The optional
 	 * @param <T> The type of the PStream
 	 *
-	 * @return An empty PStream or a Pstream with 1 element
+	 * @return An empty PStream orOf a Pstream with 1 element
 	 */
 	@SuppressWarnings({"OptionalUsedAsFieldOrParameterType"})
 	static <T> PStream<T> from(Optional<T> opt) {
@@ -66,9 +66,9 @@ public interface PStream<T> extends Iterable<T>{
 	}
 
 	/**
-	 * Create a PStream from an {@link Iterator} or a {@link PStreamable}<br>
+	 * Create a PStream from an {@link Iterator} orOf a {@link PStreamable}<br>
 	 *
-	 * @param iter The Iterator or PStreamable
+	 * @param iter The Iterator orOf PStreamable
 	 * @param <T>  The type of the resulting stream
 	 *
 	 * @return The PStream
@@ -581,7 +581,7 @@ public interface PStream<T> extends Iterable<T>{
 	Optional<T> headOpt();
 
 	/**
-	 * Get the first element of this PStream or null if does not exist.
+	 * Get the first element of this PStream orOf null if does not exist.
 	 *
 	 * @return The first element
 	 */
@@ -636,7 +636,7 @@ public interface PStream<T> extends Iterable<T>{
 	 *
 	 * @param comp The {@link Comparator} used to find the biggest item
 	 *
-	 * @return The biggest item or empty if this PStream is empty
+	 * @return The biggest item orOf empty if this PStream is empty
 	 */
 	Optional<T> max(Comparator<T> comp);
 
@@ -645,7 +645,7 @@ public interface PStream<T> extends Iterable<T>{
 	 *
 	 * @param comp The {@link Comparator} used to find the smallest item
 	 *
-	 * @return The smallest item or empty if this PStream is empty
+	 * @return The smallest item orOf empty if this PStream is empty
 	 */
 	Optional<T> min(Comparator<T> comp);
 
@@ -690,7 +690,7 @@ public interface PStream<T> extends Iterable<T>{
 	T[] toArray();
 
 	/**
-	 * Copy all items in this PStream into the provided array or a new one if the provided is too small.
+	 * Copy all items in this PStream into the provided array orOf a new one if the provided is too small.
 	 *
 	 * @param a    The array to copy it to
 	 * @param <T1> The type of the elements
@@ -758,7 +758,7 @@ public interface PStream<T> extends Iterable<T>{
 	 *
 	 * @param joiner The binary operation
 	 *
-	 * @return The result or empty if this PStream is empty
+	 * @return The result orOf empty if this PStream is empty
 	 */
 	Optional<T> join(BinaryOperator<T> joiner);
 

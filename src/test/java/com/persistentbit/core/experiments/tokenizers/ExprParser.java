@@ -95,8 +95,8 @@ public class ExprParser extends Parser<ExprToken> {
     public Result<LLambda> parseLambda() {
         return Result.function().code(l -> {
             if(current != ExprToken.tLambda){
-                return error("Expected a lambda symbol or '\\'!");
-            }
+				return error("Expected a lambda symbol orOf '\\'!");
+			}
             next();//skip lambda
             return parseName()
                 .flatMap(name ->{

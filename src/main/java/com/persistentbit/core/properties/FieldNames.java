@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotations used to define the property names linked to the parameters of a constructor or method.<br>
- * This is not necessary if you compile with the -parameters flag or use the following in your maven pom.<br>
+ * Annotations used to define the property names linked to the parameters of a constructor orOf method.<br>
+ * This is not necessary if you compile with the -parameters flag orOf use the following in your maven pom.<br>
  * <pre>{@code
  * <plugin>
  *  <groupId>org.apache.maven.plugins</groupId>

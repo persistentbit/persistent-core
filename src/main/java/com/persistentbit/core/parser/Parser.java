@@ -31,17 +31,14 @@ public interface Parser<T>{
 	 *
 	 * @return The new parser
 	 */
-	default <U> Parser<U> skipAndThen(Parser<U> nextParser) {
-		return andThen(Objects.requireNonNull(nextParser)).map(t -> t._2);
+	default <U> Parser<U> skipAnd(Parser<U> nextParser) {
+		return and(Objects.requireNonNull(nextParser)).map(t -> t._2);
 	}
 
-	default Parser<T> andThenSkip(Parser<?> nextParser) {
-		return  andThen(nextParser).map(t -> t._1);
-	}
 
 
 	default Parser<T> skip(Parser<?> skip) {
-		return skip.skipAndThen(this);
+		return and(skip).map(t -> t._1);
 	}
 
 
@@ -57,12 +54,12 @@ public interface Parser<T>{
 		};
 	}
 
-	default Parser<T> andThenEof() {
-		return andThenSkip(Scan.eof);
+	default Parser<T> andEof() {
+		return skip(Scan.eof);
 	}
 
 
-	default <U> Parser<Tuple2<T, U>> andThen(Parser<U> nextParser) {
+	default <U> Parser<Tuple2<T, U>> and(Parser<U> nextParser) {
 		Objects.requireNonNull(nextParser);
 		Parser<T> self = this;
 		return source -> {
@@ -83,10 +80,18 @@ public interface Parser<T>{
 		return source -> self.parse(source).map(mapper);
 	}
 
+	default <R> Parser<R> mapResult(Function<ParseResult<T>, ParseResult<R>> mapper) {
+		Parser<T> self = this;
+		return source -> {
+			ParseResult<T> res = self.parse(source);
+			return mapper.apply(res);
+		};
+	}
+
 	default Parser<WithPos<T>>	withPos(){
 		Parser<T> self = this;
 		return source -> {
-			Position pos = source.getPosition();
+			Position pos = source.position;
 			return self.map(v -> new WithPos<>(pos,v))
 					.parse(source);
 		};
@@ -118,14 +123,15 @@ public interface Parser<T>{
 	@SuppressWarnings("unchecked")
 	static <R> Parser<PList<R>> zeroOrMore(Parser<R> parser) {
 		return source -> {
-			PList res = PList.empty();
-			while(source.current() != Source.EOF) {
+			PList  res       = PList.empty();
+			Source orgSource = source;
+			while(source.current != Source.EOF) {
 				ParseResult<R> itemRes = parser.parse(source);
 				if(itemRes.isFailure()) {
 					return ParseResult.success(source, res);
 				}
 				res = res.plus(itemRes.getValue());
-				if(source.getPosition() == itemRes.getSource().getPosition()){
+				if(source.position.equals(itemRes.getSource().position)) {
 					break;
 				}
 				source = itemRes.getSource();
@@ -151,18 +157,22 @@ public interface Parser<T>{
 	static <R> Parser<PList<R>> zeroOrMoreSep(Parser<R> parser, Parser<?> separator) {
 		return
 			parser.optional().map(opt -> opt.map(v -> PList.val(v)).orElse(PList.empty()))
-				  .andThen(zeroOrMore(separator.skipAndThen(parser)))
+				  .and(zeroOrMore(separator.skipAnd(parser)))
 				  .map(t -> t._1.plusAll(t._2));
 	}
 
 	static <R> Parser<PList<R>> oneOrMoreSep(Parser<R> parser, Parser<?> separator) {
 		return parser
-				.andThen(zeroOrMore(separator.skipAndThen(parser)))
-				.map(t -> PList.val(t._1).plusAll(t._2));
+			.and(zeroOrMore(separator.skipAnd(parser)))
+			.map(t -> PList.val(t._1).plusAll(t._2));
+	}
+
+	default Parser<T> or(Parser other) {
+		return orOf(this, other);
 	}
 
 
-	static <R> Parser<R> or(Parser<R>... others) {
+	static <R> Parser<R> orOf(Parser<R>... others) {
 		return source -> {
 
 			ParseResult<R> longestResult = null;
@@ -172,8 +182,8 @@ public interface Parser<T>{
 					return ParseResult.success(otherResult.getSource(), otherResult.getValue());
 				}
 				if(longestResult != null) {
-					Position pos1 = longestResult.getSource().getPosition();
-					Position pos2 = otherResult.getSource().getPosition();
+					Position pos1 = longestResult.getSource().position;
+					Position pos2 = otherResult.getSource().position;
 					if(pos2.compareTo(pos1) > 0) {
 						longestResult = otherResult;
 					}

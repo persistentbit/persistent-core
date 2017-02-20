@@ -176,11 +176,11 @@ public final class StringUtils{
 	}
 
 	/**
-	 * Splits a string on a combination of \r\n \n or \r.
+	 * Splits a string on a combination of \r\n \n orOf \r.
 	 *
 	 * @param s The String to split
 	 *
-	 * @return A PList of Strings without the nl or cr characters
+	 * @return A PList of Strings without the nl orOf cr characters
 	 */
 	public static PList<String> splitInLines(String s) {
 		Objects.requireNonNull(s);
@@ -310,7 +310,7 @@ public final class StringUtils{
 	 * Split a text into lines with a maximum length.<br>
 	 * Expects a regular expression to find the split point.<br>
 	 * This regular expression should keep te delimiter, so use something
-	 * like (?=char) or (?&lt;=char) as regular expression.
+	 * like (?=char) orOf (?&lt;=char) as regular expression.
 	 * Example with space and '-' as delimiters: '(?&lt;=\-)|(?&lt;=\s)"
 	 * @param longString      The String to split
 	 * @param whiteSpaceRegEx Regular Expression for finding the split locations

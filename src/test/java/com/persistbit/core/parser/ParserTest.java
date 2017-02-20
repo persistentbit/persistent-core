@@ -13,6 +13,7 @@ import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
+import com.persistentbit.core.utils.StringUtils;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -86,7 +87,10 @@ public class ParserTest {
 
         @Override
         public String toString() {
-            return value.toString();
+			if(value instanceof String) {
+				return "\"" + StringUtils.escapeToJavaString(value.toString()) + "\"";
+			}
+			return value.toString();
         }
 
         @Override
@@ -139,32 +143,39 @@ public class ParserTest {
         }
     }
 
-    public static Parser<String> ws = Scan.whiteSpace;
+	public static Parser<String> lineComment = Scan.lineComment("//");
+	public static Parser<String> blockComment = Scan.blockComment("/*", "*?");
+
+
+	public static Parser<String> ws =
+		Scan.parseWhiteSpaceWithComment(Scan.whiteSpaceAndNewLine, lineComment.or(blockComment));
+	//Scan.whiteSpaceAndNewLine;
+
     public static Parser<String> term(String term) {
         return Scan.term(term).skip(ws);
     }
 
     public static Parser<Expr> parseFactorExpr = source -> Log.function().code(l -> {
         return
-                Parser.or(
-                        term("(")
-                                .skipAndThen(parseExpr())
-                                .andThenSkip(term(")"))
-                                .withPos()
-                                .map(e -> (Expr) new GroupExpr(e.pos,e.value)),
+			Parser.orOf(
+				term("(")
+							.skipAnd(parseExpr())
+							.skip(term(")"))
+							.withPos()
+							.map(e -> (Expr) new GroupExpr(e.pos,e.value)),
                         parseVar(),
                         parseConst()
-                ).onErrorAddMessage("Expected a Variable or a literal or (<expr>)!")
-                        .skip(ws)
-                        .onErrorAddMessage("Expected an expression factor")
-                        .parse(source);
+			).onErrorAddMessage("Expected a Variable orOf a literal orOf (<expr>)!")
+				  .skip(ws)
+				  .onErrorAddMessage("Expected an expression factor")
+				  .parse(source);
     });
 
     public static Parser<Expr> parseTermExpr = source -> {
         return parseBinOp(
                 parseFactorExpr,
-                Parser.or(
-                        term("*"), term("/"), term("and")
+			Parser.orOf(
+				term("*"), term("/"), term("and")
                 ).onErrorAddMessage("Expected an expression term operator").skip(ws),
                 parseFactorExpr
         )
@@ -175,17 +186,17 @@ public class ParserTest {
     public static Parser<Expr> parseSimpleExpr = source -> {
         Parser<Expr> parser = parseBinOp(
                 parseTermExpr,
-                Parser.or(term("+"), term("-"), term("or"))
-                        .onErrorAddMessage("Expectedd a term operator")
-                        .skip(ws),
-                parseTermExpr
-        ).skip(ws);
+			Parser.orOf(term("+"), term("-"), term("or"))
+				  .onErrorAddMessage("Expectedd a term operator")
+				  .skip(ws),
+			parseTermExpr.skip(ws)
+		).skip(ws);
         return parser.parse(source);
     };
 
     public static Parser<Expr> parseExpr() {
-        return parseSimpleExpr;
-    }
+		return parseSimpleExpr.skip(ws);
+	}
 
 
     public static Parser<Expr> parseBinOp(Parser<Expr> left, Parser<String> op, Parser<Expr> right) {
@@ -215,24 +226,53 @@ public class ParserTest {
                                 new BinOpExpr(leftPos, leftRes.getValue().value, opResValue, rightRes.getValue()))
                 );
             }
+
         };
     }
 
 
     public static Parser<Expr> parseVar() {
-        return Scan.identifier.withPos().map(name -> new VarExpr(name.pos,name.value));
-    }
+		return source ->
+			Scan.identifier
+				.withPos()
+				.skip(ws)
+				.<Expr>map(name -> new VarExpr(name.pos, name.value))
+				.onErrorAddMessage("Expected a variable name")
+				.parse(source)
+			;
+	}
+
+	public static Parser<Expr> parseStringLiteral =
+		Scan.stringLiteral("\"", false)
+			.or(Scan.stringLiteral("\'", false))
+			.or(Scan.stringLiteral("\"\"\"", true))
+			.skip(ws)
+			.withPos()
+			.map(value -> new ConstExpr(value.pos, value.value));
+
+	public static Parser<Expr> parseNumberLiteral =
+		Scan.doubleLiteral.withPos().<Expr>map(v -> new ConstExpr(v.pos, v.value))
+			.or(Scan.integerLiteral.withPos().<Expr>map(v -> new ConstExpr(v.pos, v.value)))
+			.skip(ws);
+
+
+
+
+
 
     public static Parser<Expr> parseConst() {
-        return Scan.integerLiteral.withPos().map(value -> new ConstExpr(value.pos,value.value));
-    }
+		return parseNumberLiteral.or(parseStringLiteral).onErrorAddMessage("Expected a literal!");
+	}
 
 
     static final TestCase simpleExpr = TestCase.name("parse simple expression").code(tr -> {
-        String source = "(  1 + 2  ) * varName / 3 - 4 + ( 1234 / 1 * 0 ) - name";
-        tr.info("org: " + source);
-        Expr expr = parseExpr().andThenEof().parse(Source.asSource("test", source)).getValue();
-        tr.info(expr);
+		String source = "(  1 + 2/* ignored*/  ) *  varName \r\n" +
+			"/ 3 -//And this is on a new line\r\n" +
+			" 4 + ( 1234.0 / 1.20 * .0 ) - name + \"Hello \'Peter\'\"//Done\r\n";
+		//String source ="1 + test ";
+		tr.info("org: " + source);
+		Expr expr = parseExpr().skip(ws).andEof().parse(Source.asSource("test", source)).getValue();
+		tr.info(expr);
         tr.info(new Printer().print(expr).printToString());
     });
 
@@ -257,13 +297,13 @@ public class ParserTest {
         private PrintableText constExpr(ConstExpr v){
             return out-> {
               out.println("const: " + v.getPos().get());
-              out.indent(in -> in.print(v.getValue()));
-            };
+				out.indent(in -> in.print(v));
+			};
         }
         private PrintableText varExpr(VarExpr v){
             return out-> {
-                out.println("const: " + v.getPos().get());
-                out.indent(in -> in.print(v.toString()));
+				out.println("var: " + v.getPos().get());
+				out.indent(in -> in.print(v.toString()));
             };
         }
         private PrintableText binOpExpr(BinOpExpr v){

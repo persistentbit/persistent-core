@@ -62,12 +62,12 @@ public interface IPMap<K, V> extends PStream<Tuple2<K, V>>{
   IPMap<K, V> put(K key, V val);
 
   /**
-   * Get the value of a key or a default value if the map doesn't contain the key
+   * Get the value of a key orOf a default value if the map doesn't contain the key
    *
    * @param key      The key to get
    * @param notFound The default value when not found
    *
-   * @return The value or notFound value
+   * @return The value orOf notFound value
    */
   V getOrDefault(Object key, V notFound);
 
@@ -76,7 +76,7 @@ public interface IPMap<K, V> extends PStream<Tuple2<K, V>>{
    *
    * @param key The key to get
    *
-   * @return The value or null when not found
+   * @return The value orOf null when not found
    */
   V get(Object key);
 
@@ -85,7 +85,7 @@ public interface IPMap<K, V> extends PStream<Tuple2<K, V>>{
    *
    * @param key The key to find
    *
-   * @return Optional of the value or empty when the value is not found or the value is null
+   * @return Optional of the value orOf empty when the value is not found orOf the value is null
    */
   Optional<V> getOpt(Object key);
 

@@ -16,7 +16,7 @@ public abstract class ParseResult<T>{
 	private ParseResult(){}
 
 	public static <R> ParseFailure<R> failure(Source source, String errorMessage) {
-		return new ParseFailure<>(source, new ParseException(errorMessage, source.getPosition()));
+		return new ParseFailure<>(source, new ParseException(errorMessage, source.position));
 	}
 
 	public static <R> ParseSuccess<R> success(Source source, R value) {
@@ -92,7 +92,7 @@ public abstract class ParseResult<T>{
 
 		@Override
 		public ParseException getError() {
-			return new ParseException("Can't get Error on a success", source.getPosition());
+			return new ParseException("Can't get Error on a success", source.position);
 		}
 
 		@Override
@@ -134,7 +134,7 @@ public abstract class ParseResult<T>{
 
 		@Override
 		public T getValue() {
-			throw new RuntimeException(source.getPosition() + ": Can't get value from a failure",errorMessage);
+			throw new RuntimeException(source.position + ": Can't get value from a failure", errorMessage);
 		}
 
 		@Override
@@ -155,7 +155,7 @@ public abstract class ParseResult<T>{
 
 		@Override
 		public ParseResult<T> onErrorAdd(String errorMessage) {
-			return onErrorAdd(new ParseException(errorMessage, source.getPosition()));
+			return onErrorAdd(new ParseException(errorMessage, source.position));
 		}
 
 		@Override

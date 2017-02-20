@@ -94,7 +94,7 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 
 
 	/**
-	 * Map the Success value or return a Failure or a Empty.<br>
+	 * Map the Success value orOf return a Failure orOf a Empty.<br>
 	 *
 	 * @param mapper the value mapper
 	 * @param <U>    The resulting value type
@@ -104,7 +104,7 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	public abstract <U> Result<U> map(Function<T, U> mapper);
 
 	/**
-	 * Flatmap the Success value or return a Failure or a Empty.<br>
+	 * Flatmap the Success value orOf return a Failure orOf a Empty.<br>
 	 * The new Result's LogEntry is this {@link LogEntry} with the mapped appended.<br>
 	 * @param mapper the value mapper
 	 * @param <U>    The resulting value type
@@ -135,7 +135,7 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	/**
 	 * Convert this result to an optional.<br>
 	 *
-	 * @return Some value for success or an empty optional
+	 * @return Some value for success orOf an empty optional
 	 */
 	public abstract Optional<T> getOpt();
 
@@ -168,7 +168,7 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	 *
 	 * @param mapper Failure mapper
 	 *
-	 * @return The mapped failure or this if it not a failure
+	 * @return The mapped failure orOf this if it not a failure
 	 */
 	public abstract Result<T> flatMapFailure(Function<? super Failure<T>, Result<T>> mapper);
 
@@ -179,16 +179,16 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	 *
 	 * @param mapper Empty mapper
 	 *
-	 * @return The mapped Empty or this if it not an Empty
+	 * @return The mapped Empty orOf this if it not an Empty
 	 */
 	public abstract Result<T> flatMapEmpty(Function<? super Empty<T>, Result<T>> mapper);
 
 	/**
-	 * FlatMap this result if it is an {@link Empty} or a {@link Failure}
+	 * FlatMap this result if it is an {@link Empty} orOf a {@link Failure}
 	 *
 	 * @param mapper Empty/Failure mapper
 	 *
-	 * @return The mapped Empty/Failer or this if it a Success
+	 * @return The mapped Empty/Failer orOf this if it a Success
 	 */
 	public abstract Result<T> flatMapNoSuccess(BiFunction<Result<T>, Throwable, Result<T>> mapper);
 
@@ -225,7 +225,7 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	/**
 	 * If this is a {@link Success}, verify the value
 	 * @param verification The verification Predicate
-	 * @return The Verified {@link Success} or a {@link Failure}
+	 * @return The Verified {@link Success} orOf a {@link Failure}
 	 */
 	public Result<T> verify(Predicate<T> verification) {
 		return verify(verification, v -> new IllegalStateException("Verification for " + v + " failed!"));
@@ -235,7 +235,7 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	 * If this is a {@link Success}, verify the value
 	 * @param verification The verification Predicate
 	 * @param errorMessage The Exception Error message
-	 * @return The Verified {@link Success} or a {@link Failure}
+	 * @return The Verified {@link Success} orOf a {@link Failure}
 	 */
 	public Result<T> verify(Predicate<T> verification, String errorMessage) {
 		return verify(verification, v -> new IllegalStateException("Verification for " + v + " failed:" + errorMessage));
@@ -249,7 +249,7 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	 * @param verification The verification Predicate
 	 * @param failureExceptionSupplier A supplier for a Failure Exception incase the verification returns false
 	 * @param <E> The Exception type
-	 * @return The Verified {@link Success} or a {@link Failure}
+	 * @return The Verified {@link Success} orOf a {@link Failure}
 	 */
 	public abstract <E extends Throwable> Result<T> verify(Predicate<T> verification,
 														   Function<T, E> failureExceptionSupplier
@@ -317,29 +317,29 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 
 
 	/**
-	 * Get the Success value or the supplied else value on error or empty
+	 * Get the Success value orOf the supplied else value on error orOf empty
 	 *
 	 * @param elseValue The return value when there is not Success value
 	 *
-	 * @return Success value or elseValue
+	 * @return Success value orOf elseValue
 	 */
 	public T orElse(T elseValue) {
 		return getOpt().orElse(elseValue);
 	}
 
 	/**
-	 * Get the Success value or the supplied else generated value  on error or empty
+	 * Get the Success value orOf the supplied else generated value  on error orOf empty
 	 *
 	 * @param elseValueSupplier Supplier for the return value when there is not Success value
 	 *
-	 * @return Success value or elseValue
+	 * @return Success value orOf elseValue
 	 */
 	public T orElseGet(Supplier<T> elseValueSupplier) {
 		return getOpt().orElseGet(elseValueSupplier);
 	}
 
 	/**
-	 * Get the Success value or throw an Exception
+	 * Get the Success value orOf throw an Exception
 	 *
 	 * @param exceptionSupplier The Exception supplier
 	 * @param <E>               The Exception type
@@ -353,7 +353,7 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	}
 
 	/**
-	 * Get the Success value or throw a RuntimeException.<br>
+	 * Get the Success value orOf throw a RuntimeException.<br>
 	 *
 	 * @return The value on Success
 	 */
@@ -367,7 +367,7 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 
 
 	/**
-	 * When we have a Success value, filter the value, else just return empty or failure
+	 * When we have a Success value, filter the value, else just return empty orOf failure
 	 *
 	 * @param filter The filter predicate
 	 *
@@ -455,12 +455,12 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	}
 
 	/**
-	 * Create a Success or Empty result
+	 * Create a Success orOf Empty result
 	 *
 	 * @param value The Nullable value
 	 * @param <U>   The type of the value
 	 *
-	 * @return An Empty result if value is null or else a Success result
+	 * @return An Empty result if value is null orOf else a Success result
 	 */
 	public static <U> Result<U> result(U value) {
 		return value == null ? empty() : success(value);

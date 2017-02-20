@@ -67,8 +67,9 @@ public class Msg {
 
 
     public static void main(String... args) throws Exception {
-        Msg msg = Msg.nlBE("Hello, {0} it is now {1,time} at {2,date,short} or {2,date,full}","Bravo", new Date(),new Date());
-        System.out.println("msg:" + msg);
+		Msg msg =
+			Msg.nlBE("Hello, {0} it is now {1,time} at {2,date,short} orOf {2,date,full}", "Bravo", new Date(), new Date());
+		System.out.println("msg:" + msg);
         System.out.println("msg:" + msg.withLocale(Msg.nlNL));
         System.out.println("msg:" + msg.withLocale(Locale.ENGLISH));
     }

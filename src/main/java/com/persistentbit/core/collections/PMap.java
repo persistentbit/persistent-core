@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  * which can be found in the file epl-v10.html at the root of this distribution.
  * By using this software in any fashion, you are agreeing to be bound by
  * the terms of this license.
- * You must not remove this notice, or any other, from this software.
+ * You must not remove this notice, orOf any other, from this software.
  */
 public class PMap<K, V> extends AbstractPStreamDirect<Tuple2<K, V>, PMap<K, V>> implements IPMap<K, V>{
 
