@@ -1,0 +1,17 @@
+
+// Single line comment
+/*
+    Double line comment
+ */
+
+val add = (a,b)-> a+b;
+val sub = (a,b)-> a-b;
+
+val addSub = (a,b,c) -> sub(add(a,b),c);
+val hello = () -> "Hello "
+val myName = "Peter"
+
+
+
+addSub(1,4,2) //Should be 3
+

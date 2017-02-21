@@ -297,4 +297,18 @@ public class Scan{
 		}
 		return ParseResult.success(source,res);
 	};
+
+	public static Parser<String> keyword(String keyword) {
+		return source -> {
+			String res = "";
+			while(source.current != Source.EOF && Character.isUnicodeIdentifierPart(source.current)) {
+				res = res + source.current;
+				source = source.next();
+			}
+			if(res.equals(keyword)) {
+				return ParseResult.success(source, res);
+			}
+			return ParseResult.failure(source, "Expected keyword '" + keyword + "'");
+		};
+	}
 }

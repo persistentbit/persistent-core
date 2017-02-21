@@ -15,22 +15,32 @@ public abstract class EvalContext {
     enum Type {
         block,functionCall
     }
-    public abstract Optional<EExpr> getExpr(String name);
-    public abstract Type getType();
+
+	public abstract Optional<Object> getValue(String name);
+
+	public abstract Type getType();
+
+	public abstract EvalContext withValue(String name, Object value);
+
+	public abstract boolean hasLocalValue(String name);
+
+	public EvalContext subContext(Type type) {
+		return new ContextImpl(this, type, PMap.empty());
+	}
 
 
+	private static class ContextImpl extends EvalContext{
 
-    private class ContextImpl extends EvalContext{
-        private final EvalContext parentContext;
+		private final EvalContext parentContext;
         private final Type type;
-        private final PMap<String,EExpr> exprLookup;
+		private final PMap<String, Object> valueLookup;
 
 
-        public ContextImpl(EvalContext parentContext, Type type, PMap<String, EExpr> exprLookup) {
-            this.parentContext = parentContext;
+		public ContextImpl(EvalContext parentContext, Type type, PMap<String, Object> valueLookup) {
+			this.parentContext = parentContext;
             this.type = Objects.requireNonNull(type);
-            this.exprLookup = Objects.requireNonNull(exprLookup);
-        }
+			this.valueLookup = Objects.requireNonNull(valueLookup);
+		}
 
         @Override
         public Type getType() {
@@ -38,17 +48,29 @@ public abstract class EvalContext {
         }
 
         @Override
-        public Optional<EExpr> getExpr(String name) {
-            Optional<EExpr> res = exprLookup.getOpt(name);
-            if(res.isPresent()){
+		public Optional<Object> getValue(String name) {
+			Optional<Object> res = valueLookup.getOpt(name);
+			if(res.isPresent()){
                 return res;
             }
             return parentContext == null
                     ? Optional.empty()
-                    : parentContext.getExpr(name)
-            ;
+				: parentContext.getValue(name)
+				;
         }
-    }
+
+		@Override
+		public EvalContext withValue(String name, Object value) {
+			return new ContextImpl(parentContext, type, valueLookup.put(name, value));
+		}
+
+		@Override
+		public boolean hasLocalValue(String name) {
+			return valueLookup.containsKey(name);
+		}
+	}
+
+	public static final EvalContext inst = new ContextImpl(null, Type.block, PMap.empty());
 
 /*
     public static String script(String template){
