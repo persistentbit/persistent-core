@@ -13,41 +13,38 @@ import java.util.Objects;
  * @see Parser
  * @since 17/02/17
  */
-public class Source{
+public abstract class Source{
 
 	public static final char EOF = 0;
 
-	private final String source;
-	private final int sourcePos;
+
 
 	public final char current;
 	public final StrPos position;
 
-	private Source(String source, int sourcePos, StrPos position) {
-		this.source = Objects.requireNonNull(source);
-		this.sourcePos = sourcePos;
+
+	protected Source(StrPos position, char current) {
 		this.position = Objects.requireNonNull(position);
-		this.current = sourcePos < source.length()
-			? source.charAt(sourcePos)
-			: EOF;
+		this.current = current;
 	}
 
 
+	public static Source asSource(String source) {
+		return asSource(StrPos.inst,source);
+	}
 
 	public static Source asSource(String name, String source) {
-		return new Source(source, 0, new StrPos(name, 1, 1));
+		return asSource(new StrPos(name), source);
+	}
+	public static Source asSource(StrPos pos, String source) {
+		return new SourceFromString(source, 0, pos);
 	}
 
 	public boolean isEOF() {
-		return sourcePos >= source.length();
+		return current == EOF;
 	}
 
-	public Source next() {
-		if(isEOF()) {
-			return this;
-		}
-		return new Source(source, sourcePos + 1, position.incForChar(current));
-	}
+	public abstract Source next();
 
 	public Source next(int count) {
 		Source res = this;
@@ -57,9 +54,14 @@ public class Source{
 		return res;
 	}
 
-	public String rest() {
-		return isEOF() ? "" : source.substring(sourcePos);
+	public Source plus(Source right){
+		if(isEOF()){
+			return right;
+		}
+		return new SourcePlusSource(this,right);
 	}
+
+	public abstract String rest();
 
 	@Override
 	public String toString() {
