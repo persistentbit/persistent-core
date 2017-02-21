@@ -1,8 +1,10 @@
-package com.persistentbit.core.parser.source;
+package com.persistentbit.core.utils;
 
 import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.Parser;
-import com.persistentbit.core.utils.BaseValueClass;
+import com.persistentbit.core.parser.source.Source;
+
+import java.util.Objects;
 
 /**
  * Represents an immutable position in a parser Source.<br>
@@ -14,17 +16,21 @@ import com.persistentbit.core.utils.BaseValueClass;
  * @see Parser
  * @since 17/02/17
  */
-public class Position extends BaseValueClass implements Comparable<Position>{
+public class StrPos extends BaseValueClass implements Comparable<StrPos>{
 
 	private final String sourceName;
 	private final int lineNumber;
 	private final int columnNumber;
 
-	public Position(String sourceName, int lineNumber, int columnNumber) {
-		this.sourceName = sourceName;
+	public StrPos(String sourceName, int lineNumber, int columnNumber) {
+		this.sourceName = Objects.requireNonNull(sourceName);
 		this.lineNumber = lineNumber;
 		this.columnNumber = columnNumber;
 	}
+	public StrPos(String sourceName){
+		this(sourceName,1,1);
+	}
+	static public final StrPos inst = new StrPos("");
 
 	/**
 	 * Create a new Position from this position by advancing line/column according to the character.<br>
@@ -36,14 +42,21 @@ public class Position extends BaseValueClass implements Comparable<Position>{
 	 *
 	 * @return The new position
 	 */
-	public Position incForChar(char c) {
+	public StrPos incForChar(char c) {
 		if(c == Source.EOF) {
 			return this;
 		}
 		if(c == '\n') {
-			return new Position(sourceName, lineNumber + 1, 1);
+			return new StrPos(sourceName, lineNumber + 1, 1);
 		}
-		return new Position(sourceName, lineNumber, columnNumber + 1);
+		return new StrPos(sourceName, lineNumber, columnNumber + 1);
+	}
+	public StrPos incForString(String s){
+		StrPos res = this;
+		for(int t=0; t<s.length(); t++){
+			res = res.incForChar(s.charAt(t));
+		}
+		return res;
 	}
 
 	public String getSourceName() {
@@ -60,11 +73,11 @@ public class Position extends BaseValueClass implements Comparable<Position>{
 
 	@Override
 	public String toString() {
-		return "(" + sourceName + ": " + (lineNumber) + ", " + columnNumber + ")";
+		return "(" + sourceName + (sourceName.isEmpty()? "" : ": ") + (lineNumber) + ", " + columnNumber + ")";
 	}
 
 	@Override
-	public int compareTo(Position o) {
+	public int compareTo(StrPos o) {
 		int c = sourceName.compareTo(o.getSourceName());
 		if(c != 0) {
 			return c;

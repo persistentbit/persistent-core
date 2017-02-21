@@ -8,11 +8,11 @@ import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.Parser;
 import com.persistentbit.core.parser.Scan;
 import com.persistentbit.core.parser.WithPos;
-import com.persistentbit.core.parser.source.Position;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
+import com.persistentbit.core.utils.StrPos;
 import com.persistentbit.core.utils.StringUtils;
 
 import java.util.Optional;
@@ -35,8 +35,8 @@ public class ParserTest {
         );
     }
     static abstract class BaseExpr implements Expr{
-        private final Position pos;
-        BaseExpr(Position pos){
+        private final StrPos pos;
+        BaseExpr(StrPos pos){
             this.pos = pos;
         }
 
@@ -47,7 +47,7 @@ public class ParserTest {
                 Function<BinOpExpr, R> binOpExpr
         );
 
-        public Optional<Position> getPos(){
+        public Optional<StrPos> getPos(){
             return Optional.ofNullable(pos);
         }
     }
@@ -56,7 +56,7 @@ public class ParserTest {
 
         private final Expr expr;
 
-        public GroupExpr(Position pos, Expr expr) {
+        public GroupExpr(StrPos pos, Expr expr) {
             super(pos);
             this.expr = expr;
         }
@@ -76,7 +76,7 @@ public class ParserTest {
 
         private final Object value;
 
-        public ConstExpr(Position pos, Object value) {
+        public ConstExpr(StrPos pos, Object value) {
             super(pos);
             this.value = value;
         }
@@ -103,7 +103,7 @@ public class ParserTest {
 
         private final String varName;
 
-        public VarExpr(Position pos, String varName) {
+        public VarExpr(StrPos pos, String varName) {
             super(pos);
             this.varName = varName;
         }
@@ -125,7 +125,7 @@ public class ParserTest {
         private final String binOp;
         private final Expr right;
 
-        public BinOpExpr(Position pos, Expr left, String binOp, Expr right) {
+        public BinOpExpr(StrPos pos, Expr left, String binOp, Expr right) {
             super(pos);
             this.left = left;
             this.binOp = binOp;
@@ -218,7 +218,7 @@ public class ParserTest {
                 if (rightRes.isFailure()) {
                     return rightRes;
                 }
-                Position leftPos = leftRes.getValue().pos;
+                StrPos leftPos = leftRes.getValue().pos;
                 leftRes = ParseResult.success(
                         rightRes.getSource(),
                         new WithPos(

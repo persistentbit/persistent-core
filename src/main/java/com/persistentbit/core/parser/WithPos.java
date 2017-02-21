@@ -1,7 +1,7 @@
 package com.persistentbit.core.parser;
 
-import com.persistentbit.core.parser.source.Position;
 import com.persistentbit.core.utils.BaseValueClass;
+import com.persistentbit.core.utils.StrPos;
 
 /**
  * TODO: Add comment
@@ -10,10 +10,10 @@ import com.persistentbit.core.utils.BaseValueClass;
  * @since 20/02/2017
  */
 public class WithPos<T> extends BaseValueClass{
-    public final Position   pos;
+    public final StrPos pos;
     public final T          value;
 
-    public WithPos(Position pos, T value) {
+    public WithPos(StrPos pos, T value) {
         this.pos = pos;
         this.value = value;
     }

@@ -1,6 +1,6 @@
 package com.persistentbit.core.parser;
 
-import com.persistentbit.core.parser.source.Position;
+import com.persistentbit.core.utils.StrPos;
 
 /**
  * TODOC
@@ -10,14 +10,14 @@ import com.persistentbit.core.parser.source.Position;
  */
 public class ParseException extends RuntimeException{
 
-	private final Position pos;
+	private final StrPos pos;
 
-	public ParseException(String message, Position pos) {
+	public ParseException(String message, StrPos pos) {
 		super(pos + ": " + message);
 		this.pos = pos;
 	}
 
-	public ParseException(String message, Throwable cause, Position pos) {
+	public ParseException(String message, Throwable cause, StrPos pos) {
 		super(message, cause);
 		this.pos = pos;
 	}

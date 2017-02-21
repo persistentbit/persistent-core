@@ -1,6 +1,7 @@
 package com.persistentbit.core.parser.source;
 
 import com.persistentbit.core.parser.Parser;
+import com.persistentbit.core.utils.StrPos;
 import com.persistentbit.core.utils.StringUtils;
 
 import java.util.Objects;
@@ -20,9 +21,9 @@ public class Source{
 	private final int sourcePos;
 
 	public final char current;
-	public final Position position;
+	public final StrPos position;
 
-	private Source(String source, int sourcePos, Position position) {
+	private Source(String source, int sourcePos, StrPos position) {
 		this.source = Objects.requireNonNull(source);
 		this.sourcePos = sourcePos;
 		this.position = Objects.requireNonNull(position);
@@ -34,7 +35,7 @@ public class Source{
 
 
 	public static Source asSource(String name, String source) {
-		return new Source(source, 0, new Position(name, 1, 1));
+		return new Source(source, 0, new StrPos(name, 1, 1));
 	}
 
 	public boolean isEOF() {

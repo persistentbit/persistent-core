@@ -2,9 +2,9 @@ package com.persistentbit.core.parser;
 
 import com.persistentbit.core.OK;
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.parser.source.Position;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.tuples.Tuple2;
+import com.persistentbit.core.utils.StrPos;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -91,7 +91,7 @@ public interface Parser<T>{
 	default Parser<WithPos<T>>	withPos(){
 		Parser<T> self = this;
 		return source -> {
-			Position pos = source.position;
+			StrPos pos = source.position;
 			return self.map(v -> new WithPos<>(pos,v))
 					.parse(source);
 		};
@@ -182,8 +182,8 @@ public interface Parser<T>{
 					return ParseResult.success(otherResult.getSource(), otherResult.getValue());
 				}
 				if(longestResult != null) {
-					Position pos1 = longestResult.getSource().position;
-					Position pos2 = otherResult.getSource().position;
+					StrPos pos1 = longestResult.getSource().position;
+					StrPos pos2 = otherResult.getSource().position;
 					if(pos2.compareTo(pos1) > 0) {
 						longestResult = otherResult;
 					}
