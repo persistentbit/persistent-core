@@ -160,13 +160,7 @@ public class EParser{
 	}
 
 	public static Parser<EExpr> parsePreUnaryL2 = parsePostL1();
-		/*parseBinOp(
-			parsePostL1(),
-			orTerms("++","--","+","-","!","~"),
-			source -> new ParseResult.ParseSuccess<EExpr>(source,new EExpr.Const(source.position,null))
-		)
-		.skip(ws)
-		.onErrorAddMessage("Expected a multiplicative operator.");*/
+
 		/*orTerms("++_","--_","+_","-_","!_","~_")
 			.withPos()
 				.and(parsePostL1())
