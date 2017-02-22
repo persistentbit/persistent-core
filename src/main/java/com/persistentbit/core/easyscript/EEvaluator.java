@@ -1,6 +1,7 @@
 package com.persistentbit.core.easyscript;
 
-import com.persistentbit.core.result.Result;
+import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.utils.StrPos;
 
 import java.util.Optional;
 
@@ -13,34 +14,17 @@ import java.util.Optional;
 public class EEvaluator{
 
 
-	public static class EvalResult{
 
-		public final EvalContext context;
-		public final Object value;
-
-		public EvalResult(EvalContext context, Object value) {
-			this.context = context;
-			this.value = value;
-		}
-
-		public EvalResult withContext(EvalContext context) {
-			return new EvalResult(context, value);
-		}
-
-		public EvalResult withValue(Object value) {
-			return new EvalResult(context, value);
-		}
-	}
 
 	private EEvaluator() {}
 
 	private static EEvaluator inst = new EEvaluator();
 
-	public static Result<EvalResult> eval(EvalContext context, EExpr expr) {
+	public static EEvalResult eval(EvalContext context, EExpr expr) {
 		return inst.evalExpr(context, expr);
 	}
 
-	private Result<EvalResult> evalExpr(EvalContext context, EExpr expr) {
+	private EEvalResult evalExpr(EvalContext context, EExpr expr) {
 		return expr.match(
 			e -> binOp(context, e),
 			e -> group(context, e),
@@ -53,99 +37,109 @@ public class EEvaluator{
 		);
 	}
 
-	private Result<EvalResult> binOp(EvalContext context, EExpr.BinOp e) {
+	private EEvalResult binOp(EvalContext context, EExpr.BinOp e) {
 		return evalExpr(context, e.left)
-			.flatMap(left ->
-				evalExpr(left.context, e.right).flatMap(right ->
-					executeFunction(right.context, left.value, e.op, right.value)
+			.mapSuccess(left ->
+				evalExpr(left.getContext(), e.right).mapSuccess(right ->
+					executeFunction(right.getContext(),e.left.pos, left.getValue(), e.op, right.getValue())
 				)
 			);
 	}
 
-	private Result<EvalResult> group(EvalContext context, EExpr.Group e) {
+	private EEvalResult group(EvalContext context, EExpr.Group e) {
 		return evalExpr(context.subContext(EvalContext.Type.block), e.expr);
 	}
 
-	private Result<EvalResult> lambda(EvalContext context, EExpr.Lambda e) {
-		return Result.success(new EvalResult(context, e));
+	private EEvalResult lambda(EvalContext context, EExpr.Lambda e) {
+		return EEvalResult.success(context, new ERuntimeLambda(context.getLocalContext(),e.paramName,e.code));
 	}
 
-	private Result<EvalResult> name(EvalContext context, EExpr.Name e) {
+	private EEvalResult name(EvalContext context, EExpr.Name e) {
 		Optional<Object> nameValue = context.getValue(e.name);
 		if(nameValue.isPresent()) {
-			return Result.success(new EvalResult(context, nameValue.get()));
+			return EEvalResult.success(context,nameValue.get());
 		}
-		return Result.failure(new EvalException(e.pos, "Undefined name:'" + e.name + "'"));
+		return EEvalResult.failure(context,e.pos, "Undefined name:'" + e.name + "'");
 	}
 
-	private Result<EvalResult> constant(EvalContext context, EExpr.Const e) {
-		return Result.success(new EvalResult(context, e.value));
+	private EEvalResult constant(EvalContext context, EExpr.Const e) {
+		return EEvalResult.success(context, e.value);
 	}
 
-	private Result<EvalResult> apply(EvalContext context, EExpr.Apply e) {
-		return Result.TODO();
-		/*return evalExpr(context,e.function)
-			.flatMap(funRes -> {
-				EvalContext nc = funRes.context;
-				Result<EvalResult> result = Result.success(funRes);
-				for(EExpr arg : e.parameters){
-					result = evalExpr(nc,arg)
-						.flatMap(argRes-> evalExpr(argRes.context,))
-
+	private EEvalResult apply(EvalContext context, EExpr.Apply e) {
+		return evalExpr(context,e.function).mapSuccess(rfun -> {
+			if(rfun.getValue() instanceof ERuntimeLambda){
+				ERuntimeLambda rtlambda = (ERuntimeLambda) rfun.getValue();
+				if(e.parameters.isEmpty()){
+					return EEvalResult.failure(context,e.pos,"Need at least 1 argument!");
 				}
-			});*/
+				EEvalResult result = rtlambda.apply(context,e.pos,e.parameters.head());
+				if(result.isError()){
+					return result;
+				}
+				if(e.parameters.size()>1){
+					//Create and eval a new Apply...
+					PList<EExpr> nextParamList = e.parameters.tail().plist();
+
+					EExpr nextFunction = new EExpr.Const(e.pos,result.getValue());
+					EExpr.Apply newApply = new EExpr.Apply(nextParamList.head().pos,nextFunction,nextParamList);
+					return eval(result.getContext(),newApply);
+				}
+				return result;
+			}
+			return EEvalResult.todo(context);
+		});
 	}
 
 
-	private Result<EvalResult> val(EvalContext context, EExpr.Val e) {
+	private EEvalResult val(EvalContext context, EExpr.Val e) {
 		if(context.hasLocalValue(e.name)) {
-			return Result.failure("val '" + e.name + "' is already defined!");
+			return EEvalResult.failure(context,e.pos,"val '" + e.name + "' is already defined!");
 		}
-		return evalExpr(context, e.value)
-			.map(er -> er.withContext(context.withValue(e.name, er.value)));
+		return evalExpr(context, e.value).mapSuccess(er -> er.withContext(context.withValue(e.name, er.getValue())));
 	}
 
-	private Result<EvalResult> exprList(EvalContext context, EExpr.ExprList e) {
-		return Result.TODO();
+	private EEvalResult exprList(EvalContext context, EExpr.ExprList e) {
+		return EEvalResult.todo(context);
 	}
 
 
-	private Result<EvalResult> executeFunction(EvalContext context, Object obj, String name, Object arg) {
+	private EEvalResult executeFunction(EvalContext context, StrPos pos, Object obj, String name, Object arg) {
 		if(obj == null) {
-			return Result.failure("Can't execute function '" + name + "' on null object");
+			return EEvalResult.failure(context,pos,"Can't execute function '" + name + "' on null object");
 		}
 		if(obj instanceof String) {
-			return stringExecuteFunction(context, (String) obj, name, arg);
+			return stringExecuteFunction(context,pos, (String) obj, name, arg);
 		}
 		else if(obj instanceof Integer) {
-			return integerExecuteFunction(context, (Integer) obj, name, arg);
+			return integerExecuteFunction(context,pos, (Integer) obj, name, arg);
 		}
-		return Result.failure("TODO for object:" + obj);
+		return EEvalResult.failure(context,pos,"TODO for object:" + obj);
 	}
 
-	private Result<EvalResult> stringExecuteFunction(EvalContext context, String obj, String name, Object arg) {
+	private EEvalResult stringExecuteFunction(EvalContext context, StrPos pos, String obj, String name, Object arg) {
 		switch(name) {
 			case "+":
-				return Result.success(new EvalResult(context, obj + arg));
+				return EEvalResult.success(context, obj + arg);
 			default:
-				return Result.failure("Unknown function '" + name + "' for String");
+				return EEvalResult.failure(context,pos, "Unknown function '" + name + "' for String");
 		}
 	}
 
-	private Result<EvalResult> integerExecuteFunction(EvalContext context, Integer obj, String name, Object arg) {
+	private EEvalResult integerExecuteFunction(EvalContext context,StrPos pos, Integer obj, String name, Object arg) {
 
 		Integer rightNumber = arg instanceof Integer ? (Integer) arg : null;
 		switch(name) {
 			case "+":
-				return Result.success(new EvalResult(context, obj + rightNumber));
+				return EEvalResult.success(context, obj + rightNumber);
 			case "-":
-				return Result.success(new EvalResult(context, obj - rightNumber));
+				return EEvalResult.success(context, obj - rightNumber);
 			case "*":
-				return Result.success(new EvalResult(context, obj * rightNumber));
+				return EEvalResult.success(context, obj * rightNumber);
 			case "/":
-				return Result.success(new EvalResult(context, obj / rightNumber));
+				return EEvalResult.success(context, obj / rightNumber);
 			default:
-				return Result.failure("Unknown function '" + name + "' for Integer");
+				return EEvalResult.failure(context,pos,"Unknown function '" + name + "' for Integer");
 		}
 	}
 

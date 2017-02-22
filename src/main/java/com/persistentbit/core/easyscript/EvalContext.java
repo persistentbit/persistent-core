@@ -29,6 +29,10 @@ public abstract class EvalContext {
 	}
 
 
+	public abstract EvalContext withParentContext(EvalContext context);
+
+	public abstract EvalContext	getLocalContext();
+
 	private static class ContextImpl extends EvalContext{
 
 		private final EvalContext parentContext;
@@ -67,6 +71,19 @@ public abstract class EvalContext {
 		@Override
 		public boolean hasLocalValue(String name) {
 			return valueLookup.containsKey(name);
+		}
+
+		@Override
+		public EvalContext getLocalContext() {
+			return new ContextImpl(null,type,valueLookup);
+		}
+
+		@Override
+		public EvalContext withParentContext(EvalContext context) {
+			if(parentContext != null){
+				return parentContext.withParentContext(context);
+			}
+			return new ContextImpl(context,type,valueLookup);
 		}
 	}
 

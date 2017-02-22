@@ -6,7 +6,6 @@ import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.Scan;
 import com.persistentbit.core.parser.source.Source;
-import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.StringUtils;
 
 import java.io.BufferedReader;
@@ -41,7 +40,7 @@ public class ERepl{
 
 	static final LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
 
-	static Result<EEvaluator.EvalResult> eval(EvalContext context, String code) {
+	static EEvalResult eval(EvalContext context, String code) {
 		ParseResult<EExpr> pr = EParser.ws.skipAnd(EParser.parseExpr()).skip(Scan.eof).parse(Source.asSource(code));
 		if(pr.isSuccess()) {
 			System.out.println("Parsed: " + pr.getValue());
@@ -59,16 +58,17 @@ public class ERepl{
 			if(code.trim().equals(":exit")) {
 				break;
 			}
-			Result<EEvaluator.EvalResult> evalResult = eval(context, code);
-			if(evalResult.isPresent()) {
-				EEvaluator.EvalResult er = evalResult.orElseThrow();
-				context = er.context;
-				System.out.println("Success:" + er.value);
+			EEvalResult evalResult = eval(context, code);
+			if(evalResult != null) {
+				if (evalResult.isSuccess()) {
+
+					context = evalResult.getContext();
+					System.out.println("Success:" + evalResult.getValue());
+
+				} else {
+					lp.print(evalResult.getError());
+				}
 			}
-			else {
-				evalResult.orElseThrow();
-			}
-			System.out.println();
 			System.out.flush();
 		}
 
