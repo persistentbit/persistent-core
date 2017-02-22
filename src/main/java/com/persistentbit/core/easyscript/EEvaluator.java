@@ -49,8 +49,13 @@ public class EEvaluator{
 			e -> name(context, e),
 			e -> apply(context, e),
 			e -> val(context, e),
-			e -> exprList(context, e)
+			e -> exprList(context, e),
+			e -> child(context, e)
 		);
+	}
+
+	private Result<EvalResult> child(EvalContext context, EExpr.Child e) {
+		return Result.TODO();
 	}
 
 	private Result<EvalResult> binOp(EvalContext context, EExpr.BinOp e) {

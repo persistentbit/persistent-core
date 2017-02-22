@@ -28,8 +28,34 @@ public abstract class EExpr {
 		Function<Name, T> name,
 		Function<Apply, T> apply,
 		Function<Val, T> val,
-		Function<ExprList, T> exprList
+		Function<ExprList, T> exprList,
+		Function<Child, T> child
 	);
+
+	public static class Child extends EExpr{
+
+		public final EExpr left;
+		public final String childName;
+
+		public Child(StrPos pos, EExpr left, String childName) {
+			super(pos);
+			this.left = left;
+			this.childName = childName;
+		}
+
+		@Override
+		public String toString() {
+			return left + "." + childName;
+		}
+
+		@Override
+		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
+						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
+		) {
+			return child.apply(this);
+		}
+	}
 
 	public static class BinOp extends EExpr{
 
@@ -53,11 +79,12 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
 			return binOp.apply(this);
 		}
 	}
+
 
 	public static class ExprList extends EExpr{
 
@@ -76,7 +103,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
 			return exprList.apply(this);
 		}
@@ -105,7 +132,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
 			return group.apply(this);
 		}
@@ -130,7 +157,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
 			return lambda.apply(this);
 		}
@@ -158,7 +185,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
 			return constant.apply(this);
 		}
@@ -181,7 +208,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
 			return name.apply(this);
 		}
@@ -208,7 +235,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
 			return apply.apply(this);
 		}
@@ -232,7 +259,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
 			return val.apply(this);
 		}

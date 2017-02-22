@@ -3,6 +3,7 @@ package com.persistentbit.core.parser;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.utils.ToDo;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -56,8 +57,8 @@ public abstract class ParseResult<T>{
 		private final T value;
 
 		public ParseSuccess(Source source, T value) {
-			this.source = source;
-			this.value = value;
+			this.source = Objects.requireNonNull(source);
+			this.value = Objects.requireNonNull(value);
 		}
 
 		@Override
