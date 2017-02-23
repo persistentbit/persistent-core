@@ -1,6 +1,5 @@
 package com.persistentbit.core.easyscript;
 
-import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.utils.StrPos;
 
 import java.util.Optional;
@@ -37,9 +36,7 @@ public class EEvaluator{
 			e -> child(context, e)
 		);
 	}
-	private EEvalResult child(EvalContext context, EExpr.Child e){
-		return EEvalResult.todo(context);
-	}
+
 
 	private EEvalResult binOp(EvalContext context, EExpr.BinOp e) {
 		return evalExpr(context, e.left)
@@ -72,6 +69,12 @@ public class EEvaluator{
 
 	private EEvalResult apply(EvalContext context, EExpr.Apply e) {
 		return evalExpr(context,e.function).mapSuccess(rfun -> {
+					return EEvalResult.todo(context);
+				});
+/*
+			if(rfun instanceof ECallable){
+
+			}
 			if(rfun.getValue() instanceof ERuntimeLambda){
 				ERuntimeLambda rtlambda = (ERuntimeLambda) rfun.getValue();
 				if(e.parameters.isEmpty()){
@@ -92,7 +95,7 @@ public class EEvaluator{
 				return result;
 			}
 			return EEvalResult.todo(context);
-		});
+		});*/
 	}
 
 
@@ -146,5 +149,11 @@ public class EEvaluator{
 				return EEvalResult.failure(context,pos,"Unknown function '" + name + "' for Integer");
 		}
 	}
-
+	private EEvalResult child(EvalContext context, EExpr.Child e){
+		EEvalResult parentResult = evalExpr(context,e.left);
+		if(parentResult.isError()){
+			return parentResult;
+		}
+		return ERuntimeChild.eval(parentResult.getValue(),e.childName,e.pos,parentResult.getContext());
+	}
 }

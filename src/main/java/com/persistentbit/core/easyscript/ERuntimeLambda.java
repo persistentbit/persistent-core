@@ -1,5 +1,6 @@
 package com.persistentbit.core.easyscript;
 
+import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.utils.StrPos;
 
 /**
@@ -8,7 +9,7 @@ import com.persistentbit.core.utils.StrPos;
  * @author Peter Muys
  * @since 22/02/2017
  */
-public class ERuntimeLambda {
+public class ERuntimeLambda implements ECallable{
     public final EvalContext localContext;
     public final String paramName;
     public final EExpr code;
@@ -18,13 +19,10 @@ public class ERuntimeLambda {
         this.paramName = paramName;
         this.code = code;
     }
-    public EEvalResult apply(EvalContext context, StrPos pos,  EExpr argument){
 
-        EEvalResult argRes = EEvaluator.eval(context,argument);
-        if(argRes.isError()){
-            return argRes;
-        }
-        EvalContext ctx = localContext.withParentContext(context).withValue(paramName,argRes.getValue());
+    @Override
+    public EEvalResult apply(EvalContext context, StrPos pos, PList<Object> args) {
+        EvalContext ctx = localContext.withParentContext(context);
         return EEvaluator.eval(ctx,code).withContext(ctx);
     }
 
