@@ -105,9 +105,19 @@ public class EParser{
 				.<EExpr>map(e -> new EExpr.Group(e.pos, e.value, EExpr.Group.Type.group))
 				.or(parseName())
 				.or(parseConst())
-				.onErrorAddMessage("Expected an expression primitive").parse(source);
+				.onErrorAddMessage("Expected an expression primitive")
+				.skip(ws)
+				.onErrorAddMessage("Expected an expression factor")
+				.and(parseApply().withPos()
+								 .optional())
+				.map(t ->
+					t._2.<EExpr>map(args -> new EExpr.Apply(args.pos, t._1, args.value))
+						.orElse(t._1)
+				)
+				.parse(source);
 
-	private static EExpr createApply(EExpr left, String name, EExpr right) {
+
+	private static EExpr createApply(EExpr left, StrPos namePos, String name, EExpr right) {
 		EExpr.Child function = new EExpr.Child(left.pos, left, name);
 		return new EExpr.Apply(left.pos, function, PList.val(right));
 	}
@@ -116,7 +126,7 @@ public class EParser{
 	public static Parser<EExpr> parseArrayAccess(EExpr left) {
 		return
 			term("[").skipAnd(parseExpr()).skip(term("]"))
-					 .map(arr -> createApply(left, "[]", arr));
+					 .map(arr -> createApply(left, left.pos, "[]", arr));
 
 
 	}
@@ -242,11 +252,11 @@ public class EParser{
 				if(rightRes.isFailure()) {
 					return rightRes;
 				}
-				StrPos leftPos = leftRes.getValue().pos;
-				leftRes = ParseResult.success(
-					rightRes.getSource(),
-					new EExpr.BinOp(leftPos, leftRes.getValue(), opRes.getValue(), rightRes.getValue())
-				);
+
+				EExpr result =
+					createApply(leftRes.getValue(), opRes.getSource().position, opRes.getValue(), rightRes.getValue());
+
+				leftRes = ParseResult.success(rightRes.getSource(), result);
 			}
 
 		};

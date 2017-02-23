@@ -25,7 +25,6 @@ public class EEvaluator{
 
 	private EEvalResult evalExpr(EvalContext context, EExpr expr) {
 		return expr.match(
-			e -> binOp(context, e),
 			e -> group(context, e),
 			e -> lambda(context, e),
 			e -> constant(context, e),
@@ -37,7 +36,7 @@ public class EEvaluator{
 		);
 	}
 
-
+/*
 	private EEvalResult binOp(EvalContext context, EExpr.BinOp e) {
 		return evalExpr(context, e.left)
 			.mapSuccess(left ->
@@ -45,7 +44,7 @@ public class EEvaluator{
 					executeFunction(right.getContext(),e.left.pos, left.getValue(), e.op, right.getValue())
 				)
 			);
-	}
+	}*/
 
 	private EEvalResult group(EvalContext context, EExpr.Group e) {
 		return evalExpr(context.subContext(EvalContext.Type.block), e.expr);
@@ -68,7 +67,23 @@ public class EEvaluator{
 	}
 
 	private EEvalResult apply(EvalContext context, EExpr.Apply e) {
-		return evalExpr(context,e.function).mapSuccess(rfun -> {
+		return evalExpr(context, e.function).mapSuccess(rfunRes -> {
+			Object rfun = rfunRes.getValue();
+			if(rfun instanceof ECallable) {
+				EvalContext ctx      = rfunRes.getContext();
+				ECallable   callable = (ECallable) rfun;
+				Object[]    args     = new Object[e.parameters.size()];
+				int         i        = 0;
+				for(EExpr expr : e.parameters) {
+					EEvalResult paramResult = evalExpr(ctx, expr);
+					if(paramResult.isError()) {
+						return paramResult;
+					}
+					ctx = paramResult.getContext();
+					args[i++] = paramResult.getValue();
+				}
+				return EEvalResult.success(ctx, callable.apply(args));
+			}
 					return EEvalResult.todo(context);
 				});
 /*

@@ -1,8 +1,5 @@
 package com.persistentbit.core.easyscript;
 
-import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.utils.StrPos;
-
 /**
  * TODO: Add comment
  *
@@ -11,5 +8,6 @@ import com.persistentbit.core.utils.StrPos;
  */
 @FunctionalInterface
 public interface ECallable {
-    public EEvalResult apply(EvalContext context, StrPos pos, PList<Object> args);
+
+	Object apply(Object... arguments);
 }

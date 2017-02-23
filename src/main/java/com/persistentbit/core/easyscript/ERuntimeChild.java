@@ -1,7 +1,7 @@
 package com.persistentbit.core.easyscript;
 
-import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.utils.StrPos;
+import com.persistentbit.core.utils.ToDo;
 
 /**
  * TODO: Add comment
@@ -19,9 +19,11 @@ public class ERuntimeChild {
             this.name = name;
         }
 
-        public EEvalResult apply(EvalContext context, StrPos pos, PList<Object> args){
-            return EEvalResult.failure(context,pos,"");
-        }
+		@Override
+		public Object apply(Object... arguments) {
+			throw new ToDo();
+		}
+
     }
     public static EEvalResult  eval(Object parent, String name, StrPos pos, EvalContext context){
         if(parent == null){

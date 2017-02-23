@@ -63,6 +63,7 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
 		};
 	}
 
+
 	@Override
 	default PStream<T> until(Predicate<T> until) {
 		return new AbstractPStreamLazy<T>(){
@@ -916,5 +917,10 @@ public interface PStreamWithDefaults<T> extends PStream<T>{
 				map(t -> unzipper.apply(t)._1),
 				map(t -> unzipper.apply(t)._2)
 		);
+	}
+
+	@Override
+	default ImmutableArray<T> toImmutableArray() {
+		return ImmutableArray.from(this);
 	}
 }

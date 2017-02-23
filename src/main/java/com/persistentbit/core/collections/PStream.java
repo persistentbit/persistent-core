@@ -219,8 +219,7 @@ public interface PStream<T> extends Iterable<T>{
 	}
 
 
-	@SafeVarargs
-	static <E> E[] newArray(int length, E... array) { return Arrays.copyOf(array, length); }
+
 
 	/**
 	 * @return true if this stream is infinitely long.
@@ -688,6 +687,13 @@ public interface PStream<T> extends Iterable<T>{
 	 * @return The new array
 	 */
 	T[] toArray();
+
+	/**
+	 * Create an immutable array with all the items in this PStream.
+	 *
+	 * @return The new immutable array.
+	 */
+	ImmutableArray<T> toImmutableArray();
 
 	/**
 	 * Copy all items in this PStream into the provided array orOf a new one if the provided is too small.

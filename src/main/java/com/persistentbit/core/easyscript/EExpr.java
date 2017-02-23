@@ -21,7 +21,6 @@ public abstract class EExpr {
 	}
 
 	public abstract <T> T match(
-		Function<BinOp, T> binOp,
 		Function<Group, T> group,
 		Function<Lambda, T> lambda,
 		Function<Const, T> constant,
@@ -49,39 +48,11 @@ public abstract class EExpr {
 		}
 
 		@Override
-		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
+		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
 						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
 			return child.apply(this);
-		}
-	}
-
-	public static class BinOp extends EExpr{
-
-		public final EExpr left;
-		public final String op;
-		public final EExpr right;
-
-		public BinOp(StrPos pos, EExpr left, String op, EExpr right) {
-			super(pos);
-			this.left = left;
-			this.op = op;
-			this.right = right;
-		}
-
-		@Override
-		public String toString() {
-			return left + " " + op + " " + right;
-		}
-
-
-		@Override
-		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
-						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
-		) {
-			return binOp.apply(this);
 		}
 	}
 
@@ -101,7 +72,7 @@ public abstract class EExpr {
 		}
 
 		@Override
-		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
+		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
 						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
@@ -130,7 +101,7 @@ public abstract class EExpr {
 		}
 
 		@Override
-		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
+		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
 						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
@@ -155,7 +126,7 @@ public abstract class EExpr {
 		}
 
 		@Override
-		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
+		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
 						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
@@ -183,7 +154,7 @@ public abstract class EExpr {
 		}
 
 		@Override
-		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
+		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
 						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
@@ -206,7 +177,7 @@ public abstract class EExpr {
 		}
 
 		@Override
-		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
+		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
 						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
@@ -233,7 +204,7 @@ public abstract class EExpr {
 		}
 
 		@Override
-		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
+		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
 						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {
@@ -257,7 +228,7 @@ public abstract class EExpr {
 		}
 
 		@Override
-		public <T> T match(Function<BinOp, T> binOp, Function<Group, T> group, Function<Lambda, T> lambda,
+		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
 						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
 		) {

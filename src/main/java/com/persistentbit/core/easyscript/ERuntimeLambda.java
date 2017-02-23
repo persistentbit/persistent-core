@@ -1,8 +1,5 @@
 package com.persistentbit.core.easyscript;
 
-import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.utils.StrPos;
-
 /**
  * TODO: Add comment
  *
@@ -21,13 +18,28 @@ public class ERuntimeLambda implements ECallable{
     }
 
     @Override
-    public EEvalResult apply(EvalContext context, StrPos pos, PList<Object> args) {
-        EvalContext ctx = localContext.withParentContext(context);
-        return EEvaluator.eval(ctx,code).withContext(ctx);
-    }
+	public Object apply(Object... args) {
+		if(args.length == 0) {
+			throw new EvalException(code.pos, "Can't call a lambda without arguments");
+		}
+		EvalContext ctx        = localContext.withValue(paramName, args[0]);
+		Object      thisResult = EEvaluator.eval(ctx, code).getValue();
+		if(args.length == 1) {
+			return thisResult;
+		}
+		if(thisResult instanceof ECallable == false) {
+			throw new EvalException(code.pos, "Expected a function as a result of applying " + args[0]);
+		}
+		ECallable callable = (ECallable) thisResult;
+		Object[]  newArgs  = new Object[args.length - 1];
+		System.arraycopy(args, 1, newArgs, 0, args.length - 1);
+		thisResult = callable.apply(newArgs);
+		return thisResult;
+	}
+
 
     @Override
     public String toString() {
-        return "RuntimeFunction[" + paramName + "->" + code+"]";
-    }
+		return "ERuntimeLambda[" + paramName + "->" + code + "]";
+	}
 }

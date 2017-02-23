@@ -16,19 +16,20 @@ public abstract class EEvalResult {
         this.context = context;
     }
 
-    static public EEvalResult   success(EvalContext context, Object value){
-        return new Success(context,value);
+	public static EEvalResult success(EvalContext context, Object value) {
+		return new Success(context,value);
     }
 
-    static public EEvalResult failure(EvalContext context, EvalException error){
-        return new Failure(context,error);
-    }
-    static public EEvalResult failure(EvalContext context, StrPos pos, String error){
-        return new Failure(context,new EvalException(pos,error));
+	public static EEvalResult failure(EvalContext context, EvalException error) {
+		return new Failure(context,error);
     }
 
-    static public EEvalResult   todo(EvalContext context) {
-        return failure(context, StrPos.inst,"TODO");
+	public static EEvalResult failure(EvalContext context, StrPos pos, String error) {
+		return new Failure(context,new EvalException(pos,error));
+    }
+
+	public static EEvalResult todo(EvalContext context) {
+		return failure(context, StrPos.inst,"TODO");
     }
     public abstract boolean isSuccess();
     public boolean isError() {
@@ -45,8 +46,9 @@ public abstract class EEvalResult {
     public abstract Object getValue();
     public abstract EvalException getError();
 
-    static public class Success extends EEvalResult{
-        private final Object value;
+	public static class Success extends EEvalResult{
+
+		private final Object value;
         public Success(EvalContext context,Object value) {
             super(context);
             this.value = value;
@@ -81,9 +83,16 @@ public abstract class EEvalResult {
         public EEvalResult mapSuccess(Function<EEvalResult, EEvalResult> map) {
             return map.apply(this);
         }
-    }
-    static public class Failure extends EEvalResult{
-        private final EvalException    error;
+
+		@Override
+		public String toString() {
+			return "EvalResult.success(" + value + ")";
+		}
+	}
+
+	public static class Failure extends EEvalResult{
+
+		private final EvalException    error;
         public Failure(EvalContext context,EvalException error) {
             super(context);
             this.error = error;
