@@ -80,6 +80,7 @@ public interface Parser<T>{
 		return source -> self.parse(source).map(mapper);
 	}
 
+
 	default <R> Parser<R> mapResult(Function<ParseResult<T>, ParseResult<R>> mapper) {
 		Parser<T> self = this;
 		return source -> {
