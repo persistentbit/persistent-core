@@ -1,6 +1,7 @@
 package com.persistentbit.core.easyscript;
 
 import com.persistentbit.core.collections.PMap;
+import com.persistentbit.core.utils.ToDo;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -13,8 +14,8 @@ import java.util.Optional;
  */
 public abstract class EvalContext {
     enum Type {
-        block,functionCall
-    }
+		block, functionCall, javaContext
+	}
 
 	public abstract Optional<Object> getValue(String name);
 
@@ -84,6 +85,44 @@ public abstract class EvalContext {
 				return parentContext.withParentContext(context);
 			}
 			return new ContextImpl(context,type,valueLookup);
+		}
+	}
+
+	private class JavaContext extends EvalContext{
+
+		private JavaImports javaImports = new JavaImports();
+
+		@Override
+		public Optional<Object> getValue(String name) {
+			if(name == "java") {
+				return Optional.of(javaImports);
+			}
+			return javaImports.getClass(name);
+		}
+
+		@Override
+		public Type getType() {
+			return Type.javaContext;
+		}
+
+		@Override
+		public EvalContext withValue(String name, Object value) {
+			return new ContextImpl(this, Type.block, PMap.<String, Object>empty().put(name, value));
+		}
+
+		@Override
+		public boolean hasLocalValue(String name) {
+			return javaImports.getClass(name).isPresent();
+		}
+
+		@Override
+		public EvalContext withParentContext(EvalContext context) {
+			throw new ToDo();
+		}
+
+		@Override
+		public EvalContext getLocalContext() {
+			return this;
 		}
 	}
 

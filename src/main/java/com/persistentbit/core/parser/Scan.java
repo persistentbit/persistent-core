@@ -72,7 +72,10 @@ public class Scan{
 			return ParseResult.success(source, OK.inst);
 		}
 		return ParseResult
-			.failure(source, "Expected end-of-file: got '" + StringUtils.escapeToJavaString("" + source.current) + "'");
+			.failure(source, new ParseExceptionEOF(
+				"Expected end-of-file: got '" + StringUtils
+					.escapeToJavaString("" + source.current) + "'", source.position
+			));
 
 	};
 

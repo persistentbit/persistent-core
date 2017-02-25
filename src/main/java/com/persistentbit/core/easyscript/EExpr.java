@@ -1,5 +1,6 @@
 package com.persistentbit.core.easyscript;
 
+import com.persistentbit.core.collections.ImmutableArray;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.utils.StrPos;
 import com.persistentbit.core.utils.StringUtils;
@@ -59,16 +60,16 @@ public abstract class EExpr {
 
 	public static class ExprList extends EExpr{
 
-		public final PList<EExpr> list;
+		public final ImmutableArray<EExpr> expressions;
 
-		public ExprList(StrPos pos, PList<EExpr> list) {
+		public ExprList(StrPos pos, ImmutableArray<EExpr> expressions) {
 			super(pos);
-			this.list = list;
+			this.expressions = expressions;
 		}
 
 		@Override
 		public String toString() {
-			return list.toString("[", ", ", "]");
+			return expressions.toString("; ");
 		}
 
 		@Override
@@ -111,18 +112,18 @@ public abstract class EExpr {
 
 	public static class Lambda extends EExpr{
 
-		public final String paramName;
+		public final PList<String> paramNames;
 		public final EExpr code;
 
-		public Lambda(StrPos pos, String paramName, EExpr code) {
+		public Lambda(StrPos pos, PList<String> paramNames, EExpr code) {
 			super(pos);
-			this.paramName = paramName;
+			this.paramNames = paramNames;
 			this.code = code;
 		}
 
 		@Override
 		public String toString() {
-			return paramName + " -> { " + code + " }";
+			return paramNames.toString("(", ", ", ")") + " -> { " + code + " }";
 		}
 
 		@Override

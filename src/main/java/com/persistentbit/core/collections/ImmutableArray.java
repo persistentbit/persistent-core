@@ -2,9 +2,12 @@ package com.persistentbit.core.collections;
 
 import com.persistentbit.core.OK;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Lightweight wrapper around a Java array([...]) to make it immutable.
@@ -12,7 +15,7 @@ import java.util.Iterator;
  * @author petermuys
  * @since 23/02/17
  */
-public class ImmutableArray<T> implements Iterable<T>{
+public class ImmutableArray<T> extends AbstractIPList<T, ImmutableArray<T>> implements Serializable{
 
 	private final T[] data;
 
@@ -47,6 +50,12 @@ public class ImmutableArray<T> implements Iterable<T>{
 		return from(collection, collection.size());
 	}
 
+	public static <R> ImmutableArray<R> from(R[] items, int offset, int length) {
+		R[] newArr = newArray(length);
+		System.arraycopy(items, offset, newArr, 0, length);
+		return new ImmutableArray<>(newArr, OK.inst);
+	}
+
 	public static <R> ImmutableArray<R> from(Iterable<R> iterable, int length) {
 		R[]         newData = newArray(length);
 		Iterator<R> iter    = iterable.iterator();
@@ -56,20 +65,52 @@ public class ImmutableArray<T> implements Iterable<T>{
 		return new ImmutableArray<>(newData, OK.inst);
 	}
 
+	@Override
 	public int size() {
 		return data.length;
 	}
 
+	@Override
 	public T get(int index) {
 		return data[index];
 	}
 
-	public final ImmutableArray<T> plusAll(T... addArray) {
-		T[] newData = newArray(data.length + addArray.length, data);
-		System.arraycopy(addArray, 0, newData, data.length, addArray.length);
-		return new ImmutableArray<T>(newData, OK.inst);
+	@Override
+	public ImmutableArray<T> plusAll(T first, T... addArray) {
+		T[] newData = newArray(data.length + addArray.length + 1, data);
+		newData[0] = first;
+		System.arraycopy(addArray, 0, newData, data.length + 1, addArray.length);
+		return new ImmutableArray<>(newData, OK.inst);
 	}
 
+	@Override
+	public ImmutableArray<T> put(int index, T value) {
+		T[] newData = newArray(data.length, data);
+		newData[index] = value;
+		return new ImmutableArray<>(newData, OK.inst);
+	}
+
+	@Override
+	public <R> R match(Supplier<R> emptyList, Function<T, R> singleton, Function<T, Function<IPList<T>, R>> headTail
+	) {
+		if(isEmpty()) {
+			return emptyList.get();
+		}
+		if(size() == 1) {
+			return singleton.apply(head());
+		}
+		return headTail.apply(head()).apply(from(data, 1, data.length - 1));
+	}
+
+	@Override
+	protected ImmutableArray<T> toImpl(PStream<T> lazy) {
+		if(lazy instanceof ImmutableArray) {
+			return (ImmutableArray) lazy;
+		}
+		return ImmutableArray.from(lazy);
+	}
+
+	@Override
 	public final ImmutableArray<T> plus(T item) {
 		return plusAll(item);
 	}

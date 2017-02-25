@@ -1,7 +1,6 @@
 package com.persistentbit.core.easyscript;
 
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.Parser;
 import com.persistentbit.core.parser.Scan;
@@ -31,16 +30,15 @@ public class EParser{
 		return Scan.term(term).skip(ws);
 	}
 
+	public static final Parser<EExpr> parseName = parseNameString().map(name -> new EExpr.Name(name.pos, name.value));
 
-
-	public static Parser<PList<EExpr>> parseApply() {
+	/*public static Parser<PList<EExpr>> parseApply() {
 		return source ->
 			term("(")
 				.skipAnd(Parser.zeroOrMoreSep(parseExpr(), term(",")))
-				.skip(ws)
 				.skip(term(")"))
 				.parse(source);
-	}
+	}*/
 
 	private static Parser<String> orTerms(String... terms) {
 		Parser<String> res = term(terms[0]);
@@ -63,58 +61,39 @@ public class EParser{
 	//public static Parser<String> operatorAssignmentL15 = ....
 
 
-	public static Parser<EExpr> parseFactorExpr = source -> Log.function().code(l -> Parser.orOf(
-		term("(")
-			.skipAnd(parseExpr())
-			.skip(term(")"))
-			.withPos()
-			.map(e -> new EExpr.Group(e.pos, e.value, EExpr.Group.Type.group)),
-		parseName(),
-		parseConst()
-	).onErrorAddMessage("Expected a Variable or a literal or (<expr>)!")
-																						   .skip(ws)
-																						   .onErrorAddMessage("Expected an expression factor")
-																						   .and(parseApply().withPos()
-																											.optional())
-																						   .map(t ->
-																							   t._2.<EExpr>map(args -> new EExpr.Apply(args.pos, t._1, args.value))
-																								   .orElse(t._1)
-																						   )
-																						   .parse(source));
 
-	public static Parser<EExpr> parseTermExpr = source -> {
-		return parseBinOp(
-			parseFactorExpr,
-			Parser.orOf(
-				term("*"), term("/"), term("and")
-			).onErrorAddMessage("Expected an expression term operator").skip(ws),
-			parseFactorExpr
-		)
-			.skip(ws)
-			.onErrorAddMessage("Expected an expression term")
-			.parse(source);
-	};
 
 
 	public static Parser<EExpr> parsePrimitiveL0 =
 		source ->
-			term("(")
-				.skipAnd(parseExpr())
-				.skip(term(")"))
-				.withPos()
-				.<EExpr>map(e -> new EExpr.Group(e.pos, e.value, EExpr.Group.Type.group))
-				.or(parseName())
+			parseLambda()
+				.or(term("(").skipAnd(parseExpr()).skip(term(")")).withPos()
+					.<EExpr>map(e -> new EExpr.Group(e.pos, e.value, EExpr.Group.Type.group))
+				)
+				.or(parseExprBlock(EExpr.Group.Type.block))
+				.or(parseExprBlock(EExpr.Group.Type.group))
+				.or(parseName)
 				.or(parseConst())
 				.onErrorAddMessage("Expected an expression primitive")
 				.skip(ws)
 				.onErrorAddMessage("Expected an expression factor")
-				.and(parseApply().withPos()
+				/*.and(parseApply().withPos()
 								 .optional())
 				.map(t ->
 					t._2.<EExpr>map(args -> new EExpr.Apply(args.pos, t._1, args.value))
 						.orElse(t._1)
-				)
+				)*/
 				.parse(source);
+
+	public static Parser<EExpr> parseLambda() {
+		return source -> {
+			return term("(").skipAnd(Parser.zeroOrMoreSep(parseNameString(), term(",")).skip(term(")")))
+							.or(parseNameString().map(name -> PList.val(name)))
+							.skip(term("->")).and(parseExpr())
+				.<EExpr>map(t -> new EExpr.Lambda(source.position, t._1.map(wp -> wp.value), t._2))
+				.parse(source);
+		};
+	}
 
 
 	private static EExpr createApply(EExpr left, StrPos namePos, String name, EExpr right) {
@@ -159,6 +138,7 @@ public class EParser{
 				ParseResult<EExpr> newLeft =
 					parseArrayAccess(leftExpr)
 						.or(parseChild(leftExpr))
+						.or(parseApply(leftExpr))
 						.parse(left.getSource());
 
 				if(newLeft.isFailure()) {
@@ -223,11 +203,64 @@ public class EParser{
 			.onErrorAddMessage("Expected name list");
 
 
+	public static Parser<EExpr> parseExprBlock(EExpr.Group.Type blockType) {
+		String left;
+		String right;
+		switch(blockType) {
+			case block:
+				left = "{";
+				right = "}";
+				break;
+			case group:
+				left = "(";
+				right = ")";
+				break;
+			default:
+				throw new RuntimeException("Unknown type: " + blockType);
+		}
+		return
+			term(left).onlyPos()
+					  .and(parseExprList())
+					  .skip(term(right))
+					  .map(t -> new EExpr.Group(t._1, t._2, blockType));
+	}
+
 	public static Parser<EExpr> parseExpr() {
 		return source ->
 			parseValExpr()
 				.or(parseSimpleExpr)
 				.skip(ws).parse(source);
+	}
+
+	public static final Parser<String> parseEndOfExpression =
+		term(";");
+
+	public static Parser<EExpr> parseExprList() {
+		return source -> {
+			StrPos       startPos = source.position;
+			PList<EExpr> result   = PList.empty();
+			while(true) {
+				ParseResult<EExpr> exprResult = parseExpr().parse(source);
+				if(exprResult.isFailure()) {
+					break;
+				}
+				result = result.plus(exprResult.getValue());
+				source = exprResult.getSource();
+
+				ParseResult<String> endOfExprREsult = parseEndOfExpression.parse(source);
+				if(endOfExprREsult.isFailure()) {
+					break;
+				}
+				source = endOfExprREsult.getSource();
+			}
+			//if(result.isEmpty()){
+			//	return ParseResult.failure(source,"Not a valid Expression");
+			//}
+
+			return ParseResult.success(source,
+				new EExpr.ExprList(startPos, result.toImmutableArray())
+			);
+		};
 	}
 
 
@@ -272,18 +305,6 @@ public class EParser{
 			;
 	}
 
-	public static Parser<EExpr> parseName() {
-		return source ->
-			parseNameString()
-				.map(name -> new EExpr.Name(name.pos, name.value))
-				.onErrorAddMessage("Expected a variable name")
-				.and(term("->").skipAnd(parseExpr()).optional())
-				.map(t ->
-					t._2.<EExpr>map(code -> new EExpr.Lambda(t._1.pos, t._1.name, code)).orElse(t._1)
-				)
-				.parse(source)
-			;
-	}
 
 	public static Parser<EExpr> parseStringLiteral =
 		Scan.stringLiteral("\"\"\"", true)

@@ -1,5 +1,7 @@
 package com.persistentbit.core.easyscript;
 
+import com.persistentbit.core.collections.PList;
+
 /**
  * TODO: Add comment
  *
@@ -7,39 +9,34 @@ package com.persistentbit.core.easyscript;
  * @since 22/02/2017
  */
 public class ERuntimeLambda implements ECallable{
-    public final EvalContext localContext;
-    public final String paramName;
-    public final EExpr code;
 
-    public ERuntimeLambda(EvalContext localContext, String paramName, EExpr code) {
-        this.localContext = localContext;
-        this.paramName = paramName;
-        this.code = code;
+	public final EEvaluator evaluator;
+	public final EvalContext localContext;
+	public final PList<String> paramNames;
+	public final EExpr code;
+
+	public ERuntimeLambda(EEvaluator evaluator, EvalContext localContext, PList<String> paramNames, EExpr code) {
+		this.evaluator = evaluator;
+		this.localContext = localContext;
+		this.paramNames = paramNames;
+		this.code = code;
     }
 
     @Override
 	public Object apply(Object... args) {
-		if(args.length == 0) {
-			throw new EvalException(code.pos, "Can't call a lambda without arguments");
+		EvalContext ctx = localContext;
+		for(int t = 0; t < paramNames.size(); t++) {
+			String name  = paramNames.get(t);
+			Object value = args.length > t ? args[t] : null;
+			ctx = ctx.withValue(name, value);
 		}
-		EvalContext ctx        = localContext.withValue(paramName, args[0]);
-		Object      thisResult = EEvaluator.eval(ctx, code).getValue();
-		if(args.length == 1) {
-			return thisResult;
-		}
-		if(thisResult instanceof ECallable == false) {
-			throw new EvalException(code.pos, "Expected a function as a result of applying " + args[0]);
-		}
-		ECallable callable = (ECallable) thisResult;
-		Object[]  newArgs  = new Object[args.length - 1];
-		System.arraycopy(args, 1, newArgs, 0, args.length - 1);
-		thisResult = callable.apply(newArgs);
-		return thisResult;
+		EEvalResult evalRes = evaluator.evalExpr(ctx, code);
+		return evalRes.getValue();
 	}
 
 
     @Override
     public String toString() {
-		return "ERuntimeLambda[" + paramName + "->" + code + "]";
+		return "ERuntimeLambda[" + paramNames + "->" + code + "]";
 	}
 }

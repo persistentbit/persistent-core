@@ -98,7 +98,13 @@ public interface Parser<T>{
 		};
 	}
 
-
+	default Parser<StrPos> onlyPos() {
+		Parser<T> self = this;
+		return source -> {
+			StrPos pos = source.position;
+			return self.map(v -> pos).parse(source);
+		};
+	}
 
 
 	default Parser<Optional<T>> optional() {

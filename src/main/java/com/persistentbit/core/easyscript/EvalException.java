@@ -16,4 +16,9 @@ public class EvalException extends RuntimeException{
 		super(pos + ": " + message);
 		this.pos = pos;
 	}
+
+	public EvalException(StrPos pos, String message, Throwable cause) {
+		super(pos + ": " + message, cause);
+		this.pos = pos;
+	}
 }

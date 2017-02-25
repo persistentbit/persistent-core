@@ -41,7 +41,7 @@ public class ERepl{
 	static final LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
 
 	static EEvalResult eval(EvalContext context, String code) {
-		ParseResult<EExpr> pr = EParser.ws.skipAnd(EParser.parseExpr()).skip(Scan.eof).parse(Source.asSource(code));
+		ParseResult<EExpr> pr = EParser.ws.skipAnd(EParser.parseExprList()).skip(Scan.eof).parse(Source.asSource(code));
 		if(pr.isSuccess()) {
 			System.out.println("Parsed: " + pr.getValue());
 			return EEvaluator.eval(context, pr.getValue());

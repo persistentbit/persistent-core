@@ -20,6 +20,10 @@ public abstract class ParseResult<T>{
 		return new ParseFailure<>(source, new ParseException(errorMessage, source.position));
 	}
 
+	public static <R> ParseFailure<R> failure(Source source, ParseException parseException) {
+		return new ParseFailure<>(source, parseException);
+	}
+
 	public static <R> ParseSuccess<R> success(Source source, R value) {
 		return new ParseSuccess<>(source, value);
 	}

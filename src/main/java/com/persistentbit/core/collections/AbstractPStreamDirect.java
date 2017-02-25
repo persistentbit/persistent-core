@@ -99,9 +99,9 @@ public abstract class AbstractPStreamDirect<T, IMP extends PStream<T>> extends A
 	return toImpl(super.plus(value));
   }
 
-  @SafeVarargs
+
   @Override
-  public final IMP plusAll(T v1, T... rest) {
+  public IMP plusAll(T v1, T... rest) {
 	return toImpl(super.plusAll(v1, rest));
   }
 
