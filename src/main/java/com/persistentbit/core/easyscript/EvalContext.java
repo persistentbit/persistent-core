@@ -1,7 +1,6 @@
 package com.persistentbit.core.easyscript;
 
 import com.persistentbit.core.collections.PMap;
-import com.persistentbit.core.utils.ToDo;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -19,16 +18,18 @@ public abstract class EvalContext {
 
 	public abstract Optional<Object> getValue(String name);
 
+	public abstract Optional<Object> getClass(String name);
+
+
+	public abstract EvalContext addImport(String name);
+
 	public abstract Type getType();
 
 	public abstract EvalContext withValue(String name, Object value);
 
 	public abstract boolean hasLocalValue(String name);
 
-	public EvalContext subContext(Type type) {
-		return new ContextImpl(this, type, PMap.empty());
-	}
-
+	public abstract EvalContext subContext(Type type);
 
 	public abstract EvalContext withParentContext(EvalContext context);
 
@@ -39,16 +40,30 @@ public abstract class EvalContext {
 		private final EvalContext parentContext;
         private final Type type;
 		private final PMap<String, Object> valueLookup;
+		private final JavaImports imports;
 
 
-		public ContextImpl(EvalContext parentContext, Type type, PMap<String, Object> valueLookup) {
+		public ContextImpl(EvalContext parentContext, Type type, PMap<String, Object> valueLookup, JavaImports imports
+		) {
 			this.parentContext = parentContext;
             this.type = Objects.requireNonNull(type);
 			this.valueLookup = Objects.requireNonNull(valueLookup);
+			this.imports = imports;
 		}
 
-        @Override
-        public Type getType() {
+		@Override
+		public Optional<Object> getClass(String name) {
+			return imports.getClass(name);
+		}
+
+		@Override
+		public EvalContext addImport(String name) {
+			imports.add(name);
+			return this;
+		}
+
+		@Override
+		public Type getType() {
             return type;
         }
 
@@ -58,6 +73,7 @@ public abstract class EvalContext {
 			if(res.isPresent()){
                 return res;
             }
+
             return parentContext == null
                     ? Optional.empty()
 				: parentContext.getValue(name)
@@ -66,7 +82,7 @@ public abstract class EvalContext {
 
 		@Override
 		public EvalContext withValue(String name, Object value) {
-			return new ContextImpl(parentContext, type, valueLookup.put(name, value));
+			return new ContextImpl(parentContext, type, valueLookup.put(name, value), imports);
 		}
 
 		@Override
@@ -76,7 +92,7 @@ public abstract class EvalContext {
 
 		@Override
 		public EvalContext getLocalContext() {
-			return new ContextImpl(null,type,valueLookup);
+			return new ContextImpl(null, type, valueLookup, imports);
 		}
 
 		@Override
@@ -84,49 +100,17 @@ public abstract class EvalContext {
 			if(parentContext != null){
 				return parentContext.withParentContext(context);
 			}
-			return new ContextImpl(context,type,valueLookup);
+			return new ContextImpl(context, type, valueLookup, imports);
+		}
+
+		@Override
+		public EvalContext subContext(Type type) {
+			return new ContextImpl(this, type, PMap.empty(), imports);
 		}
 	}
 
-	private class JavaContext extends EvalContext{
 
-		private JavaImports javaImports = new JavaImports();
-
-		@Override
-		public Optional<Object> getValue(String name) {
-			if(name == "java") {
-				return Optional.of(javaImports);
-			}
-			return javaImports.getClass(name);
-		}
-
-		@Override
-		public Type getType() {
-			return Type.javaContext;
-		}
-
-		@Override
-		public EvalContext withValue(String name, Object value) {
-			return new ContextImpl(this, Type.block, PMap.<String, Object>empty().put(name, value));
-		}
-
-		@Override
-		public boolean hasLocalValue(String name) {
-			return javaImports.getClass(name).isPresent();
-		}
-
-		@Override
-		public EvalContext withParentContext(EvalContext context) {
-			throw new ToDo();
-		}
-
-		@Override
-		public EvalContext getLocalContext() {
-			return this;
-		}
-	}
-
-	public static final EvalContext inst = new ContextImpl(null, Type.block, PMap.empty());
+	public static final EvalContext inst = new ContextImpl(null, Type.block, PMap.empty(), new JavaImports());
 
 /*
     public static String script(String template){

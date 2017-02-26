@@ -57,6 +57,10 @@ public class EEvaluator{
 		if(nameValue.isPresent()) {
 			return EEvalResult.success(context,nameValue.get());
 		}
+		nameValue = context.getClass(e.name);
+		if(nameValue.isPresent()) {
+			return EEvalResult.success(context, nameValue.get());
+		}
 		return EEvalResult.failure(context,e.pos, "Undefined name:'" + e.name + "'");
 	}
 
