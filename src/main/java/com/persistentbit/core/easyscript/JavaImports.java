@@ -57,9 +57,12 @@ public class JavaImports{
 	}
 
 	public JavaImports add(String importName) {
-		int i = importName.lastIndexOf('.');
+		/*int i = importName.lastIndexOf('.');
 		if(i >= 0) {
 			getClass(importName).orElseThrow(() -> new RuntimeException("Unknown class: " + importName));
+			return this;
+		}*/
+		if(getClass(importName).isPresent()){
 			return this;
 		}
 		return new JavaImports(resolved, imports.plus(importName));

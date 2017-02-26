@@ -2,9 +2,11 @@ package com.persistentbit.core.utils;
 
 import com.persistentbit.core.collections.PMap;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Helper Utilities for using Reflection.
@@ -65,4 +67,61 @@ public final class ReflectionUtils{
 			return Optional.empty();
 		}
 	}
+
+	public static Optional<Method> getGetter(Class cls,String name){
+		name = StringUtils.firstUpperCase(name);
+		try {
+			return Optional.of(cls.getMethod("get" + name));
+		} catch(NoSuchMethodException e) {
+			try {
+				return Optional.of(cls.getMethod("is" + name));
+			} catch(NoSuchMethodException e2) {
+				return Optional.empty();
+			}
+		}
+
+	}
+
+	public static Optional<Method> getFunctionalInterfaceMethod(Class functionalInterfaceClass){
+		for(Method m : functionalInterfaceClass.getMethods()){
+			if(m.isDefault() == false){
+				return Optional.of(m);
+			}
+		}
+		return Optional.empty();
+	}
+
+	public static <T> T createProxyForFunctionalInterface(Class<T> clsFunctionalInterface, Function<Object[],Object> implementation){
+		InvocationHandler handler=  (proxy, method, args) -> {
+			if (method.isDefault())
+			{
+				final Class<?> declaringClass = method.getDeclaringClass();
+				return
+					MethodHandles.lookup()
+						.in(declaringClass)
+						.unreflectSpecial(method, declaringClass)
+						.bindTo(proxy)
+						.invokeWithArguments(args);
+			}
+			return implementation.apply(args);
+		};
+		Class[] clsList = new Class[]{ clsFunctionalInterface};
+		return (T)Proxy.newProxyInstance(clsFunctionalInterface.getClassLoader(),clsList,handler);
+	}
+
+	public static final InvocationHandler invocationHandlerWithDefaults = (proxy, method, args) -> {
+		if (method.isDefault())
+		{
+			final Class<?> declaringClass = method.getDeclaringClass();
+			return
+				MethodHandles.lookup()
+					.in(declaringClass)
+					.unreflectSpecial(method, declaringClass)
+					.bindTo(proxy)
+					.invokeWithArguments(args);
+		}
+
+		// proxy impl of not defaults methods
+		return null;
+	};
 }

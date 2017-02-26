@@ -11,8 +11,6 @@ import java.util.Optional;
 public class EEvaluator{
 
 
-
-
 	private EEvaluator() {}
 
 	private static EEvaluator inst = new EEvaluator();
@@ -55,13 +53,9 @@ public class EEvaluator{
 	private EEvalResult name(EvalContext context, EExpr.Name e) {
 		Optional<Object> nameValue = context.getValue(e.name);
 		if(nameValue.isPresent()) {
-			return EEvalResult.success(context,nameValue.get());
-		}
-		nameValue = context.getClass(e.name);
-		if(nameValue.isPresent()) {
 			return EEvalResult.success(context, nameValue.get());
 		}
-		return EEvalResult.failure(context,e.pos, "Undefined name:'" + e.name + "'");
+		return EEvalResult.failure(context, e.pos, "Undefined name:'" + e.name + "'");
 	}
 
 	private EEvalResult constant(EvalContext context, EExpr.Const e) {
@@ -86,15 +80,31 @@ public class EEvaluator{
 				}
 				return EEvalResult.success(ctx, callable.apply(args));
 			}
-					return EEvalResult.todo(context);
-				});
+			if(rfun instanceof Class){
+				Class cls = (Class)rfun;
+				EvalContext ctx      = rfunRes.getContext();
+				Object[]    args     = new Object[e.parameters.size()];
+				int         i        = 0;
+				for(EExpr expr : e.parameters) {
+					EEvalResult paramResult = evalExpr(ctx, expr);
+					if(paramResult.isError()) {
+						return paramResult;
+					}
+					ctx = paramResult.getContext();
+					args[i++] = paramResult.getValue();
+				}
+				return EEvalResult.success(ctx,EJavaObjectMethod.construct(e.pos,cls,args));
+			}
+			return EEvalResult.todo(context);
+		});
 
 	}
 
 
+
 	private EEvalResult val(EvalContext context, EExpr.Val e) {
 		if(context.hasLocalValue(e.name)) {
-			return EEvalResult.failure(context,e.pos,"val '" + e.name + "' is already defined!");
+			return EEvalResult.failure(context, e.pos, "val '" + e.name + "' is already defined!");
 		}
 		return evalExpr(context, e.value).mapSuccess(er -> er.withContext(context.withValue(e.name, er.getValue())));
 	}
@@ -153,9 +163,9 @@ public class EEvaluator{
 					return EEvalResult.failure(context,pos,"Unknown function '" + name + "' for Integer");
 			}
 		}*/
-	private EEvalResult child(EvalContext context, EExpr.Child e){
-		EEvalResult parentResult = evalExpr(context,e.left);
-		if(parentResult.isError()){
+	private EEvalResult child(EvalContext context, EExpr.Child e) {
+		EEvalResult parentResult = evalExpr(context, e.left);
+		if(parentResult.isError()) {
 			return parentResult;
 		}
 		return ERuntimeChild.evalGetChild(parentResult.getValue(), e.childName, e.pos, parentResult.getContext());

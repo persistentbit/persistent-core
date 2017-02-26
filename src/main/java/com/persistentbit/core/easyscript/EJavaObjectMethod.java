@@ -9,12 +9,14 @@ import com.persistentbit.core.utils.NumberUtils;
 import com.persistentbit.core.utils.ReflectionUtils;
 import com.persistentbit.core.utils.StrPos;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 
 /**
@@ -42,12 +44,17 @@ public class EJavaObjectMethod implements ECallable{
 		if(arguments.length == 0) {
 			for(Method m : methods) {
 				if(m.getParameterCount() == arguments.length) {
-					return invoke(m, arguments);
+
+					return invoke(m);
 				}
 			}
 		}
 		if(methods.size() == 1) {
-			return invoke(methods.head(), arguments);
+			Method m = methods.head();
+			Class[] paramTypes = m.getParameterTypes();
+			Tuple2<MatchLevel, Object[]> matchResult = tryMatch(paramTypes, arguments);
+			checkMatch(pos,matchResult,arguments,paramTypes);
+			return invoke(m, matchResult._2);
 		}
 		Method        first          = null;
 		PList<Method> otherPossibles = PList.empty();
@@ -67,7 +74,10 @@ public class EJavaObjectMethod implements ECallable{
 		}
 		if(otherPossibles.isEmpty()) {
 			//We have only 1 method with the same number of arguments
-			return invoke(first, arguments);
+			Class[] paramTypes = first.getParameterTypes();
+			Tuple2<MatchLevel, Object[]> matchResult = tryMatch(paramTypes, arguments);
+			checkMatch(pos,matchResult,arguments,paramTypes);
+			return invoke(first, matchResult._2);
 		}
 		otherPossibles = otherPossibles.plus(first);
 
@@ -110,8 +120,19 @@ public class EJavaObjectMethod implements ECallable{
 	private Object invoke(Method m, Object... arguments) {
 		try {
 			return m.invoke(value, arguments);
-		} catch(IllegalAccessException | InvocationTargetException e) {
-			throw new EvalException(pos, "Error while invoking java method '" + m.getName() + "()' on " + value, e);
+		} catch(IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+			String on = value == null ? m.getDeclaringClass().getName() : value.toString();
+			String args = PStream.from(arguments).toString(", ");
+			String call = on + "." + m.getName() + "(" + args + ")";
+			throw new EvalException(pos, "Error while invoking " + call, e);
+		}
+	}
+
+	private static Object invoke(StrPos pos,Constructor c, Object... arguments) {
+		try {
+			return c.newInstance(arguments);
+		} catch(IllegalAccessException | InstantiationException | InvocationTargetException e) {
+			throw new EvalException(pos, "Error instantiating '" + c.getName(), e);
 		}
 	}
 
@@ -119,7 +140,7 @@ public class EJavaObjectMethod implements ECallable{
 		full, partial, not
 	}
 
-	static Tuple2<MatchLevel, Object[]> tryMatch(Class[] paramTypes, Object[] arguments) {
+	public static Tuple2<MatchLevel, Object[]> tryMatch(Class[] paramTypes, Object[] arguments) {
 		MatchLevel level     = MatchLevel.full;
 		Object[]   converted = new Object[paramTypes.length];
 		for(int t = 0; t < paramTypes.length; t++) {
@@ -135,7 +156,7 @@ public class EJavaObjectMethod implements ECallable{
 		return Tuple2.of(level, converted);
 	}
 
-	static <R> Optional<R> tryCast(Object value, Class<R> cls) {
+	public static <R> Optional<R> tryCast(Object value, Class<R> cls) {
 		if(value == null) {
 			return Optional.of(null);
 		}
@@ -166,6 +187,102 @@ public class EJavaObjectMethod implements ECallable{
 				return Optional.of((R) ((IPSet) value).pset().toSet());
 			}
 		}
+
+		if(cls.getAnnotation(FunctionalInterface.class) != null && value instanceof ERuntimeLambda){
+			Optional<Method> optMethod = ReflectionUtils.getFunctionalInterfaceMethod(cls);
+			if(optMethod.isPresent()){
+				ERuntimeLambda lambda = (ERuntimeLambda)value;
+				Function<Object[],Object> impl = lambda::apply;
+				return Optional.of(ReflectionUtils.createProxyForFunctionalInterface(cls,impl));
+			}
+
+		}
+
+
 		return Optional.empty();
+	}
+
+	public static Object construct(StrPos pos, Class cls,Object... arguments) {
+		Constructor[] constructors = cls.getConstructors();
+		if(arguments.length == 0) {
+			for(Constructor m : constructors) {
+				if(m.getParameterCount() == arguments.length) {
+
+					return invoke(pos,m);
+				}
+			}
+		}
+		if(constructors.length == 1) {
+			Class[] paramTypes = constructors[0].getParameterTypes();
+			Tuple2<MatchLevel, Object[]> matchResult = tryMatch(paramTypes, arguments);
+			checkMatch(pos,matchResult,arguments,paramTypes);
+			return invoke(pos,constructors[0], matchResult._2);
+		}
+		Constructor        first          = null;
+		PList<Constructor> otherPossibles = PList.empty();
+		for(Constructor m : constructors) {
+			if(m.getParameterCount() == arguments.length) {
+				if(first == null) {
+					first = m;
+				}
+				else {
+					otherPossibles = otherPossibles.plus(m);
+				}
+			}
+		}
+		if(first == null) {
+			throw new EvalException(pos, "Can't find construct for class  '" + cls.getName()+ "' with " + arguments.length + " parameters");
+		}
+		if(otherPossibles.isEmpty()) {
+			//We have only 1 method with the same number of arguments
+			Class[] paramTypes = first.getParameterTypes();
+			Tuple2<MatchLevel, Object[]> matchResult = tryMatch(paramTypes, arguments);
+			checkMatch(pos,matchResult,arguments,paramTypes);
+			return invoke(pos,first, matchResult._2);
+		}
+		otherPossibles = otherPossibles.plus(first);
+
+		//otherPosibles is now all methods with the same number of arguments
+		//So we have to select the correct one for the argument types;
+
+		Class[] argClasses = new Class[arguments.length];
+		for(int t = 0; t < arguments.length; t++) {
+			argClasses[t] = arguments[t] == null ? null : arguments[t].getClass();
+		}
+		Constructor   partial            = null;
+		Object[] partialArgs        = null;
+		boolean  hasMultiplePartial = false;
+
+		for(Constructor m : otherPossibles) {
+			Tuple2<MatchLevel, Object[]> matchResult = tryMatch(m.getParameterTypes(), arguments);
+			if(matchResult._1 == MatchLevel.full) {
+				return invoke(pos,m, matchResult._2);
+			}
+			if(matchResult._1 == MatchLevel.partial) {
+				if(partial != null) {
+					hasMultiplePartial = true;
+				}
+				else {
+					partial = m;
+					partialArgs = matchResult._2;
+				}
+			}
+
+		}
+		if(hasMultiplePartial) {
+			throw new EvalException(pos, "Multiple overloaded method for java method application!");
+		}
+		if(partial != null) {
+			return invoke(pos,partial, partialArgs);
+		}
+		throw new EvalException(pos, "Method arguments don't match for java method application!");
+	}
+
+	private static void checkMatch(StrPos pos,Tuple2<MatchLevel,Object[]> mr, Object[] arguments,Class[] types){
+		if(mr._1 == MatchLevel.not){
+			String args = PStream.from(arguments).toString(", ");
+			String params = PStream.from(types).map(v -> v.getName()).toString(", ");
+			throw new EvalException(pos,"Can't match parameters (" + args + ") with (" + params + ")");
+		}
 	}
 }

@@ -58,8 +58,7 @@ public abstract class EvalContext {
 
 		@Override
 		public EvalContext addImport(String name) {
-			imports.add(name);
-			return this;
+			return new ContextImpl(parentContext,type,valueLookup,imports.add(name));
 		}
 
 		@Override
@@ -73,7 +72,10 @@ public abstract class EvalContext {
 			if(res.isPresent()){
                 return res;
             }
-
+			res = imports.getClass(name);
+			if(res.isPresent()){
+				return res;
+			}
             return parentContext == null
                     ? Optional.empty()
 				: parentContext.getValue(name)

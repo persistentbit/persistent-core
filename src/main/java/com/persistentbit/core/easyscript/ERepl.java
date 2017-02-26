@@ -52,6 +52,16 @@ public class ERepl{
 
 	public static void main(String[] args) throws Exception {
 		EvalContext    context = EvalContext.inst;
+		context = context
+			.addImport("java.lang")
+			.addImport("java.util")
+			.addImport("com.persistentbit.core.collections")
+			.addImport("com.persistentbit.core.result")
+			.addImport("com.persistentbit.core.utils")
+			.addImport("com.persistentbit.core");
+
+		;
+
 		BufferedReader bin     = new BufferedReader(new InputStreamReader(System.in));
 		while(true) {
 			String code = read(bin);

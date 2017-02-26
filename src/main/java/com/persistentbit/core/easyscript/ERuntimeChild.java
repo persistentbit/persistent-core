@@ -1,9 +1,10 @@
 package com.persistentbit.core.easyscript;
 
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.utils.ImTools;
+import com.persistentbit.core.utils.ReflectionUtils;
 import com.persistentbit.core.utils.StrPos;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -29,14 +30,50 @@ public class ERuntimeChild {
 		}
 		else if(parent instanceof Boolean) {
 			return getBooleanChild(context, pos, (Boolean) parent, name);
-		}
-		else {
+		} else {
 			return getJavaObjectChild(context, pos, parent, name);
 		}
 	}
 
 	public static EEvalResult getJavaObjectChild(EvalContext context, StrPos pos, Object parent, String name) {
-		Optional<Method> optGetter = ImTools.get(parent.getClass()).getGetterMethod(name);
+		Class cls = null;
+		if(parent instanceof Class){
+			cls = (Class)parent;
+			return getJavaClassChild(context,pos,cls,name);
+		}
+		cls = parent.getClass();
+
+		PList<Method> methods = PList.empty();
+		for(Method m : cls.getMethods()) {
+			if(m.getName().equals(name) && Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())==false) {
+				methods = methods.plus(m);
+			}
+		}
+		if(methods.isEmpty() == false) {
+			return EEvalResult.success(context, new EJavaObjectMethod(pos, parent, methods));
+		}
+
+		EEvalResult optGetter1 = tryGetter(context, pos, parent, name);
+		if(optGetter1.isSuccess()) return optGetter1;
+		try {
+			Field f = cls.getField(name);
+			return EEvalResult.success(context,f.get(parent));
+		} catch(NoSuchFieldException | IllegalAccessException e) {
+			return EEvalResult.failure(context, pos, "Don't know how to get child '" + name + "' from " + parent);
+		}
+
+
+	}
+
+	private static EEvalResult tryGetter(EvalContext context, StrPos pos, Object parent, String name) {
+		Class cls;
+		if(parent instanceof Class){
+			cls = (Class)parent;
+			parent = null;
+		} else {
+			cls = parent.getClass();
+		}
+		Optional<Method> optGetter = ReflectionUtils.getGetter(cls,name);
 		if(optGetter.isPresent()) {
 			try {
 				return EEvalResult.success(context, optGetter.get().invoke(parent));
@@ -45,16 +82,29 @@ public class ERuntimeChild {
 					.failure(context, new EvalException(pos, "Exception while getting child '" + name + "' from " + parent, e));
 			}
 		}
+		return EEvalResult.failure(context,pos,"No getter found");
+	}
+
+	public static EEvalResult getJavaClassChild(EvalContext context, StrPos pos, Class cls, String name) {
+
+
 		PList<Method> methods = PList.empty();
-		for(Method m : parent.getClass().getMethods()) {
-			if(m.getName().equals(name) && Modifier.isPublic(m.getModifiers())) {
+		for(Method m : cls.getMethods()) {
+			if(m.getName().equals(name) && Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())) {
 				methods = methods.plus(m);
 			}
 		}
 		if(methods.isEmpty() == false) {
-			return EEvalResult.success(context, new EJavaObjectMethod(pos, parent, methods));
+			return EEvalResult.success(context, new EJavaObjectMethod(pos, null, methods));
 		}
-		return EEvalResult.failure(context, pos, "Don't know how to get child '" + name + "' from " + parent);
+		EEvalResult optGetter1 = tryGetter(context, pos, cls, name);
+		if(optGetter1.isSuccess()) return optGetter1;
+		try {
+			Field f = cls.getField(name);
+			return EEvalResult.success(context,f.get(null));
+		} catch(NoSuchFieldException | IllegalAccessException e) {
+			return EEvalResult.failure(context, pos, "Don't know how to get child '" + name + "' from " + cls.getName());
+		}
 	}
 
 	public static <T> T cast(StrPos pos, Object value, Class<T> cls) {
