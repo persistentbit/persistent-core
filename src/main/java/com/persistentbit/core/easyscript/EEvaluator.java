@@ -21,7 +21,7 @@ public class EEvaluator{
 		} catch(EvalException e) {
 			return EEvalResult.failure(context, e);
 		} catch(Exception e) {
-			return EEvalResult.failure(context, expr.pos, "Evaluation failed");
+			return EEvalResult.failure(context, new EvalException(expr.pos, "Evaluation failed", e));
 		}
 	}
 
