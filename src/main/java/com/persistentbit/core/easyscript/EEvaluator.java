@@ -47,8 +47,8 @@ public class EEvaluator{
 
 	private EEvalResult name(EvalContext context, EExpr.Name e) {
 		Optional<Object> nameValue = context.getValue(e.name);
-		if(nameValue.isPresent()) {
-			return EEvalResult.success(context, nameValue.get());
+		if(context.hasValue(e.name)) {
+			return EEvalResult.success(context, nameValue.orElse(null));
 		}
 		return EEvalResult.failure(context, e.pos, "Undefined name:'" + e.name + "'");
 	}

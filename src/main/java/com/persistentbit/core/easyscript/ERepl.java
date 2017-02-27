@@ -6,6 +6,7 @@ import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.Scan;
 import com.persistentbit.core.parser.source.Source;
+import com.persistentbit.core.utils.IO;
 import com.persistentbit.core.utils.StringUtils;
 
 import java.io.BufferedReader;
@@ -61,6 +62,25 @@ public class ERepl{
 			.addImport("com.persistentbit.core");
 
 		;
+
+
+		String defaultCode = IO.getClassPathResourceReader("/repl.easy",IO.utf8)
+				.flatMap(IO::readTextStream)
+				.orElse(null);
+		if(defaultCode!= null){
+			EEvalResult res = eval(context,defaultCode);
+			if(res != null) {
+				if (res.isSuccess()) {
+
+					context = res.getContext();
+					System.out.println("Success:" + res.getValue());
+
+				} else {
+					lp.print(res.getError());
+				}
+			}
+			System.out.flush();
+		}
 
 		BufferedReader bin     = new BufferedReader(new InputStreamReader(System.in));
 		while(true) {

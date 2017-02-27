@@ -29,6 +29,8 @@ public abstract class EvalContext {
 
 	public abstract boolean hasLocalValue(String name);
 
+	public abstract boolean hasValue(String name);
+
 	public abstract EvalContext subContext(Type type);
 
 	public abstract EvalContext withParentContext(EvalContext context);
@@ -90,6 +92,17 @@ public abstract class EvalContext {
 		@Override
 		public boolean hasLocalValue(String name) {
 			return valueLookup.containsKey(name);
+		}
+
+		@Override
+		public boolean hasValue(String name) {
+			if(valueLookup.containsKey(name) ){
+				return true;
+			}
+			if(imports.getClass(name).isPresent()){
+				return true;
+			}
+			return (parentContext != null && parentContext.hasValue(name));
 		}
 
 		@Override
