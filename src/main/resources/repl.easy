@@ -1,2 +1,2 @@
-val println = System.out.println;
+//val println = System.out.println;
 val range = x -> { val index = 0; while(index<x) { println(index); index=index+1; } }

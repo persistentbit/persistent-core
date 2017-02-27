@@ -87,7 +87,9 @@ public class ECustomExprEval {
 	}
 
 	private static EEvalResult evalImport(EEvaluator evaluator, EvalContext context, EExpr.Custom custom) {
-		throw new RuntimeException("ECustomExprEval.evalWhile TODO: Not yet implemented");
+		String importName = evaluator.evalExpr(context, custom.arguments.get(0)).getValue().toString();
+		context = context.addImport(importName);
+		return EEvalResult.success(context, importName);
 	}
 
 	private static EEvalResult evalSource(EEvaluator evaluator, EvalContext context, EExpr.Custom custom) {

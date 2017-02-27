@@ -1,3 +1,10 @@
+import "java.lang";
+import "java.util";
+import "com.persistentbit.core.collections";
+import "com.persistentbit.core.result";
+import "com.persistentbit.core.utils";
+import "com.persistentbit.core";
+
 
 // Single line comment
 /*
@@ -8,10 +15,21 @@ val add = (a,b)-> a+b;
 val sub = (a,b)-> a-b;
 
 val addSub = (a,b,c) -> sub(add(a,b),c);
-val hello = () -> "Hello "
-val myName = "Peter"
+val hello = () -> "Hello ";
+val myName = "Peter";
 
 
 
-addSub(1,4,2) //Should be 3
+addSub(1,4,2); //Should be 3
+
+//val println = System.out.println;
+val range = x -> {
+    val index = 0;
+    while(index<x) {
+        println(index);
+        index=index+1;
+    }
+};
+
+range(100);
 

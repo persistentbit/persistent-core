@@ -1,7 +1,5 @@
 package com.persistentbit.core.easyscript;
 
-import java.util.Optional;
-
 /**
  * TODOC
  *
@@ -18,7 +16,13 @@ public class EEvaluator{
 	private static EEvaluator inst = new EEvaluator();
 
 	public static EEvalResult eval(EvalContext context, EExpr expr) {
-		return inst.evalExpr(context, expr);
+		try {
+			return inst.evalExpr(context, expr);
+		} catch(EvalException e) {
+			return EEvalResult.failure(context, e);
+		} catch(Exception e) {
+			return EEvalResult.failure(context, expr.pos, "Evaluation failed");
+		}
 	}
 
 	public EEvalResult evalExpr(EvalContext context, EExpr expr) {
@@ -46,9 +50,8 @@ public class EEvaluator{
 	}
 
 	private EEvalResult name(EvalContext context, EExpr.Name e) {
-		Optional<Object> nameValue = context.getValue(e.name);
 		if(context.hasValue(e.name)) {
-			return EEvalResult.success(context, nameValue.orElse(null));
+			return EEvalResult.success(context, context.getValue(e.name).orElse(null));
 		}
 		return EEvalResult.failure(context, e.pos, "Undefined name:'" + e.name + "'");
 	}

@@ -1,6 +1,7 @@
 package com.persistentbit.core.parser;
 
 import com.persistentbit.core.parser.source.Source;
+import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.ToDo;
 
 import java.util.Objects;
@@ -53,6 +54,13 @@ public abstract class ParseResult<T>{
 	public abstract ParseResult<T> onErrorAdd(String errorMessage);
 
 	public abstract ParseResult<T> onErrorAdd(ParseException exception);
+
+	public Result<T> asResult() {
+		if(isSuccess()) {
+			return Result.success(getValue());
+		}
+		return Result.failure(getError());
+	}
 
 
 	public static class ParseSuccess<T> extends ParseResult<T>{
