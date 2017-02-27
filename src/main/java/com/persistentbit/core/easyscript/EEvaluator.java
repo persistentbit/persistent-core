@@ -98,10 +98,11 @@ public class EEvaluator{
 
 
 	private EEvalResult val(EvalContext context, EExpr.Val e) {
-		if(context.hasLocalValue(e.name)) {
+		if(e.type != EExpr.Val.Type.assign && context.hasLocalValue(e.name)) {
 			return EEvalResult.failure(context, e.pos, "val '" + e.name + "' is already defined!");
 		}
-		return evalExpr(context, e.value).mapSuccess(er -> er.withContext(context.withValue(e.name, er.getValue())));
+		return evalExpr(context, e.value)
+			.mapSuccess(er -> er.withContext(er.getContext().withValue(e.name, er.getValue())));
 	}
 
 	private EEvalResult exprList(EvalContext context, EExpr.ExprList e) {

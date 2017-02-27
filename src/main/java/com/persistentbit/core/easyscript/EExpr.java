@@ -216,17 +216,31 @@ public abstract class EExpr {
 
 	public static class Val extends EExpr{
 
+		public enum Type{
+			val, var, assign
+		}
+
 		public final String name;
 		public final EExpr value;
+		public final Type type;
 
-		public Val(StrPos pos, String name, EExpr value) {
+		public Val(StrPos pos, String name, EExpr value, Type type) {
 			super(pos);
 			this.name = name;
 			this.value = value;
+			this.type = type;
 		}
 
 		public String toString() {
-			return "val " + name + " = " + value;
+			switch(type) {
+				case assign:
+					return name + " = " + value;
+				case val:
+				case var:
+				default:
+					return type + " " + name + " = " + value;
+			}
+
 		}
 
 		@Override
