@@ -11,7 +11,9 @@ import java.util.Optional;
 public class EEvaluator{
 
 
-	private EEvaluator() {}
+	private EEvaluator() {
+
+	}
 
 	private static EEvaluator inst = new EEvaluator();
 
@@ -28,19 +30,12 @@ public class EEvaluator{
 			e -> apply(context, e),
 			e -> val(context, e),
 			e -> exprList(context, e),
-			e -> child(context, e)
+			e -> child(context, e),
+			e -> ECustomExprEval.eval(this,context,e)
 		);
 	}
 
-/*
-	private EEvalResult binOp(EvalContext context, EExpr.BinOp e) {
-		return evalExpr(context, e.left)
-			.mapSuccess(left ->
-				evalExpr(left.getContext(), e.right).mapSuccess(right ->
-					executeFunction(right.getContext(),e.left.pos, left.getValue(), e.op, right.getValue())
-				)
-			);
-	}*/
+
 
 	private EEvalResult group(EvalContext context, EExpr.Group e) {
 		return evalExpr(context.subContext(EvalContext.Type.block), e.expr);
@@ -170,4 +165,6 @@ public class EEvaluator{
 		}
 		return ERuntimeChild.evalGetChild(parentResult.getValue(), e.childName, e.pos, parentResult.getContext());
 	}
+
+
 }

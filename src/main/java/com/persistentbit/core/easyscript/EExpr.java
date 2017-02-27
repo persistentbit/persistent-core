@@ -29,7 +29,8 @@ public abstract class EExpr {
 		Function<Apply, T> apply,
 		Function<Val, T> val,
 		Function<ExprList, T> exprList,
-		Function<Child, T> child
+		Function<Child, T> child,
+		Function<Custom, T> custom
 	);
 
 	public static class Child extends EExpr{
@@ -51,7 +52,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child,Function<Custom, T> custom
 		) {
 			return child.apply(this);
 		}
@@ -75,7 +76,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child,Function<Custom, T> custom
 		) {
 			return exprList.apply(this);
 		}
@@ -104,7 +105,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child,Function<Custom, T> custom
 		) {
 			return group.apply(this);
 		}
@@ -129,7 +130,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child,Function<Custom, T> custom
 		) {
 			return lambda.apply(this);
 		}
@@ -157,7 +158,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child,Function<Custom, T> custom
 		) {
 			return constant.apply(this);
 		}
@@ -180,7 +181,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child,Function<Custom, T> custom
 		) {
 			return name.apply(this);
 		}
@@ -207,7 +208,7 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child,Function<Custom, T> custom
 		) {
 			return apply.apply(this);
 		}
@@ -231,10 +232,29 @@ public abstract class EExpr {
 		@Override
 		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda,
 						   Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply,
-						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child
+						   Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child,Function<Custom, T> custom
 		) {
 			return val.apply(this);
 		}
 	}
+	public static class Custom extends EExpr{
+		public final String name;
+		public final PList<EExpr> arguments;
 
+		public Custom(StrPos pos, String name, PList<EExpr> arguments) {
+			super(pos);
+			this.name = name;
+			this.arguments = arguments;
+		}
+
+		@Override
+		public String toString() {
+			return "$" + name + arguments.toString("(",", ", ")");
+		}
+
+		@Override
+		public <T> T match(Function<Group, T> group, Function<Lambda, T> lambda, Function<Const, T> constant, Function<Name, T> name, Function<Apply, T> apply, Function<Val, T> val, Function<ExprList, T> exprList, Function<Child, T> child,Function<Custom, T> custom) {
+			return custom.apply(this);
+		}
+	}
 }

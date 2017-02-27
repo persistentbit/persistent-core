@@ -49,31 +49,49 @@ public class EParser{
 	}
 
 
-	public static Parser<String> operatorShiftL6 = orTerms(">>>", "<<", ">>");
-	public static Parser<String> operatorComparisonL7 = orTerms("<=", ">=", "<", ">");
-	public static Parser<String> operatorEqualityL8 = orTerms("==", "!=");
-	public static Parser<String> operatorBitwiseANDL9 = term("&");
-	public static Parser<String> operatorBitwiseXORL10 = term("^");
-	public static Parser<String> operatorBitwiseORL11 = term("|");
-	public static Parser<String> operatorCondANDL12 = term("&&");
-	public static Parser<String> operatorCondORL13 = term("||");
+
 	//public static Parser<String> operatorConditionalL14 = term("?:");
 	//public static Parser<String> operatorAssignmentL15 = ....
 
 
 
-
+	public static Parser<EExpr> parseIf() {
+		return
+			keyword("if")
+			.skipAnd(parseExpr().and(parseExpr()))
+			.and(
+				keyword("else")
+				.skipAnd(parseExpr())
+				.optional()
+			)
+			.map(t -> {
+				if(t._2.isPresent()){
+					return new EExpr.Custom(
+							t._1._1.pos,
+							"ifElse",
+							PList.val(t._1._1,t._1._2,t._2.get())
+					);
+				} else {
+					return new EExpr.Custom(
+							t._1._1.pos,
+							"if",
+							PList.val(t._1._1,t._1._2)
+					);
+				}
+			});
+	}
 
 	public static Parser<EExpr> parsePrimitiveL0 =
 		source ->
-			parseLambda()
+				parseConst()
+				.or(parseLambda())
 				.or(term("(").skipAnd(parseExpr()).skip(term(")")).withPos()
 					.<EExpr>map(e -> new EExpr.Group(e.pos, e.value, EExpr.Group.Type.group))
 				)
 				.or(parseExprBlock(EExpr.Group.Type.block))
 				.or(parseExprBlock(EExpr.Group.Type.group))
+				.or(parseIf())
 				.or(parseName)
-				.or(parseConst())
 				.onErrorAddMessage("Expected an expression primitive")
 				.skip(ws)
 				.onErrorAddMessage("Expected an expression factor")
@@ -177,7 +195,60 @@ public class EParser{
 			.skip(ws)
 			.onErrorAddMessage("Expected an additive operator.");
 
-	public static Parser<EExpr> parseSimpleExpr = parseBinOpAdditveL5; /*source -> {
+
+
+
+
+
+	public static Parser<EExpr> parseBinOpShiftL6 =
+			parseBinOp(parseBinOpAdditveL5, orTerms(">>>", "<<", ">>"), parseBinOpAdditveL5)
+					.skip(ws)
+					.onErrorAddMessage("Expected a shift operator ");
+
+	public static Parser<EExpr> parseBinOpComparisonL7 =
+			parseBinOp(parseBinOpShiftL6, orTerms("<=", ">=", "<", ">"), parseBinOpShiftL6)
+					.skip(ws)
+					.onErrorAddMessage("Expected a comparison operator.");
+
+	public static Parser<EExpr> parseBinOpEqualityL8 =
+			parseBinOp(parseBinOpComparisonL7, orTerms("==", "!="), parseBinOpComparisonL7)
+					.skip(ws)
+					.onErrorAddMessage("Expected an equality operator.");
+
+	public static Parser<EExpr> parseBinOpBitwiseANDL9 =
+			parseBinOp(parseBinOpEqualityL8, term("&").and(Parser.not("",term("&"))).map(t -> t._1), parseBinOpEqualityL8)
+					.skip(ws)
+					.onErrorAddMessage("Expected a bitwise and operator.");
+
+	public static Parser<EExpr> parseBinOpBitwiseXORL10 =
+			parseBinOp(parseBinOpBitwiseANDL9, term("^"), parseBinOpBitwiseANDL9)
+					.skip(ws)
+					.onErrorAddMessage("Expected a bitwise and operator.");
+
+	public static Parser<EExpr> parseBinOpBitwiseORL11 =
+			parseBinOp(parseBinOpBitwiseXORL10, term("|").and(Parser.not("",term("|"))).map(t -> t._1), parseBinOpBitwiseXORL10)
+					.skip(ws)
+					.onErrorAddMessage("Expected a bitwise and operator.");
+
+
+	public static Parser<EExpr> parseBinOpCondANDL12 =
+			parseBinOp(parseBinOpBitwiseORL11, term("&&"), parseBinOpBitwiseORL11)
+					.skip(ws)
+					.onErrorAddMessage("Expected a bitwise and operator.");
+
+
+
+	public static Parser<EExpr> parseBinOpCondORL13 =
+			parseBinOp(parseBinOpCondANDL12, term("||"), parseBinOpCondANDL12)
+					.skip(ws)
+					.onErrorAddMessage("Expected a bitwise and operator.");
+
+
+
+
+
+
+	public static Parser<EExpr> parseSimpleExpr = parseBinOpCondORL13; /*source -> {
 		Parser<EExpr> parser = parseBinOp(
 			parseTermExpr,
 			Parser.orOf(term("+"), term("-"), term("or"))
@@ -328,6 +399,7 @@ public class EParser{
 		return parseNumberLiteral
 			.or(parseBooleanLiteral)
 			.or(parseStringLiteral)
+			.or(keyword("null").withPos().map(v -> new EExpr.Const(v.pos,null)))
 			.onErrorAddMessage("Expected a literal!");
 	}
 

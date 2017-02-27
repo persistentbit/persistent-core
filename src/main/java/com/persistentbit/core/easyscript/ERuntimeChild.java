@@ -119,6 +119,7 @@ public class ERuntimeChild {
 
 	public static EEvalResult getIntegerChild(EvalContext context, StrPos pos, Integer value, String name) {
 		ECallable callable = null;
+
 		switch(name) {
 			case "+":
 				callable = args -> value + cast(pos, args[0], Number.class).intValue();
@@ -131,6 +132,39 @@ public class ERuntimeChild {
 				break;
 			case "/":
 				callable = args -> value / cast(pos, args[0], Number.class).intValue();
+				break;
+			case "==":
+				callable = args -> value == cast(pos, args[0], Number.class).intValue() ;
+				break;
+			case "!=":
+				callable = args -> value != cast(pos, args[0], Number.class).intValue();
+				break;
+			case "<=":
+				callable = args -> value <= cast(pos, args[0], Number.class).intValue();
+				break;
+			case ">=":
+				callable = args -> value >= cast(pos, args[0], Number.class).intValue();
+				break;
+			case ">":
+				callable = args -> value > cast(pos, args[0], Number.class).intValue();
+				break;
+			case "<":
+				callable = args -> value < cast(pos, args[0], Number.class).intValue();
+				break;
+			case "%":
+				callable = args -> value % cast(pos, args[0], Number.class).intValue();
+				break;
+			case ">>":
+				callable = args -> value >> cast(pos, args[0], Number.class).intValue();
+				break;
+			case "<<":
+				callable = args -> value >> cast(pos, args[0], Number.class).intValue();
+				break;
+			case "|":
+				callable = args -> value | cast(pos, args[0], Number.class).intValue();
+				break;
+			case "&":
+				callable = args -> value & cast(pos, args[0], Number.class).intValue();
 				break;
 		}
 		if(callable == null) {
@@ -145,6 +179,25 @@ public class ERuntimeChild {
 			case "+":
 				callable = args -> value + args[0];
 				break;
+			case "==":
+				callable = args -> value.equals(args[0]) ;
+				break;
+			case "!=":
+				callable = args -> value.equals(args[0]) == false;
+				break;
+			case "<=":
+				callable = args -> value.compareTo("" + args[0]) <= 0;
+				break;
+			case ">=":
+				callable = args -> value.compareTo("" + args[0]) >= 0;
+				break;
+			case ">":
+				callable = args -> value.compareTo("" + args[0]) > 0;
+				break;
+			case "<":
+				callable = args -> value.compareTo("" + args[0]) < 0;
+				break;
+
 		}
 		if(callable == null) {
 			return getJavaObjectChild(context, pos, value, name);
@@ -155,6 +208,19 @@ public class ERuntimeChild {
 	public static EEvalResult getBooleanChild(EvalContext context, StrPos pos, Boolean value, String name) {
 		ECallable callable = null;
 		switch(name) {
+			case "==":
+				callable = args -> value == cast(pos, args[0], Boolean.class).booleanValue() ;
+				break;
+			case "!=":
+				callable = args -> value != cast(pos, args[0], Boolean.class).booleanValue();
+				break;
+			case "&&":
+				callable = args -> value && cast(pos, args[0], Boolean.class);
+				break;
+
+			case "||":
+				callable = args -> value || cast(pos, args[0], Boolean.class);
+				break;
 
 		}
 		if(callable == null) {
