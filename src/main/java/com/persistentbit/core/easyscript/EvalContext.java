@@ -1,7 +1,9 @@
 package com.persistentbit.core.easyscript;
 
-import com.persistentbit.core.collections.PMap;
+import com.persistentbit.core.OK;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -41,15 +43,15 @@ public abstract class EvalContext {
 
 		private final EvalContext parentContext;
         private final Type type;
-		private final PMap<String, Object> valueLookup;
+		private Map<String, Object> valueLookup;
 		private final JavaImports imports;
 
 
-		public ContextImpl(EvalContext parentContext, Type type, PMap<String, Object> valueLookup, JavaImports imports
+		public ContextImpl(EvalContext parentContext, Type type, Map<String, Object> valueLookup, JavaImports imports
 		) {
 			this.parentContext = parentContext;
             this.type = Objects.requireNonNull(type);
-			this.valueLookup = Objects.requireNonNull(valueLookup);
+			this.valueLookup = valueLookup;
 			this.imports = imports;
 		}
 
@@ -70,11 +72,15 @@ public abstract class EvalContext {
 
         @Override
 		public Optional<Object> getValue(String name) {
-			Optional<Object> res = valueLookup.getOpt(name);
-			if(res.isPresent()){
-                return res;
-            }
-			res = imports.getClass(name);
+
+			if(valueLookup != null) {
+				Object value = valueLookup.getOrDefault(name, OK.inst);
+				if(value != OK.inst) {
+					return Optional.ofNullable(value);
+				}
+			}
+
+			Optional<Object> res = imports.getClass(name);
 			if(res.isPresent()){
 				return res;
 			}
@@ -86,17 +92,22 @@ public abstract class EvalContext {
 
 		@Override
 		public EvalContext withValue(String name, Object value) {
-			return new ContextImpl(parentContext, type, valueLookup.put(name, value), imports);
+			//return new ContextImpl(parentContext, type, valueLookup.put(name, value), imports);
+			if(valueLookup == null) {
+				valueLookup = new HashMap<>();
+			}
+			valueLookup.put(name, value);
+			return this;
 		}
 
 		@Override
 		public boolean hasLocalValue(String name) {
-			return valueLookup.containsKey(name);
+			return valueLookup != null && valueLookup.containsKey(name);
 		}
 
 		@Override
 		public boolean hasValue(String name) {
-			if(valueLookup.containsKey(name) ){
+			if(valueLookup != null && valueLookup.containsKey(name)) {
 				return true;
 			}
 			if(imports.getClass(name).isPresent()){
@@ -107,7 +118,7 @@ public abstract class EvalContext {
 
 		@Override
 		public EvalContext getLocalContext() {
-			return new ContextImpl(null, type, valueLookup, imports);
+			return new ContextImpl(this, type, null, imports);
 		}
 
 		@Override
@@ -120,12 +131,12 @@ public abstract class EvalContext {
 
 		@Override
 		public EvalContext subContext(Type type) {
-			return new ContextImpl(this, type, PMap.empty(), imports);
+			return new ContextImpl(this, type, null, imports);
 		}
 	}
 
 
-	public static final EvalContext inst = new ContextImpl(null, Type.block, PMap.empty(), new JavaImports());
+	public static final EvalContext inst = new ContextImpl(null, Type.block, null, new JavaImports());
 
 /*
     public static String script(String template){

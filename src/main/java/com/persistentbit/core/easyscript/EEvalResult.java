@@ -1,5 +1,6 @@
 package com.persistentbit.core.easyscript;
 
+import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.StrPos;
 
 import java.util.function.Function;
@@ -45,6 +46,13 @@ public abstract class EEvalResult {
     public abstract EEvalResult withContext(EvalContext context);
     public abstract Object getValue();
     public abstract EvalException getError();
+
+	public <T> Result<T> asResult() {
+		if(isSuccess()) {
+			return Result.success((T) getValue());
+		}
+		return Result.failure(getError());
+	}
 
 	public static class Success extends EEvalResult{
 

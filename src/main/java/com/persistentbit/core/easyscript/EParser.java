@@ -81,27 +81,81 @@ public class EParser{
 			});
 	}
 
+	public static Parser<EExpr> parseImport() {
+		return
+			keyword("import")
+				.skipAnd(parseStringLiteral.withPos())
+				.and(keyword("as").skipAnd(parseName).optional())
+				.map(t -> {
+					return new EExpr.Custom(
+						t._1.pos,
+						"import",
+						PList.val(t._1.value, t._2.orElse(null))
+					);
+				});
+	}
+
+	public static Parser<EExpr> parseWhile() {
+		return
+			keyword("while")
+				.skipAnd(parseExpr())
+				.and(parseExpr())
+				.map(t ->
+					new EExpr.Custom(
+						t._1.pos,
+						"while",
+						PList.val(t._1, t._2)
+					)
+				);
+	}
+
+	public static Parser<EExpr> parseSource() {
+		return
+			keyword("source")
+				.skipAnd(parseStringLiteral)
+				.map(t -> new EExpr.Custom(
+					t.pos,
+					"source",
+					PList.val(t)
+				));
+	}
+
+	public static Parser<EExpr> parseClasspath() {
+		return
+			keyword("classpath")
+				.skipAnd(parseStringLiteral)
+				.map(t -> new EExpr.Custom(
+					t.pos,
+					"classpath",
+					PList.val(t)
+				));
+	}
+
+	public static Parser<EExpr> parseCustom() {
+		return Parser.orOf(parseIf(), parseImport(), parseWhile(), parseSource(), parseClasspath());
+	}
+
 	public static Parser<EExpr> parsePrimitiveL0 =
 		source ->
 				parseConst()
-				.or(parseLambda())
-				.or(term("(").skipAnd(parseExpr()).skip(term(")")).withPos()
+					.or(parseLambda())
+					.or(term("(").skipAnd(parseExpr()).skip(term(")")).withPos()
 					.<EExpr>map(e -> new EExpr.Group(e.pos, e.value, EExpr.Group.Type.group))
 				)
-				.or(parseExprBlock(EExpr.Group.Type.block))
-				.or(parseExprBlock(EExpr.Group.Type.group))
-				.or(parseIf())
-				.or(parseName)
-				.onErrorAddMessage("Expected an expression primitive")
-				.skip(ws)
-				.onErrorAddMessage("Expected an expression factor")
+					.or(parseExprBlock(EExpr.Group.Type.block))
+					.or(parseExprBlock(EExpr.Group.Type.group))
+					.or(parseCustom())
+					.or(parseName)
+					.onErrorAddMessage("Expected an expression primitive")
+					.skip(ws)
+					.onErrorAddMessage("Expected an expression factor")
 				/*.and(parseApply().withPos()
 								 .optional())
 				.map(t ->
 					t._2.<EExpr>map(args -> new EExpr.Apply(args.pos, t._1, args.value))
 						.orElse(t._1)
 				)*/
-				.parse(source);
+					.parse(source);
 
 	public static Parser<EExpr> parseLambda() {
 		return source -> {
@@ -260,11 +314,13 @@ public class EParser{
 	};*/
 
 	public static Parser<EExpr> parseValExpr() {
-		return keyword("val")
-			.skipAnd(parseNameString())
-			.skip(term("="))
-			.and(parseExpr())
-			.map(t -> new EExpr.Val(t._1.pos, t._1.value, t._2));
+		return keyword("val").map(v -> EExpr.Val.Type.val)
+							 .or(keyword("var").map(v -> EExpr.Val.Type.var))
+							 .or(Scan.whiteSpace.map(v -> EExpr.Val.Type.assign))
+							 .and(parseNameString())
+							 .skip(term("="))
+							 .and(parseExpr())
+							 .map(t -> new EExpr.Val(t._1._2.pos, t._1._2.value, t._2, t._1._1));
 	}
 
 	public static Parser<PList<String>> nameList =
