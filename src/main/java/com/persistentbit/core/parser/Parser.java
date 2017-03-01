@@ -189,16 +189,41 @@ public interface Parser<T>{
 	}
 
 	static <R> Parser<PList<R>> zeroOrMoreSep(Parser<R> parser, Parser<?> separator) {
-		return
+		/*return
 			parser.optional().map(opt -> opt.map(v -> PList.val(v)).orElse(PList.empty()))
 				  .and(zeroOrMore(separator.skipAnd(parser)))
-				  .map(t -> t._1.plusAll(t._2));
+				  .map(t -> t._1.plusAll(t._2));*/
+		return source -> {
+			PList<R> res = PList.empty();
+			while(source.current != Source.EOF) {
+				ParseResult<R> itemRes = parser.parse(source);
+				if(itemRes.isFailure()) {
+					return ParseResult.success(source, res);
+				}
+				if(source.position.equals(itemRes.getSource().position)) {
+					break;
+				}
+				res = res.plus(itemRes.getValue());
+				source = itemRes.getSource();
+				ParseResult sep = separator.parse(source);
+				if(sep.isFailure()) {
+					return ParseResult.success(source, res);
+				}
+				if(source.position.equals(sep.getSource().position)) {
+					break;
+				}
+				source = sep.getSource();
+
+			}
+			return ParseResult.success(source, res);
+		};
 	}
 
 	static <R> Parser<PList<R>> oneOrMoreSep(Parser<R> parser, Parser<?> separator) {
-		return parser
+		return zeroOrMoreSep(parser, separator).verify("Expected at least 1 item", p -> p.isEmpty() == false);
+		/*return parser
 			.and(zeroOrMore(separator.skipAnd(parser)))
-			.map(t -> PList.val(t._1).plusAll(t._2));
+			.map(t -> PList.val(t._1).plusAll(t._2));*/
 	}
 
 	default Parser<T> or(Parser other) {

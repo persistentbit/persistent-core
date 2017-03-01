@@ -150,8 +150,8 @@ public abstract class ETypeSig {
 
         @Override
         public String toString() {
-            return arrayOf + "[]";
-        }
+			return "[" + arrayOf + "]";
+		}
 
 
         @Override
@@ -177,8 +177,8 @@ public abstract class ETypeSig {
 
         @Override
         public String toString() {
-            return arguments.toString("(",",",")") + ":" + returnType;
-        }
+			return arguments.toString("(", ",", ")") + "->" + returnType;
+		}
     }
 
 

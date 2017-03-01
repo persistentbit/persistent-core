@@ -77,9 +77,20 @@ public class ETypeSigParser {
 
 	}
 
-	private Parser<ETypeSig> parseSimple() {
-		return parseAny().or(parseNameWithGenerics());
+	private Parser<ETypeSig> parseFunction() {
+		return
+			term("(")
+				.skipAnd(Parser.zeroOrMoreSep(parseTypeSig(), term(",")))
+				.skip(term(")"))
+				.skip(term("->"))
+				.and(parseTypeSig())
+				.map(t -> new ETypeSig.Fun(t._2, t._1));
 	}
+
+	private Parser<ETypeSig> parseSimple() {
+		return Parser.orOf(parseAny(), parseNameWithGenerics(), parseFunction());
+	}
+
 
 	private Parser<ETypeSig> parseArray(ETypeSig left) {
 		return term("[")
@@ -94,7 +105,9 @@ public class ETypeSigParser {
 	}
 
 	private Parser<ETypeSig> parseTypeSig() {
-		return parseSimpleWithArray();
+		return source ->
+			parseSimpleWithArray().or(whitespace.map(s -> new ETypeSig.Any())).parse(source))
+	}
 	}
 
 

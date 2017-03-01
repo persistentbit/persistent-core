@@ -185,6 +185,9 @@ public class EJavaObjectMethod implements ECallable{
 	public static Tuple2<MatchLevel, Object[]> tryMatch(Class[] paramTypes, Object[] arguments) {
 		MatchLevel level     = MatchLevel.full;
 		Object[]   converted = new Object[paramTypes.length];
+		if(paramTypes.length != arguments.length) {
+			return Tuple2.of(MatchLevel.not, converted);
+		}
 		for(int t = 0; t < paramTypes.length; t++) {
 			Optional<Object> convertedArg = tryCast(arguments[t], paramTypes[t]);
 			if(convertedArg.isPresent() == false) {
