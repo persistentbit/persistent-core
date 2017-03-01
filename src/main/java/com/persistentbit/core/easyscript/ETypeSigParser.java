@@ -106,8 +106,8 @@ public class ETypeSigParser {
 
 	private Parser<ETypeSig> parseTypeSig() {
 		return source ->
-			parseSimpleWithArray().or(whitespace.map(s -> new ETypeSig.Any())).parse(source))
-	}
+			parseSimpleWithArray().or(whitespace.map(s -> new ETypeSig.Any())).parse(source)
+
 	}
 
 
