@@ -47,11 +47,14 @@ public class EasyScript{
 	}
 
 	private <T> Result<T> eval(EExpr expr) {
-		EEvalResult res = EEvaluator.eval(context, expr);
-		if(res.isSuccess()) {
+		try {
+			EEvalResult res = EEvaluator.inst.evalExpr(context, expr);
 			context = res.getContext();
+
+			return Result.result((T) res.getValue());
+		} catch(Exception e) {
+			return Result.failure(e);
 		}
-		return res.asResult();
 	}
 
 	public <T> Result<T> loadAndEval(String sourceName) {

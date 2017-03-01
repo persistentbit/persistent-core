@@ -12,10 +12,7 @@ import com.persistentbit.core.utils.StrPos;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 
@@ -30,6 +27,37 @@ public class EJavaObjectMethod implements ECallable{
 	private final StrPos pos;
 	private final Object value;
 	private final PList<Method> methods;
+	private Class[] prevKey;
+	private Method prevMethod;
+
+	/*static private class CacheKey{
+		public final Class prevValueCls;
+		public final Class[] prevArgCls;
+
+		public CacheKey(Class prevValueCls, Class[] prevArgCls) {
+			this.prevValueCls = prevValueCls;
+			this.prevArgCls = prevArgCls;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if(this == o) return true;
+			if(!(o instanceof CacheKey)) return false;
+
+			CacheKey cacheKey = (CacheKey) o;
+
+			if(!prevValueCls.equals(cacheKey.prevValueCls)) return false;
+			// Probably incorrect - comparing Object[] arrays with Arrays.equals
+			return Arrays.equals(prevArgCls, cacheKey.prevArgCls);
+		}
+
+		@Override
+		public int hashCode() {
+			int result = prevValueCls.hashCode();
+			result = 31 * result + Arrays.hashCode(prevArgCls);
+			return result;
+		}
+	}*/
 
 	public EJavaObjectMethod(StrPos pos, Object value,
 							 PList<Method> methods
@@ -41,6 +69,22 @@ public class EJavaObjectMethod implements ECallable{
 
 	@Override
 	public Object apply(Object... arguments) {
+
+		Class[] argClasses = new Class[arguments.length];
+		for(int t = 0; t < arguments.length; t++) {
+			argClasses[t] = arguments[t] == null ? null : arguments[t].getClass();
+		}
+		if(prevKey != null && prevMethod != null && Arrays.equals(argClasses, prevKey) == false) {
+			System.out.println("Cached: " + prevMethod);
+			Method                       m           = prevMethod;
+			Class[]                      paramTypes  = m.getParameterTypes();
+			Tuple2<MatchLevel, Object[]> matchResult = tryMatch(paramTypes, arguments);
+			checkMatch(pos, matchResult, arguments, paramTypes);
+			return invoke(m, matchResult._2);
+		}
+		prevKey = argClasses;
+		prevMethod = null;
+
 		if(arguments.length == 0) {
 			for(Method m : methods) {
 				if(m.getParameterCount() == arguments.length) {
@@ -84,10 +128,7 @@ public class EJavaObjectMethod implements ECallable{
 		//otherPosibles is now all methods with the same number of arguments
 		//So we have to select the correct one for the argument types;
 
-		Class[] argClasses = new Class[arguments.length];
-		for(int t = 0; t < arguments.length; t++) {
-			argClasses[t] = arguments[t] == null ? null : arguments[t].getClass();
-		}
+
 		Method   partial            = null;
 		Object[] partialArgs        = null;
 		boolean  hasMultiplePartial = false;
@@ -119,6 +160,7 @@ public class EJavaObjectMethod implements ECallable{
 
 	private Object invoke(Method m, Object... arguments) {
 		try {
+			prevMethod = m;
 			return m.invoke(value, arguments);
 		} catch(IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
 			String on = value == null ? m.getDeclaringClass().getName() : value.toString();

@@ -30,28 +30,23 @@ public class ECustomExprEval {
     private static EEvalResult evalIf(EEvaluator evaluator,EvalContext context, EExpr.Custom custom) {
         EExpr condExpr = custom.arguments.get(0);
         EEvalResult condRes = evaluator.evalExpr(context, condExpr);
-        if(condRes.isError()){
-            return condRes;
-        }
         if(condRes.getValue() instanceof Boolean == false){
-            return EEvalResult.failure(context,condExpr.pos,"Expected a boolean expression for 'if' condition");
-        }
+			throw new EvalException(condExpr.pos, "Expected a boolean expression for 'if' condition");
+		}
         context = condRes.getContext();
         if(((Boolean)condRes.getValue())){
             return evaluator.evalExpr(context,custom.arguments.get(1));
         }
-        return EEvalResult.success(context,null);
+		return new EEvalResult(context, null);
 
     }
     private static EEvalResult evalIfElse(EEvaluator evaluator,EvalContext context, EExpr.Custom custom) {
         EExpr condExpr = custom.arguments.get(0);
         EEvalResult condRes = evaluator.evalExpr(context, condExpr);
-        if(condRes.isError()){
-            return condRes;
-        }
+
         if(condRes.getValue() instanceof Boolean == false){
-            return EEvalResult.failure(context,condExpr.pos,"Expected a boolean expression for 'if' condition");
-        }
+			throw new EvalException(condExpr.pos, "Expected a boolean expression for 'if' condition");
+		}
         context = condRes.getContext();
         if(((Boolean)condRes.getValue())){
             return evaluator.evalExpr(context,custom.arguments.get(1));
@@ -65,21 +60,17 @@ public class ECustomExprEval {
 		Object returnValue = null;
 		while(true) {
 			EEvalResult condRes = evaluator.evalExpr(context, condExpr);
-			if(condRes.isError()) {
-				return condRes;
-			}
+
 			if(condRes.getValue() instanceof Boolean == false) {
-				return EEvalResult.failure(context, condExpr.pos, "Expected a boolean as while condition");
+				throw new EvalException(condExpr.pos, "Expected a boolean as while condition");
 			}
 			Boolean condValue = (Boolean) (condRes.getValue());
 			if(condValue == false) {
-				return EEvalResult.success(context, returnValue);
+				return new EEvalResult(context, returnValue);
 			}
 			context = condRes.getContext();
 			EEvalResult codeRes = evaluator.evalExpr(context, codeExpr);
-			if(codeRes.isError()) {
-				return codeRes;
-			}
+
 			context = codeRes.getContext();
 			returnValue = codeRes.getValue();
 		}
@@ -89,7 +80,7 @@ public class ECustomExprEval {
 	private static EEvalResult evalImport(EEvaluator evaluator, EvalContext context, EExpr.Custom custom) {
 		String importName = evaluator.evalExpr(context, custom.arguments.get(0)).getValue().toString();
 		context = context.addImport(importName);
-		return EEvalResult.success(context, importName);
+		return new EEvalResult(context, importName);
 	}
 
 	private static EEvalResult evalSource(EEvaluator evaluator, EvalContext context, EExpr.Custom custom) {

@@ -28,8 +28,9 @@ val range = x -> {
     while(index<x) {
         println(index);
         index=index+1;
-    }
+    };
 };
 
-range(100);
+//range(100);
 
+PStream.range(0,100).forEach(x -> println(x));

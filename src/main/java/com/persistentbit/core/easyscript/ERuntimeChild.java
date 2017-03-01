@@ -20,8 +20,8 @@ public class ERuntimeChild {
 
 	public static EEvalResult evalGetChild(Object parent, String name, StrPos pos, EvalContext context) {
 		if(parent == null){
-            return EEvalResult.failure(context,pos,"Can't get child '" + name + "' from a null object");
-        }
+			throw new EvalException(pos, "Can't get child '" + name + "' from a null object");
+		}
 		if(parent instanceof Integer) {
 			return getIntegerChild(context, pos, (Integer) parent, name);
 		}
@@ -50,22 +50,22 @@ public class ERuntimeChild {
 			}
 		}
 		if(methods.isEmpty() == false) {
-			return EEvalResult.success(context, new EJavaObjectMethod(pos, parent, methods));
+			return new EEvalResult(context, new EJavaObjectMethod(pos, parent, methods));
 		}
 
-		EEvalResult optGetter1 = tryGetter(context, pos, parent, name);
-		if(optGetter1.isSuccess()) return optGetter1;
+		Optional<EEvalResult> optGetter1 = tryGetter(context, pos, parent, name);
+		if(optGetter1.isPresent()) return optGetter1.get();
 		try {
 			Field f = cls.getField(name);
-			return EEvalResult.success(context,f.get(parent));
+			return new EEvalResult(context, f.get(parent));
 		} catch(NoSuchFieldException | IllegalAccessException e) {
-			return EEvalResult.failure(context, pos, "Don't know how to get child '" + name + "' from " + parent);
+			throw new EvalException(pos, "Don't know how to get child '" + name + "' from " + parent);
 		}
 
 
 	}
 
-	private static EEvalResult tryGetter(EvalContext context, StrPos pos, Object parent, String name) {
+	private static Optional<EEvalResult> tryGetter(EvalContext context, StrPos pos, Object parent, String name) {
 		Class cls;
 		if(parent instanceof Class){
 			cls = (Class)parent;
@@ -76,13 +76,12 @@ public class ERuntimeChild {
 		Optional<Method> optGetter = ReflectionUtils.getGetter(cls,name);
 		if(optGetter.isPresent()) {
 			try {
-				return EEvalResult.success(context, optGetter.get().invoke(parent));
+				return Optional.of(new EEvalResult(context, optGetter.get().invoke(parent)));
 			} catch(IllegalAccessException | InvocationTargetException e) {
-				return EEvalResult
-					.failure(context, new EvalException(pos, "Exception while getting child '" + name + "' from " + parent, e));
+				throw new EvalException(pos, "Exception while getting child '" + name + "' from " + parent, e);
 			}
 		}
-		return EEvalResult.failure(context,pos,"No getter found");
+		return Optional.empty();
 	}
 
 	public static EEvalResult getJavaClassChild(EvalContext context, StrPos pos, Class cls, String name) {
@@ -95,15 +94,15 @@ public class ERuntimeChild {
 			}
 		}
 		if(methods.isEmpty() == false) {
-			return EEvalResult.success(context, new EJavaObjectMethod(pos, null, methods));
+			return new EEvalResult(context, new EJavaObjectMethod(pos, null, methods));
 		}
-		EEvalResult optGetter1 = tryGetter(context, pos, cls, name);
-		if(optGetter1.isSuccess()) return optGetter1;
+		Optional<EEvalResult> optGetter1 = tryGetter(context, pos, cls, name);
+		if(optGetter1.isPresent()) return optGetter1.get();
 		try {
 			Field f = cls.getField(name);
-			return EEvalResult.success(context,f.get(null));
+			return new EEvalResult(context, f.get(null));
 		} catch(NoSuchFieldException | IllegalAccessException e) {
-			return EEvalResult.failure(context, pos, "Don't know how to get child '" + name + "' from " + cls.getName());
+			throw new EvalException(pos, "Don't know how to get child '" + name + "' from " + cls.getName());
 		}
 	}
 
@@ -170,7 +169,7 @@ public class ERuntimeChild {
 		if(callable == null) {
 			return getJavaObjectChild(context, pos, value, name);
 		}
-		return EEvalResult.success(context, callable);
+		return new EEvalResult(context, callable);
 	}
 
 	public static EEvalResult getStringChild(EvalContext context, StrPos pos, String value, String name) {
@@ -202,7 +201,7 @@ public class ERuntimeChild {
 		if(callable == null) {
 			return getJavaObjectChild(context, pos, value, name);
 		}
-		return EEvalResult.success(context, callable);
+		return new EEvalResult(context, callable);
 	}
 
 	public static EEvalResult getBooleanChild(EvalContext context, StrPos pos, Boolean value, String name) {
@@ -226,6 +225,6 @@ public class ERuntimeChild {
 		if(callable == null) {
 			return getJavaObjectChild(context, pos, value, name);
 		}
-		return EEvalResult.success(context, callable);
+		return new EEvalResult(context, callable);
 	}
 }

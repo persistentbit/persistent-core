@@ -80,6 +80,33 @@ public interface Parser<T>{
 		return source -> self.parse(source).map(mapper);
 	}
 
+	default Parser<T> flatMap(Function<T, Parser<T>> mapper) {
+		Parser<T> self = this;
+		return source -> {
+			ParseResult<T> res = self.parse(source);
+			if(res.isFailure()) {
+				return res;
+			}
+			return mapper.apply(res.getValue()).parse(res.getSource());
+		};
+	}
+
+	default Parser<T> parseThisOrFollowedBy(Function<T, Parser<T>> nextParserSupplier) {
+		Parser<T> self = this;
+		return source -> {
+			ParseResult<T> resThis = self.parse(source);
+			if(resThis.isFailure()) {
+				return resThis;
+			}
+			Parser<T>      nextParser  = nextParserSupplier.apply(resThis.getValue());
+			ParseResult<T> resFollowed = nextParser.parse(resThis.getSource());
+			if(resFollowed.isFailure()) {
+				return resThis;
+			}
+			return resFollowed;
+		};
+	}
+
 
 	default <R> Parser<R> mapResult(Function<ParseResult<T>, ParseResult<R>> mapper) {
 		Parser<T> self = this;

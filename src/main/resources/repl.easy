@@ -1,2 +1,14 @@
-//val println = System.out.println;
-val range = x -> { val index = 0; while(index<x) { println(index); index=index+1; } }
+import "java.lang";
+import "java.util";
+import "com.persistentbit.core.collections";
+import "com.persistentbit.core.result";
+import "com.persistentbit.core.utils";
+import "com.persistentbit.core";
+import "com.persistentbit.core.easyscript";
+
+
+
+val range = x -> { val index = 0; while(index<x) { println(index); index=index+1; } };
+
+
+val parseType = x -> ETypeSigParser(EParser.ws).parse(x).getValue();

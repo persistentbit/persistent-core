@@ -3,10 +3,7 @@ package com.persistentbit.core.easyscript;
 import com.persistentbit.core.ModuleCore;
 import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.logging.printing.LogPrintStream;
-import com.persistentbit.core.parser.ParseResult;
-import com.persistentbit.core.parser.Scan;
-import com.persistentbit.core.parser.source.Source;
-import com.persistentbit.core.utils.IO;
+import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.StringUtils;
 
 import java.io.BufferedReader;
@@ -41,7 +38,7 @@ public class ERepl{
 
 	static final LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
 
-	static EEvalResult eval(EvalContext context, String code) {
+	/*static EEvalResult eval(EvalContext context, String code) {
 		ParseResult<EExpr> pr = EParser.ws.skipAnd(EParser.parseExprList()).skip(Scan.eof).parse(Source.asSource(code));
 		if(pr.isSuccess()) {
 			System.out.println("Parsed: " + pr.getValue());
@@ -49,11 +46,13 @@ public class ERepl{
 		}
 		lp.print(pr.getError());
 		return null;
-	}
+	}*/
+
+	static final EasyScript es = new EasyScript();
 
 	public static void main(String[] args) throws Exception {
 		EvalContext    context = EvalContext.inst;
-		context = context
+		/*context = context
 			.addImport("java.lang")
 			.addImport("java.util")
 			.addImport("com.persistentbit.core.collections")
@@ -61,14 +60,15 @@ public class ERepl{
 			.addImport("com.persistentbit.core.utils")
 			.addImport("com.persistentbit.core");
 
-		;
+		;*/
 
+		es.loadAndEval("repl.easy").orElseThrow();
 
-		String defaultCode = IO.getClassPathResourceReader("/repl.easy",IO.utf8)
+		/*String defaultCode = IO.getClassPathResourceReader("/repl.easy",IO.utf8)
 				.flatMap(IO::readTextStream)
 				.orElse(null);
 		if(defaultCode!= null){
-			EEvalResult res = eval(context,defaultCode);
+			EEvalResult res = es.eval(context,defaultCode);
 			if(res != null) {
 				if (res.isSuccess()) {
 
@@ -81,23 +81,19 @@ public class ERepl{
 			}
 			System.out.flush();
 		}
-
+*/
 		BufferedReader bin     = new BufferedReader(new InputStreamReader(System.in));
 		while(true) {
 			String code = read(bin);
 			if(code.trim().equals(":exit")) {
 				break;
 			}
-			EEvalResult evalResult = eval(context, code);
-			if(evalResult != null) {
-				if (evalResult.isSuccess()) {
-
-					context = evalResult.getContext();
-					System.out.println("Success:" + evalResult.getValue());
-
-				} else {
-					lp.print(evalResult.getError());
-				}
+			Result<Object> evalResult = es.eval("repl", code);
+			if(evalResult.isError()) {
+				lp.print(evalResult.getEmptyOrFailureException().get());
+			}
+			else {
+				System.out.println("Success:" + evalResult.orElse(null));
 			}
 			System.out.flush();
 		}

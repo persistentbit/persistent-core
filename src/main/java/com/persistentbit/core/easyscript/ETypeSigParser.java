@@ -1,7 +1,9 @@
 package com.persistentbit.core.easyscript;
 
+import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.Parser;
 import com.persistentbit.core.parser.Scan;
+import com.persistentbit.core.parser.source.Source;
 
 /**
  * TODO: Add comment
@@ -17,49 +19,83 @@ public class ETypeSigParser {
         this.whitespace = whitespace;
     }
 
+
+	public ParseResult<ETypeSig> parse(Source source) {
+		return parseNameWithGenerics().parse(source);
+	}
+
+	public ParseResult<ETypeSig> parse(String code) {
+		return parseTypeSig().parse(Source.asSource(code));
+	}
+
+
     private Parser<String> term(String value){
         return Scan.term(value).skip(whitespace);
     }
-    public Parser<ETypeSig> parseGenericBound(ETypeSig left) {
-        return
-                term("extends").map(s -> ETypeSig.Bound.Type.boundExtends)
-                .or(term("super").map(s -> ETypeSig.Bound.Type.boundSuper))
-                .and(Parser.oneOrMoreSep(parseTypeSig(),term("&")))
-                .map(t -> new ETypeSig.Bound(t._1, left, t._2) )
-        ;
-    }
-    public Parser<ETypeSig> parseArray(ETypeSig left){
-        return term("[")
-                .skipAnd(term("]"))
-                .map(v -> new ETypeSig.Array(left));
-    }
 
-    public Parser<ETypeSig> parseGeneric(ETypeSig left){
-        return
-            term("<")
-                .skipAnd(
-                    Parser.oneOrMoreSep(parseTypeSig(),term(","))
-                ).skip(term(">"))
-                .map(l -> new ETypeSig.WithGenerics(left,l));
-    }
 
-    public Parser<ETypeSig> parseName() {
-        return Parser.oneOrMoreSep(Scan.identifier.skip(whitespace),term("."))
-                .map(t -> new ETypeSig.Name(t.toString(".")))
-                ;
-    }
-    public Parser<ETypeSig> parseAny() {
-        return term("Any").map(s -> new ETypeSig.Any());
-    }
-    // List<T>[][]
-    // <A>(A,A)->A
+	private Parser<ETypeSig> parseAny() {
+		return term("Any").or(term("?")).map(s -> new ETypeSig.Any());
+	}
 
-    public Parser<ETypeSig> parseTypeSig() {
-        return
-            Parser.orOf(
-                term("Any").map(s -> new ETypeSig.Any())
-        );
-    }
+
+	private Parser<ETypeSig> parseGenericBound(ETypeSig left) {
+		return
+			term("extends").map(s -> ETypeSig.Bound.Type.boundExtends)
+						   .or(term("super").map(s -> ETypeSig.Bound.Type.boundSuper))
+						   .and(Parser.oneOrMoreSep(parseTypeSig(), term("&")))
+						   .map(t -> new ETypeSig.Bound(t._1, left, t._2))
+			;
+	}
+
+	private Parser<ETypeSig> parseAnyWithBound() {
+		return
+			parseAny().parseThisOrFollowedBy(this::parseGenericBound);
+	}
+
+
+	private Parser<ETypeSig> parseName() {
+		return Parser.oneOrMoreSep(Scan.identifier.skip(whitespace), term("."))
+					 .map(t -> new ETypeSig.Name(t.toString(".")))
+			;
+	}
+
+	private Parser<ETypeSig> parseGeneric(ETypeSig left) {
+		return
+			term("<")
+				.skipAnd(
+					Parser.oneOrMoreSep(
+						parseAnyWithBound().or(parseTypeSig())
+						, term(",")
+					)
+				).skip(term(">"))
+				.map(l -> new ETypeSig.WithGenerics((ETypeSig.Name) left, l));
+	}
+
+	private Parser<ETypeSig> parseNameWithGenerics() {
+		return parseName().parseThisOrFollowedBy(this::parseGeneric);
+
+	}
+
+	private Parser<ETypeSig> parseSimple() {
+		return parseAny().or(parseNameWithGenerics());
+	}
+
+	private Parser<ETypeSig> parseArray(ETypeSig left) {
+		return term("[")
+			.skipAnd(term("]"))
+			.map(v -> new ETypeSig.Array(left));
+	}
+
+	private Parser<ETypeSig> parseSimpleWithArray() {
+		return parseSimple().parseThisOrFollowedBy(
+			left -> parseArray(left).parseThisOrFollowedBy(arleft -> parseArray(arleft))
+		);
+	}
+
+	private Parser<ETypeSig> parseTypeSig() {
+		return parseSimpleWithArray();
+	}
 
 
 

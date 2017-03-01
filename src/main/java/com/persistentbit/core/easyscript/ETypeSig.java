@@ -28,8 +28,8 @@ public abstract class ETypeSig {
     static public class Any extends ETypeSig{
         @Override
         public String toString() {
-            return "Any";
-        }
+			return "?";
+		}
 
 
 
@@ -58,8 +58,8 @@ public abstract class ETypeSig {
 
         @Override
         public String toString() {
-            return left + (type == Type.boundExtends ? "extends " : "super ") + bounds.toString(" & ");
-        }
+			return left + (type == Type.boundExtends ? " extends " : " super ") + bounds.toString(" & ");
+		}
 
         @Override
         public <T> T match(Function<Any, T> matchAny, Function<Cls, T> matchCls, Function<Name, T> matchName, Function<WithGenerics, T> matchWithGenerics, Function<Array, T> matchArray, Function<Fun, T> matchFunction, Function<Bound, T> matchBound) {
@@ -116,18 +116,19 @@ public abstract class ETypeSig {
      *
      */
     static public class WithGenerics extends ETypeSig{
-        public final ETypeSig typeSig;
-        public final PList<ETypeSig>  generics;
 
-        public WithGenerics(ETypeSig typeSig, PList<ETypeSig> generics) {
-            this.typeSig = typeSig;
-            this.generics = generics;
+		public final ETypeSig.Name name;
+		public final PList<ETypeSig>  generics;
+
+		public WithGenerics(ETypeSig.Name name, PList<ETypeSig> generics) {
+			this.name = name;
+			this.generics = generics;
         }
 
         @Override
         public String toString() {
-            return typeSig + generics.toString("<",",", ">");
-        }
+			return name + generics.toString("<", ",", ">");
+		}
 
 
         @Override

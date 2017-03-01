@@ -1,5 +1,8 @@
 package com.persistentbit.core.easyscript;
 
+import com.persistentbit.core.result.Result;
+import com.persistentbit.core.utils.ToDo;
+
 /**
  * TODOC
  *
@@ -13,16 +16,13 @@ public class EEvaluator{
 
 	}
 
-	private static EEvaluator inst = new EEvaluator();
+	public static EEvaluator inst = new EEvaluator();
 
-	public static EEvalResult eval(EvalContext context, EExpr expr) {
-		try {
-			return inst.evalExpr(context, expr);
-		} catch(EvalException e) {
-			return EEvalResult.failure(context, e);
-		} catch(Exception e) {
-			return EEvalResult.failure(context, new EvalException(expr.pos, "Evaluation failed", e));
-		}
+	public static <T> Result<T> eval(EvalContext context, EExpr expr) {
+		return Result.function().code(l ->
+			Result.success((T) inst.evalExpr(context, expr))
+		);
+
 	}
 
 	public EEvalResult evalExpr(EvalContext context, EExpr expr) {
@@ -42,59 +42,56 @@ public class EEvaluator{
 
 
 	private EEvalResult group(EvalContext context, EExpr.Group e) {
-		return evalExpr(context.subContext(EvalContext.Type.block), e.expr);
+		if(e.type == EExpr.Group.Type.block) {
+			context = context.subContext(EvalContext.Type.block);
+		}
+		return evalExpr(context, e.expr);
 	}
 
 	private EEvalResult lambda(EvalContext context, EExpr.Lambda e) {
-		return EEvalResult.success(context, new ERuntimeLambda(this, context.getLocalContext(), e.paramNames, e.code));
+		return new EEvalResult(context, new ERuntimeLambda(this, context, e.paramNames, e.code));
 	}
 
 	private EEvalResult name(EvalContext context, EExpr.Name e) {
 		if(context.hasValue(e.name)) {
-			return EEvalResult.success(context, context.getValue(e.name).orElse(null));
+			return new EEvalResult(context, context.getValue(e.name).orElse(null));
 		}
-		return EEvalResult.failure(context, e.pos, "Undefined name:'" + e.name + "'");
+		throw new EvalException(e.pos, "Undefined name:'" + e.name + "'");
 	}
 
 	private EEvalResult constant(EvalContext context, EExpr.Const e) {
-		return EEvalResult.success(context, e.value);
+		return new EEvalResult(context, e.value);
 	}
 
 	private EEvalResult apply(EvalContext context, EExpr.Apply e) {
-		return evalExpr(context, e.function).mapSuccess(rfunRes -> {
-			Object rfun = rfunRes.getValue();
-			if(rfun instanceof ECallable) {
-				EvalContext ctx      = rfunRes.getContext();
-				ECallable   callable = (ECallable) rfun;
-				Object[]    args     = new Object[e.parameters.size()];
-				int         i        = 0;
-				for(EExpr expr : e.parameters) {
-					EEvalResult paramResult = evalExpr(ctx, expr);
-					if(paramResult.isError()) {
-						return paramResult;
-					}
-					ctx = paramResult.getContext();
-					args[i++] = paramResult.getValue();
-				}
-				return EEvalResult.success(ctx, callable.apply(args));
+		EEvalResult rfunRes = evalExpr(context, e.function);
+		Object      rfun    = rfunRes.getValue();
+		if(rfun instanceof ECallable) {
+			EvalContext ctx      = rfunRes.getContext();
+			ECallable   callable = (ECallable) rfun;
+			Object[]    args     = new Object[e.parameters.size()];
+			int         i        = 0;
+			for(EExpr expr : e.parameters) {
+				EEvalResult paramResult = evalExpr(ctx, expr);
+				ctx = paramResult.getContext();
+				args[i++] = paramResult.getValue();
 			}
-			if(rfun instanceof Class){
-				Class cls = (Class)rfun;
-				EvalContext ctx      = rfunRes.getContext();
-				Object[]    args     = new Object[e.parameters.size()];
-				int         i        = 0;
-				for(EExpr expr : e.parameters) {
-					EEvalResult paramResult = evalExpr(ctx, expr);
-					if(paramResult.isError()) {
-						return paramResult;
-					}
-					ctx = paramResult.getContext();
-					args[i++] = paramResult.getValue();
-				}
-				return EEvalResult.success(ctx,EJavaObjectMethod.construct(e.pos,cls,args));
+			return new EEvalResult(ctx, callable.apply(args));
+		}
+		if(rfun instanceof Class) {
+			Class       cls  = (Class) rfun;
+			EvalContext ctx  = rfunRes.getContext();
+			Object[]    args = new Object[e.parameters.size()];
+			int         i    = 0;
+			for(EExpr expr : e.parameters) {
+				EEvalResult paramResult = evalExpr(ctx, expr);
+
+				ctx = paramResult.getContext();
+				args[i++] = paramResult.getValue();
 			}
-			return EEvalResult.todo(context);
-		});
+			return new EEvalResult(ctx, EJavaObjectMethod.construct(e.pos, cls, args));
+		}
+		throw new ToDo("for " + rfun);
 
 	}
 
@@ -102,23 +99,20 @@ public class EEvaluator{
 
 	private EEvalResult val(EvalContext context, EExpr.Val e) {
 		if(e.type != EExpr.Val.Type.assign && context.hasLocalValue(e.name)) {
-			return EEvalResult.failure(context, e.pos, "val '" + e.name + "' is already defined!");
+			throw new EvalException(e.pos, "val '" + e.name + "' is already defined!");
 		}
-		return evalExpr(context, e.value)
-			.mapSuccess(er -> er.withContext(er.getContext().withValue(e.name, er.getValue())));
+		EEvalResult er = evalExpr(context, e.value);
+		return er.withContext(er.getContext().withValue(e.name, er.getValue()));
 	}
 
 	private EEvalResult exprList(EvalContext context, EExpr.ExprList e) {
 		EEvalResult result = null;
 		for(EExpr expr : e.expressions) {
 			result = evalExpr(context, expr);
-			if(result.isError()) {
-				return result;
-			}
 			context = result.getContext();
 		}
 		if(result == null) {
-			return EEvalResult.success(context, null);
+			return new EEvalResult(context, null);
 		}
 		return result;
 	}
@@ -164,9 +158,6 @@ public class EEvaluator{
 		}*/
 	private EEvalResult child(EvalContext context, EExpr.Child e) {
 		EEvalResult parentResult = evalExpr(context, e.left);
-		if(parentResult.isError()) {
-			return parentResult;
-		}
 		return ERuntimeChild.evalGetChild(parentResult.getValue(), e.childName, e.pos, parentResult.getContext());
 	}
 
