@@ -65,6 +65,7 @@ public abstract class Source{
 
 	@Override
 	public String toString() {
-		return "Source[" + position + ", current=" + StringUtils.escapeToJavaString("" + current) + "]";
+		return "Source[" + position + ", current=" + StringUtils
+			.present(StringUtils.escapeToJavaString(rest()), 20, "...") + "]";
 	}
 }

@@ -265,8 +265,11 @@ public final class StringUtils{
 		return str;
 	}
 
-	@Deprecated
 	public static String present(String org, int maxLength){
+		return present(org, maxLength, "");
+	}
+
+	public static String present(String org, int maxLength, String continueString) {
 		if(org == null){
 			return null;
 		}
@@ -282,7 +285,7 @@ public final class StringUtils{
 		if(kleiner.length() == 0){
 			kleiner = str;
 		}
-		return kleiner + "";
+		return kleiner + continueString;
 	}
 
 

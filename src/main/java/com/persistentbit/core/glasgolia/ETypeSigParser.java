@@ -1,4 +1,4 @@
-package com.persistentbit.core.easyscript;
+package com.persistentbit.core.glasgolia;
 
 import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.Parser;
@@ -11,7 +11,7 @@ import com.persistentbit.core.parser.source.Source;
  * @author Peter Muys
  * @since 28/02/2017
  */
-public class ETypeSigParser {
+public class ETypeSigParser implements Parser<ETypeSig>{
 
     private final Parser<String> whitespace;
 
@@ -21,7 +21,7 @@ public class ETypeSigParser {
 
 
 	public ParseResult<ETypeSig> parse(Source source) {
-		return parseNameWithGenerics().parse(source);
+		return parseTypeSig().parse(source);
 	}
 
 	public ParseResult<ETypeSig> parse(String code) {
@@ -35,7 +35,7 @@ public class ETypeSigParser {
 
 
 	private Parser<ETypeSig> parseAny() {
-		return term("Any").or(term("?")).map(s -> new ETypeSig.Any());
+		return term("Any").or(term("?")).map(s -> ETypeSig.any);
 	}
 
 
@@ -78,17 +78,19 @@ public class ETypeSigParser {
 	}
 
 	private Parser<ETypeSig> parseFunction() {
-		return
+		return source ->
 			term("(")
 				.skipAnd(Parser.zeroOrMoreSep(parseTypeSig(), term(",")))
 				.skip(term(")"))
 				.skip(term("->"))
 				.and(parseTypeSig())
-				.map(t -> new ETypeSig.Fun(t._2, t._1));
+				.<ETypeSig>map(t -> new ETypeSig.Fun(t._2, t._1))
+				.parse(source)
+			;
 	}
 
 	private Parser<ETypeSig> parseSimple() {
-		return Parser.orOf(parseAny(), parseNameWithGenerics(), parseFunction());
+		return Parser.orOf(parseNameWithGenerics(), parseFunction(), parseAny());
 	}
 
 
@@ -106,7 +108,7 @@ public class ETypeSigParser {
 
 	private Parser<ETypeSig> parseTypeSig() {
 		return source ->
-			parseSimpleWithArray().or(whitespace.map(s -> new ETypeSig.Any())).parse(source)
+			parseSimpleWithArray().or(whitespace.map(s -> ETypeSig.any)).parse(source);
 
 	}
 

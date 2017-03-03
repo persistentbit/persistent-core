@@ -1,4 +1,4 @@
-package com.persistentbit.core.easyscript;
+package com.persistentbit.core.glasgolia;
 
 import com.persistentbit.core.collections.PList;
 
@@ -13,6 +13,14 @@ import java.util.function.Function;
 public abstract class ETypeSig {
     private ETypeSig(){}
 
+	static public ETypeSig any = new Any();
+
+
+	public static Cls cls(Class cls) {
+		return new Cls(cls);
+	}
+
+
 
     public abstract <T> T match(
         Function<Any,T> matchAny,
@@ -26,6 +34,9 @@ public abstract class ETypeSig {
     );
 
     static public class Any extends ETypeSig{
+
+		private Any() {}
+
         @Override
         public String toString() {
 			return "?";
@@ -80,8 +91,10 @@ public abstract class ETypeSig {
 
         @Override
         public String toString() {
-            return cls.getName();
-        }
+			return cls.getName().startsWith("java.lang")
+				? cls.getSimpleName()
+				: cls.getName();
+		}
 
 
         @Override

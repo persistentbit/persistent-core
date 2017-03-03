@@ -566,7 +566,7 @@ public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializabl
 	}
 
 	@Override
-	public <R> R match(Supplier<R> emptyList, Function<T, R> singleton, Function<T, Function<IPList<T>, R>> headTail
+	public <R> R match(Supplier<R> emptyList, Function<T, R> singleton, Function<IPList<T>, R> list
 	) {
 		if(isEmpty()){
 			return emptyList.get();
@@ -574,6 +574,6 @@ public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializabl
 		if(size() == 1){
 			return singleton.apply(head());
 		}
-		return headTail.apply(head()).apply(tail().plist());
+		return list.apply(this);
 	}
 }

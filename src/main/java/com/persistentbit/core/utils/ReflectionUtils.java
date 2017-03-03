@@ -82,6 +82,14 @@ public final class ReflectionUtils{
 
 	}
 
+	public static Optional<Field> getField(Class cls, String name) {
+		try {
+			return Optional.of(cls.getField(name));
+		} catch(NoSuchFieldException e) {
+			return Optional.empty();
+		}
+	}
+
 	public static Optional<Method> getFunctionalInterfaceMethod(Class functionalInterfaceClass){
 		for(Method m : functionalInterfaceClass.getMethods()){
 			if(m.isDefault() == false){

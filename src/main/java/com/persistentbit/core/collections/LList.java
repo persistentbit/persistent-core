@@ -228,12 +228,12 @@ public abstract class LList<E> extends AbstractIPList<E, LList<E>> implements Se
 	}
 
 	  @Override
-	  public <R> R match(Supplier<R> emptyList, Function<E, R> singleton, Function<E, Function<IPList<E>, R>> headTail
+	  public <R> R match(Supplier<R> emptyList, Function<E, R> singleton, Function<IPList<E>, R> list
 	  ) {
 		  if(tail.isEmpty()){
 		  	return singleton.apply(head);
 		  }
-		  return headTail.apply(head).apply(tail);
+		  return list.apply(this);
 	  }
   }
 

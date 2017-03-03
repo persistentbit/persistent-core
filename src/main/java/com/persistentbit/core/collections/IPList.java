@@ -15,8 +15,8 @@ public interface IPList<T> extends PStream<T>{
   IPList<T> put(int index, T value);
 
   <R> R match(
-     Supplier<R> emptyList,
-     Function<T,R>  singleton,
-     Function<T,Function<IPList<T>,R>> headTail
+	  Supplier<R> emptyList,
+	  Function<T,R>  singleton,
+	  Function<IPList<T>, R> multiple
   );
 }

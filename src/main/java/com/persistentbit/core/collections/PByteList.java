@@ -243,7 +243,7 @@ public final class PByteList extends AbstractIPList<Byte, PByteList> implements 
 
 	@Override
 	public <R> R match(Supplier<R> emptyList, Function<Byte, R> singleton,
-					   Function<Byte, Function<IPList<Byte>, R>> headTail
+					   Function<IPList<Byte>, R> list
 	) {
 		if(isEmpty()){
 			return emptyList.get();
@@ -251,6 +251,6 @@ public final class PByteList extends AbstractIPList<Byte, PByteList> implements 
 		if(size() == 1){
 			return singleton.apply(head());
 		}
-		return headTail.apply(head()).apply(from(data,1,data.length-1));
+		return list.apply(this);
 	}
 }
