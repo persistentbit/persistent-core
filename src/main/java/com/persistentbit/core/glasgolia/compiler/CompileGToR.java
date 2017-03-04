@@ -93,6 +93,7 @@ public class CompileGToR{
 		}
 
 		ETypeSig varTypeSig = g.getType() == ETypeSig.any ? g.initial.getType() : g.getType();
+		ctx = ctx.addVar(false, name, getType(varTypeSig));
 		RExpr    right      = compile(g.initial);
 		Class type = varTypeSig == ETypeSig.any
 			? right.getType() : getType(varTypeSig);
@@ -225,9 +226,27 @@ public class CompileGToR{
 		switch(g.name) {
 			case "import":
 				return compileImport(g);
+			case "while":
+				return compileWhile(g);
+			case "if":
+				return compileIf(g);
+
 			default:
 				throw new ToDo("custom " + g.name);
 		}
+	}
+
+	private RExpr compileWhile(GExpr.Custom g) {
+		RExpr cond = compile(g.arguments.get(0));
+		RExpr code = compile(g.arguments.get(1));
+		return new RWhile(cond, code);
+	}
+
+	private RExpr compileIf(GExpr.Custom g) {
+		RExpr cond      = compile(g.arguments.get(0));
+		RExpr trueCode  = compile(g.arguments.get(1));
+		RExpr falseCode = compile(g.arguments.get(2));
+		return new RIf(cond, trueCode, falseCode);
 	}
 
 	private RExpr compileImport(GExpr.Custom g) {

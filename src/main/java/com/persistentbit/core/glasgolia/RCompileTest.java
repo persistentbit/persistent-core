@@ -57,6 +57,12 @@ public class RCompileTest{
 		print("val id = u -> u");
 		print("id('this is id')");
 		print("sum(2)(5);");
-		print("printSum(sum(1,2),sum(4)(6));");
+		print("printSum(sum(1)(2),sum(4)(6));");
+		print("var aVar = 100;");
+		print("aVar = 1");
+		print("val count = cnt -> { var i = 0; while(i<cnt) { print(i); i=i+1; } }");
+		print("count(100)");
+		print("val recursive = (x,f)  -> {print(x); f(x-1,f); }");
+		print("recursive(10,recursive)");
 	}
 }

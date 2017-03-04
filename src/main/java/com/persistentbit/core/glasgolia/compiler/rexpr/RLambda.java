@@ -1,6 +1,7 @@
 package com.persistentbit.core.glasgolia.compiler.rexpr;
 
 import com.persistentbit.core.collections.PStream;
+import com.persistentbit.core.glasgolia.EvalException;
 import com.persistentbit.core.glasgolia.compiler.RStack;
 import com.persistentbit.core.utils.StrPos;
 
@@ -38,6 +39,9 @@ public class RLambda implements RFunction{
 
 	@Override
 	public Object apply(Object[] arguments) {
+		if(arguments.length != paramCount) {
+			throw new EvalException("Expected " + paramCount + " arguments, got " + arguments.length, pos);
+		}
 		Object[] frame = new Object[paramCount + freeVars.length];
 		System.arraycopy(arguments, 0, frame, 0, arguments.length);
 		System.arraycopy(freeVars, 0, frame, paramCount, freeVars.length);

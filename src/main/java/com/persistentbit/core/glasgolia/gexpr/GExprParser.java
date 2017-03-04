@@ -314,20 +314,13 @@ public class GExprParser{
 			.onErrorAddMessage("Expected a bitwise and operator.");
 
 
-	private Parser<GExpr> parseSimpleExpr = parseBinOpCondORL13; /*source -> {
-		Parser<GExpr> parser = parseBinOp(
-			parseTermExpr,
-			Parser.orOf(term("+"), term("-"), term("or"))
-				  .onErrorAddMessage("Expected a term operator")
-				  .skip(ws),
-			parseTermExpr.skip(ws)
-		).skip(ws);
-		return parser.parse(source);
-	};*/
+	private Parser<GExpr> parseSimpleExpr = parseBinOpCondORL13;
 
 	private Parser<GExpr> parseAssign(GExpr left) {
-		return term("=").skipAnd(parseExpr())
-						.map(e -> new GExpr.BinOp(left, "=", e));
+		return source -> term("=").skipAnd(parseExpr())
+			.<GExpr>map(e -> new GExpr.BinOp(left, "=", e))
+			.parse(source)
+			;
 	}
 
 	private Parser<GExpr> parseVarVal() {
@@ -383,7 +376,7 @@ public class GExprParser{
 	public Parser<GExpr> parseExpr() {
 		return source ->
 			parseVarValAndAssign()
-				.or(parseSimpleExpr)
+				.or(parseSimpleExpr.parseThisOrFollowedBy(l -> parseAssign(l)))
 				.skip(ws).parse(source);
 	}
 
