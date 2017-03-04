@@ -229,6 +229,7 @@ public class CompileGToR{
 			case "while":
 				return compileWhile(g);
 			case "if":
+			case "ifElse":
 				return compileIf(g);
 
 			default:
@@ -245,7 +246,7 @@ public class CompileGToR{
 	private RExpr compileIf(GExpr.Custom g) {
 		RExpr cond      = compile(g.arguments.get(0));
 		RExpr trueCode  = compile(g.arguments.get(1));
-		RExpr falseCode = compile(g.arguments.get(2));
+		RExpr falseCode = g.arguments.size()==2 ? null : compile(g.arguments.get(2));
 		return new RIf(cond, trueCode, falseCode);
 	}
 

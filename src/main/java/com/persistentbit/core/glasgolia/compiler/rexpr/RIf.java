@@ -1,7 +1,7 @@
 package com.persistentbit.core.glasgolia.compiler.rexpr;
 
+import com.persistentbit.core.glasgolia.EvalException;
 import com.persistentbit.core.utils.StrPos;
-import com.persistentbit.core.utils.ToDo;
 
 /**
  * TODOC
@@ -38,6 +38,16 @@ public class RIf implements RExpr{
 
 	@Override
 	public Object get() {
-		throw new ToDo();
+		Object condVal = cond.get();
+		if(condVal instanceof Boolean == false){
+			throw new EvalException("Expected boolean condition for if, got: " + condVal,cond.getPos());
+		}
+		if((Boolean)condVal){
+			return codeTrue.get();
+		}
+		if(codeFalse != null){
+			return codeFalse.get();
+		}
+		return null;
 	}
 }

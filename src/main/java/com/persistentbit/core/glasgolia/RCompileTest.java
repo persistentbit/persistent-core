@@ -62,7 +62,8 @@ public class RCompileTest{
 		print("aVar = 1");
 		print("val count = cnt -> { var i = 0; while(i<cnt) { print(i); i=i+1; } }");
 		print("count(100)");
-		print("val recursive = (x,f)  -> {print(x); f(x-1,f); }");
-		print("recursive(10,recursive)");
+		print("val recursive = (x,f)  -> {print(x); if(x != 0) {f(x-1,f);} else 'Done counting ' }");
+		print("val rec1 = x -> recursive(x,recursive);");
+		print("rec1(1000)");
 	}
 }
