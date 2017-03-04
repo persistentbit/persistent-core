@@ -20,7 +20,7 @@ import com.persistentbit.core.parser.source.Source;
 public class RCompileTest{
 
 	private static GExprParser parser = new GExprParser();
-	private static CompileGToR compiler = new CompileGToR(new RStack.ReplStack());
+	private static CompileGToR compiler = new CompileGToR(new GExprParser(),new RStack.ReplStack());
 
 
 	private static void print(String code) {

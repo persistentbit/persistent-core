@@ -6,9 +6,6 @@ import "com.persistentbit.core.utils";
 import "com.persistentbit.core";
 import "com.persistentbit.core.easyscript";
 
-
+val println = x -> System.out.println(x);
 
 val range = x -> { val index = 0; while(index<x) { println(index); index=index+1; } };
-
-
-val parseType = x -> ETypeSigParser(EParser.ws).parse(x).getValue();

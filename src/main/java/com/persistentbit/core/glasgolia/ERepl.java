@@ -1,4 +1,4 @@
-package com.persistentbit.core.easyscript;
+package com.persistentbit.core.glasgolia;
 
 import com.persistentbit.core.ModuleCore;
 import com.persistentbit.core.logging.printing.LogPrint;
@@ -38,50 +38,13 @@ public class ERepl{
 
 	static final LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
 
-	/*static EEvalResult eval(EvalContext context, String code) {
-		ParseResult<EExpr> pr = EParser.ws.skipAnd(EParser.parseExprList()).skip(Scan.eof).parse(Source.asSource(code));
-		if(pr.isSuccess()) {
-			System.out.println("Parsed: " + pr.getValue());
-			return EEvaluator.eval(context, pr.getValue());
-		}
-		lp.print(pr.getError());
-		return null;
-	}*/
 
-	static final EasyScript es = new EasyScript();
+
+	static final Glasgolia es = new Glasgolia();
 
 	public static void main(String[] args) throws Exception {
-		EvalContext    context = EvalContext.inst;
-		/*context = context
-			.addImport("java.lang")
-			.addImport("java.util")
-			.addImport("com.persistentbit.core.collections")
-			.addImport("com.persistentbit.core.result")
-			.addImport("com.persistentbit.core.utils")
-			.addImport("com.persistentbit.core");
-
-		;*/
-
 		es.loadAndEval("repl.easy").orElseThrow();
 
-		/*String defaultCode = IO.getClassPathResourceReader("/repl.easy",IO.utf8)
-				.flatMap(IO::readTextStream)
-				.orElse(null);
-		if(defaultCode!= null){
-			EEvalResult res = es.eval(context,defaultCode);
-			if(res != null) {
-				if (res.isSuccess()) {
-
-					context = res.getContext();
-					System.out.println("Success:" + res.getValue());
-
-				} else {
-					lp.print(res.getError());
-				}
-			}
-			System.out.flush();
-		}
-*/
 		BufferedReader bin     = new BufferedReader(new InputStreamReader(System.in));
 		while(true) {
 			String code = read(bin);

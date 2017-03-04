@@ -6,6 +6,9 @@ import com.persistentbit.core.glasgolia.CompileException;
 import com.persistentbit.core.glasgolia.ETypeSig;
 import com.persistentbit.core.glasgolia.compiler.rexpr.*;
 import com.persistentbit.core.glasgolia.gexpr.GExpr;
+import com.persistentbit.core.glasgolia.gexpr.GExprParser;
+import com.persistentbit.core.parser.source.Source;
+import com.persistentbit.core.result.Result;
 import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.utils.StrPos;
 import com.persistentbit.core.utils.ToDo;
@@ -25,16 +28,22 @@ import java.util.Optional;
  */
 public class CompileGToR{
 
-
+	private GExprParser	parser;
 	private CompileContext ctx = new CompileContext();
 	private final RStack runtimeStack;
 
-	public CompileGToR(RStack runtimeStack) {
+	public CompileGToR(GExprParser parser,RStack runtimeStack) {
+		this.parser = parser;
 		this.runtimeStack = runtimeStack;
 	}
 
 	public CompileGToR() {
-		this(new RStack.RuntimeStack());
+		this(new GExprParser(),new RStack.ReplStack());
+	}
+
+	public Result<RExpr> compile(Source source){
+		return parser.parseExprList().parse(source).asResult()
+			.map(this::compile);
 	}
 
 	public RExpr compile(GExpr g) {

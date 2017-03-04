@@ -23,10 +23,14 @@ public class GExprParser{
 	private final ETypeSigParser typeSigParser = new ETypeSigParser(ws);
 
 
+
 	public GExprParser() {
 
 	}
 
+	public Parser<String> eof(){
+		return ws.andEof();
+	}
 
 	private Parser<String> keyword(String keyword) {
 		return Scan.keyword(keyword).skip(ws);
