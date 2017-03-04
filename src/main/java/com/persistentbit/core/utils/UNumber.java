@@ -1,7 +1,9 @@
 package com.persistentbit.core.utils;
 
+import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.result.Result;
+import com.persistentbit.core.tuples.Tuple2;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -14,7 +16,7 @@ import java.util.Comparator;
  * @author Peter Muys
  * @since 28/12/2016
  */
-public final class NumberUtils {
+public final class UNumber{
 
 	public static Result<Byte> convertToByte(Number value) {
 		if(value == null) {
@@ -75,7 +77,7 @@ public final class NumberUtils {
 		if(value instanceof Double) {
 			return Result.failure("Can't convert a double to a float:" + value);
 		}
-		return Result.failure("Not a float: " + value);
+		return Result.success(value.floatValue());
 	}
 
 	public static Result<Double> convertToDouble(Number value) {
@@ -88,7 +90,7 @@ public final class NumberUtils {
 		if(value instanceof Float) {
 			return Result.success(value.doubleValue());
 		}
-		return Result.failure("Don't know how to convert to a Double:" + value);
+		return Result.success(value.doubleValue());
 	}
 
 	public static <R> Result<R> convertTo(Number value, Class<R> cls) {
@@ -115,6 +117,48 @@ public final class NumberUtils {
 		}
 		return Result
 			.failure("Don't know how to convert a " + value.getClass().getSimpleName() + " to a" + cls.getName());
+	}
+
+	private static PMap<Tuple2<Class, Class>, Class> unifyLookup = PMap.<Tuple2<Class, Class>, Class>empty()
+		.put(Tuple2.of(Byte.class, Short.class), Short.class)
+		.put(Tuple2.of(Byte.class, Integer.class), Integer.class)
+		.put(Tuple2.of(Byte.class, Long.class), Long.class)
+		.put(Tuple2.of(Byte.class, Float.class), Float.class)
+		.put(Tuple2.of(Byte.class, Double.class), Double.class)
+		.put(Tuple2.of(Short.class, Byte.class), Short.class)
+		.put(Tuple2.of(Short.class, Integer.class), Integer.class)
+		.put(Tuple2.of(Short.class, Long.class), Long.class)
+		.put(Tuple2.of(Short.class, Float.class), Float.class)
+		.put(Tuple2.of(Short.class, Double.class), Double.class)
+		.put(Tuple2.of(Integer.class, Byte.class), Integer.class)
+		.put(Tuple2.of(Integer.class, Short.class), Integer.class)
+		.put(Tuple2.of(Integer.class, Long.class), Long.class)
+		.put(Tuple2.of(Integer.class, Float.class), Float.class)
+		.put(Tuple2.of(Integer.class, Double.class), Double.class).put(Tuple2.of(Long.class, Byte.class), Long.class)
+		.put(Tuple2.of(Long.class, Short.class), Long.class)
+		.put(Tuple2.of(Long.class, Integer.class), Long.class)
+		.put(Tuple2.of(Long.class, Float.class), Float.class)
+		.put(Tuple2.of(Long.class, Double.class), Double.class)
+		.put(Tuple2.of(Float.class, Float.class), Float.class)
+		.put(Tuple2.of(Float.class, Double.class), Double.class);
+
+	public static Result<Tuple2<Number, Number>> unify(Number left, Number right) {
+		if(left == null || right == null) {
+			return Result.failure("Can't unify a null value");
+		}
+		Class clsLeft  = left.getClass();
+		Class clsRight = right.getClass();
+		if(clsLeft == clsRight) {
+			return Result.success(Tuple2.of(left, right));
+		}
+		return Result.fromOpt(unifyLookup.getOpt(Tuple2.of(clsLeft, clsRight)))
+					 .flatMap(clsUni ->
+						 convertTo(left, clsUni)
+							 .flatMap(nl -> convertTo(right, clsUni)
+								 .map(nr -> Tuple2.of(nl, nr))
+							 )
+					 )
+			;
 	}
 
 

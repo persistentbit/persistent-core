@@ -3,7 +3,7 @@ package com.persistentbit.core.tokenizers;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.result.Result;
-import com.persistentbit.core.utils.StringUtils;
+import com.persistentbit.core.utils.UString;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -247,7 +247,7 @@ public class SimpleTokenizer<TT> implements Tokenizer<TT> {
                     return;
                 }
                 String skipString = code.substring(0, len);
-                int nlCount = StringUtils.countCharOccurrence(skipString, '\n');
+				int    nlCount    = UString.countCharOccurrence(skipString, '\n');
 
                 if (nlCount > 0) {
                     int lastNl = skipString.lastIndexOf('\n');

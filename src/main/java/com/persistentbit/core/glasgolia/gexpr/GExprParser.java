@@ -4,8 +4,8 @@ import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.glasgolia.ETypeSig;
 import com.persistentbit.core.glasgolia.ETypeSigParser;
 import com.persistentbit.core.parser.*;
-import com.persistentbit.core.utils.NumberUtils;
 import com.persistentbit.core.utils.StrPos;
+import com.persistentbit.core.utils.UNumber;
 
 /**
  * TODOC
@@ -157,19 +157,25 @@ public class GExprParser{
 					 .parse(source);
 	}
 
-	private Parser<GExpr> parseVarDecl =
-		parseNameString().and(parseType()).map(n -> new GExpr.Name(n._1.pos, n._1.value, n._2));
-
+	private Parser<GExpr.TypedName> parseTypedName =
+		parseNameString()
+			.and(parseType())
+			.map(t -> new GExpr.TypedName(t._1.pos, t._1.value, t._2));
+/*
+	private Parser<Tuple2<WithPos<String>,ETypeSig>> parseVarDecl =
+		parseNameString()
+		.and(parseType());
+*/
 
 	private Parser<GExpr> parseLambda() {
 		return source ->
 			term("(").skipAnd(
 				Parser.zeroOrMoreSep(
-					parseVarDecl,
+					parseTypedName,
 					term(",")
 				).skip(term(")"))
 			)
-					 .or(parseVarDecl.map(arg -> PList.val(arg)))
+					 .or(parseTypedName.map(arg -> PList.val(arg)))
 					 .skip(term("->")).and(parseExpr())
 					 .and(parseType())
 				.<GExpr>map(t -> new GExpr.Lambda(source.position, t._2, t._1._1, t._1._2))
@@ -179,7 +185,7 @@ public class GExprParser{
 
 
 	private GExpr createApply(GExpr left, StrPos namePos, String name, GExpr right) {
-		GExpr.Child function = new GExpr.Child(left.getPos(), left, name);
+		GExpr.Child function = new GExpr.Child(left.getPos(), left, new GExpr.TypedName(namePos, name, ETypeSig.any));
 		return new GExpr.Apply(left.getPos(), function, PList.val(right));
 	}
 
@@ -194,8 +200,8 @@ public class GExprParser{
 
 	private Parser<GExpr> parseChild(GExpr left) {
 		return
-			term(".").skipAnd(parseNameString())
-					 .map(nameWithPos -> new GExpr.Child(nameWithPos.pos, left, nameWithPos.value));
+			term(".").skipAnd(parseTypedName)
+					 .map(typedName -> new GExpr.Child(typedName.pos, left, typedName));
 	}
 
 	private Parser<GExpr> parseApply(GExpr left) {
@@ -328,9 +334,14 @@ public class GExprParser{
 		return source ->
 			keyword("val").map(v -> GExpr.ValVar.ValVarType.val)
 						  .or(keyword("var").map(v -> GExpr.ValVar.ValVarType.var))
-						  .and(parseVarDecl)
-				.<GExpr>map(t -> new GExpr.ValVar(t._2, t._1))
-				.parseThisOrFollowedBy(vv -> parseAssign(vv))
+						  .and(parseTypedName)
+						  .skip(term("="))
+						  .and(parseExpr())
+						  //.<GExpr>map(t -> new GExpr.ValVar(t._2.pos,t._2, t._1))
+						  //.parseThisOrFollowedBy(vv -> parseAssign(vv))
+				.<GExpr>map(t ->
+					new GExpr.ValVar(t._1._2.pos, t._1._2, t._1._1, t._2)
+				)
 				.parse(source)
 			;
 
@@ -475,7 +486,7 @@ public class GExprParser{
 							.optional())
 					.<GExpr>map(v -> {
 						long    value = v._1.value;
-						Integer asInt = NumberUtils.convertToInteger(value).orElse(null);
+						Integer asInt = UNumber.convertToInteger(value).orElse(null);
 						if(v._2.isPresent()) {
 							switch(v._2.get()) {
 								case "L":

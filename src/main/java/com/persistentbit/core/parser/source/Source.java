@@ -2,7 +2,7 @@ package com.persistentbit.core.parser.source;
 
 import com.persistentbit.core.parser.Parser;
 import com.persistentbit.core.utils.StrPos;
-import com.persistentbit.core.utils.StringUtils;
+import com.persistentbit.core.utils.UString;
 
 import java.util.Objects;
 
@@ -65,7 +65,7 @@ public abstract class Source{
 
 	@Override
 	public String toString() {
-		return "Source[" + position + ", current=" + StringUtils
-			.present(StringUtils.escapeToJavaString(rest()), 20, "...") + "]";
+		return "Source[" + position + ", current=" + UString
+			.present(UString.escapeToJavaString(rest()), 20, "...") + "]";
 	}
 }

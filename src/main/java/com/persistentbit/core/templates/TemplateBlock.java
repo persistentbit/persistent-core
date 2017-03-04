@@ -3,7 +3,7 @@ package com.persistentbit.core.templates;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.utils.StrPos;
-import com.persistentbit.core.utils.StringUtils;
+import com.persistentbit.core.utils.UString;
 
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -64,9 +64,9 @@ public class TemplateBlock {
                 "type=" + type +
                 ", " + pos +
                 ", content='" +
-                StringUtils.escapeToJavaString(
-                        StringUtils.present(content,40)
-                )+ '\'' +
+			UString.escapeToJavaString(
+				UString.present(content, 40)
+			)+ '\'' +
 
                 '}';
     }
@@ -79,8 +79,8 @@ public class TemplateBlock {
         return parse(pos,code,"<<",">>");
     }
     public static PList<TemplateBlock> parse(StrPos orgPos, String orgCode, String regExItemBlockStart, String regExItemBlockEnd){
-        return Log.function(orgPos,StringUtils.present(orgCode,10),regExItemBlockStart,regExItemBlockEnd).code(l ->{
-            Pattern p = Pattern.compile("(" + regExItemBlockStart + ")(.*?)(" + regExItemBlockEnd + ")" , Pattern.DOTALL);
+		return Log.function(orgPos, UString.present(orgCode, 10), regExItemBlockStart, regExItemBlockEnd).code(l -> {
+			Pattern p = Pattern.compile("(" + regExItemBlockStart + ")(.*?)(" + regExItemBlockEnd + ")" , Pattern.DOTALL);
             String code = orgCode;
             StrPos pos = orgPos;
             PList<TemplateBlock> res = PList.empty();

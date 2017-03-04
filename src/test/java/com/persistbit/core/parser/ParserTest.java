@@ -13,7 +13,7 @@ import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
 import com.persistentbit.core.utils.StrPos;
-import com.persistentbit.core.utils.StringUtils;
+import com.persistentbit.core.utils.UString;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -88,7 +88,7 @@ public class ParserTest {
         @Override
         public String toString() {
 			if(value instanceof String) {
-				return "\"" + StringUtils.escapeToJavaString(value.toString()) + "\"";
+				return "\"" + UString.escapeToJavaString(value.toString()) + "\"";
 			}
 			return value.toString();
         }

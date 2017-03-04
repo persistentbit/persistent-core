@@ -1,7 +1,7 @@
 package com.persistentbit.core.collections;
 
 import com.persistentbit.core.utils.IO;
-import com.persistentbit.core.utils.StringUtils;
+import com.persistentbit.core.utils.UString;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -100,7 +100,7 @@ public final class PByteList extends AbstractIPList<Byte, PByteList> implements 
 
 	public String toHexString() {
 		StringBuilder sb = new StringBuilder(size() * 2);
-		forEach(b -> sb.append(StringUtils.padLeft(Integer.toHexString(b & 0xff), 2, '0')));
+		forEach(b -> sb.append(UString.padLeft(Integer.toHexString(b & 0xff), 2, '0')));
 		return sb.toString();
 	}
 

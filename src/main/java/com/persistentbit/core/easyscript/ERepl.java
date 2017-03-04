@@ -4,7 +4,7 @@ import com.persistentbit.core.ModuleCore;
 import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.result.Result;
-import com.persistentbit.core.utils.StringUtils;
+import com.persistentbit.core.utils.UString;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -31,7 +31,7 @@ public class ERepl{
 			if(line.trim().isEmpty()) {
 				break;
 			}
-			code += StringUtils.NL + line;
+			code += UString.NL + line;
 		}
 		return code;
 	}

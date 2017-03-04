@@ -20,6 +20,11 @@ public interface RBoolean extends RExpr{
 	}
 
 	static RExpr createBinOp(RExpr left, String opString, RExpr right) {
+		BiFunction<Boolean, Boolean, Object> op = getOperatorFunction(opString);
+		return new BinOp(left, opString, op, right);
+	}
+
+	static BiFunction<Boolean, Boolean, Object> getOperatorFunction(String opString) {
 		BiFunction<Boolean, Boolean, Object> op;
 		switch(opString) {
 			case "||":
@@ -37,7 +42,7 @@ public interface RBoolean extends RExpr{
 			default:
 				throw new ToDo("int bin op " + opString);
 		}
-		return new BinOp(left, opString, op, right);
+		return op;
 	}
 
 	class BinOp implements RBoolean{

@@ -20,6 +20,11 @@ public interface RString extends RExpr{
 	}
 
 	static RExpr createBinOp(RExpr left, String opString, RExpr right) {
+		BiFunction<String, String, Object> op = getOperatorFunction(opString);
+		return new RString.BinOp(left, opString, op, right);
+	}
+
+	static BiFunction<String, String, Object> getOperatorFunction(String opString) {
 		BiFunction<String, String, Object> op;
 		switch(opString) {
 			case "+":
@@ -46,7 +51,7 @@ public interface RString extends RExpr{
 			default:
 				throw new ToDo("string bin op " + opString);
 		}
-		return new RString.BinOp(left, opString, op, right);
+		return op;
 	}
 
 	class BinOp implements RString{

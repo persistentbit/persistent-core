@@ -2,8 +2,8 @@ package com.persistentbit.core.parser;
 
 import com.persistentbit.core.OK;
 import com.persistentbit.core.parser.source.Source;
-import com.persistentbit.core.utils.NumberUtils;
-import com.persistentbit.core.utils.StringUtils;
+import com.persistentbit.core.utils.UNumber;
+import com.persistentbit.core.utils.UString;
 
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -73,7 +73,7 @@ public class Scan{
 		}
 		return ParseResult
 			.failure(source, new ParseExceptionEOF(
-				"Expected end-of-file: got '" + StringUtils
+				"Expected end-of-file: got '" + UString
 					.escapeToJavaString("" + source.current) + "'", source.position
 			));
 
@@ -101,7 +101,7 @@ public class Scan{
 				if(res.isFailure()) {
 					return res.<Integer>map(v -> null).onErrorAdd("Not an integer literal");
 				}
-				return NumberUtils.parseInt(res.getValue()).match(
+				return UNumber.parseInt(res.getValue()).match(
 					success -> res.map(v -> success.getValue()),
 					empty -> ParseResult.failure(res.getSource(), "No Number"),
 					failure -> ParseResult.failure(res.getSource(), failure.getException().getMessage())
@@ -113,7 +113,7 @@ public class Scan{
 				if(res.isFailure()) {
 					return res.<Long>map(v -> null).onErrorAdd("Not a long literal");
 				}
-				return NumberUtils.parseLong(res.getValue()).match(
+				return UNumber.parseLong(res.getValue()).match(
 					success -> res.map(v -> success.getValue()),
 					empty -> ParseResult.failure(res.getSource(), "No Number"),
 					failure -> ParseResult.failure(res.getSource(), failure.getException().getMessage())
@@ -126,7 +126,7 @@ public class Scan{
 				if(res.isFailure()) {
 					return res.<Double>map(v -> null).onErrorAdd("Not a double literal");
 				}
-				return NumberUtils.parseDouble(res.getValue()).match(
+				return UNumber.parseDouble(res.getValue()).match(
 					success -> res.map(v -> success.getValue()),
 					empty -> ParseResult.failure(res.getSource(), "No Number"),
 					failure -> ParseResult.failure(res.getSource(), failure.getException().getMessage())
@@ -201,8 +201,8 @@ public class Scan{
 							source = source.next();
 							hn += source.current;
 							source = source.next();
-							String uc = NumberUtils.parseHexInt(hn).map(i -> new String(Character.toChars(i)))
-												   .orElse("\\u" + hn);
+							String uc = UNumber.parseHexInt(hn).map(i -> new String(Character.toChars(i)))
+											   .orElse("\\u" + hn);
 							sb.append(uc);
 
 							break;

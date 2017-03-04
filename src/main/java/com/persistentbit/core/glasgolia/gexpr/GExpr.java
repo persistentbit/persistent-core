@@ -4,7 +4,7 @@ import com.persistentbit.core.collections.ImmutableArray;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.glasgolia.ETypeSig;
 import com.persistentbit.core.utils.StrPos;
-import com.persistentbit.core.utils.StringUtils;
+import com.persistentbit.core.utils.UString;
 
 import java.util.function.Function;
 
@@ -23,6 +23,24 @@ public abstract class GExpr{
 	public abstract StrPos getPos();
 
 
+	static public class TypedName{
+
+		public StrPos pos;
+		public String name;
+		public ETypeSig type;
+
+		public TypedName(StrPos pos, String name, ETypeSig type) {
+			this.pos = pos;
+			this.name = name;
+			this.type = type;
+		}
+
+		@Override
+		public String toString() {
+			return name + ":" + type;
+		}
+	}
+
 	public abstract <T> T match(
 		Function<Child, T> matchChild,
 		Function<ExprList, T> matchExprList,
@@ -40,9 +58,9 @@ public abstract class GExpr{
 	public static class Child extends GExpr{
 
 		public final GExpr left;
-		public final String childName;
+		public final TypedName childName;
 
-		public Child(StrPos pos, GExpr left, String childName) {
+		public Child(StrPos pos, GExpr left, TypedName childName) {
 			this.left = left;
 			this.childName = childName;
 		}
@@ -162,11 +180,11 @@ public abstract class GExpr{
 	public static class Lambda extends GExpr{
 
 		private final StrPos pos;
-		public final PList<GExpr> params;
+		public final PList<TypedName> params;
 		public final GExpr code;
 		public final ETypeSig returnType;
 
-		public Lambda(StrPos pos, ETypeSig returnType, PList<GExpr> params, GExpr code) {
+		public Lambda(StrPos pos, ETypeSig returnType, PList<TypedName> params, GExpr code) {
 			this.pos = pos;
 			this.params = params;
 			this.code = code;
@@ -214,7 +232,7 @@ public abstract class GExpr{
 		@Override
 		public String toString() {
 			if(value instanceof String) {
-				return "\"" + StringUtils.escapeToJavaString(value.toString()) + "\"" + ":" + type;
+				return "\"" + UString.escapeToJavaString(value.toString()) + "\"" + ":" + type;
 			}
 			else {
 				return "" + value + ":" + type;
@@ -330,27 +348,33 @@ public abstract class GExpr{
 			val, var
 		}
 
-		public final GExpr name;
+		public final StrPos pos;
+		public final TypedName name;
 		public final ValVarType valVarType;
+		public final GExpr initial;
 
-		public ValVar(GExpr name, ValVarType valVarType) {
+		public ValVar(StrPos pos, TypedName name,
+					  ValVarType valVarType, GExpr initial
+		) {
+			this.pos = pos;
 			this.name = name;
 			this.valVarType = valVarType;
+			this.initial = initial;
 		}
 
 		@Override
 		public ETypeSig getType() {
-			return name.getType();
+			return name.type;
 		}
 
 		@Override
 		public StrPos getPos() {
-			return name.getPos();
+			return pos;
 		}
 
 		@Override
 		public String toString() {
-			return valVarType + " " + name;
+			return valVarType + " " + name + " = " + initial;
 		}
 
 		@Override

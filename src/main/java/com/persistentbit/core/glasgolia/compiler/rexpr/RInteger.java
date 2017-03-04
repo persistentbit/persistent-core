@@ -1,9 +1,9 @@
 package com.persistentbit.core.glasgolia.compiler.rexpr;
 
 import com.persistentbit.core.glasgolia.EvalException;
-import com.persistentbit.core.utils.NumberUtils;
 import com.persistentbit.core.utils.StrPos;
 import com.persistentbit.core.utils.ToDo;
+import com.persistentbit.core.utils.UNumber;
 
 import java.util.function.BiFunction;
 
@@ -21,6 +21,11 @@ public interface RInteger extends RExpr{
 	}
 
 	static RExpr createBinOp(RExpr left, String opString, RExpr right) {
+		BiFunction<Integer, Integer, Object> op = getOperatorFunction(opString);
+		return new BinOp(left, opString, op, right);
+	}
+
+	static BiFunction<Integer, Integer, Object> getOperatorFunction(String opString) {
 		BiFunction<Integer, Integer, Object> op;
 		switch(opString) {
 			case "+":
@@ -56,7 +61,7 @@ public interface RInteger extends RExpr{
 			default:
 				throw new ToDo("int bin op " + opString);
 		}
-		return new BinOp(left, opString, op, right);
+		return op;
 	}
 
 	class BinOp implements RInteger{
@@ -122,8 +127,8 @@ public interface RInteger extends RExpr{
 				return (Integer) value;
 			}
 			if(value instanceof Number) {
-				return NumberUtils.convertToInteger((Number) value)
-								  .orElseThrow(() -> new EvalException("Not an int: " + value, expr.getPos()));
+				return UNumber.convertToInteger((Number) value)
+							  .orElseThrow(() -> new EvalException("Not an int: " + value, expr.getPos()));
 			}
 			throw new EvalException("Not an int: " + value, expr.getPos());
 		}

@@ -12,7 +12,7 @@ import java.util.function.Function;
 /**
  * General String utilities, because we all have to have our own  StringUtils version
  */
-public final class StringUtils{
+public final class UString{
 
 	/**
 	 * Takes a raw string and converts it to a java code string:<br>

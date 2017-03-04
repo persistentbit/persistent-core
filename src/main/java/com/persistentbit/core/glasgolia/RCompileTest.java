@@ -2,6 +2,7 @@ package com.persistentbit.core.glasgolia;
 
 import com.persistentbit.core.ModuleCore;
 import com.persistentbit.core.glasgolia.compiler.CompileGToR;
+import com.persistentbit.core.glasgolia.compiler.RStack;
 import com.persistentbit.core.glasgolia.compiler.rexpr.RExpr;
 import com.persistentbit.core.glasgolia.gexpr.GExpr;
 import com.persistentbit.core.glasgolia.gexpr.GExprParser;
@@ -19,7 +20,7 @@ import com.persistentbit.core.parser.source.Source;
 public class RCompileTest{
 
 	private static GExprParser parser = new GExprParser();
-	private static CompileGToR compiler = new CompileGToR();
+	private static CompileGToR compiler = new CompileGToR(new RStack.ReplStack());
 
 
 	private static void print(String code) {
@@ -45,6 +46,17 @@ public class RCompileTest{
 		print("import 'com.persistentbit.core.glasgolia'; GExprTest.test");
 		print("import 'com.persistentbit.core.glasgolia'; 'tostring=' + GExprTest('Hello').toString():String");
 		print("import 'java.lang'; System.out.println('This is from system out:' + 1234);System.out.println()");
-
+		print("var a = 100; var b= 23; var c= a+b");
+		print("{val a = 100; val b= 23L; val c= a+b; c}");
+		print("{val c= a+b;}");
+		print("val print = System.out.println;");
+		print("print('Hello: ' + c)");
+		print("val tekst = 'sum='; ");
+		print("val printSum = (a,b) -> { val c = a+b; print(tekst + c)}");
+		print("val sum = x:Integer -> y:Integer -> x+y");
+		print("val id = u -> u");
+		print("id('this is id')");
+		print("sum(2)(5);");
+		print("printSum(sum(1,2),sum(4)(6));");
 	}
 }

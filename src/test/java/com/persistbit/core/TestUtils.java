@@ -5,7 +5,7 @@ import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestData;
 import com.persistentbit.core.utils.IO;
-import com.persistentbit.core.utils.NumberUtils;
+import com.persistentbit.core.utils.UNumber;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -100,18 +100,18 @@ public class TestUtils{
 
 
 	static final TestCase testNumberUtils = TestCase.name("Test Number Utilities").code(tr -> {
-		tr.isFailure(NumberUtils.numberToBigDecimal(null));
-		Comparator<Number> nc = NumberUtils.numberComparator;
+		tr.isFailure(UNumber.numberToBigDecimal(null));
+		Comparator<Number> nc = UNumber.numberComparator;
 		tr.isEquals(nc.compare(1, 1.0), 0);
 		tr.isEquals(nc.compare((short) 2, 2.0f), 0);
 		tr.isEquals(nc.compare(1234567l, 1234567), 0);
 		tr.isEquals(nc.compare(1234567l, 1234566), 1);
-		tr.isFailure(NumberUtils.numberToBigDecimal(null));
-		tr.isEquals(NumberUtils.numberToBigDecimal(1234), NumberUtils.numberToBigDecimal(1234.0));
-		tr.isFailure(NumberUtils.parseBigDecimal(null));
-		tr.isFailure(NumberUtils.parseInt(null));
-		tr.isFailure(NumberUtils.parseLong(null));
-		tr.isEquals(NumberUtils.parseLong("1234").orElseThrow(), 1234l);
+		tr.isFailure(UNumber.numberToBigDecimal(null));
+		tr.isEquals(UNumber.numberToBigDecimal(1234), UNumber.numberToBigDecimal(1234.0));
+		tr.isFailure(UNumber.parseBigDecimal(null));
+		tr.isFailure(UNumber.parseInt(null));
+		tr.isFailure(UNumber.parseLong(null));
+		tr.isEquals(UNumber.parseLong("1234").orElseThrow(), 1234l);
 	});
 
 

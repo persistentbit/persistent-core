@@ -64,4 +64,9 @@ public class RObjectChild implements RExpr{
 		}
 		return CompileGToR.getConstJavaObjectChild(pos, parentValue, name, parent.isConst());
 	}
+
+	@Override
+	public String toString() {
+		return "RObjectChild(" + parent + "." + name + ")";
+	}
 }

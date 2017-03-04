@@ -1,8 +1,8 @@
 package com.persistentbit.core.easyscript;
 
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.utils.ReflectionUtils;
 import com.persistentbit.core.utils.StrPos;
+import com.persistentbit.core.utils.UReflect;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -73,7 +73,7 @@ public class ERuntimeChild {
 		} else {
 			cls = parent.getClass();
 		}
-		Optional<Method> optGetter = ReflectionUtils.getGetter(cls,name);
+		Optional<Method> optGetter = UReflect.getGetter(cls, name);
 		if(optGetter.isPresent()) {
 			try {
 				return Optional.of(new EEvalResult(context, optGetter.get().invoke(parent)));

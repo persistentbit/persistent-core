@@ -117,18 +117,18 @@ public final class PasswordStorage {
             if (!params[HASH_ALGORITHM_INDEX].equals("sha256")) {
                 return Result.failure(new CannotPerformOperationException("Unsupported hash type."));
             }
-			return NumberUtils.parseInt(params[ITERATION_INDEX])
-				.mapError(ex -> new InvalidHashException("Could not parse the iteration count as an integer.",ex))
-                .flatMap(iterations -> {
-                    if(iterations < 1){
+			return UNumber.parseInt(params[ITERATION_INDEX])
+						  .mapError(ex -> new InvalidHashException("Could not parse the iteration count as an integer.", ex))
+						  .flatMap(iterations -> {
+							  if(iterations < 1){
                         return Result.failure(new InvalidHashException("Invalid number of iterations. Must be >= 1."));
                     }
                     return fromBase64(params[SALT_INDEX]).flatMap(salt ->
                           fromBase64(params[PBKDF2_INDEX]).flatMap(hash ->
-																	   NumberUtils.parseInt(params[HASH_SIZE_INDEX])
-																		   .verify(storedHashSize -> storedHashSize == hash.length,(v)->new InvalidHashException("Hash length doesn't match stored hash length."))
-                                   .flatMap(storedHashSize ->
-                                            {
+							  UNumber.parseInt(params[HASH_SIZE_INDEX])
+									 .verify(storedHashSize -> storedHashSize == hash.length, (v) -> new InvalidHashException("Hash length doesn't match stored hash length."))
+									 .flatMap(storedHashSize ->
+									 {
                                                 // Compute the hash of the provided password, using the same salt,
                                                 // iteration count, and hash length
                                                 byte[] testHash = pbkdf2(password, salt, iterations, hash.length);
@@ -167,8 +167,8 @@ public final class PasswordStorage {
     }
 
     private static Result<byte[]> fromBase64(String hex) {
-        return Log.function(StringUtils.present(hex,20)).code(l-> {
-            if(hex == null){
+		return Log.function(UString.present(hex, 20)).code(l -> {
+			if(hex == null){
                 return Result.failure("bas64 string is null");
             }
             return Result.success(DatatypeConverter.parseBase64Binary(hex));

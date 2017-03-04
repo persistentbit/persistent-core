@@ -240,8 +240,8 @@ public final class IO {
 
 
     public static Result<PList<String>> readLines(String text) {
-        return Result.function(StringUtils.present(text, 40)).code(l -> {
-            if (text == null) {
+		return Result.function(UString.present(text, 40)).code(l -> {
+			if (text == null) {
                 return Result.empty();
             }
             return readLinesFromReader(new StringReader(text));
@@ -585,8 +585,8 @@ public final class IO {
             if(file.canRead() == false){
                 return Result.failure("Can't read file: " + file);
             }
-            return Result.success(NumberUtils.readableComputerSize(file.length()));
-        });
+			return Result.success(UNumber.readableComputerSize(file.length()));
+		});
     }
 
     /**
@@ -648,8 +648,8 @@ public final class IO {
                     elements.add(element);
                 }
             }
-            return Result.success("/" + StringUtils.join("/", elements));
-        });
+			return Result.success("/" + UString.join("/", elements));
+		});
     }
 
     public static void main(String... args) throws Exception {

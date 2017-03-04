@@ -3,7 +3,7 @@ package com.persistentbit.core.experiments.adt;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.printing.PrintableText;
-import com.persistentbit.core.utils.StringUtils;
+import com.persistentbit.core.utils.UString;
 
 import java.util.function.Function;
 
@@ -136,7 +136,7 @@ public abstract class JSon{
 			},
 			aList -> PrintableText
 				.fromString(aList.values.map(item -> prettyPrint(item).printToString()).toString("[", ", ", "]")),
-			aString -> PrintableText.fromString("\"" + StringUtils.escapeToJavaString(aString.value) + "\"")
+			aString -> PrintableText.fromString("\"" + UString.escapeToJavaString(aString.value) + "\"")
 
 		);
 	}

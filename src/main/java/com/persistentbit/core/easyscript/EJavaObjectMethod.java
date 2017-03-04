@@ -5,9 +5,9 @@ import com.persistentbit.core.collections.IPSet;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.tuples.Tuple2;
-import com.persistentbit.core.utils.NumberUtils;
-import com.persistentbit.core.utils.ReflectionUtils;
 import com.persistentbit.core.utils.StrPos;
+import com.persistentbit.core.utils.UNumber;
+import com.persistentbit.core.utils.UReflect;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -209,13 +209,13 @@ public class EJavaObjectMethod implements ECallable{
 		if(cls.isAssignableFrom(valueCls)) {
 			return Optional.of((R) value);
 		}
-		cls = ReflectionUtils.convertPrimitiveClassToObjectClass(cls).orElse(cls);
+		cls = UReflect.convertPrimitiveClassToObjectClass(cls).orElse(cls);
 		if(cls.isAssignableFrom(valueCls)) {
 			return Optional.of((R) value);
 		}
-		if(value instanceof Number && NumberUtils.isNumberClass(cls)) {
-			return NumberUtils.convertTo((Number) value, cls)
-							  .getOpt();
+		if(value instanceof Number && UNumber.isNumberClass(cls)) {
+			return UNumber.convertTo((Number) value, cls)
+						  .getOpt();
 		}
 		if(cls.isAssignableFrom(List.class)) {
 			if(value instanceof PStream) {
@@ -234,11 +234,11 @@ public class EJavaObjectMethod implements ECallable{
 		}
 
 		if(cls.getAnnotation(FunctionalInterface.class) != null && value instanceof ERuntimeLambda){
-			Optional<Method> optMethod = ReflectionUtils.getFunctionalInterfaceMethod(cls);
+			Optional<Method> optMethod = UReflect.getFunctionalInterfaceMethod(cls);
 			if(optMethod.isPresent()){
 				ERuntimeLambda lambda = (ERuntimeLambda)value;
 				Function<Object[],Object> impl = lambda::apply;
-				return Optional.of(ReflectionUtils.createProxyForFunctionalInterface(cls,impl));
+				return Optional.of(UReflect.createProxyForFunctionalInterface(cls, impl));
 			}
 
 		}

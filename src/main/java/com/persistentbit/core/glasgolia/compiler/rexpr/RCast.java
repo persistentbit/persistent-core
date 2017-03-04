@@ -3,6 +3,7 @@ package com.persistentbit.core.glasgolia.compiler.rexpr;
 import com.persistentbit.core.glasgolia.EvalException;
 import com.persistentbit.core.glasgolia.compiler.JavaObjectMatcher;
 import com.persistentbit.core.utils.StrPos;
+import com.persistentbit.core.utils.UReflect;
 
 import java.util.Optional;
 
@@ -44,6 +45,11 @@ public class RCast implements RExpr{
 		if(casted.isPresent()) {
 			return casted.get();
 		}
-		throw new EvalException("Can't cast to " + cls.getName() + ":" + parentValue, expr.getPos());
+		throw new EvalException("Can't cast to " + UReflect.present(cls) + ":" + parentValue, expr.getPos());
+	}
+
+	@Override
+	public String toString() {
+		return "RCast(" + expr + " to " + UReflect.present(cls);
 	}
 }

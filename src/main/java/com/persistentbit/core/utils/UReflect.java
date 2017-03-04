@@ -14,7 +14,7 @@ import java.util.function.Function;
  * @author Peter Muys
  * @since 13/07/2016
  */
-public final class ReflectionUtils{
+public final class UReflect{
 
   public static Class<?> classFromType(Type t) {
 	if(t instanceof Class) {
@@ -69,7 +69,7 @@ public final class ReflectionUtils{
 	}
 
 	public static Optional<Method> getGetter(Class cls,String name){
-		name = StringUtils.firstUpperCase(name);
+		name = UString.firstUpperCase(name);
 		try {
 			return Optional.of(cls.getMethod("get" + name));
 		} catch(NoSuchMethodException e) {
@@ -132,4 +132,19 @@ public final class ReflectionUtils{
 		// proxy impl of not defaults methods
 		return null;
 	};
+
+	/**
+	 * Create a human version of a Class name
+	 *
+	 * @param cls The class to present
+	 *
+	 * @return A human readable version of the class name
+	 */
+	public static String present(Class cls) {
+		String name = cls.getName();
+		if(name.startsWith("java.lang")) {
+			name = name.substring(10);
+		}
+		return name;
+	}
 }

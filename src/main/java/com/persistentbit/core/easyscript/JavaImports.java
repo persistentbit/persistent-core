@@ -3,7 +3,7 @@ package com.persistentbit.core.easyscript;
 import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.collections.PSet;
 import com.persistentbit.core.collections.PStream;
-import com.persistentbit.core.utils.ReflectionUtils;
+import com.persistentbit.core.utils.UReflect;
 
 import java.util.Optional;
 
@@ -35,11 +35,11 @@ public class JavaImports{
 		int i = name.lastIndexOf(".");
 		if(i >= 0) {
 			//Full classname...
-			return ReflectionUtils.getClass(name)
-								  .map(this::addResolved);
+			return UReflect.getClass(name)
+						   .map(this::addResolved);
 		}
 		PStream<Optional<Class>> resSet = imports.lazy()
-												 .map(im -> ReflectionUtils.getClass(im + "." + name))
+												 .map(im -> UReflect.getClass(im + "." + name))
 												 .filter(Optional::isPresent);
 		if(resSet.isEmpty()) {
 			return Optional.empty();

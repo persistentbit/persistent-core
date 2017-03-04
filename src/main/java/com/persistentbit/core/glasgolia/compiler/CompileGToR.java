@@ -1,15 +1,16 @@
 package com.persistentbit.core.glasgolia.compiler;
 
 import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.collections.PSet;
 import com.persistentbit.core.glasgolia.CompileException;
 import com.persistentbit.core.glasgolia.ETypeSig;
 import com.persistentbit.core.glasgolia.compiler.rexpr.*;
 import com.persistentbit.core.glasgolia.gexpr.GExpr;
 import com.persistentbit.core.tuples.Tuple2;
-import com.persistentbit.core.utils.NumberUtils;
-import com.persistentbit.core.utils.ReflectionUtils;
 import com.persistentbit.core.utils.StrPos;
 import com.persistentbit.core.utils.ToDo;
+import com.persistentbit.core.utils.UNumber;
+import com.persistentbit.core.utils.UReflect;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -26,6 +27,15 @@ public class CompileGToR{
 
 
 	private CompileContext ctx = new CompileContext();
+	private final RStack runtimeStack;
+
+	public CompileGToR(RStack runtimeStack) {
+		this.runtimeStack = runtimeStack;
+	}
+
+	public CompileGToR() {
+		this(new RStack.RuntimeStack());
+	}
 
 	public RExpr compile(GExpr g) {
 		return g.match(
@@ -39,15 +49,102 @@ public class CompileGToR{
 			this::compileBinOp,
 			matchCast -> null,
 			this::compileCustom,
-			matchLambda -> null
+			this::compileLambda
 		);
 	}
 
 
-	public RExpr compileValVar(GExpr.ValVar g) {
-		throw new ToDo();
+	public RExpr compileLambda(GExpr.Lambda g) {
+		//System.out.println("Before Lambda: " + ctx);
+		ctx = ctx.addFrame();
+		//System.out.println("After add frame: " + ctx);
+		//Add parameter in order to the frame
+		for(GExpr.TypedName param : g.params) {
+			ctx = ctx.addVar(true, param.name, getType(param.type));
+		}
+		RExpr code = compile(g.code);
+
+		//System.out.println("After compile code: " + ctx);
+
+		System.out.println(code);
+
+		PSet<CompileContext.ValVar> undeclared = ctx.findUndeclaredInFrame();
+		//undeclared.forEach(u -> ctx.addVal(false,u.name,u.type));
+		//code = compile(g.code);
+		int frameSize = ctx.getFrameSize();
+		ctx = ctx.popFrame();
+
+		System.out.println("Undeclared: " + undeclared.toString(", "));
+		PList<Tuple2<Integer, RExpr>> initFreeList = PList.empty();
+		for(CompileContext.ValVar vv : undeclared) {
+			boolean isParam = g.params.find(v -> v.name.equals(vv.name)).isPresent();
+			if(isParam == false) {
+				initFreeList = initFreeList.plus(Tuple2.of(vv.id, ctx.bindName(g.getPos(), runtimeStack, vv.name)));
+			}
+		}
+		return new RLambdaCreate(g.getPos(), g.params.size(), initFreeList, frameSize, code, runtimeStack);
 	}
 
+
+	public RExpr compileValVar(GExpr.ValVar g) {
+		String name = g.name.name;
+		if(ctx.findInCurrentNameContext(name).isPresent()) {
+			throw new CompileException("variable name '" + g.name + "' is already declared");
+		}
+
+		ETypeSig varTypeSig = g.getType() == ETypeSig.any ? g.initial.getType() : g.getType();
+		RExpr    right      = compile(g.initial);
+		Class type = varTypeSig == ETypeSig.any
+			? right.getType() : getType(varTypeSig);
+
+		switch(g.valVarType) {
+			case val:
+				ctx = ctx.addVal(true, name, type);
+				break;
+			case var:
+				ctx = ctx.addVar(true, name, type);
+				break;
+			default:
+				throw new RuntimeException("Unknown type : " + g.valVarType);
+		}
+		RExpr left = ctx.bindName(g.getPos(), runtimeStack, name);
+
+		RExpr res = new RAssign((RAssignable) left, right);
+		return res;
+	}
+
+
+	private RExpr compileAssign(GExpr.BinOp g) {
+		RExpr left = compile(g.left);
+		if(left instanceof RAssignable == false) {
+			throw new CompileException("Don't know how to assign to " + g.left, g.left.getPos());
+		}
+		RAssignable assignable = (RAssignable) left;
+		return new RAssign(assignable, compile(g.right));
+	}
+
+	private RExpr compileName(GExpr.Name g) {
+		Optional<CompileContext.ValVar> vv = ctx.findInCurrentFrame(g.name);
+		if(vv.isPresent() == false) {
+			if(ctx.findJavaClass(g.name).isPresent() == false) {
+				vv = ctx.findInAllFrames(g.name);
+				if(vv.isPresent()) {
+					//Not in current frame, but in a prev frame, so declare it...
+					//System.out.println(ctx);
+					ctx = ctx.addVal(false, vv.get().name, vv.get().type);
+					//System.out.println(ctx);
+				}
+			}
+		}
+		RExpr bind = ctx.bindName(g.getPos(), runtimeStack, g.name);
+		//System.out.println(ctx);
+		Class nameType = getType(g.getType());
+		Class bindType = bind.getType();
+		if(nameType.isAssignableFrom(bindType) == false) {
+			return createCast(bind, bindType);
+		}
+		return bind;
+	}
 	public RExpr compileApply(GExpr.Apply g) {
 		RExpr left = compile(g.function);
 		return new RApply(g.getPos(), left, g.parameters.map(this::compile).toImmutableArray());
@@ -58,12 +155,12 @@ public class CompileGToR{
 		if(left.isConst()) {
 			if(left.getType() == Class.class) {
 				//We have a static class child
-				return getConstJavaClassChild(g.getPos(), (Class) left.get(), g.childName);
+				return getConstJavaClassChild(g.getPos(), (Class) left.get(), g.childName.name);
 			}
-			return getConstJavaObjectChild(g.getPos(), left.get(), g.childName, true);
+			return getConstJavaObjectChild(g.getPos(), left.get(), g.childName.name, true);
 		}
 		else {
-			return new RObjectChild(g.getPos(), left, g.childName);
+			return new RObjectChild(g.getPos(), left, g.childName.name);
 		}
 	}
 
@@ -72,7 +169,7 @@ public class CompileGToR{
 			throw new CompileException("Can't get child '" + name + "' from a null object");
 		}
 		Class           cls      = obj.getClass();
-		Optional<Field> optField = ReflectionUtils.getField(cls, name);
+		Optional<Field> optField = UReflect.getField(cls, name);
 		if(optField.isPresent()) {
 			Field f = optField.get();
 			if(Modifier.isPublic(f.getModifiers()) && Modifier.isStatic(f.getModifiers()) == false) {
@@ -97,7 +194,7 @@ public class CompileGToR{
 		if(cls == null) {
 			throw new CompileException("Can't get child '" + name + "' from a null class");
 		}
-		Optional<Field> optField = ReflectionUtils.getField(cls, name);
+		Optional<Field> optField = UReflect.getField(cls, name);
 		if(optField.isPresent()) {
 			Field f = optField.get();
 			if(Modifier.isPublic(f.getModifiers()) && Modifier.isStatic(f.getModifiers())) {
@@ -143,22 +240,19 @@ public class CompileGToR{
 		return new RConst(nameExpr.getPos(), String.class, name);
 	}
 
-	private RExpr compileName(GExpr.Name g) {
-		RExpr bind     = ctx.bindName(g.getPos(), g.name);
-		Class nameType = getType(g.getType());
-		Class bindType = bind.getType();
-		if(nameType.isAssignableFrom(bindType) == false) {
-			return createCast(bind, bindType);
-		}
-		return bind;
-	}
 
 	private RExpr compileGroup(GExpr.Group g) {
 		//if(g.groupType == GExpr.Group.GroupType.group)
-		return compile(g.expr);
+		ctx = ctx.addNameContext();
+		RExpr res = compile(g.expr);
+		ctx = ctx.popNameContext();
+		return res;
 	}
 
 	private RExpr compileBinOp(GExpr.BinOp g) {
+		if(g.op.equals("=")) {
+			return compileAssign(g);
+		}
 		RExpr left  = compile(g.left);
 		RExpr right = compile(g.right);
 		if(left.getType() != String.class) {
@@ -174,6 +268,8 @@ public class CompileGToR{
 			left = unified._1;
 			right = unified._2;
 		}
+
+
 		Class leftType = left.getType();
 		if(leftType == Integer.class) {
 			return RInteger.createBinOp(left, g.op, right);
@@ -187,7 +283,7 @@ public class CompileGToR{
 		else if(leftType == String.class) {
 			return RString.createBinOp(left, g.op, right);
 		}
-		throw new ToDo("java object bin op");
+		return new RDynamicBinOp(left, g.op, right);
 	}
 
 	private RExpr createCast(RExpr r, Class castTo) {
@@ -219,11 +315,21 @@ public class CompileGToR{
 		return typeSig.match(
 			mAny -> Object.class,
 			cls -> cls.cls,
-			mName -> null,
+			mName -> {
+				try {
+					String name = mName.clsName;
+					if(name.indexOf('.') < 0) {
+						name = "java.lang." + name;
+					}
+					return Class.forName(name);
+				} catch(ClassNotFoundException e) {
+					throw new CompileException(e);
+				}
+			},
 			mWG -> getType(mWG.name),
-			mArr -> null,
+			mArr -> {throw new ToDo();},
 			mFun -> getType(mFun.returnType),
-			mbound -> null
+			mbound -> {throw new ToDo();}
 		);
 	}
 
@@ -236,13 +342,13 @@ public class CompileGToR{
 				return unify(right, left)
 					.map(t -> Tuple2.of(t._2, t._1));
 			}
-			if(NumberUtils.isNaturalNumberClass(right.getType())) {
+			if(UNumber.isNaturalNumberClass(right.getType())) {
 				return Optional.of(Tuple2.of(left, new RInteger.CastToInt(right)));
 			}
 			return Optional.empty();
 		}
 		if(Long.class.isAssignableFrom(left.getType())) {
-			if(NumberUtils.isNaturalNumberClass(right.getType())) {
+			if(UNumber.isNaturalNumberClass(right.getType())) {
 				return Optional.of(Tuple2.of(left, new RLong.CastToLong(right)));
 			}
 			return Optional.empty();

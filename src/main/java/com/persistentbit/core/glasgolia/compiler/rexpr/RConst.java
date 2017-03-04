@@ -1,6 +1,7 @@
 package com.persistentbit.core.glasgolia.compiler.rexpr;
 
 import com.persistentbit.core.utils.StrPos;
+import com.persistentbit.core.utils.UReflect;
 
 /**
  * TODOC
@@ -37,15 +38,7 @@ public class RConst implements RExpr{
 
 	@Override
 	public String toString() {
-		String tn;
-		if(type.getName().startsWith("java.lang")) {
-			tn = type.getSimpleName();
-		}
-		else {
-			tn = type.getName();
-		}
-
-		return "RConst(" + value + ")" + ":" + tn;
+		return "RConst(" + value + ")" + ":" + UReflect.present(type);
 	}
 
 	@Override
