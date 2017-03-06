@@ -136,7 +136,7 @@ public class CompileContext implements PrintableText{
 		}
 	}
 
-	private static class Frame implements PrintableText{
+	public static class Frame implements PrintableText{
 
 		public final Frame parent;
 		public final int nextId;
@@ -236,47 +236,55 @@ public class CompileContext implements PrintableText{
 		}
 	}
 
-	private Frame currentFrame = new Frame();
+	private final Frame currentFrame;
+
+	public CompileContext(Frame currentFrame) {
+		this.currentFrame = currentFrame;
+	}
+
+	public CompileContext() {
+		this(new Frame());
+	}
+
+	public Frame getCurrentFrame() {
+		return currentFrame;
+	}
 
 	public int getFrameSize() {
 		return currentFrame.getFrameSize();
 	}
 
+	public CompileContext withFrame(Frame f) {
+		return new CompileContext(f);
+	}
 
 	public CompileContext addImport(String importName) {
-		currentFrame = currentFrame.addImport(importName);
-		return this;
+		return withFrame(currentFrame.addImport(importName));
 	}
 
 	public CompileContext addNameContext() {
-		currentFrame = currentFrame.addNameContext();
-		return this;
+		return withFrame(currentFrame.addNameContext());
 	}
 
 	public CompileContext popNameContext() {
-		currentFrame = currentFrame.popNameContext();
-		return this;
+		return withFrame(currentFrame.popNameContext());
 	}
 
 	public CompileContext addFrame() {
-		currentFrame = currentFrame.addFrame();
-		return this;
+		return withFrame(currentFrame.addFrame());
 	}
 
 	public CompileContext popFrame() {
-		currentFrame = currentFrame.popFrame();
-		return this;
+		return withFrame(currentFrame.popFrame());
 	}
 
 
 	public CompileContext addVal(boolean isDeclared, String name, Class type) {
-		currentFrame = currentFrame.addValVar(true, name, type, isDeclared);
-		return this;
+		return withFrame(currentFrame.addValVar(true, name, type, isDeclared));
 	}
 
 	public CompileContext addVar(boolean isDeclared, String name, Class type) {
-		currentFrame = currentFrame.addValVar(false, name, type, isDeclared);
-		return this;
+		return withFrame(currentFrame.addValVar(false, name, type, isDeclared));
 	}
 
 	public Optional<ValVar> findInCurrentFrame(String name) {

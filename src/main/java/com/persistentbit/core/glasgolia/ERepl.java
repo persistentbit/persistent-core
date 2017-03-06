@@ -3,6 +3,7 @@ package com.persistentbit.core.glasgolia;
 import com.persistentbit.core.ModuleCore;
 import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.logging.printing.LogPrintStream;
+import com.persistentbit.core.parser.ParseExceptionEOF;
 import com.persistentbit.core.result.Result;
 
 import java.io.BufferedReader;
@@ -16,17 +17,25 @@ import java.io.InputStreamReader;
  */
 public class ERepl{
 
+	public static final LogPrint lp =
+		LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
 
-	static String read(BufferedReader in) throws Exception {
-		String code = "";
+	public String read(String existingCode, BufferedReader in) throws Exception {
+		String code = existingCode;
 		while(true) {
-			System.out.print(">> ");
+			if(code.isEmpty() == false) {
+				System.out.print(".. ");
+			}
+			else {
+				System.out.print(">> ");
+			}
+
 			System.out.flush();
 			String line = in.readLine();
 			if(line == null) {
 				break;
 			}
-			code = line;
+			code = code + line;
 			if(true) break;
 			//if(line.trim().isEmpty()) {
 			//	break;
@@ -36,32 +45,50 @@ public class ERepl{
 		return code;
 	}
 
-	static final LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
 
-
-	static public void repl() throws Exception {
-		BufferedReader bin = new BufferedReader(new InputStreamReader(System.in));
+	public void repl() throws Exception {
+		BufferedReader bin  = new BufferedReader(new InputStreamReader(System.in));
+		String         code = "";
 		while(true) {
-			String code = read(bin);
+			code = read(code, bin);
 			if(code.trim().equals(":exit")) {
 				break;
 			}
-			Result<Object> evalResult = es.eval("repl", code);
+			Result<Object> evalResult = gg.eval("repl", code);
 			if(evalResult.isError()) {
+				Throwable error = evalResult.getEmptyOrFailureException().orElse(null);
+				if(error instanceof ParseExceptionEOF && code.endsWith("\n") == false) {
+					code = code + "\n";
+					continue; //try next line
+				}
 				lp.print(evalResult.getEmptyOrFailureException().get());
 			}
 			else {
+
 				System.out.println("Success:" + evalResult.orElse(null));
 			}
+			code = "";
 			System.out.flush();
 		}
 	}
 
-	static public final Glasgolia es = new Glasgolia();
+	public final Glasgolia gg = new Glasgolia();
+
+	public ERepl loadAndEval(String sourceName) {
+		gg.loadAndEval(sourceName).throwOnError().orElse(null);
+		return this;
+	}
+
+
+	public ERepl() {
+		loadAndEval("repl.gg");
+	}
 
 	public static void main(String[] args) throws Exception {
-		es.loadAndEval("repl.gg").throwOnError().orElse(null);
-		repl();
+		ERepl repl = new ERepl();
+
+
+		repl.repl();
 
 
 	}

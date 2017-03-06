@@ -11,8 +11,8 @@ import com.persistentbit.core.glasgolia.ERepl;
 public class PersistentCoreRepl extends ERepl{
 
 	public static void main(String[] args) throws Exception {
-		es.loadAndEval("repl.gg").throwOnError().orElse(null);
-		es.loadAndEval("persistentcore.repl.test.gg").throwOnError().orElse(null);
-		ERepl.repl();
+		ERepl repl = new ERepl()
+			.loadAndEval("persistentcore.repl.test.gg");
+		repl.repl();
 	}
 }

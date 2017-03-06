@@ -47,19 +47,27 @@ public class CompileGToR{
 	}
 
 	public RExpr compile(GExpr g) {
-		return g.match(
-			this::compileChildOp,
-			this::exprList,
-			this::compileGroup,
-			this::compileConst,
-			this::compileName,
-			this::compileApply,
-			this::compileValVar,
-			this::compileBinOp,
-			matchCast -> null,
-			this::compileCustom,
-			this::compileLambda
-		);
+		CompileContext.Frame currentFrame = ctx.getCurrentFrame();
+		try {
+			return g.match(
+				this::compileChildOp,
+				this::exprList,
+				this::compileGroup,
+				this::compileConst,
+				this::compileName,
+				this::compileApply,
+				this::compileValVar,
+				this::compileBinOp,
+				matchCast -> null,
+				this::compileCustom,
+				this::compileLambda
+			);
+		} catch(CompileException ce) {
+			ctx = ctx.withFrame(currentFrame);
+			throw ce;
+		} catch(Exception e) {
+			throw new CompileException(e, g.getPos());
+		}
 	}
 
 
@@ -75,7 +83,7 @@ public class CompileGToR{
 
 		//System.out.println("After compile code: " + ctx);
 
-		System.out.println(code);
+		//System.out.println(code);
 
 		PSet<CompileContext.ValVar> undeclared = ctx.findUndeclaredInFrame();
 		//undeclared.forEach(u -> ctx.addVal(false,u.name,u.type));
@@ -83,7 +91,7 @@ public class CompileGToR{
 		int frameSize = ctx.getFrameSize();
 		ctx = ctx.popFrame();
 
-		System.out.println("Undeclared: " + undeclared.toString(", "));
+		//System.out.println("Undeclared: " + undeclared.toString(", "));
 		PList<Tuple2<Integer, RExpr>> initFreeList = PList.empty();
 		for(CompileContext.ValVar vv : undeclared) {
 			boolean isParam = g.params.find(v -> v.name.equals(vv.name)).isPresent();
