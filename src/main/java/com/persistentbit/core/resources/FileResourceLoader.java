@@ -31,9 +31,6 @@ public class FileResourceLoader implements ResourceLoader{
 	}
 
 
-	//static String cleanName(String name){
-	//	return IO.resolveResourceName("/", IO.asURL(name).map(URL::getPath).orElse(name)).orElse(name);
-	//}
 
 	@Override
 	public String toString() {

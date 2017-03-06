@@ -1,4 +1,4 @@
-package com.persistentbit.core.easyscript;
+package com.persistentbit.core.experiments.easyscript;
 
 import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.collections.PSet;
@@ -36,10 +36,10 @@ public class JavaImports{
 		if(i >= 0) {
 			//Full classname...
 			return UReflect.getClass(name)
-						   .map(this::addResolved);
+						   .map(this::addResolved).getOpt();
 		}
 		PStream<Optional<Class>> resSet = imports.lazy()
-												 .map(im -> UReflect.getClass(im + "." + name))
+												 .map(im -> UReflect.getClass(im + "." + name).getOpt())
 												 .filter(Optional::isPresent);
 		if(resSet.isEmpty()) {
 			return Optional.empty();

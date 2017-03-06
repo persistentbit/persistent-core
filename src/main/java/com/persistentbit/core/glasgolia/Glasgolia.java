@@ -1,7 +1,5 @@
 package com.persistentbit.core.glasgolia;
 
-import com.persistentbit.core.easyscript.EExpr;
-import com.persistentbit.core.easyscript.EParser;
 import com.persistentbit.core.function.Memoizer;
 import com.persistentbit.core.glasgolia.compiler.CompileGToR;
 import com.persistentbit.core.glasgolia.compiler.rexpr.RExpr;
@@ -43,11 +41,7 @@ public class Glasgolia{
 		this(new CompileGToR(),ClassPathResourceLoader.inst);
 	}
 
-	private Result<EExpr> parse(Source source) {
-		return EParser.ws.skipAnd(EParser.parseExprList())//.skip(Scan.eof)
-						 .parse(source)
-						 .asResult();
-	}
+
 
 	private <T> Result<T> eval(RExpr expr) {
 		try {

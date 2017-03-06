@@ -1,6 +1,7 @@
 package com.persistentbit.core.glasgolia.compiler.rexpr;
 
-import com.persistentbit.core.easyscript.EvalException;
+
+import com.persistentbit.core.glasgolia.EvalException;
 import com.persistentbit.core.utils.StrPos;
 
 import java.lang.reflect.Field;
@@ -39,7 +40,7 @@ public class RJavaField implements RExpr{
 		try {
 			return field.get(parentValue);
 		} catch(IllegalAccessException e) {
-			throw new EvalException(pos, "Error getting field " + field, e);
+			throw new EvalException("Error getting field " + field, e,pos);
 		}
 	}
 

@@ -36,10 +36,11 @@ public class JavaImports{
 		if(i >= 0) {
 			//Full classname...
 			return UReflect.getClass(name)
-						   .map(this::addResolved);
+						   .map(this::addResolved)
+						   .getOpt();
 		}
 		PStream<Optional<Class>> resSet = imports.lazy()
-												 .map(im -> UReflect.getClass(im + "." + name))
+												 .map(im -> UReflect.getClass(im + "." + name).getOpt())
 												 .filter(Optional::isPresent);
 		if(resSet.isEmpty()) {
 			return Optional.empty();

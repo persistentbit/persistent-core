@@ -20,6 +20,8 @@ public class ERepl{
 	public static final LogPrint lp =
 		LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
 
+
+
 	public String read(String existingCode, BufferedReader in) throws Exception {
 		String code = existingCode;
 		while(true) {
@@ -71,6 +73,7 @@ public class ERepl{
 			System.out.flush();
 		}
 	}
+
 
 	public final Glasgolia gg = new Glasgolia();
 

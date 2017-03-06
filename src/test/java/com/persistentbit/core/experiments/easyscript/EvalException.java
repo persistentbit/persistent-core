@@ -1,4 +1,4 @@
-package com.persistentbit.core.easyscript;
+package com.persistentbit.core.experiments.easyscript;
 
 import com.persistentbit.core.utils.StrPos;
 

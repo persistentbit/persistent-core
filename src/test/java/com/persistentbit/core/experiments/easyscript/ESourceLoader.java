@@ -1,4 +1,4 @@
-package com.persistentbit.core.easyscript;
+package com.persistentbit.core.experiments.easyscript;
 
 /**
  * TODOC

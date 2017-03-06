@@ -1,7 +1,7 @@
 package com.persistbit.core.easy;
 
 import com.persistentbit.core.ModuleCore;
-import com.persistentbit.core.easyscript.EasyScript;
+import com.persistentbit.core.experiments.easyscript.EasyScript;
 import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.result.Result;
 

@@ -53,7 +53,7 @@ public final class PByteList extends AbstractIPList<Byte, PByteList> implements 
 
 	/**
 	 * Read an input stream in a new PByteList.<br>
-	 *
+	 * Closes the inputstream after reading.<br>
 	 * @param in The InputStream to read
 	 *
 	 * @return The PByteList with the content from the inputStream.
@@ -102,6 +102,12 @@ public final class PByteList extends AbstractIPList<Byte, PByteList> implements 
 		StringBuilder sb = new StringBuilder(size() * 2);
 		forEach(b -> sb.append(UString.padLeft(Integer.toHexString(b & 0xff), 2, '0')));
 		return sb.toString();
+	}
+
+	public byte[] toByteArray() {
+		byte[] res = new byte[data.length];
+		System.arraycopy(data,0,res,0,data.length);
+		return res;
 	}
 
 	/**

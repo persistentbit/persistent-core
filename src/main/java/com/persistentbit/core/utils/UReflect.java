@@ -1,10 +1,10 @@
 package com.persistentbit.core.utils;
 
 import com.persistentbit.core.collections.PMap;
+import com.persistentbit.core.result.Result;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -60,12 +60,11 @@ public final class UReflect{
 		return convertPrimitiveClassToObjectClass(cls).isPresent();
 	}
 
-	public static Optional<Class> getClass(String name) {
-		try {
-			return Optional.of(Class.forName(Objects.requireNonNull(name)));
-		} catch(ClassNotFoundException e) {
-			return Optional.empty();
-		}
+	public static Result<Class> getClass(String name) {
+		return getClass(name,UReflect.class.getClassLoader());
+	}
+	public static Result<Class> getClass(String name,ClassLoader classLoader) {
+		return Result.noExceptions(() -> Class.forName(name,true,classLoader));
 	}
 
 	public static Optional<Method> getGetter(Class cls,String name){
