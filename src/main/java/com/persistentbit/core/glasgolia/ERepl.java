@@ -39,13 +39,8 @@ public class ERepl{
 	static final LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
 
 
-
-	static final Glasgolia es = new Glasgolia();
-
-	public static void main(String[] args) throws Exception {
-		es.loadAndEval("repl.gg").throwOnError().orElse(null);
-
-		BufferedReader bin     = new BufferedReader(new InputStreamReader(System.in));
+	static public void repl() throws Exception {
+		BufferedReader bin = new BufferedReader(new InputStreamReader(System.in));
 		while(true) {
 			String code = read(bin);
 			if(code.trim().equals(":exit")) {
@@ -60,6 +55,13 @@ public class ERepl{
 			}
 			System.out.flush();
 		}
+	}
+
+	static public final Glasgolia es = new Glasgolia();
+
+	public static void main(String[] args) throws Exception {
+		es.loadAndEval("repl.gg").throwOnError().orElse(null);
+		repl();
 
 
 	}

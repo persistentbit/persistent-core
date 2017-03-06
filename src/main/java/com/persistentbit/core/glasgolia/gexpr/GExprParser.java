@@ -3,9 +3,12 @@ package com.persistentbit.core.glasgolia.gexpr;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.glasgolia.ETypeSig;
 import com.persistentbit.core.glasgolia.ETypeSigParser;
+import com.persistentbit.core.glasgolia.gexpr.custom.GExprStatementParsers;
 import com.persistentbit.core.parser.*;
 import com.persistentbit.core.utils.StrPos;
 import com.persistentbit.core.utils.UNumber;
+
+import java.util.function.Supplier;
 
 /**
  * TODOC
@@ -17,22 +20,27 @@ public class GExprParser{
 
 	private final Parser<String> lineComment = Scan.lineComment("//");
 	private final Parser<String> blockComment = Scan.blockComment("/*", "*?");
-	private final Parser<String> ws =
+	public final Parser<String> ws =
 		Scan.parseWhiteSpaceWithComment(Scan.whiteSpaceAndNewLine, lineComment.or(blockComment));
 
-	private final ETypeSigParser typeSigParser = new ETypeSigParser(ws);
+	public final ETypeSigParser typeSigParser = new ETypeSigParser(ws);
+
+	private final Supplier<Parser<GExpr>> customParsers;
 
 
+	public GExprParser(GExprCustomParser customParsers) {
+		this.customParsers = () -> customParsers.getParser(this);
+	}
 
 	public GExprParser() {
-
+		this(new GExprStatementParsers());
 	}
 
 	public Parser<String> eof(){
 		return ws.andEof();
 	}
 
-	private Parser<String> keyword(String keyword) {
+	public Parser<String> keyword(String keyword) {
 		return Scan.keyword(keyword).skip(ws);
 	}
 
@@ -40,97 +48,18 @@ public class GExprParser{
 		return Scan.term(term).skip(ws);
 	}
 
-	private Parser<GExpr> parseName = parseNameString().map(name -> new GExpr.Name(name.pos, name.value, ETypeSig.any));
+	public Parser<GExpr> parseName = parseNameString().map(name -> new GExpr.Name(name.pos, name.value, ETypeSig.any));
 
-	private Parser<String> orTerms(String... terms) {
+	public Parser<String> orTerms(String... terms) {
 		Parser<String> res = term(terms[0]);
 		for(int t = 1; t < terms.length; t++) {
 			res = res.or(term(terms[t]));
 		}
 		return res;
 	}
-
-	private Parser<GExpr> parseIf() {
-		return
-			keyword("if")
-				.skipAnd(parseExpr().and(parseExpr()))
-				.and(
-					keyword("else")
-						.skipAnd(parseExpr())
-						.optional()
-				)
-				.map(t -> {
-					if(t._2.isPresent()) {
-						return new GExpr.Custom(
-							t._1._1.getPos(),
-							"ifElse",
-							PList.val(t._1._1, t._1._2, t._2.get()), t._1._2.getType()
-						);
-					}
-					else {
-						return new GExpr.Custom(
-							t._1._1.getPos(),
-							"if",
-							PList.val(t._1._1, t._1._2), t._1._2.getType()
-						);
-					}
-				});
-	}
-
-	private Parser<GExpr> parseImport() {
-		return
-			keyword("import")
-				.skipAnd(parseStringLiteral.withPos())
-				.and(keyword("as").skipAnd(parseName).optional())
-				.map(t -> {
-					return new GExpr.Custom(
-						t._1.pos,
-						"import",
-						PList.val(t._1.value, t._2.orElse(null)), new ETypeSig.Cls(String.class)
-					);
-				});
-	}
-
-	private Parser<GExpr> parseWhile() {
-		return
-			keyword("while")
-				.skipAnd(parseExpr())
-				.and(parseExpr())
-				.map(t ->
-					new GExpr.Custom(
-						t._1.getPos(),
-						"while",
-						PList.val(t._1, t._2),
-						t._2.getType()
-					)
-				);
-	}
-
-	private Parser<GExpr> parseSource() {
-		return
-			keyword("source")
-				.skipAnd(parseStringLiteral)
-				.map(t -> new GExpr.Custom(
-					t.getPos(),
-					"source",
-					PList.val(t),
-					t.getType()
-				));
-	}
-
-	private Parser<GExpr> parseClasspath() {
-		return
-			keyword("classpath")
-				.skipAnd(parseStringLiteral)
-				.map(t -> new GExpr.Custom(
-					t.getPos(),
-					"classpath",
-					PList.val(t), new ETypeSig.Cls(String.class)
-				));
-	}
-
 	private Parser<GExpr> parseCustom() {
-		return Parser.orOf(parseIf(), parseImport(), parseWhile(), parseSource(), parseClasspath());
+		return customParsers.get();
+
 	}
 
 	private Parser<GExpr> parsePrimitiveL0 =
@@ -155,13 +84,13 @@ public class GExprParser{
 				)*/
 				.parse(source);
 
-	private Parser<ETypeSig> parseType() {
+	public Parser<ETypeSig> parseType() {
 		return source ->
 			term(":").skipAnd(typeSigParser).optional().map(opt -> opt.orElse(ETypeSig.any))
 					 .parse(source);
 	}
 
-	private Parser<GExpr.TypedName> parseTypedName =
+	public Parser<GExpr.TypedName> parseTypedName =
 		parseNameString()
 			.and(parseType())
 			.map(t -> new GExpr.TypedName(t._1.pos, t._1.value, t._2));
@@ -171,7 +100,7 @@ public class GExprParser{
 		.and(parseType());
 */
 
-	private Parser<GExpr> parseLambda() {
+	public Parser<GExpr> parseLambda() {
 		return source ->
 			term("(").skipAnd(
 				Parser.zeroOrMoreSep(
@@ -355,7 +284,7 @@ public class GExprParser{
 			.onErrorAddMessage("Expected name list");
 
 
-	private Parser<GExpr> parseExprBlock(GExpr.Group.GroupType blockType) {
+	public Parser<GExpr> parseExprBlock(GExpr.Group.GroupType blockType) {
 		String left;
 		String right;
 		switch(blockType) {
@@ -384,7 +313,7 @@ public class GExprParser{
 				.skip(ws).parse(source);
 	}
 
-	private final Parser<String> parseEndOfExpression =
+	public final Parser<String> parseEndOfExpression =
 		term(";");
 
 	public Parser<GExpr> parseExprList() {
@@ -416,7 +345,7 @@ public class GExprParser{
 	}
 
 
-	private Parser<GExpr> parseBinOp(Parser<GExpr> left, Parser<String> op, Parser<GExpr> right) {
+	public Parser<GExpr> parseBinOp(Parser<GExpr> left, Parser<String> op, Parser<GExpr> right) {
 		return source -> {
 			ParseResult<GExpr> leftRes = left.parse(source);
 			if(leftRes.isFailure()) {
@@ -450,7 +379,7 @@ public class GExprParser{
 		};
 	}
 
-	private Parser<WithPos<String>> parseNameString() {
+	public Parser<WithPos<String>> parseNameString() {
 		return source ->
 			Scan.identifier
 				.withPos()
@@ -461,7 +390,7 @@ public class GExprParser{
 	}
 
 
-	private final Parser<GExpr> parseStringLiteral =
+	public final Parser<GExpr> parseStringLiteral =
 		Scan.stringLiteral("\"\"\"", true)
 			.or(Scan.stringLiteral("\'", false))
 			.or(Scan.stringLiteral("`", false))
@@ -470,7 +399,7 @@ public class GExprParser{
 			.withPos()
 			.map(value -> new GExpr.Const(value.pos, ETypeSig.cls(String.class), value.value));
 
-	private final Parser<GExpr> parseNumberLiteral =
+	public final Parser<GExpr> parseNumberLiteral =
 		Scan.doubleLiteral.withPos().<GExpr>map(v -> new GExpr.Const(v.pos, ETypeSig.cls(Double.class), v.value))
 			.or(
 				Scan.longLiteral
@@ -503,12 +432,12 @@ public class GExprParser{
 					}))
 			.skip(ws);
 
-	private final Parser<GExpr> parseBooleanLiteral =
+	public final Parser<GExpr> parseBooleanLiteral =
 		keyword("true").withPos().<GExpr>map(s -> new GExpr.Const(s.pos, ETypeSig.cls(Boolean.class), true))
 			.or(keyword("false").withPos().<GExpr>map(s -> new GExpr.Const(s.pos, ETypeSig.cls(Boolean.class), false)))
 			.onErrorAddMessage("Expected 'true' or 'false'");
 
-	private Parser<GExpr> parseConst() {
+	public Parser<GExpr> parseConst() {
 		return parseNumberLiteral
 			.or(parseBooleanLiteral)
 			.or(parseStringLiteral)

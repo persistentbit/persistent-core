@@ -473,10 +473,10 @@ public abstract class GExpr{
 
 		private final StrPos pos;
 		public final String name;
-		public final PList<GExpr> arguments;
+		public final PList<Object> arguments;
 		private final ETypeSig type;
 
-		public Custom(StrPos pos, String name, PList<GExpr> arguments, ETypeSig type) {
+		public Custom(StrPos pos, String name, PList<Object> arguments, ETypeSig type) {
 			this.pos = pos;
 			this.name = name;
 			this.arguments = arguments;

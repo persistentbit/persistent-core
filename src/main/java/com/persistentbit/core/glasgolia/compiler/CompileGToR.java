@@ -69,7 +69,7 @@ public class CompileGToR{
 		//System.out.println("After add frame: " + ctx);
 		//Add parameter in order to the frame
 		for(GExpr.TypedName param : g.params) {
-			ctx = ctx.addVar(true, param.name, getType(param.type));
+			ctx = ctx.addVar(true, param.name, getType(param.pos, param.type));
 		}
 		RExpr code = compile(g.code);
 
@@ -102,10 +102,10 @@ public class CompileGToR{
 		}
 
 		ETypeSig varTypeSig = g.getType() == ETypeSig.any ? g.initial.getType() : g.getType();
-		ctx = ctx.addVar(false, name, getType(varTypeSig));
+		ctx = ctx.addVar(false, name, getType(g.getPos(), varTypeSig));
 		RExpr    right      = compile(g.initial);
 		Class type = varTypeSig == ETypeSig.any
-			? right.getType() : getType(varTypeSig);
+			? right.getType() : getType(g.getPos(), varTypeSig);
 
 		switch(g.valVarType) {
 			case val:
@@ -144,13 +144,11 @@ public class CompileGToR{
 					ctx = ctx.addVal(false, vv.get().name, vv.get().type);
 					//System.out.println(ctx);
 				}
-			} else {
-				ctx.addVar(true,g.name,Class.class);
 			}
 		}
 		RExpr bind = ctx.bindName(g.getPos(), runtimeStack, g.name);
 		//System.out.println(ctx);
-		Class nameType = getType(g.getType());
+		Class nameType = getType(g.getPos(), g.getType());
 		Class bindType = bind.getType();
 		if(nameType.isAssignableFrom(bindType) == false) {
 			return createCast(bind, bindType);
@@ -223,7 +221,11 @@ public class CompileGToR{
 		if(methods.isEmpty() == false) {
 			return new RJavaMethods(pos, methods.toImmutableArray(), null, true);
 		}
-		throw new CompileException("Can't get child '" + name + "' from class " + cls);
+		//Could be a sub class...
+		return UReflect.getClass(cls.getName() + "$" + name)
+					   .map(scls -> new RConst(pos, Class.class, scls))
+					   .orElseThrow(() -> new CompileException("Can't get child '" + name + "' from class " + cls));
+
 	}
 
 
@@ -249,21 +251,21 @@ public class CompileGToR{
 	}
 
 	private RExpr compileWhile(GExpr.Custom g) {
-		RExpr cond = compile(g.arguments.get(0));
-		RExpr code = compile(g.arguments.get(1));
+		RExpr cond = compile((GExpr) g.arguments.get(0));
+		RExpr code = compile((GExpr) g.arguments.get(1));
 		return new RWhile(cond, code);
 	}
 
 	private RExpr compileIf(GExpr.Custom g) {
-		RExpr cond      = compile(g.arguments.get(0));
-		RExpr trueCode  = compile(g.arguments.get(1));
-		RExpr falseCode = g.arguments.size()==2 ? null : compile(g.arguments.get(2));
+		RExpr cond      = compile((GExpr) g.arguments.get(0));
+		RExpr trueCode  = compile((GExpr) g.arguments.get(1));
+		RExpr falseCode = g.arguments.size() == 2 ? null : compile((GExpr) g.arguments.get(2));
 		return new RIf(cond, trueCode, falseCode);
 	}
 
 	private RExpr compileImport(GExpr.Custom g) {
-		GExpr nameExpr = g.arguments.get(0);
-		if(nameExpr instanceof GExpr.Const == false || getType(nameExpr.getType()) != String.class) {
+		GExpr nameExpr = (GExpr) g.arguments.get(0);
+		if(nameExpr instanceof GExpr.Const == false || getType(nameExpr.getPos(), nameExpr.getType()) != String.class) {
 			throw new CompileException("Expected a java package or class name string:" + nameExpr, nameExpr.getPos());
 		}
 		String name = (String) ((GExpr.Const) nameExpr).value;
@@ -339,27 +341,34 @@ public class CompileGToR{
 	}
 
 	private RExpr compileConst(GExpr.Const g) {
-		return new RConst(g.getPos(), getType(g.getType()), g.value);
+		return new RConst(g.getPos(), getType(g.getPos(), g.getType()), g.value);
 	}
 
-	private Class getType(ETypeSig typeSig) {
+	private Class getType(StrPos pos, ETypeSig typeSig) {
 		return typeSig.match(
 			mAny -> Object.class,
 			cls -> cls.cls,
 			mName -> {
-				try {
+				String name = mName.clsName;
+				name = name.replace('.', '$');
+				Class foundCls = ctx.findJavaClass(name).orElse(null);
+				if(foundCls == null) {
+					throw new CompileException("Can't find class '" + name + "'", pos);
+				}
+				return foundCls;
+				/*try {
 					String name = mName.clsName;
 					if(name.indexOf('.') < 0) {
 						name = "java.lang." + name;
 					}
-					return Class.forName(name);
+ 					return Class.forName(name);
 				} catch(ClassNotFoundException e) {
 					throw new CompileException(e);
-				}
+				}*/
 			},
-			mWG -> getType(mWG.name),
+			mWG -> getType(pos, mWG.name),
 			mArr -> {throw new ToDo();},
-			mFun -> getType(mFun.returnType),
+			mFun -> getType(pos, mFun.returnType),
 			mbound -> {throw new ToDo();}
 		);
 	}

@@ -10,6 +10,7 @@ import java.util.function.Supplier;
  *
  * @see Supplier
  */
+
 public class Lazy<T> implements Supplier<T>{
 
   private final Supplier<T> supplier;

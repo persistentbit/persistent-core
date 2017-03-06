@@ -1,0 +1,2 @@
+import "com.persistentbit.core.utils";
+println("Welcome to Persistent-Core");

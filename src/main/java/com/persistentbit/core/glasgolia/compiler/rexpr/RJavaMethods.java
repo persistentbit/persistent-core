@@ -33,6 +33,7 @@ public class RJavaMethods implements RExpr, RFunction{
 	) {
 		this.pos = pos;
 		this.methods = methods;
+		methods.forEach(m -> m.setAccessible(true));
 		this.parentValue = parentValue;
 		this.parentIsConst = parentIsConst;
 	}
@@ -147,7 +148,9 @@ public class RJavaMethods implements RExpr, RFunction{
 	}
 
 	private Object invoke(Method m, Object... args) {
+
 		try {
+
 			return m.invoke(parentValue, args);
 		} catch(IllegalAccessException | InvocationTargetException e) {
 			throw new EvalException(e, pos);
