@@ -144,6 +144,8 @@ public class CompileGToR{
 					ctx = ctx.addVal(false, vv.get().name, vv.get().type);
 					//System.out.println(ctx);
 				}
+			} else {
+				ctx.addVar(true,g.name,Class.class);
 			}
 		}
 		RExpr bind = ctx.bindName(g.getPos(), runtimeStack, g.name);
@@ -383,5 +385,9 @@ public class CompileGToR{
 			return Optional.empty();
 		}
 		return Optional.empty();
+	}
+
+	public PSet<String> getUndefinedVars() {
+		return ctx.findUndeclaredInFrame().map(vv -> vv.name).pset();
 	}
 }

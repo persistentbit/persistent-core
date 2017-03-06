@@ -43,7 +43,7 @@ public class ERepl{
 	static final Glasgolia es = new Glasgolia();
 
 	public static void main(String[] args) throws Exception {
-		es.loadAndEval("repl.ss").throwOnError().orElse(null);
+		es.loadAndEval("repl.gg").throwOnError().orElse(null);
 
 		BufferedReader bin     = new BufferedReader(new InputStreamReader(System.in));
 		while(true) {

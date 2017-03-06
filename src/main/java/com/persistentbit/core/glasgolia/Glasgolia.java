@@ -31,7 +31,11 @@ public class Glasgolia{
 		this.compiled = Memoizer.of(name ->
 			resourceLoader.apply(name)
 						  .map(pb -> pb.toText(IO.utf8))
-				          .flatMap(code -> compiler.compile(Source.asSource(name,code)))
+				          .flatMap(code -> {
+				          	return compiler.compile(Source.asSource(name,code))
+				          	  .verify(r -> compiler.getUndefinedVars().isEmpty() ,"Undefined vars: " + compiler.getUndefinedVars().toString(", "));
+
+						  })
 		);
 	}
 

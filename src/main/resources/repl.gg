@@ -7,6 +7,6 @@ import "com.persistentbit.core";
 import "com.persistentbit.core.glasgolia";
 
 val println = System.out.println;
-val print = System.out.print
+val print = System.out.print;
 
-val range:(Integer,Integer)->PStream = (from,to) -> PStream.range(from,to)
+val range = (from,to) -> PStream.range(from,to);
