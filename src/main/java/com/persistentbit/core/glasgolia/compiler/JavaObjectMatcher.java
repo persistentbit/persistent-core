@@ -3,7 +3,7 @@ package com.persistentbit.core.glasgolia.compiler;
 import com.persistentbit.core.collections.IPMap;
 import com.persistentbit.core.collections.IPSet;
 import com.persistentbit.core.collections.PStream;
-import com.persistentbit.core.easyscript.ERuntimeLambda;
+import com.persistentbit.core.glasgolia.compiler.rexpr.RFunction;
 import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.utils.UNumber;
 import com.persistentbit.core.utils.UReflect;
@@ -77,16 +77,18 @@ public class JavaObjectMatcher{
 				return Optional.of((R) ((IPSet) value).pset().toSet());
 			}
 		}
-
-		if(cls.getAnnotation(FunctionalInterface.class) != null && value instanceof ERuntimeLambda) {
-			Optional<Method> optMethod = UReflect.getFunctionalInterfaceMethod(cls);
-			if(optMethod.isPresent()) {
-				ERuntimeLambda             lambda = (ERuntimeLambda) value;
-				Function<Object[], Object> impl   = lambda::apply;
-				return Optional.of(UReflect.createProxyForFunctionalInterface(cls, impl));
+		if(cls.getAnnotation(FunctionalInterface.class) != null){
+			if(value instanceof RFunction){
+				Optional<Method> optMethod = UReflect.getFunctionalInterfaceMethod(cls);
+				if(optMethod.isPresent()) {
+					//ERuntimeLambda             lambda = (ERuntimeLambda) value;
+					Function<Object[], Object> impl   = v -> ((RFunction)value).apply(v);
+					return Optional.of(UReflect.createProxyForFunctionalInterface(cls, impl));
+				}
 			}
-
 		}
+
+
 
 
 		return Optional.empty();

@@ -380,10 +380,6 @@ public class EParser{
 				}
 				source = endOfExprREsult.getSource();
 			}
-			//if(result.isEmpty()){
-			//	return ParseResult.failure(source,"Not a valid Expression");
-			//}
-
 			return ParseResult.success(source,
 				new EExpr.ExprList(startPos, result.toImmutableArray())
 			);

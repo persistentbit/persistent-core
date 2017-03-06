@@ -4,8 +4,9 @@ import "com.persistentbit.core.collections";
 import "com.persistentbit.core.result";
 import "com.persistentbit.core.utils";
 import "com.persistentbit.core";
-import "com.persistentbit.core.easyscript";
+import "com.persistentbit.core.glasgolia";
 
-val println = x -> System.out.println(x);
+val println = System.out.println;
+val print = System.out.print
 
-val range = x -> { val index = 0; while(index<x) { println(index); index=index+1; } };
+val range:(Integer,Integer)->PStream = (from,to) -> PStream.range(from,to)

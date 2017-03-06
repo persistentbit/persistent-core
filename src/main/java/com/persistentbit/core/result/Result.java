@@ -132,6 +132,13 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 		});
 	}
 
+	public Result<T> throwOnError(){
+		if(isError()){
+			orElseThrow();
+		}
+		return this;
+	}
+
 	/**
 	 * Convert this result to an optional.<br>
 	 *

@@ -42,7 +42,7 @@ public class CompileGToR{
 	}
 
 	public Result<RExpr> compile(Source source){
-		return parser.parseExprList().parse(source).asResult()
+		return parser.parseExprList().andEof().parse(source).asResult()
 			.map(this::compile);
 	}
 

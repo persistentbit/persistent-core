@@ -4,7 +4,6 @@ import com.persistentbit.core.ModuleCore;
 import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.result.Result;
-import com.persistentbit.core.utils.UString;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -27,11 +26,12 @@ public class ERepl{
 			if(line == null) {
 				break;
 			}
-
-			if(line.trim().isEmpty()) {
-				break;
-			}
-			code += UString.NL + line;
+			code = line;
+			if(true) break;
+			//if(line.trim().isEmpty()) {
+			//	break;
+			//}
+			//code += UString.NL + line;
 		}
 		return code;
 	}
@@ -43,7 +43,7 @@ public class ERepl{
 	static final Glasgolia es = new Glasgolia();
 
 	public static void main(String[] args) throws Exception {
-		es.loadAndEval("repl.easy").orElseThrow();
+		es.loadAndEval("repl.ss").throwOnError().orElse(null);
 
 		BufferedReader bin     = new BufferedReader(new InputStreamReader(System.in));
 		while(true) {
