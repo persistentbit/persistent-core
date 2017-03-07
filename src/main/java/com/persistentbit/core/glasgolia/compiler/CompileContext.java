@@ -44,6 +44,10 @@ public class CompileContext implements PrintableText{
 			return "ValVar(id:" + id + ", isVal:" + isVal + ", name:" + name + ", decl:" + isDeclared + ", type:" + UReflect
 				.present(type) + ")";
 		}
+		public String show() {
+			String type = UReflect.present(this.type);
+			return (isVal ? "val " : "var ") + name + ":" + type;
+		}
 	}
 
 	private static class NameContext implements PrintableText{
@@ -128,9 +132,13 @@ public class CompileContext implements PrintableText{
 		}
 
 		public PSet<ValVar> findUndeclared() {
-			PSet<ValVar> res = lookup.values().filter(vv -> vv.isDeclared == false).pset();
+			return getAllValVars().filter(vv -> vv.isDeclared == false);
+		}
+
+		public PSet<ValVar> getAllValVars(){
+			PSet<ValVar> res = lookup.values().pset();
 			if(parent != null) {
-				res = res.plusAll(parent.findUndeclared());
+				res = res.plusAll(parent.getAllValVars());
 			}
 			return res;
 		}
@@ -153,7 +161,9 @@ public class CompileContext implements PrintableText{
 			this.nextId = 0;
 			this.nameContext = new NameContext(null, new JavaImports());
 		}
-
+		public PSet<ValVar> getAllValVars(){
+			return this.nameContext.getAllValVars();
+		}
 		@Override
 		public void print(PrintTextWriter out) {
 			out.println("Frame {");

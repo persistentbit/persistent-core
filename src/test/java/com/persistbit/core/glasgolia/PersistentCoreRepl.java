@@ -1,6 +1,6 @@
 package com.persistbit.core.glasgolia;
 
-import com.persistentbit.core.glasgolia.ERepl;
+import com.persistentbit.core.glasgolia.repl.GGRepl;
 
 /**
  * TODOC
@@ -8,10 +8,10 @@ import com.persistentbit.core.glasgolia.ERepl;
  * @author petermuys
  * @since 6/03/17
  */
-public class PersistentCoreRepl extends ERepl{
+public class PersistentCoreRepl {
 
 	public static void main(String[] args) throws Exception {
-		ERepl repl = new ERepl()
+		GGRepl repl = new GGRepl()
 			.loadAndEval("persistentcore.repl.test.gg");
 		repl.repl();
 	}

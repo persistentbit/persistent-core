@@ -39,7 +39,7 @@ public class RVal implements RExpr, RAssignable{
 
 	@Override
 	public boolean isConst() {
-		return true;
+		return isInitialized;
 	}
 
 	@Override

@@ -42,6 +42,9 @@ public class Glasgolia{
 	}
 
 
+	public CompileGToR getCompiler(){
+		return compiler;
+	}
 
 	private <T> Result<T> eval(RExpr expr) {
 		try {

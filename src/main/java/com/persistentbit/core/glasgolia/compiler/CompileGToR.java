@@ -46,6 +46,10 @@ public class CompileGToR{
 			.map(this::compile);
 	}
 
+	public CompileContext getContext() {
+		return ctx;
+	}
+
 	public RExpr compile(GExpr g) {
 		CompileContext.Frame currentFrame = ctx.getCurrentFrame();
 		try {

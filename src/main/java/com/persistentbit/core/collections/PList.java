@@ -323,6 +323,13 @@ public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializabl
 	}
 
 	@Override
+	public Optional<T> getOpt(int index) {
+		return index >=0 && index < size()
+				? Optional.ofNullable(get(index))
+				: Optional.empty();
+	}
+
+	@Override
 	public Optional<T> beforeLastOpt() {
 		if(size() < 2) {
 			return Optional.empty();
