@@ -39,9 +39,29 @@ public class GGReplCmdParser {
         return commandName("rl").or(commandName("reload")).map(s -> new GGReplCmd("reload"));
     }
 
+	private Parser<GGReplCmd> saveSession() {
+		return
+			commandName("save").skipAnd(Scan.stringLiteral("\"", false).optional())
+							   .map(file -> new GGReplCmd("save", file.orElse("session.gg")));
+	}
+
+	private Parser<GGReplCmd> loadSession() {
+		return
+			commandName("load").skipAnd(Scan.stringLiteral("\"", false).optional())
+							   .map(file -> new GGReplCmd("load", file.orElse("session.gg")));
+	}
+
+	private Parser<GGReplCmd> resetSession() {
+		return commandName("reset").map(r -> new GGReplCmd("reset"));
+	}
 
 
     public Parser<GGReplCmd> command() {
-        return show().or(exit()).or(reload());
-    }
+		return show()
+			.or(exit())
+			.or(reload())
+			.or(saveSession())
+			.or(loadSession())
+			.or(resetSession());
+	}
 }

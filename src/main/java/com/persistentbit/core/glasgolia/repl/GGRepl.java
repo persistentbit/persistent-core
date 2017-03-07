@@ -11,8 +11,11 @@ import com.persistentbit.core.parser.ParseExceptionEOF;
 import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.result.Result;
+import com.persistentbit.core.utils.IO;
+import com.persistentbit.core.utils.UString;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 
 /**
@@ -112,7 +115,16 @@ public class GGRepl {
             case "exit": System.exit(0);return;
             case "show": showCmd(cmd);return ;
             case "reload": reloadCmd(cmd); return ;
-            default:
+			case "save":
+				saveCmd(cmd);
+				return;
+			case "load":
+				loadCmd(cmd);
+				return;
+			case "reset":
+				resetCmd(cmd);
+				return;
+			default:
                 System.out.println("Unknown command:" + cmd.name);
         }
     }
@@ -132,6 +144,26 @@ public class GGRepl {
         });
     }
 
+	private void saveCmd(GGReplCmd cmd) {
+		File   f    = new File(cmd.params.getOpt(0).map(s -> s.toString()).orElse("session.gg"));
+		String code = history.fold("", (a, b) -> a + UString.NL + b);
+		IO.writeFile(code, f, IO.utf8);
+		System.out.println("Session saved to " + f.getAbsolutePath());
+	}
+
+	private void loadCmd(GGReplCmd cmd) {
+		File f = new File(cmd.params.getOpt(0).map(s -> s.toString()).orElse("session.gg"));
+		String res = IO.readTextFile(f, IO.utf8)
+					   .ifPresent(s -> history = PList.val(s.getValue().trim()))
+					   .ifPresent(s -> System.out.println("loaded " + f.getAbsolutePath()))
+					   .orElseThrow();
+		throw new ReloadException();
+	}
+
+	public void resetCmd(GGReplCmd cmd) {
+		history = PList.empty();
+		throw new ReloadException();
+	}
 
 
     public GGRepl loadAndEval(String sourceName) {
