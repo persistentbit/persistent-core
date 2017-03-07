@@ -46,6 +46,10 @@ public class CompileGToR{
 			.map(this::compile);
 	}
 
+	public CompileGToR	reset() {
+		return new CompileGToR(parser, runtimeStack.reset());
+	}
+
 	public CompileContext getContext() {
 		return ctx;
 	}

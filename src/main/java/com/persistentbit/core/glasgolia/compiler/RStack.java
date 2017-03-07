@@ -28,6 +28,7 @@ public interface RStack extends PrintableText{
 		}
 	}
 
+	RStack reset();
 
 	void popFrame();
 
@@ -38,6 +39,11 @@ public interface RStack extends PrintableText{
 	class ReplStack implements RStack{
 
 		private LList<Map<Integer, Object>> frames = LList.<Map<Integer, Object>>empty().plus(new HashMap<>());
+
+		@Override
+		public RStack reset() {
+			return new ReplStack();
+		}
 
 		@Override
 		public void addFrame(int size) {
@@ -110,7 +116,10 @@ public interface RStack extends PrintableText{
 			}
 			current.set(frame);
 		}
-
+		@Override
+		public RStack reset() {
+			return new RuntimeStack();
+		}
 		@Override
 		public void popFrame() {
 			LList<Object[]> localStack = threadLocalFrames.get();

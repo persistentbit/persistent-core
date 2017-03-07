@@ -26,8 +26,10 @@ public class GGRepl {
     public static final LogPrint lp =
             LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
 
-
+    private Glasgolia gg = new Glasgolia();
     private GGReplCmdParser cmdParser = new GGReplCmdParser();
+
+    private PList<String> history = PList.empty();
 
     public String read(String existingCode, BufferedReader in) throws Exception {
         String code = existingCode;
@@ -54,8 +56,26 @@ public class GGRepl {
         return code;
     }
 
+    public void repl(){
+        while(true){
+            try{
+                doRepl();
+            }catch (ReloadException reload){
+                System.out.println("RELOADING");
+                gg = gg.restart();
+                for(String eval : history){
+                    System.out.println(">> " + eval);
+                    System.out.println(gg.eval("repl",eval));
+                }
+                System.out.println("Done reloading");
+            }catch (Exception e){
+                lp.print(e);
+            }
+        }
 
-    public void repl() throws Exception {
+    }
+
+    private void doRepl() throws Exception {
         BufferedReader bin  = new BufferedReader(new InputStreamReader(System.in));
         String         code = "";
         while(true) {
@@ -67,6 +87,7 @@ public class GGRepl {
                     throw cmdResult.getError();
                 }
                 execCmd(cmdResult.getValue());
+
             } else {
                 Result<Object> evalResult = gg.eval("repl", code);
                 if (evalResult.isError()) {
@@ -77,7 +98,7 @@ public class GGRepl {
                     }
                     lp.print(evalResult.getEmptyOrFailureException().get());
                 } else {
-
+                    history = history.plus(code);
                     System.out.println("Success:" + evalResult.orElse(null));
                 }
             }
@@ -89,10 +110,17 @@ public class GGRepl {
     private void execCmd(GGReplCmd cmd){
         switch (cmd.name){
             case "exit": System.exit(0);return;
-            case "show": showCmd(cmd);return;
+            case "show": showCmd(cmd);return ;
+            case "reload": reloadCmd(cmd); return ;
             default:
                 System.out.println("Unknown command:" + cmd.name);
         }
+    }
+    class ReloadException extends RuntimeException{
+
+    }
+    private void reloadCmd(GGReplCmd cmd){
+        throw new ReloadException();
     }
 
     private void showCmd(GGReplCmd cmd) {
@@ -104,7 +132,7 @@ public class GGRepl {
         });
     }
 
-    public final Glasgolia gg = new Glasgolia();
+
 
     public GGRepl loadAndEval(String sourceName) {
         gg.loadAndEval(sourceName).throwOnError().orElse(null);

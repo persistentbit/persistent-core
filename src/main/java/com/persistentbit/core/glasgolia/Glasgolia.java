@@ -1,5 +1,6 @@
 package com.persistentbit.core.glasgolia;
 
+import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.function.Memoizer;
 import com.persistentbit.core.glasgolia.compiler.CompileGToR;
 import com.persistentbit.core.glasgolia.compiler.rexpr.RExpr;
@@ -22,6 +23,7 @@ public class Glasgolia{
 	private final ResourceLoader            resourceLoader;
 	private final CompileGToR                     compiler;
 	private Function<String, Result<RExpr>> compiled;
+	private PList<String> loaded = PList.empty();
 
 	public Glasgolia(CompileGToR compiler,ResourceLoader resourceLoader) {
 		this.compiler = compiler;
@@ -54,11 +56,20 @@ public class Glasgolia{
 		}
 	}
 
+	public Glasgolia restart() {
+		Glasgolia res =  new Glasgolia(compiler.reset(),resourceLoader);
+		loaded.forEach(name -> res.loadAndEval(name));
+		return res;
+	}
+
 	public <T> Result<T> loadAndEval(String sourceName) {
-		return compiled.apply(sourceName).flatMap(this::eval);
+		return compiled.apply(sourceName).flatMap(this::eval)
+				.map(p -> { loaded = loaded.plus(sourceName); return (T)p; })
+		;
 	}
 
 	public <T> Result<T> eval(String name, String code) {
+
 		return compiler.compile(Source.asSource(name, code))
 			.flatMap(this::eval);
 	}
