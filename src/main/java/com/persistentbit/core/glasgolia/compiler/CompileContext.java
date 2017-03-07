@@ -46,7 +46,7 @@ public class CompileContext implements PrintableText{
 		}
 		public String show() {
 			String type = UReflect.present(this.type);
-			return (isVal ? "val " : "var ") + name + ":" + type;
+			return (isVal ? "val " : "var ") + name ;
 		}
 	}
 

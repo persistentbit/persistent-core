@@ -100,7 +100,7 @@ public class GGRepl {
         CompileContext ctx = compiler.getContext();
         PList<CompileContext.ValVar> all = ctx.getCurrentFrame().getAllValVars().plist();
         all.forEach(vv -> {
-            System.out.println(vv.show());
+            System.out.println(vv.show() + " = " + gg.eval("repl.show",vv.name).orElse("?"));
         });
     }
 

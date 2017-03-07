@@ -44,6 +44,14 @@ public class RDynamicBinOp implements RExpr{
 		Object valLeft  = left.get();
 		Object valRight = right.get();
 		if(valLeft == null) {
+			switch(op){
+				case "==": return valRight == null;
+				case "!=": return valRight != null;
+				case "<=": return valRight == null;
+				case "<": return valRight != null;
+				case ">=": return valRight == null;
+				case ">": return false;
+			}
 			throw new EvalException("Can't execute binary operator '" + op + "' on null", getPos());
 		}
 		if(valLeft instanceof Number) {
@@ -62,6 +70,20 @@ public class RDynamicBinOp implements RExpr{
 		}
 		if(valLeft instanceof String) {
 			return RString.getOperatorFunction(op).apply((String) valLeft, String.valueOf(valRight));
+		}
+		switch (op){
+			case "==": return valLeft.equals(valRight);
+			case "!=": return valLeft.equals(valRight) == false;
+		}
+		if(valLeft instanceof Comparable){
+			Comparable c = (Comparable)valLeft;
+			int res = ((Comparable) valLeft).compareTo(valRight);
+			switch(op){
+				case "<": return res < 0;
+				case "<=": return res <= 0;
+				case ">": return res > 0;
+				case ">=": return res >=0;
+			}
 		}
 		throw new ToDo("bin op for " + valLeft);
 	}
