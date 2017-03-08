@@ -1,5 +1,6 @@
 package com.persistentbit.core.glasgolia.repl;
 
+import com.persistentbit.core.glasgolia.gexpr.GExprParser;
 import com.persistentbit.core.parser.Parser;
 import com.persistentbit.core.parser.Scan;
 
@@ -56,7 +57,7 @@ public class GGReplCmdParser {
 	}
 
 
-    public Parser<GGReplCmd> command() {
+    public Parser<GGReplCmd> command(GExprParser exprParser) {
 		return show()
 			.or(exit())
 			.or(reload())

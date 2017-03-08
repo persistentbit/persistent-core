@@ -85,7 +85,7 @@ public class GGRepl {
             code = read(code, bin);
 
             if(code.startsWith(":")){
-                ParseResult<GGReplCmd> cmdResult = cmdParser.command().parse(Source.asSource(code));
+                ParseResult<GGReplCmd> cmdResult = cmdParser.command(gg.getCompiler().getParser()).parse(Source.asSource(code));
                 if(cmdResult.isFailure()){
                     throw cmdResult.getError();
                 }

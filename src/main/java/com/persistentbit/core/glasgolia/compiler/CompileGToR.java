@@ -415,4 +415,8 @@ public class CompileGToR{
 	public PSet<String> getUndefinedVars() {
 		return ctx.findUndeclaredInFrame().map(vv -> vv.name).pset();
 	}
+
+	public GExprParser	getParser(){
+		return parser;
+	}
 }
