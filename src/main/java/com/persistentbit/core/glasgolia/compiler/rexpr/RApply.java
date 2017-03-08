@@ -97,7 +97,7 @@ public class RApply implements RExpr{
 				throw new EvalException("No public constructor!", pos);
 			}
 			Class[]                                        paramTypes  = constructors[0].getParameterTypes();
-			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(paramTypes, resolvedArgs);
+			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(paramTypes, resolvedArgs,constructors[0].isVarArgs());
 			checkMatch(pos, matchResult, resolvedArgs, paramTypes);
 			return invoke(constructors[0], matchResult._2);
 		}
@@ -120,7 +120,7 @@ public class RApply implements RExpr{
 		if(otherPossibles.isEmpty()) {
 			//We have only 1 method with the same number of arguments
 			Class[]                                        paramTypes  = first.getParameterTypes();
-			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(paramTypes, resolvedArgs);
+			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(paramTypes, resolvedArgs,first.isVarArgs());
 			checkMatch(pos, matchResult, resolvedArgs, paramTypes);
 			return invoke(first, matchResult._2);
 		}
@@ -141,7 +141,7 @@ public class RApply implements RExpr{
 			if(isPublic(m) == false) {
 				continue;
 			}
-			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(m.getParameterTypes(), resolvedArgs);
+			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(m.getParameterTypes(), resolvedArgs,m.isVarArgs());
 			if(matchResult._1 == JavaObjectMatcher.MatchLevel.full) {
 				return invoke(m, matchResult._2);
 			}

@@ -8,6 +8,7 @@ import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.utils.UNumber;
 import com.persistentbit.core.utils.UReflect;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -27,14 +28,45 @@ public class JavaObjectMatcher{
 		full, partial, not
 	}
 
-	public static Tuple2<MatchLevel, Object[]> tryMatch(Class[] paramTypes, Object[] arguments) {
-		MatchLevel level     = MatchLevel.full;
-		Object[]   converted = new Object[paramTypes.length];
-		if(paramTypes.length != arguments.length) {
-			return Tuple2.of(MatchLevel.not, converted);
+	public static Tuple2<MatchLevel, Object[]> tryMatch(Class[] paramTypes, Object[] arguments,boolean withVarArgs) {
+		if(withVarArgs == false){
+			if (paramTypes.length != arguments.length) {
+				return Tuple2.of(MatchLevel.not, new Object[0]);
+			}
+			return tryMatch(paramTypes,arguments,paramTypes.length);
+
 		}
-		for(int t = 0; t < paramTypes.length; t++) {
-			Optional<Object> convertedArg = tryCast(arguments[t], paramTypes[t]);
+		//Try match with varargs...
+
+		if(paramTypes.length> arguments.length){
+			return Tuple2.of(MatchLevel.not, new Object[0]);
+		}
+		Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(paramTypes, arguments,paramTypes.length-1);
+		if(matchResult._1 == JavaObjectMatcher.MatchLevel.not){
+			return Tuple2.of(MatchLevel.not, new Object[0]);
+		}
+		Class itemClass = paramTypes[paramTypes.length-1].getComponentType();
+		int restLength = arguments.length-(paramTypes.length-1);
+		Object[] varArgs = (Object[]) Array.newInstance(itemClass, restLength);
+		boolean ok= true;
+		for(int t=0; t<varArgs.length; t++){
+			Object value = arguments[paramTypes.length-1+t];
+			Optional<Object> casted = JavaObjectMatcher.tryCast(value,itemClass);
+			if(casted.isPresent() == false){
+				return Tuple2.of(MatchLevel.not, new Object[0]);
+			}
+			varArgs[t] = casted.get();
+		}
+		Object[] newSet = new Object[paramTypes.length];
+		System.arraycopy(matchResult._2, 0, newSet, 0, paramTypes.length - 1);
+		newSet[paramTypes.length - 1] = varArgs;
+		return Tuple2.of(matchResult._1,newSet);
+	}
+	public static Tuple2<MatchLevel, Object[]> tryMatch(Class[] paramTypes, Object[] arguments,int compareCount) {
+		MatchLevel level = MatchLevel.full;
+		Object[] converted = new Object[compareCount];
+		for(int t = 0; t < compareCount; t++) {
+			Optional<Object> convertedArg = tryCast(arguments[t],paramTypes[t]);
 			if(convertedArg.isPresent() == false) {
 				return Tuple2.of(MatchLevel.not, null);
 			}
@@ -81,15 +113,11 @@ public class JavaObjectMatcher{
 			if(value instanceof RFunction){
 				Optional<Method> optMethod = UReflect.getFunctionalInterfaceMethod(cls);
 				if(optMethod.isPresent()) {
-					//ERuntimeLambda             lambda = (ERuntimeLambda) value;
-					Function<Object[], Object> impl   = v -> ((RFunction)value).apply(v);
+					Function<Object[], Object> impl   = ((RFunction) value)::apply;
 					return Optional.of(UReflect.createProxyForFunctionalInterface(cls, impl));
 				}
 			}
 		}
-
-
-
 
 		return Optional.empty();
 	}

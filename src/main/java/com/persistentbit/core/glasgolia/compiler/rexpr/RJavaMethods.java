@@ -8,10 +8,8 @@ import com.persistentbit.core.glasgolia.compiler.JavaObjectMatcher;
 import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.utils.StrPos;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
+import java.util.Optional;
 
 import static com.persistentbit.core.glasgolia.compiler.JavaObjectMatcher.tryMatch;
 
@@ -78,7 +76,7 @@ public class RJavaMethods implements RExpr, RFunction{
 				throw new EvalException("No public constructor!", pos);
 			}
 			Class[]                                        paramTypes  = methods.get(0).getParameterTypes();
-			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(paramTypes, resolvedArgs);
+			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(paramTypes, resolvedArgs,methods.get(0).isVarArgs());
 			checkMatch(pos, matchResult, resolvedArgs, paramTypes);
 			return invoke(methods.get(0), matchResult._2);
 		}
@@ -86,7 +84,7 @@ public class RJavaMethods implements RExpr, RFunction{
 		Method        first          = null;
 		PList<Method> otherPossibles = PList.empty();
 		for(Method m : methods) {
-			if(m.getParameterCount() == resolvedArgs.length && isPublic(m)) {
+			if((m.isVarArgs()|| m.getParameterCount() == resolvedArgs.length) && isPublic(m)) {
 				if(first == null) {
 					first = m;
 				}
@@ -101,7 +99,7 @@ public class RJavaMethods implements RExpr, RFunction{
 		if(otherPossibles.isEmpty()) {
 			//We have only 1 method with the same number of arguments
 			Class[]                                        paramTypes  = first.getParameterTypes();
-			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(paramTypes, resolvedArgs);
+			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(paramTypes, resolvedArgs,first.isVarArgs());
 			checkMatch(pos, matchResult, resolvedArgs, paramTypes);
 			return invoke(first, matchResult._2);
 		}
@@ -123,7 +121,7 @@ public class RJavaMethods implements RExpr, RFunction{
 			if(isPublic(m) == false) {
 				continue;
 			}
-			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(m.getParameterTypes(), resolvedArgs);
+			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(m.getParameterTypes(), resolvedArgs,m.isVarArgs());
 			if(matchResult._1 == JavaObjectMatcher.MatchLevel.full) {
 				return invoke(m, matchResult._2);
 			}
@@ -144,6 +142,43 @@ public class RJavaMethods implements RExpr, RFunction{
 		if(partial != null) {
 			return invoke(partial, partialArgs);
 		}
+
+		//Try match with varargs...
+		for(Method m : methods){
+			if(m.isVarArgs() == false){
+				continue;
+			}
+			Class[] paramTypes = m.getParameterTypes();
+			if(paramTypes.length> resolvedArgs.length){
+				continue;
+			}
+			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(paramTypes, resolvedArgs,paramTypes.length-1);
+			if(matchResult._1 == JavaObjectMatcher.MatchLevel.not){
+				continue;
+			}
+			//Found one...
+			Class itemClass = paramTypes[paramTypes.length-1].getComponentType();
+			int restLength = resolvedArgs.length-(paramTypes.length-1);
+			Object[] varArgs = (Object[])Array.newInstance(itemClass, restLength);
+			boolean ok= true;
+			for(int t=0; t<varArgs.length; t++){
+				Object value = resolvedArgs[paramTypes.length-1+t];
+				Optional<Object> casted = JavaObjectMatcher.tryCast(value,itemClass);
+				if(casted.isPresent() == false){
+					ok = false;
+					break;
+				}
+				varArgs[t] = casted.get();
+			}
+			if(ok) {
+				Object[] newSet = new Object[paramTypes.length];
+				System.arraycopy(matchResult._2, 0, newSet, 0, paramTypes.length - 1);
+				newSet[paramTypes.length - 1] = varArgs;
+
+				return invoke(m, newSet);
+			}
+		}
+
 		throw new EvalException("Method arguments don't match for java method application!", pos);
 	}
 
