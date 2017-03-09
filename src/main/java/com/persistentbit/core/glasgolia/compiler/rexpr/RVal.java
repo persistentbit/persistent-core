@@ -27,6 +27,7 @@ public class RVal implements RExpr, RAssignable{
 		this.index = index;
 	}
 
+
 	@Override
 	public Class getType() {
 		return type;

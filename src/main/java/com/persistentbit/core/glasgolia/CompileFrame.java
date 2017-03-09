@@ -30,4 +30,5 @@ public interface CompileFrame{
 
 	void addName(NameDef nameDef);
 
+	int	createStackVarIndex();
 }
