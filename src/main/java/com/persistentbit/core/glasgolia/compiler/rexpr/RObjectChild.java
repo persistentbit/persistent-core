@@ -58,6 +58,10 @@ public class RObjectChild implements RExpr{
 				throw new EvalException("Can't get child '" + name + "' from null", pos);
 			};
 		}
+		if(parentValue instanceof GGObject) {
+			GGObject gg = (GGObject) parentValue;
+			return () -> gg.getChild(pos, name);
+		}
 		if(parentValue instanceof Class) {
 			Class pcls = (Class) parentValue;
 			return CompileGToR.getConstJavaClassChild(pos, pcls, name);

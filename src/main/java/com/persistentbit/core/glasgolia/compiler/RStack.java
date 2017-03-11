@@ -5,12 +5,6 @@ import com.persistentbit.core.printing.PrintTextWriter;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.ToDo;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 /**
  * TODOC
  *
@@ -36,68 +30,7 @@ public interface RStack extends PrintableText{
 
 	void set(int index, Object value);
 
-	class ReplStack implements RStack{
 
-		private LList<Map<Integer, Object>> frames = LList.<Map<Integer, Object>>empty().plus(new HashMap<>());
-
-		@Override
-		public RStack reset() {
-			return new ReplStack();
-		}
-
-		@Override
-		public void addFrame(int size) {
-			frames = frames.prepend(new HashMap<>());
-		}
-
-		@Override
-		public void popFrame() {
-			frames = frames.tail();
-		}
-
-		@Override
-		public Object get(int index) {
-			return frames.head().get(index);
-		}
-
-		@Override
-		public String toString() {
-			Map<Integer, Object> thisFrame = frames.head();
-			String str = thisFrame.entrySet().stream().sorted((a, b) -> a.getKey().compareTo(b.getKey()))
-								  .map(e -> "" + e.getKey() + "=" + e.getValue()).collect(Collectors
-					.joining(", "));
-			return "RFrame(" + str + ")";
-		}
-
-		@Override
-		public void set(int index, Object value) {
-			frames.head().put(index, value);
-		}
-
-
-		@Override
-		public void print(PrintTextWriter out) {
-			out.println("ReplStack { ");
-			out.indent(print(frames));
-			out.println("}");
-
-		}
-
-		private PrintableText print(LList<Map<Integer, Object>> frames) {
-			return out -> {
-				if(frames.isEmpty()) {
-					return;
-				}
-				Map<Integer, Object> thisFrame = frames.head();
-				List<String>         items     =
-					thisFrame.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getKey))
-							 .map(e -> "" + e.getKey() + "=" + e.getValue()).collect(Collectors.toList());
-				items.forEach(item -> out.println(item));
-				out.indent(print(frames.tail()));
-			};
-		}
-
-	}
 
 	class RuntimeStack implements RStack{
 

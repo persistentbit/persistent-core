@@ -10,7 +10,7 @@ import com.persistentbit.core.utils.UReflect;
  * @author petermuys
  * @since 3/03/17
  */
-public class RVar extends RVal implements RAssignable{
+public class RVar extends RVal{
 
 	public RVar(StrPos pos, Class type, RStack stack, int index
 	) {

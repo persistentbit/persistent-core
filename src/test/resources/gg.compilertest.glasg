@@ -1,0 +1,12 @@
+import java "java.lang";
+val println = System.out.println;
+//val print = System.out.print;
+println("Initializing gg.compilertest module");
+val mod = import module "gg.moduletest";
+
+val modulevar = mod.modulevar;
+val modulevar2 = mod.modulevar2;
+val id = x -> x;
+val add = a->b->a+b;
+val mul = (a,b)->a*b;
+println("Initializing gg.compilertest module...done");

@@ -1,4 +1,4 @@
-package com.persistentbit.core.glasgolia;
+package com.persistentbit.core.glasgolia.compiler.rexpr;
 
 import com.persistentbit.core.utils.StrPos;
 

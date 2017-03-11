@@ -2,6 +2,7 @@ package com.persistentbit.core.glasgolia.gexpr.custom;
 
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.glasgolia.ETypeSig;
+import com.persistentbit.core.glasgolia.compiler.rexpr.GGModule;
 import com.persistentbit.core.glasgolia.gexpr.GExpr;
 import com.persistentbit.core.glasgolia.gexpr.GExprCustomParser;
 import com.persistentbit.core.glasgolia.gexpr.GExprParser;
@@ -44,13 +45,15 @@ public class GExprStatementParsers implements GExprCustomParser{
 	public GExprCustomParser importParser = mainParser -> {
 		return
 			mainParser.keyword("import")
-					  .skipAnd(mainParser.parseStringLiteral.withPos())
-					  .and(mainParser.keyword("as").skipAnd(mainParser.parseName).optional())
+					  .skipAnd(mainParser.keyword("java").or(mainParser.keyword("module")))
+					  .and(mainParser.parseStringLiteral.withPos())
+					  //.and(mainParser.keyword("as").skipAnd(mainParser.parseName).optional())
 					  .map(t -> {
+						  Class cls = t._1.equals("java") ? Object.class : GGModule.class;
 						  return new GExpr.Custom(
-							  t._1.pos,
+							  t._2.pos,
 							  "import",
-							  PList.val(t._1.value, t._2.orElse(null)), new ETypeSig.Cls(String.class)
+							  PList.val(t._1, t._2.value), new ETypeSig.Cls(cls)
 						  );
 					  });
 

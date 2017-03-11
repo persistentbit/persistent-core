@@ -1,6 +1,7 @@
 package com.persistentbit.core.glasgolia.compiler.rexpr;
 
 import com.persistentbit.core.utils.StrPos;
+import com.persistentbit.core.utils.ToDo;
 
 import java.util.function.Supplier;
 
@@ -20,5 +21,9 @@ public interface RExpr extends Supplier<Object>{
 
 	default boolean isAssignableFrom(RExpr other) {
 		return other != null && getType().isAssignableFrom(other.getType());
+	}
+
+	default Object assign(Object other) {
+		throw new ToDo("Assign in " + getClass().getName());
 	}
 }

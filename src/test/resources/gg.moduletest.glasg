@@ -1,0 +1,3 @@
+val modulevar = "Dit is module test";
+val module2 = import module "gg.moduletest2";
+val modulevar2 = module2.modulevar2;

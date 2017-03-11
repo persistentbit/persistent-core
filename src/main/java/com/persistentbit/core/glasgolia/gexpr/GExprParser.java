@@ -334,6 +334,7 @@ public class GExprParser{
 				}
 				source = endOfExprREsult.getSource();
 			}
+			//source = ws.parse(source).getSource();
 			//if(result.isEmpty()){
 			//	return ParseResult.failure(source,"Not a valid Expression");
 			//}

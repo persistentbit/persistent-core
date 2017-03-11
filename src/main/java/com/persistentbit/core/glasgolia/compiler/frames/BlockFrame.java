@@ -1,4 +1,4 @@
-package com.persistentbit.core.glasgolia;
+package com.persistentbit.core.glasgolia.compiler.frames;
 
 import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.glasgolia.compiler.RStack;
@@ -8,21 +8,24 @@ import com.persistentbit.core.glasgolia.compiler.rexpr.RVar;
 import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.utils.StrPos;
 
+import java.util.Objects;
+
 /**
  * TODO: Add comment
  *
  * @author Peter Muys
  * @since 9/03/2017
  */
-public class BlockFrame implements CompileFrame{
-    private final RStack  runtimeStack;
+public class BlockFrame extends AbstractCompileFrame{
+
+	private final RStack  runtimeStack;
     private final CompileFrame    parentFrame;
     private PMap<String,Tuple2<Integer,NameDef>> stackVars = PMap.empty();
 
     public BlockFrame(RStack runtimeStack, CompileFrame parentFrame) {
-        this.runtimeStack = runtimeStack;
-        this.parentFrame = parentFrame;
-    }
+		this.runtimeStack = Objects.requireNonNull(runtimeStack);
+		this.parentFrame = Objects.requireNonNull(parentFrame);
+	}
 
     @Override
     public RExpr bind(StrPos pos, String name) {
@@ -47,5 +50,10 @@ public class BlockFrame implements CompileFrame{
     public int createStackVarIndex() {
         return parentFrame.createStackVarIndex();
     }
+
+	@Override
+	public boolean canDefineLocal(String name) {
+		return stackVars.containsKey(name) == false;
+	}
 
 }

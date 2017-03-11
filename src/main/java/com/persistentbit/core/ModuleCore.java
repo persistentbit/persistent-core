@@ -3,10 +3,8 @@ package com.persistentbit.core;
 import com.persistentbit.core.logging.LoggedException;
 import com.persistentbit.core.logging.cleaning.LogCleaner;
 import com.persistentbit.core.logging.entries.*;
-import com.persistentbit.core.logging.printing.DefaultExceptionPrinter;
-import com.persistentbit.core.logging.printing.DefaultLogPrinter;
-import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
-import com.persistentbit.core.logging.printing.LogFormatter;
+import com.persistentbit.core.logging.printing.*;
+import com.persistentbit.core.utils.UOS;
 
 import java.util.Optional;
 
@@ -35,6 +33,22 @@ public final class ModuleCore {
                 .logIf(Throwable.class, new DefaultExceptionPrinter(format))
                 ;
     }
+
+	/**
+	 * Create a log formatter with or without color, depending on the os.<br>
+	 *
+	 * @return a LogFormatter
+	 *
+	 * @see #createLogFormatter(boolean)
+	 */
+	public static LogFormatter createLogFormatter() {
+		return createLogFormatter(UOS.hasAnsiColor());
+	}
+
+
+	public static LogPrint consoleLogPrint = LogPrintStream.sysOut(createLogFormatter());
+
+
     public static LogCleaner cleaner() {
         return LogCleaner.create()
                 .orIf(LogEntryEmpty.class,(rc, le)-> Optional.empty())

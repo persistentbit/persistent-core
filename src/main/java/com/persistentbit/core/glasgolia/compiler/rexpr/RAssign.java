@@ -10,10 +10,10 @@ import com.persistentbit.core.utils.StrPos;
  */
 public class RAssign implements RExpr{
 
-	private RAssignable left;
+	private RExpr left;
 	private RExpr right;
 
-	public RAssign(RAssignable left, RExpr right) {
+	public RAssign(RExpr left, RExpr right) {
 		this.left = left;
 		this.right = right;
 	}

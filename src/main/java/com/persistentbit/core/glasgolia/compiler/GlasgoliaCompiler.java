@@ -1,20 +1,25 @@
 package com.persistentbit.core.glasgolia.compiler;
 
+import com.persistentbit.core.collections.PByteList;
 import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.collections.PSet;
 import com.persistentbit.core.glasgolia.CompileException;
 import com.persistentbit.core.glasgolia.ETypeSig;
+import com.persistentbit.core.glasgolia.compiler.frames.*;
 import com.persistentbit.core.glasgolia.compiler.rexpr.*;
 import com.persistentbit.core.glasgolia.gexpr.GExpr;
 import com.persistentbit.core.glasgolia.gexpr.GExprParser;
+import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.source.Source;
+import com.persistentbit.core.resources.ClassPathResourceLoader;
+import com.persistentbit.core.resources.FileResourceLoader;
+import com.persistentbit.core.resources.ResourceLoader;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.tuples.Tuple2;
-import com.persistentbit.core.utils.StrPos;
-import com.persistentbit.core.utils.ToDo;
-import com.persistentbit.core.utils.UNumber;
-import com.persistentbit.core.utils.UReflect;
+import com.persistentbit.core.utils.*;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -24,38 +29,103 @@ import java.util.Optional;
  * TODOC
  *
  * @author petermuys
- * @since 2/03/17
+ * @since 10/03/17
  */
-public class CompileGToR{
+public class GlasgoliaCompiler{
 
-	private GExprParser	parser;
-	private CompileContext ctx = new CompileContext();
+	private ResourceLoader resourceLoader;
+	private GExprParser parser;
 	private final RStack runtimeStack;
+	private CompileFrame ctx;
 
-	public CompileGToR(GExprParser parser,RStack runtimeStack) {
+	public GlasgoliaCompiler(GExprParser parser, ResourceLoader resourceLoader, CompileFrame compileFrame,
+							 RStack runtimeStack
+	) {
+		this.resourceLoader = resourceLoader;
 		this.parser = parser;
+		this.ctx = compileFrame;
 		this.runtimeStack = runtimeStack;
 	}
 
-	public CompileGToR() {
-		this(new GExprParser(), new RStack.RuntimeStack());
+	public Result<RExpr> compileCode(String code) {
+		return Result.noExceptions(() -> {
+			ParseResult<GExpr> parseResult = parser.parseExprList().andEof().parse(Source.asSource("repl", code));
+			return compile(parseResult.getValue());
+		});
 	}
 
-	public Result<RExpr> compile(Source source){
+	public static GlasgoliaCompiler replCompiler(GExprParser parser, ResourceLoader resourceLoader) {
+		ReplCompileFrame compileFrame = new ReplCompileFrame();
+		return new GlasgoliaCompiler(parser, resourceLoader, compileFrame, compileFrame.getStack());
+	}
+
+	public static GlasgoliaCompiler replCompiler(ResourceLoader resourceLoader) {
+		return replCompiler(new GExprParser(), resourceLoader);
+	}
+
+	public static GlasgoliaCompiler replCompiler() {
+		File           currentRoot = new File(".").getAbsoluteFile();
+		ResourceLoader loader      = ClassPathResourceLoader.inst.orTry(new FileResourceLoader(currentRoot));
+		return replCompiler(loader);
+	}
+
+	private Optional<Source> findSource(String moduleName) {
+		//make name end with '.glasg'
+		if(moduleName.endsWith(".glasg") == false) {
+			moduleName = moduleName + ".glasg";
+		}
+		//Try in root
+		PByteList bl = resourceLoader.apply(moduleName).orElse(null);
+		if(bl == null) {
+			//Try in subfolders
+			moduleName = moduleName.substring(0, moduleName.length() - ".glasg".length()).replace('.', '/') + ".glasg";
+			bl = resourceLoader.apply(moduleName).orElse(null);
+		}
+		if(bl == null) {
+			return Optional.empty();
+		}
+		return Optional.of(Source.asSource(moduleName, bl.toText(IO.utf8)));
+	}
+
+	private PMap<String, GGModule> compiledModules = PMap.empty();
+	private PSet<String> currentlyCompiling = PSet.empty();
+
+	private GGModule compileModule(String moduleName, Source source) {
+		if(currentlyCompiling.contains(moduleName)) {
+			throw new CompileException("Circular dependency for module '" + moduleName + "'");
+		}
+		if(compiledModules.containsKey(moduleName)) {
+			return compiledModules.get(moduleName);
+		}
+		currentlyCompiling = currentlyCompiling.plus(moduleName);
+		CompileFrame currentFrame = ctx;
+		try {
+			GGModule             mod      = new GGModule(moduleName, PMap.empty());
+			GGModuleCompileFrame modFrame = new GGModuleCompileFrame(mod);
+			ctx = modFrame;
+			ParseResult<GExpr> parseResult = parser.parseExprList().andEof().parse(source);
+			if(parseResult.isFailure()) {
+				throw parseResult.getError();
+			}
+			RExpr initCode = compile(parseResult.getValue());
+			modFrame.createModule(runtimeStack, initCode);
+			compiledModules.put(moduleName, mod);
+			return mod;
+
+		} catch(Exception e) {
+			throw new CompileException("Error while compiling module '" + moduleName + "'", e);
+		} finally {
+			ctx = currentFrame;
+			currentlyCompiling = currentlyCompiling.filter(n -> n.equals(moduleName));
+		}
+	}
+	/*public Result<RExpr> compile(Source source){
 		return parser.parseExprList().andEof().parse(source).asResult()
-			.map(this::compile);
-	}
+					 .map(this::compile);
+	}*/
 
-	public CompileGToR	reset() {
-		return new CompileGToR(parser, runtimeStack.reset());
-	}
-
-	public CompileContext getContext() {
-		return ctx;
-	}
 
 	public RExpr compile(GExpr g) {
-		CompileContext.Frame currentFrame = ctx.getCurrentFrame();
 		try {
 			return g.match(
 				this::compileChildOp,
@@ -71,7 +141,6 @@ public class CompileGToR{
 				this::compileLambda
 			);
 		} catch(CompileException ce) {
-			ctx = ctx.withFrame(currentFrame);
 			throw ce;
 		} catch(Exception e) {
 			throw new CompileException(e, g.getPos());
@@ -80,7 +149,19 @@ public class CompileGToR{
 
 
 	public RExpr compileLambda(GExpr.Lambda g) {
-		//System.out.println("Before Lambda: " + ctx);
+		CompileFrame       currentFrame = ctx;
+		LambdaCompileFrame lambdaFrame  = new LambdaCompileFrame(currentFrame, runtimeStack);
+		try {
+			ctx = lambdaFrame;
+			for(GExpr.TypedName param : g.params) {
+				ctx.addName(new CompileFrame.NameDef(param.pos, param.name, false, GGAccess.publicAccess, getType(param.pos, param.type)));
+			}
+			RExpr code = compile(g.code);
+			return lambdaFrame.createLambdaCreate(g.getPos(), g.params.size(), code);
+		} finally {
+			ctx = currentFrame;
+		}
+		/*//System.out.println("Before Lambda: " + ctx);
 		ctx = ctx.addFrame();
 		//System.out.println("After add frame: " + ctx);
 		//Add parameter in order to the frame
@@ -108,32 +189,38 @@ public class CompileGToR{
 			}
 		}
 		return new RLambdaCreate(g.getPos(), g.params.size(), initFreeList, frameSize, code, runtimeStack);
+
+		*/
 	}
 
 
 	public RExpr compileValVar(GExpr.ValVar g) {
 		String name = g.name.name;
-		if(ctx.findInCurrentNameContext(name).isPresent()) {
+		if(ctx.canDefineLocal(name) == false) {
 			throw new CompileException("variable name '" + g.name + "' is already declared");
 		}
 
-		ETypeSig varTypeSig = g.getType() == ETypeSig.any ? g.initial.getType() : g.getType();
-		ctx = ctx.addVar(false, name, getType(g.getPos(), varTypeSig));
-		RExpr    right      = compile(g.initial);
+
+		ETypeSig             varTypeSig = g.getType() == ETypeSig.any ? g.initial.getType() : g.getType();
+		CompileFrame.NameDef nameDef    =
+			new CompileFrame.NameDef(g.getPos(), name, false, GGAccess.publicAccess, getType(g.getPos(), varTypeSig));
+		ctx.addName(nameDef);
+		RExpr right = compile(g.initial);
 		Class type = varTypeSig == ETypeSig.any
 			? right.getType() : getType(g.getPos(), varTypeSig);
 
+		nameDef = nameDef.withType(type);
 		switch(g.valVarType) {
 			case val:
-				ctx = ctx.addVal(true, name, type);
+				ctx.addName(nameDef.withIsVal(true));
 				break;
 			case var:
-				ctx = ctx.addVar(true, name, type);
+				ctx.addName(nameDef.withIsVal(false));
 				break;
 			default:
 				throw new RuntimeException("Unknown type : " + g.valVarType);
 		}
-		RExpr left = ctx.bindName(g.getPos(), runtimeStack, name);
+		RExpr left = ctx.bind(g.getPos(), name);
 
 		RExpr res = new RAssign(left, right);
 		return res;
@@ -150,19 +237,8 @@ public class CompileGToR{
 	}
 
 	private RExpr compileName(GExpr.Name g) {
-		Optional<CompileContext.ValVar> vv = ctx.findInCurrentFrame(g.name);
-		if(vv.isPresent() == false) {
-			if(ctx.findJavaClass(g.name).isPresent() == false) {
-				vv = ctx.findInAllFrames(g.name);
-				if(vv.isPresent()) {
-					//Not in current frame, but in a prev frame, so declare it...
-					//System.out.println(ctx);
-					ctx = ctx.addVal(false, vv.get().name, vv.get().type);
-					//System.out.println(ctx);
-				}
-			}
-		}
-		RExpr bind = ctx.bindName(g.getPos(), runtimeStack, g.name);
+
+		RExpr bind = ctx.bind(g.getPos(), g.name);
 		//System.out.println(ctx);
 		Class nameType = getType(g.getPos(), g.getType());
 		Class bindType = bind.getType();
@@ -171,6 +247,7 @@ public class CompileGToR{
 		}
 		return bind;
 	}
+
 	public RExpr compileApply(GExpr.Apply g) {
 		RExpr left = compile(g.function);
 		return new RApply(g.getPos(), left, g.parameters.map(this::compile).toImmutableArray());
@@ -178,6 +255,8 @@ public class CompileGToR{
 
 	public RExpr compileChildOp(GExpr.Child g) {
 		RExpr left = compile(g.left);
+
+
 		if(left.isConst()) {
 			if(left.getType() == Class.class) {
 				//We have a static class child
@@ -245,12 +324,6 @@ public class CompileGToR{
 	}
 
 
-	public CompileGToR addImport(String importName) {
-		ctx = ctx.addImport(importName);
-		return this;
-	}
-
-
 	private RExpr compileCustom(GExpr.Custom g) {
 		switch(g.name) {
 			case "import":
@@ -280,22 +353,40 @@ public class CompileGToR{
 	}
 
 	private RExpr compileImport(GExpr.Custom g) {
-		GExpr nameExpr = (GExpr) g.arguments.get(0);
-		if(nameExpr instanceof GExpr.Const == false || getType(nameExpr.getPos(), nameExpr.getType()) != String.class) {
-			throw new CompileException("Expected a java package or class name string:" + nameExpr, nameExpr.getPos());
+		String typeName = (String) g.arguments.get(0); //'java' or 'module'
+		String name     = compile((GExpr) g.arguments.get(1)).get().toString(); //module or package name
+		//String as = g.arguments.get(2) == null
+		//	   ? null
+		//	   : compile((GExpr)g.arguments.get(2)).get().toString();
+		switch(typeName) {
+			case "java":
+				ctx.addImported(new ImportedJava(name));
+				return new RConst(g.getPos(), Object.class, null);
+			case "module": {
+				Source source = findSource(name).orElse(null);
+				if(source == null) {
+					throw new CompileException("Can't find module '" + name + "'", g.getPos());
+				}
+				GGModule mod = compileModule(name, source);
+				ctx.addImported(new ImportedModule(mod));
+				return mod.asRExpr();
+			}
+			default:
+				throw new CompileException("Unknown import type:'" + typeName + "'", g.getPos());
 		}
-		String name = (String) ((GExpr.Const) nameExpr).value;
-		ctx = ctx.addImport(name);
-		return new RConst(nameExpr.getPos(), String.class, name);
 	}
 
 
 	private RExpr compileGroup(GExpr.Group g) {
 		//if(g.groupType == GExpr.Group.GroupType.group)
-		ctx = ctx.addNameContext();
-		RExpr res = compile(g.expr);
-		ctx = ctx.popNameContext();
-		return res;
+		CompileFrame current = ctx;
+		try {
+			ctx = new BlockFrame(runtimeStack, current);
+			RExpr res = compile(g.expr);
+			return res;
+		} finally {
+			ctx = current;
+		}
 	}
 
 	private RExpr compileBinOp(GExpr.BinOp g) {
@@ -367,20 +458,12 @@ public class CompileGToR{
 			mName -> {
 				String name = mName.clsName;
 				name = name.replace('.', '$');
-				Class foundCls = ctx.findJavaClass(name).orElse(null);
+				Class foundCls = ctx.getType(name).orElse(null);
 				if(foundCls == null) {
 					throw new CompileException("Can't find class '" + name + "'", pos);
 				}
 				return foundCls;
-				/*try {
-					String name = mName.clsName;
-					if(name.indexOf('.') < 0) {
-						name = "java.lang." + name;
-					}
- 					return Class.forName(name);
-				} catch(ClassNotFoundException e) {
-					throw new CompileException(e);
-				}*/
+
 			},
 			mWG -> getType(pos, mWG.name),
 			mArr -> {throw new ToDo();},
@@ -412,11 +495,8 @@ public class CompileGToR{
 		return Optional.empty();
 	}
 
-	public PSet<String> getUndefinedVars() {
-		return ctx.findUndeclaredInFrame().map(vv -> vv.name).pset();
-	}
 
-	public GExprParser	getParser(){
+	public GExprParser getParser() {
 		return parser;
 	}
 }

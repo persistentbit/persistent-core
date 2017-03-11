@@ -11,7 +11,7 @@ import com.persistentbit.core.utils.UReflect;
  * @author petermuys
  * @since 3/03/17
  */
-public class RVal implements RExpr, RAssignable{
+public class RVal implements RExpr{
 
 	protected final StrPos pos;
 	protected final Class type;
