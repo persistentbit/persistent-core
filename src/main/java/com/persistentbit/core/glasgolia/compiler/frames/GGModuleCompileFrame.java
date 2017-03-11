@@ -57,6 +57,11 @@ public class GGModuleCompileFrame extends AbstractCompileFrame{
 			return value;
 		}
 
+		@Override
+		public String toString() {
+			return module + "." + nameDef.name;
+		}
+
 		public Object assign(Object other) {
 			if(isInitialized && nameDef.isVal) {
 				throw new EvalException("Can't set '" + nameDef.name + "' in module " + module + ": already  initialized.", nameDef.pos);

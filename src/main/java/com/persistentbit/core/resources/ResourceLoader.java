@@ -79,7 +79,7 @@ public interface ResourceLoader extends Function<String, Result<PByteList>>{
 		return new ResourceLoader(){
 			@Override
 			public Result<PByteList> apply(String name) {
-				System.out.println("MAPPING NAME " + name + " to " + nameMapper.apply(name));
+				//System.out.println("MAPPING NAME " + name + " to " + nameMapper.apply(name));
 				return self.apply(nameMapper.apply(name));
 			}
 

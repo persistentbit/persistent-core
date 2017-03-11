@@ -1,3 +1,4 @@
+
 import java "java.lang";
 val println = System.out.println;
 //val print = System.out.print;
@@ -9,4 +10,16 @@ val modulevar2 = mod.modulevar2;
 val id = x -> x;
 val add = a->b->a+b;
 val mul = (a,b)->a*b;
+val addMul = a->b->add(mul(a,b))(mul(a,b));
+val printAddMul = (x,y)-> {
+    val res = addMul(x)(y);
+    println("AddMul " + x + ", "  + y + " = " + res);
+    res;
+};
 println("Initializing gg.compilertest module...done");
+val blockTest = {
+    val y = modulevar + "?";
+    y;
+};
+
+range(0,10).forEach(i -> println(i));

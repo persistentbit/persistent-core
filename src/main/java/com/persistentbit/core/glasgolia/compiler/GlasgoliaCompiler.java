@@ -1,9 +1,6 @@
 package com.persistentbit.core.glasgolia.compiler;
 
-import com.persistentbit.core.collections.PByteList;
-import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.collections.PMap;
-import com.persistentbit.core.collections.PSet;
+import com.persistentbit.core.collections.*;
 import com.persistentbit.core.glasgolia.CompileException;
 import com.persistentbit.core.glasgolia.ETypeSig;
 import com.persistentbit.core.glasgolia.compiler.frames.*;
@@ -38,6 +35,7 @@ public class GlasgoliaCompiler{
 	private final RStack runtimeStack;
 	private CompileFrame ctx;
 
+
 	public GlasgoliaCompiler(GExprParser parser, ResourceLoader resourceLoader, CompileFrame compileFrame,
 							 RStack runtimeStack
 	) {
@@ -49,7 +47,8 @@ public class GlasgoliaCompiler{
 
 	public Result<RExpr> compileCode(String code) {
 		return Result.noExceptions(() -> {
-			ParseResult<GExpr> parseResult = parser.parseExprList().andEof().parse(Source.asSource("repl", code));
+			ParseResult<GExpr> parseResult =
+				parser.ws.skipAnd(parser.parseExprList()).andEof().parse(Source.asSource("repl", code));
 			return compile(parseResult.getValue());
 		});
 	}
@@ -89,7 +88,15 @@ public class GlasgoliaCompiler{
 
 	private PMap<String, GGModule> compiledModules = PMap.empty();
 	private PSet<String> currentlyCompiling = PSet.empty();
+	private GExpr moduleInit = null;
 
+	private GExpr getModuleInit() {
+		if(moduleInit == null) {
+			Source source = findSource("gg.moduleInit").orElse(Source.asSource("null;"));
+			moduleInit = parser.ws.skipAnd(parser.parseExprList()).parse(source).getValue();
+		}
+		return moduleInit;
+	}
 	private GGModule compileModule(String moduleName, Source source) {
 		if(currentlyCompiling.contains(moduleName)) {
 			throw new CompileException("Circular dependency for module '" + moduleName + "'");
@@ -103,12 +110,14 @@ public class GlasgoliaCompiler{
 			GGModule             mod      = new GGModule(moduleName, PMap.empty());
 			GGModuleCompileFrame modFrame = new GGModuleCompileFrame(mod);
 			ctx = modFrame;
-			ParseResult<GExpr> parseResult = parser.parseExprList().andEof().parse(source);
+			ParseResult<GExpr> parseResult = parser.ws.skipAnd(parser.parseExprList()).andEof().parse(source);
 			if(parseResult.isFailure()) {
 				throw parseResult.getError();
 			}
-			RExpr initCode = compile(parseResult.getValue());
-			modFrame.createModule(runtimeStack, initCode);
+			RExpr moduleInitCode = compile(getModuleInit());
+			RExpr initCode       = compile(parseResult.getValue());
+			modFrame
+				.createModule(runtimeStack, new RExprList(StrPos.inst, ImmutableArray.val(moduleInitCode, initCode)));
 			compiledModules.put(moduleName, mod);
 			return mod;
 
@@ -119,10 +128,6 @@ public class GlasgoliaCompiler{
 			currentlyCompiling = currentlyCompiling.filter(n -> n.equals(moduleName));
 		}
 	}
-	/*public Result<RExpr> compile(Source source){
-		return parser.parseExprList().andEof().parse(source).asResult()
-					 .map(this::compile);
-	}*/
 
 
 	public RExpr compile(GExpr g) {

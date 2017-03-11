@@ -21,6 +21,10 @@ public class TestGlasgoliaCompiler{
 		tr.info(gc.compileCode("id(100)").orElseThrow().get());
 		tr.info(gc.compileCode("add(100)(23)").orElseThrow().get());
 		tr.info(gc.compileCode("mul(2,add(3)(id(2)))").orElseThrow().get());
+		tr.info(gc.compileCode("addMul(2)(add(3)(id(2)))").orElseThrow().get());
+		tr.info(gc.compileCode("printAddMul(2,add(3)(id(2)))").orElseThrow().get());
+		tr.info(gc.compileCode("printAddMul(2,add(3)(id(2)))").orElseThrow());
+		tr.info(gc.compileCode("blockTest").orElseThrow().get());
 	});
 
 	public void testAll() {

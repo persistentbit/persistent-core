@@ -21,6 +21,11 @@ public class GGModule implements GGObject{
 	private PMap<String, GGModuleCompileFrame.ModNameDef> nameLookup;
 	private final Lazy<RExpr> thisRExpr;
 
+	@Override
+	public String toString() {
+		return "GGModule[" + moduleName + "]";
+	}
+
 	public GGModule(String moduleName,
 					PMap<String, GGModuleCompileFrame.ModNameDef> nameLookup
 	) {
