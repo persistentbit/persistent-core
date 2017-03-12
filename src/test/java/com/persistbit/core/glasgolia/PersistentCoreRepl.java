@@ -1,7 +1,5 @@
 package com.persistbit.core.glasgolia;
 
-import com.persistentbit.core.glasgolia.repl.GGRepl;
-
 /**
  * TODOC
  *
@@ -11,8 +9,8 @@ import com.persistentbit.core.glasgolia.repl.GGRepl;
 public class PersistentCoreRepl {
 
 	public static void main(String[] args) throws Exception {
-		GGRepl repl = new GGRepl()
-			.loadAndEval("persistentcore.repl.test.gg");
-		repl.repl();
+		//GGRepl repl = new GGRepl()
+		//	.loadAndEval("persistentcore.repl.test.gg");
+		//repl.repl();
 	}
 }

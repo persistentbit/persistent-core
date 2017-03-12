@@ -1,7 +1,7 @@
 package com.persistentbit.core.glasgolia.compiler.rexpr;
 
 import com.persistentbit.core.glasgolia.EvalException;
-import com.persistentbit.core.glasgolia.compiler.CompileGToR;
+import com.persistentbit.core.glasgolia.compiler.GlasgoliaCompiler;
 import com.persistentbit.core.utils.StrPos;
 
 import java.util.function.Supplier;
@@ -64,9 +64,9 @@ public class RObjectChild implements RExpr{
 		}
 		if(parentValue instanceof Class) {
 			Class pcls = (Class) parentValue;
-			return CompileGToR.getConstJavaClassChild(pos, pcls, name);
+			return GlasgoliaCompiler.getConstJavaClassChild(pos, pcls, name);
 		}
-		return CompileGToR.getConstJavaObjectChild(pos, parentValue, name, parent.isConst());
+		return GlasgoliaCompiler.getConstJavaObjectChild(pos, parentValue, name, parent.isConst());
 	}
 
 	@Override

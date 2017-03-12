@@ -9,14 +9,11 @@ import com.persistentbit.core.glasgolia.gexpr.GExpr;
 import com.persistentbit.core.glasgolia.gexpr.GExprParser;
 import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.source.Source;
-import com.persistentbit.core.resources.ClassPathResourceLoader;
-import com.persistentbit.core.resources.FileResourceLoader;
 import com.persistentbit.core.resources.ResourceLoader;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.utils.*;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -63,9 +60,7 @@ public class GlasgoliaCompiler{
 	}
 
 	public static GlasgoliaCompiler replCompiler() {
-		File           currentRoot = new File(".").getAbsoluteFile();
-		ResourceLoader loader      = ClassPathResourceLoader.inst.orTry(new FileResourceLoader(currentRoot));
-		return replCompiler(loader);
+		return replCompiler(ResourceLoader.rootAndClassPath);
 	}
 
 	private Optional<Source> findSource(String moduleName) {

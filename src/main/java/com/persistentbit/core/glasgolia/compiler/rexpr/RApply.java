@@ -4,14 +4,14 @@ import com.persistentbit.core.collections.ImmutableArray;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.glasgolia.EvalException;
-import com.persistentbit.core.glasgolia.compiler.JavaObjectMatcher;
+import com.persistentbit.core.glasgolia.compiler.JavaExecutableFinder;
 import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.utils.StrPos;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
-import static com.persistentbit.core.glasgolia.compiler.JavaObjectMatcher.tryMatch;
+import static com.persistentbit.core.glasgolia.compiler.JavaExecutableFinder.tryMatch;
 
 /**
  * TODOC
@@ -24,7 +24,7 @@ public class RApply implements RExpr{
 	private final StrPos pos;
 	private final RExpr parent;
 	private final ImmutableArray<RExpr> arguments;
-
+	static private final JavaExecutableFinder.Caster caster = JavaExecutableFinder.defaultCaster;
 	public RApply(StrPos pos, RExpr parent,
 				  ImmutableArray<RExpr> arguments
 	) {
@@ -96,8 +96,9 @@ public class RApply implements RExpr{
 			if(isPublic(constructors[0]) == false) {
 				throw new EvalException("No public constructor!", pos);
 			}
-			Class[]                                        paramTypes  = constructors[0].getParameterTypes();
-			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(paramTypes, resolvedArgs,constructors[0].isVarArgs());
+			Class[]                                           paramTypes  = constructors[0].getParameterTypes();
+			Tuple2<JavaExecutableFinder.MatchLevel, Object[]> matchResult =
+				tryMatch(caster, paramTypes, resolvedArgs, constructors[0].isVarArgs());
 			checkMatch(pos, matchResult, resolvedArgs, paramTypes);
 			return invoke(constructors[0], matchResult._2);
 		}
@@ -119,8 +120,9 @@ public class RApply implements RExpr{
 		}
 		if(otherPossibles.isEmpty()) {
 			//We have only 1 method with the same number of arguments
-			Class[]                                        paramTypes  = first.getParameterTypes();
-			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(paramTypes, resolvedArgs,first.isVarArgs());
+			Class[]                                           paramTypes  = first.getParameterTypes();
+			Tuple2<JavaExecutableFinder.MatchLevel, Object[]> matchResult =
+				tryMatch(caster, paramTypes, resolvedArgs, first.isVarArgs());
 			checkMatch(pos, matchResult, resolvedArgs, paramTypes);
 			return invoke(first, matchResult._2);
 		}
@@ -141,11 +143,12 @@ public class RApply implements RExpr{
 			if(isPublic(m) == false) {
 				continue;
 			}
-			Tuple2<JavaObjectMatcher.MatchLevel, Object[]> matchResult = tryMatch(m.getParameterTypes(), resolvedArgs,m.isVarArgs());
-			if(matchResult._1 == JavaObjectMatcher.MatchLevel.full) {
+			Tuple2<JavaExecutableFinder.MatchLevel, Object[]> matchResult =
+				tryMatch(caster, m.getParameterTypes(), resolvedArgs, m.isVarArgs());
+			if(matchResult._1 == JavaExecutableFinder.MatchLevel.full) {
 				return invoke(m, matchResult._2);
 			}
-			if(matchResult._1 == JavaObjectMatcher.MatchLevel.partial) {
+			if(matchResult._1 == JavaExecutableFinder.MatchLevel.partial) {
 				if(partial != null) {
 					hasMultiplePartial = true;
 				}
@@ -165,10 +168,10 @@ public class RApply implements RExpr{
 		throw new EvalException("Method arguments don't match for java method application!", pos);
 	}
 
-	private static void checkMatch(StrPos pos, Tuple2<JavaObjectMatcher.MatchLevel, Object[]> mr, Object[] arguments,
+	private static void checkMatch(StrPos pos, Tuple2<JavaExecutableFinder.MatchLevel, Object[]> mr, Object[] arguments,
 								   Class[] types
 	) {
-		if(mr._1 == JavaObjectMatcher.MatchLevel.not) {
+		if(mr._1 == JavaExecutableFinder.MatchLevel.not) {
 			String args   = PStream.from(arguments).toString(", ");
 			String params = PStream.from(types).map(v -> v.getName()).toString(", ");
 			throw new EvalException("Can't match parameters (" + args + ") with (" + params + ")", pos);

@@ -1,23 +1,5 @@
 package com.persistentbit.core.glasgolia.repl;
 
-import com.persistentbit.core.ModuleCore;
-import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.glasgolia.Glasgolia;
-import com.persistentbit.core.glasgolia.compiler.CompileContext;
-import com.persistentbit.core.glasgolia.compiler.CompileGToR;
-import com.persistentbit.core.logging.printing.LogPrint;
-import com.persistentbit.core.logging.printing.LogPrintStream;
-import com.persistentbit.core.parser.ParseExceptionEOF;
-import com.persistentbit.core.parser.ParseResult;
-import com.persistentbit.core.parser.source.Source;
-import com.persistentbit.core.result.Result;
-import com.persistentbit.core.utils.IO;
-import com.persistentbit.core.utils.UString;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
-
 /**
  * TODO: Add comment
  *
@@ -25,8 +7,8 @@ import java.io.InputStreamReader;
  * @since 7/03/2017
  */
 public class GGRepl {
-
-    public static final LogPrint lp =
+/*
+	public static final LogPrint lp =
             LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
 
     private Glasgolia gg = new Glasgolia();
@@ -181,5 +163,5 @@ public class GGRepl {
 
         repl.repl();
 
-    }
+    }*/
 }

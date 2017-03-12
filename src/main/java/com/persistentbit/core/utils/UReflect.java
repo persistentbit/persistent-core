@@ -1,6 +1,8 @@
 package com.persistentbit.core.utils;
 
+import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PMap;
+import com.persistentbit.core.glasgolia.compiler.JavaExecutableFinder;
 import com.persistentbit.core.result.Result;
 
 import java.lang.invoke.MethodHandles;
@@ -79,6 +81,80 @@ public final class UReflect{
 			}
 		}
 
+	}
+
+	public static Result<Object> invokeMethod(Method m, Object parent, Object... args) {
+		return Result.noExceptions(() -> m.invoke(parent, args));
+	}
+
+	public static Result<Object> invokeConstructor(Constructor c, Object... args) {
+		return Result.noExceptions(() -> c.newInstance(args));
+	}
+
+	public static PList<Executable> findInstanceMethods(Class cls, String name) {
+		PList<Executable> methods = PList.empty();
+		for(Method m : cls.getMethods()) {
+			if(Modifier.isStatic(m.getModifiers()) == false && Modifier.isPublic(m.getModifiers()) && m.getName()
+																									   .equals(name)) {
+				methods = methods.plus(m);
+			}
+		}
+		return methods;
+	}
+
+	public static PList<Executable> findClassMethods(Class cls, String name) {
+		PList<Executable> methods = PList.empty();
+		for(Method m : cls.getDeclaredMethods()) {
+			if(Modifier.isStatic(m.getModifiers()) && Modifier.isPublic(m.getModifiers()) && m.getName().equals(name)) {
+				methods = methods.plus(m);
+			}
+		}
+		return methods;
+	}
+
+	public static PList<Executable> findConstructors(Class cls) {
+		return PList.val(cls.getConstructors());
+	}
+
+
+	public static Result<Object> executeStaticMethod(Class cls, String name, Object... arguments) {
+		return Result.function(cls, name, arguments).code(l -> {
+			PList<Executable> methods = findClassMethods(cls, name);
+			return JavaExecutableFinder
+				.findExecutableForArguments(JavaExecutableFinder.defaultCaster, methods, arguments)
+				.flatMap(t -> {
+					Method m = (Method) t._1;
+					return invokeMethod(m, null, t._2);
+				});
+		});
+
+
+	}
+
+	public static Result<Object> executeMethod(Object parent, Class cls, String name, Object... arguments) {
+		return Result.function(parent, cls, name, arguments).code(l -> {
+			PList<Executable> methods = findInstanceMethods(cls, name);
+			return JavaExecutableFinder
+				.findExecutableForArguments(JavaExecutableFinder.defaultCaster, methods, arguments)
+				.flatMap(t -> {
+					Method m = (Method) t._1;
+					return invokeMethod(m, parent, t._2);
+				});
+		});
+
+
+	}
+
+	public static <R> Result<R> executeConstructor(Class<R> cls, Object... arguments) {
+		return Result.function(cls, arguments).code(l -> {
+			PList<Executable> constructors = findConstructors(cls);
+			return JavaExecutableFinder
+				.findExecutableForArguments(JavaExecutableFinder.defaultCaster, constructors, arguments)
+				.flatMap(t -> {
+					Constructor c = (Constructor) t._1;
+					return (Result<R>) invokeConstructor(c, t._2);
+				});
+		});
 	}
 
 	public static Optional<Field> getField(Class cls, String name) {

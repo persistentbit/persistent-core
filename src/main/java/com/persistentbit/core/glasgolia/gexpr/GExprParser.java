@@ -50,6 +50,12 @@ public class GExprParser{
 
 	public Parser<GExpr> parseName = parseNameString().map(name -> new GExpr.Name(name.pos, name.value, ETypeSig.any));
 
+
+	@Override
+	public String toString() {
+		return "GExprParser[]";
+	}
+
 	public Parser<String> orTerms(String... terms) {
 		Parser<String> res = term(terms[0]);
 		for(int t = 1; t < terms.length; t++) {

@@ -4,6 +4,7 @@ import com.persistentbit.core.collections.PByteList;
 import com.persistentbit.core.function.Memoizer;
 import com.persistentbit.core.result.Result;
 
+import java.io.File;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -18,6 +19,25 @@ import java.util.function.Predicate;
  * @since 6/02/17
  */
 public interface ResourceLoader extends Function<String, Result<PByteList>>{
+
+
+	ResourceLoader empty = name -> Result.empty("Resource '" + name + "' not found");
+
+	/**
+	 * A Resource loader that first search in the root folder and then tries the classpath
+	 *
+	 * @see #rootAndClassPath
+	 */
+	ResourceLoader classPathAndRoot =
+		ClassPathResourceLoader.inst.orTry(new FileResourceLoader(new File(".").getAbsoluteFile()));
+
+	/**
+	 * A Resource loader that first search in classpath and then in the root folder
+	 *
+	 * @see #classPathAndRoot
+	 */
+	ResourceLoader rootAndClassPath =
+		ClassPathResourceLoader.inst.orTry(new FileResourceLoader(new File(".").getAbsoluteFile()));
 
 	/**
 	 * Create a cached version of this resource loader, using the resource name as key

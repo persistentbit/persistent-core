@@ -1,7 +1,7 @@
 package com.persistentbit.core.glasgolia.compiler.rexpr;
 
 import com.persistentbit.core.glasgolia.EvalException;
-import com.persistentbit.core.glasgolia.compiler.JavaObjectMatcher;
+import com.persistentbit.core.glasgolia.compiler.JavaExecutableFinder;
 import com.persistentbit.core.utils.StrPos;
 import com.persistentbit.core.utils.UReflect;
 
@@ -41,7 +41,7 @@ public class RCast implements RExpr{
 	@Override
 	public Object get() {
 		Object           parentValue = expr.get();
-		Optional<Object> casted      = JavaObjectMatcher.tryCast(parentValue, cls);
+		Optional<Object> casted      = JavaExecutableFinder.defaultCaster.apply(parentValue, cls);
 		if(casted.isPresent()) {
 			return casted.get();
 		}

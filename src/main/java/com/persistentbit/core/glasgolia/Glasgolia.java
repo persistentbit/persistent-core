@@ -1,17 +1,5 @@
 package com.persistentbit.core.glasgolia;
 
-import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.function.Memoizer;
-import com.persistentbit.core.glasgolia.compiler.CompileGToR;
-import com.persistentbit.core.glasgolia.compiler.rexpr.RExpr;
-import com.persistentbit.core.parser.source.Source;
-import com.persistentbit.core.resources.ClassPathResourceLoader;
-import com.persistentbit.core.resources.ResourceLoader;
-import com.persistentbit.core.result.Result;
-import com.persistentbit.core.utils.IO;
-
-import java.util.function.Function;
-
 /**
  * TODOC
  *
@@ -19,7 +7,7 @@ import java.util.function.Function;
  * @since 27/02/17
  */
 public class Glasgolia{
-
+/*
 	private final ResourceLoader            resourceLoader;
 	private final CompileGToR                     compiler;
 	private Function<String, Result<RExpr>> compiled;
@@ -73,4 +61,5 @@ public class Glasgolia{
 		return compiler.compile(Source.asSource(name, code))
 			.flatMap(this::eval);
 	}
+	*/
 }
