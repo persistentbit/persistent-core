@@ -70,7 +70,7 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 				);
 			} catch(LoggedException le) {
 				return Result.failure(le.setLogs(entry.append(le.getLogs())));
-			} catch(Exception e) {
+			} catch(Throwable e) {
 				return Result.failure(new LoggedException(e, entry));
 			}
 		}

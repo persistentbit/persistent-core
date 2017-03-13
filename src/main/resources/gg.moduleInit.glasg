@@ -6,3 +6,5 @@ import java "com.persistentbit.core.utils";
 import java "com.persistentbit.core.result";
 //System.out.println("Module init:" + this);
 val range = (start, end) -> PStream.range(start,end);
+val println = System.out.println;
+val print = System.out.print;

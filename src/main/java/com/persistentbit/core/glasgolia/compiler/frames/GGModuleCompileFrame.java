@@ -118,6 +118,7 @@ public class GGModuleCompileFrame extends AbstractCompileFrame{
 		}
 	}
 
+
 	@Override
 	public int createStackVarIndex() {
 		return nextStackId++;

@@ -1,9 +1,11 @@
 package com.persistentbit.core.glasgolia.compiler.frames;
 
 import com.persistentbit.core.collections.LList;
+import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.glasgolia.CompileException;
 import com.persistentbit.core.glasgolia.compiler.RStack;
+import com.persistentbit.core.glasgolia.compiler.rexpr.RConst;
 import com.persistentbit.core.glasgolia.compiler.rexpr.RExpr;
 import com.persistentbit.core.printing.PrintTextWriter;
 import com.persistentbit.core.printing.PrintableText;
@@ -91,7 +93,7 @@ public class ReplCompileFrame extends AbstractCompileFrame{
 	}
 
 
-	private class ReplVar implements RExpr{
+	public class ReplVar implements RExpr{
 
 		public NameDef nameDef;
 		private Object value;
@@ -147,6 +149,9 @@ public class ReplCompileFrame extends AbstractCompileFrame{
 		if(res != null) {
 			return res;
 		}
+		if(name.equals("this")) {
+			return new RConst(pos, Object.class, null);
+		}
 		throw new CompileException("Can't find '" + name + "'", pos);
 	}
 
@@ -160,6 +165,10 @@ public class ReplCompileFrame extends AbstractCompileFrame{
 			var = new ReplVar(nameDef);
 			nameLookup = nameLookup.put(nameDef.name, var);
 		}
+	}
+
+	public PList<ReplVar> getDefs() {
+		return nameLookup.values().plist();
 	}
 
 	@Override

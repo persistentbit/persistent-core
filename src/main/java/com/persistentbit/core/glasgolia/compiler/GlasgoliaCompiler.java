@@ -43,20 +43,25 @@ public class GlasgoliaCompiler{
 	}
 
 	public Result<RExpr> compileCode(String code) {
-		return Result.noExceptions(() -> {
-			ParseResult<GExpr> parseResult =
-				parser.ws.skipAnd(parser.parseExprList()).andEof().parse(Source.asSource("repl", code));
-			return compile(parseResult.getValue());
-		});
+		Result<GExpr> ge =
+			parser.ws.skipAnd(parser.parseExprList()).andEof().parse(Source.asSource("repl", code)).asResult();
+		return ge.map(v -> compile(v));
 	}
 
 	public static GlasgoliaCompiler replCompiler(GExprParser parser, ResourceLoader resourceLoader) {
-		ReplCompileFrame compileFrame = new ReplCompileFrame();
-		return new GlasgoliaCompiler(parser, resourceLoader, compileFrame, compileFrame.getStack());
+		ReplCompileFrame  compileFrame = new ReplCompileFrame();
+		GlasgoliaCompiler result       =
+			new GlasgoliaCompiler(parser, resourceLoader, compileFrame, compileFrame.getStack());
+		result.compile(result.getModuleInit()).get();
+		return result;
 	}
 
 	public static GlasgoliaCompiler replCompiler(ResourceLoader resourceLoader) {
 		return replCompiler(new GExprParser(), resourceLoader);
+	}
+
+	public CompileFrame getCompileFrame() {
+		return ctx;
 	}
 
 	public static GlasgoliaCompiler replCompiler() {
