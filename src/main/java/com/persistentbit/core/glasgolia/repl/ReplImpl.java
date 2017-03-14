@@ -5,6 +5,10 @@ import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.glasgolia.compiler.GlasgoliaCompiler;
 import com.persistentbit.core.glasgolia.compiler.frames.ReplCompileFrame;
 import com.persistentbit.core.glasgolia.compiler.rexpr.RExpr;
+import com.persistentbit.core.glasgolia.compiler.rexpr.RJavaField;
+import com.persistentbit.core.glasgolia.compiler.rexpr.RJavaMethods;
+import com.persistentbit.core.glasgolia.compiler.rexpr.RLambda;
+import com.persistentbit.core.glasgolia.gexpr.GExpr;
 import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.parser.ParseExceptionEOF;
 import com.persistentbit.core.parser.ParseResult;
@@ -17,6 +21,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * TODOC
@@ -176,17 +184,72 @@ public class ReplImpl implements ReplInterface{
 	}
 
 	private void showCmd(GGReplCmd cmd) {
+		switch(cmd.params.get(0).toString()) {
+			case "context":
+				showContextCmd(cmd);
+				return;
+			case "members":
+				showMembersCmd(cmd);
+				return;
+			default:
+				throw new RuntimeException("Expected 'context' or 'members' after show");
+		}
+
+	}
+
+	private void showContextCmd(GGReplCmd cmd) {
 		ReplCompileFrame                replFrame = (ReplCompileFrame) compiler.getCompileFrame();
 		PList<ReplCompileFrame.ReplVar> defs      = replFrame.getDefs();
 		defs.forEach(def -> {
 			System.out.println(def.nameDef.name + " = " + def.get());
 		});
-		/*CompileGToR                  compiler = gg.getCompiler();
-		CompileContext               ctx      = compiler.getContext();
-		PList<CompileContext.ValVar> all      = ctx.getCurrentFrame().getAllValVars().plist();
-		all.forEach(vv -> {
-			System.out.println(vv.show() + " = " + gg.eval("repl.show",vv.name).orElse("?"));
-		});*/
+	}
+
+	private void showMembersCmd(GGReplCmd cmd) {
+		RExpr  expr  = compiler.compile((GExpr) cmd.params.get(1));
+		Object value = expr.get();
+		if(value == null) {
+			System.out.println("Can't show a null value members");
+		}
+		Class cls = null;
+		if(value instanceof RLambda) {
+			RLambda lambda = (RLambda) value;
+			System.out.println("Lambda " + lambda.typeDefToString());
+		}
+		else if(value instanceof RJavaMethods) {
+			RJavaMethods jm = (RJavaMethods) value;
+			for(Method m : jm.getMethods()) {
+				System.out.println(m);
+			}
+		}
+		else if(value instanceof RJavaField) {
+			RJavaField javaField = (RJavaField) value;
+			System.out.println(javaField.getParentValue() + "." + javaField.getField());
+		}
+		else if(value instanceof Class) {
+			cls = (Class) value;
+		}
+		else {
+			cls = value.getClass();
+		}
+		if(cls != null) {
+			System.out.println("Class: " + cls.getName());
+			for(Field f : cls.getFields()) {
+				if(Modifier.isPublic(f.getModifiers())) {
+					System.out.println("\t" + f);
+				}
+			}
+			for(Constructor m : cls.getConstructors()) {
+				if(Modifier.isPublic(m.getModifiers())) {
+					System.out.println("\t" + m);
+				}
+			}
+			for(Method m : cls.getMethods()) {
+				if(Modifier.isPublic(m.getModifiers())) {
+					System.out.println("\t" + m);
+				}
+			}
+		}
 	}
 
 	private void saveCmd(GGReplCmd cmd) {

@@ -1,6 +1,6 @@
 
 import java "java.lang";
-val println = System.out.println;
+//val println = System.out.println;
 //val print = System.out.print;
 println("Initializing gg.compilertest module");
 val mod = import module "gg.moduletest";

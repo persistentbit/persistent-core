@@ -28,10 +28,21 @@ public class GGReplCmdParser {
 
     private Parser<String> term(String term) { return Scan.term(term).skip(ws());}
 
-    private Parser<GGReplCmd> show() {
-        return commandName("show").skipAnd(term("context"))
-                .map(s -> new GGReplCmd("show","context"));
-    }
+
+	private Parser<GGReplCmd> showContext() {
+		return term("context")
+			.map(s -> new GGReplCmd("show", "context"));
+
+	}
+
+	private Parser<GGReplCmd> showMembers(GExprParser exprParser) {
+		return term("members").skipAnd(exprParser.parseExpr())
+							  .map(s -> new GGReplCmd("show", "members", s));
+	}
+
+	private Parser<GGReplCmd> show(GExprParser exprParser) {
+		return commandName("show").skipAnd(showContext().or(showMembers(exprParser)));
+	}
     private Parser<GGReplCmd> exit(){
         return commandName("exit").map(s -> new GGReplCmd("exit"));
     }
@@ -58,7 +69,7 @@ public class GGReplCmdParser {
 
 
     public Parser<GGReplCmd> command(GExprParser exprParser) {
-		return show()
+		return show(exprParser)
 			.or(exit())
 			.or(reload())
 			.or(saveSession())

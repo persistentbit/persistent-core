@@ -63,7 +63,7 @@ public class LambdaCompileFrame extends AbstractCompileFrame{
 		return names.containsKey(name) == false;
 	}
 
-	public RExpr createLambdaCreate(StrPos pos, int paramSize, RExpr code) {
+	public RExpr createLambdaCreate(StrPos pos, int paramSize, String[] paramNames, Class[] paramTypes, RExpr code) {
 		//undeclared.forEach(u -> ctx.addVal(false,u.name,u.type));
 		//code = compile(g.code);
 		int                           frameSize    = nextId;
@@ -77,6 +77,6 @@ public class LambdaCompileFrame extends AbstractCompileFrame{
 			initFreeList =
 				initFreeList.plus(Tuple2.of(idAndNameDef._1, parentFrame.bind(code.getPos(), undeclaredName)));
 		}
-		return new RLambdaCreate(pos, paramSize, initFreeList, frameSize, code, runtimeStack);
+		return new RLambdaCreate(pos, paramSize, paramNames, paramTypes, initFreeList, frameSize, code, runtimeStack);
 	}
 }

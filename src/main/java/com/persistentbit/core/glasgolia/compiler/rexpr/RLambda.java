@@ -4,6 +4,7 @@ import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.glasgolia.EvalException;
 import com.persistentbit.core.glasgolia.compiler.RStack;
 import com.persistentbit.core.utils.StrPos;
+import com.persistentbit.core.utils.UReflect;
 
 /**
  * TODOC
@@ -15,17 +16,21 @@ public class RLambda implements RFunction{
 
 	private final StrPos pos;
 	private final int paramCount;
+	private final String[] paramNames;
+	private final Class[] paramTypes;
 	private final Object[] freeVars;
 	private final RExpr code;
 	private final RStack runtimeStack;
 
 
-	public RLambda(StrPos pos, int paramCount,
-				   Object[] freeVars,
-				   RExpr code, RStack runtimeStack
+	public RLambda(StrPos pos, int paramCount, String[] paramNames, Class[] paramTypes, Object[] freeVars,
+				   RExpr code,
+				   RStack runtimeStack
 	) {
 		this.pos = pos;
 		this.paramCount = paramCount;
+		this.paramNames = paramNames;
+		this.paramTypes = paramTypes;
 		this.freeVars = freeVars;
 		this.code = code;
 		this.runtimeStack = runtimeStack;
@@ -37,6 +42,15 @@ public class RLambda implements RFunction{
 																		   .toString(",") + ", code:" + code + ")";
 	}
 
+	public String typeDefToString() {
+		String params = PStream.val(paramNames).zip(PStream.val(paramTypes))
+							   .map(t -> t._2 + ": " + UReflect.present(t._1)).toString("(", ", ", ")");
+		return "lambda " + params + " -> " + UReflect.present(code.getType());
+	}
+
+	public Class getResultType() {
+		return code.getType();
+	}
 	@Override
 	public Object apply(Object[] arguments) {
 		if(arguments.length != paramCount) {

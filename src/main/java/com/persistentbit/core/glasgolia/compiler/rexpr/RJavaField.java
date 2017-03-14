@@ -25,6 +25,14 @@ public class RJavaField implements RExpr{
 		this.parentValue = parentValue;
 	}
 
+	public Field getField() {
+		return field;
+	}
+
+	public Object getParentValue() {
+		return parentValue;
+	}
+
 	@Override
 	public Class getType() {
 		return field.getType();

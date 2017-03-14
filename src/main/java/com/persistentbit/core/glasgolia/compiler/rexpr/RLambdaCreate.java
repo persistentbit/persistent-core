@@ -15,12 +15,14 @@ public class RLambdaCreate implements RExpr{
 
 	private final StrPos pos;
 	private final int paramCount;
+	private final String[] paramNames;
+	private final Class[] paramTypes;
 	private final PList<Tuple2<Integer, RExpr>> freeInitList;
 	private final int frameSize;
 	private final RExpr code;
 	private final RStack runtimeStack;
 
-	public RLambdaCreate(StrPos pos, int paramCount,
+	public RLambdaCreate(StrPos pos, int paramCount, String[] paramNames, Class[] paramTypes,
 						 PList<Tuple2<Integer, RExpr>> freeInitList,
 						 int frameSize,
 						 RExpr code,
@@ -28,6 +30,8 @@ public class RLambdaCreate implements RExpr{
 	) {
 		this.pos = pos;
 		this.paramCount = paramCount;
+		this.paramNames = paramNames;
+		this.paramTypes = paramTypes;
 		this.freeInitList = freeInitList;
 		this.frameSize = frameSize;
 		this.code = code;
@@ -84,6 +88,6 @@ public class RLambdaCreate implements RExpr{
 	public Object get() {
 		Object[] free = new Object[frameSize - paramCount];
 		freeInitList.forEach(t -> free[t._1 - paramCount] = t._2.get());
-		return new RLambda(pos, paramCount, free, code, runtimeStack);
+		return new RLambda(pos, paramCount, paramNames, paramTypes, free, code, runtimeStack);
 	}
 }

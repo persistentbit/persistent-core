@@ -66,6 +66,10 @@ public class RJavaMethods implements RExpr, RFunction{
 		return "RJavaMethods(" + methods.toString(",") + ")";
 	}
 
+	public ImmutableArray<Method> getMethods() {
+		return methods;
+	}
+
 	@Override
 	public Object apply(Object[] resolvedArgs) {
 		if(resolvedArgs.length == 0) {

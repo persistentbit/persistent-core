@@ -177,11 +177,17 @@ public class GlasgoliaCompiler{
 		LambdaCompileFrame lambdaFrame  = new LambdaCompileFrame(currentFrame, runtimeStack);
 		try {
 			ctx = lambdaFrame;
+			Class[]  paramTypes = new Class[g.params.size()];
+			String[] paramNames = new String[g.params.size()];
+			int      index      = 0;
 			for(GExpr.TypedName param : g.params) {
-				ctx.addName(new CompileFrame.NameDef(param.pos, param.name, false, GGAccess.publicAccess, getType(param.pos, param.type)));
+				Class paramType = getType(param.pos, param.type);
+				ctx.addName(new CompileFrame.NameDef(param.pos, param.name, false, GGAccess.publicAccess, paramType));
+				paramNames[index] = param.name;
+				paramTypes[index++] = paramType;
 			}
 			RExpr code = compile(g.code);
-			return lambdaFrame.createLambdaCreate(g.getPos(), g.params.size(), code);
+			return lambdaFrame.createLambdaCreate(g.getPos(), g.params.size(), paramNames, paramTypes, code);
 		} finally {
 			ctx = currentFrame;
 		}
