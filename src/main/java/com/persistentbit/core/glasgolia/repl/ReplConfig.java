@@ -4,6 +4,8 @@ import com.persistentbit.core.glasgolia.gexpr.GExprParser;
 import com.persistentbit.core.resources.ResourceLoader;
 import com.persistentbit.core.utils.BaseValueClass;
 
+import java.util.Optional;
+
 /**
  * Config settings for a Glasgolia Repl
  *
@@ -16,21 +18,25 @@ public class ReplConfig extends BaseValueClass{
 	private final ResourceLoader classResourceLoader;
 	private final ResourceLoader moduleResourceLoader;
 	private final GExprParser exprParser;
+	private final String replInitResourceName;
 
 	public ReplConfig(ResourceLoader classResourceLoader,
 					  ResourceLoader moduleResourceLoader,
-					  GExprParser exprParser
+					  GExprParser exprParser,
+					  String replInitResourceName
 	) {
 		this.classResourceLoader = classResourceLoader;
 		this.moduleResourceLoader = moduleResourceLoader;
 		this.exprParser = exprParser;
+		this.replInitResourceName =replInitResourceName;
 	}
 
 	public ReplConfig() {
 		this(
 			ResourceLoader.rootAndClassPath,    //classes
 			ResourceLoader.rootAndClassPath,    //modules
-			new GExprParser()
+			new GExprParser(),
+			null
 		);
 	}
 
@@ -41,9 +47,16 @@ public class ReplConfig extends BaseValueClass{
 	public ReplConfig withModuleResourceLoader(ResourceLoader moduleResourceLoader) {
 		return copyWith("moduleResourceLoader", moduleResourceLoader);
 	}
+	public ReplConfig withReplInitResourceName(String replInitResourceName) {
+		return copyWith("replInitResourceName",replInitResourceName);
+	}
 
 	public ReplConfig withExprParser(GExprParser exprParser) {
 		return copyWith("exprParser", exprParser);
+	}
+
+	public Optional<String> getReplInitResourceName() {
+		return Optional.ofNullable(replInitResourceName);
 	}
 
 	public ResourceLoader getClassResourceLoader() {
@@ -53,6 +66,7 @@ public class ReplConfig extends BaseValueClass{
 	public ResourceLoader getModuleResourceLoader() {
 		return moduleResourceLoader;
 	}
+
 
 	public GExprParser getExprParser() {
 		return exprParser;

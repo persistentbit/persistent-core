@@ -67,6 +67,14 @@ public class ReplImpl implements ReplInterface{
 	@Override
 	public ReplAction startRepl(PList<String> execute) {
 		compiler = GlasgoliaCompiler.replCompiler(config.getExprParser(), config.getModuleResourceLoader());
+		config.getReplInitResourceName().ifPresent(name -> {
+			if(name.endsWith(".glasg") == false){
+				name = name + ".glasg";
+			}
+			String code = config.getModuleResourceLoader().apply(name)
+			.map(pb -> pb.toText(IO.utf8)).orElseThrow();
+			compileCode(code).orElseThrow().get();
+		});
 		execute.forEach(cmd -> {
 			try {
 				System.out.println(">>" + cmd);

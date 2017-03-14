@@ -24,9 +24,9 @@ public class ImportedJava implements Imported{
 
 	@Override
 	public Optional<RExpr> bind(String name) {
-		if(name.equals(importName)) {
+		if(importName.endsWith("." + name)) {
 			//Must be a class
-			return UReflect.getClass(name).getOpt().map(cls -> new RConst(StrPos.inst, Class.class, cls));
+			return UReflect.getClass(importName).getOpt().map(cls -> new RConst(StrPos.inst, Class.class, cls));
 		}
 		//if(name.startsWith(importName) == false){
 		//	return Optional.empty();

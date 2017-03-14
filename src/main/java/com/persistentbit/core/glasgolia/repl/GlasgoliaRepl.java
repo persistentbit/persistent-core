@@ -1,7 +1,6 @@
 package com.persistentbit.core.glasgolia.repl;
 
 import com.persistentbit.core.ModuleCore;
-import com.persistentbit.core.classloader.DynamicClassLoader;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.utils.UReflect;
@@ -42,7 +41,8 @@ public class GlasgoliaRepl{
 			"com.persistentbit.core.tuples",
 			"com.persistentbit.core.result",
 			"com.persistentbit.core.logging",
-			"javax."
+			"javax.",
+			"org."
 		);
 
 		Predicate<String> includeNames = name -> {
@@ -52,8 +52,8 @@ public class GlasgoliaRepl{
 
 		PList<String> history = PList.empty();
 		while(true) {
-			classLoader = new DynamicClassLoader(config.getClassResourceLoader(), includeNames);
-			//classLoader = getClass().getClassLoader();
+			//classLoader = new DynamicClassLoader(config.getClassResourceLoader(), includeNames);
+			classLoader = getClass().getClassLoader();
 			Class clsRepl =
 				UReflect.getClass("com.persistentbit.core.glasgolia.repl.ReplImpl", classLoader).orElseThrow();
 			ReplInterface            repl   =
