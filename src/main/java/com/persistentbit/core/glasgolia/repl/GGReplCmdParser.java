@@ -43,13 +43,13 @@ public class GGReplCmdParser {
 	private Parser<GGReplCmd> saveSession() {
 		return
 			commandName("save").skipAnd(Scan.stringLiteral("\"", false).optional())
-							   .map(file -> new GGReplCmd("save", file.orElse("session.gg")));
+							   .map(file -> new GGReplCmd("save", file.orElse("session.glasg")));
 	}
 
 	private Parser<GGReplCmd> loadSession() {
 		return
 			commandName("load").skipAnd(Scan.stringLiteral("\"", false).optional())
-							   .map(file -> new GGReplCmd("load", file.orElse("session.gg")));
+							   .map(file -> new GGReplCmd("load", file.orElse("session.glasg")));
 	}
 
 	private Parser<GGReplCmd> resetSession() {

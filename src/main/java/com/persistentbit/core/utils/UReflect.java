@@ -62,11 +62,33 @@ public final class UReflect{
 		return convertPrimitiveClassToObjectClass(cls).isPresent();
 	}
 
+	/**
+	 * Try loading a java class using this class (UReflect) classLoader
+	 *
+	 * @param name The name of the class to load
+	 *
+	 * @return Result.empty if the class is not found, Result.failure on exception, Result.success when we have a class
+	 *
+	 * @see #getClass(String, ClassLoader)
+	 */
 	public static Result<Class> getClass(String name) {
 		return getClass(name,UReflect.class.getClassLoader());
 	}
-	public static Result<Class> getClass(String name,ClassLoader classLoader) {
-		return Result.noExceptions(() -> Class.forName(name,true,classLoader));
+
+	/**
+	 * Try loading a java class
+	 * @param name    The name of the class to load
+	 * @param classLoader The classloader to use
+	 * @return Result.empty if the class is not found, Result.failure on exception, Result.success when we have a class
+	 */
+	public static Result<Class> getClass(String name, ClassLoader classLoader) {
+		try {
+			return Result.success(Class.forName(name, true, classLoader));
+		} catch(ClassNotFoundException cnf) {
+			return Result.empty(cnf);
+		} catch(Exception e){
+			return Result.failure(e);
+		}
 	}
 
 	public static Optional<Method> getGetter(Class cls,String name){

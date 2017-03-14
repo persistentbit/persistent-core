@@ -1,5 +1,7 @@
 package com.persistentbit.core.glasgolia.repl;
 
+import com.persistentbit.core.collections.PList;
+
 /**
  * TODOC
  *
@@ -8,5 +10,12 @@ package com.persistentbit.core.glasgolia.repl;
  */
 public interface ReplInterface{
 
-	void startRepl();
+	enum ReplAction{
+		reload, exit
+	}
+
+	ReplAction startRepl(PList<String> execute);
+
+	PList<String> getHistory();
+
 }

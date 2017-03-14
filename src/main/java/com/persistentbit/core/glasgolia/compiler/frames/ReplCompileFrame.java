@@ -145,7 +145,9 @@ public class ReplCompileFrame extends AbstractCompileFrame{
 		if(res != null) {
 			return res;
 		}
-		res = getFromLocalImported(name).orElse(null);
+
+		res = getFromLocalImported(name)
+			.orElse(null);
 		if(res != null) {
 			return res;
 		}

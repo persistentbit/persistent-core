@@ -2,6 +2,7 @@ package com.persistentbit.core.glasgolia.compiler.frames;
 
 import com.persistentbit.core.glasgolia.compiler.rexpr.RConst;
 import com.persistentbit.core.glasgolia.compiler.rexpr.RExpr;
+import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.StrPos;
 import com.persistentbit.core.utils.UReflect;
 
@@ -30,7 +31,11 @@ public class ImportedJava implements Imported{
 		//if(name.startsWith(importName) == false){
 		//	return Optional.empty();
 		//}
-		return UReflect.getClass(importName + "." + name).getOpt()
+		Result<Class> clsResult = UReflect.getClass(importName + "." + name);
+		if(clsResult.isError()) {
+			clsResult.orElseThrow();
+		}
+		return clsResult.getOpt()
 					   .map(cls -> new RConst(StrPos.inst, Class.class, cls));
 	}
 }

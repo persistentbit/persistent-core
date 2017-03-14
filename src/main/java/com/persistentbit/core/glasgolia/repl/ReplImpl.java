@@ -37,7 +37,7 @@ public class ReplImpl implements ReplInterface{
 
 	public ReplImpl(ReplConfig config) {
 		out = System.out;
-		out.println("config: " + config);
+		//out.println("config: " + config);
 		this.config = config;
 
 
@@ -65,25 +65,39 @@ public class ReplImpl implements ReplInterface{
 	}
 
 	@Override
-	public void startRepl() {
+	public ReplAction startRepl(PList<String> execute) {
 		compiler = GlasgoliaCompiler.replCompiler(config.getExprParser(), config.getModuleResourceLoader());
+		execute.forEach(cmd -> {
+			try {
+				System.out.println(">>" + cmd);
+				System.out.println(compileCode(cmd).orElseThrow().get());
+			} catch(Exception e) {
+				lp.print(e);
+			}
+		});
 		while(true) {
 			try {
 				doRepl();
 			} catch(ReloadException reload) {
-				System.out.println("RELOADING");
+				return ReplAction.reload;
+				/*System.out.println("RELOADING");
 				compiler = GlasgoliaCompiler.replCompiler(config.getExprParser(), config.getModuleResourceLoader());
 				for(String eval : history) {
 					System.out.println(">> " + eval);
 					System.out.println(compileCode(eval).orElseThrow().get());
 				}
-				System.out.println("Done reloading");
+				System.out.println("Done reloading");*/
 			} catch(Exception e) {
 				lp.print(e);
 			}
 		}
-
 	}
+
+	@Override
+	public PList<String> getHistory() {
+		return history;
+	}
+
 
 	private void doRepl() throws Exception {
 		BufferedReader bin  = new BufferedReader(new InputStreamReader(System.in));
@@ -168,14 +182,14 @@ public class ReplImpl implements ReplInterface{
 	}
 
 	private void saveCmd(GGReplCmd cmd) {
-		File   f    = new File(cmd.params.getOpt(0).map(s -> s.toString()).orElse("session.gg"));
+		File   f    = new File(cmd.params.getOpt(0).map(s -> s.toString()).orElse("session.glasg"));
 		String code = history.fold("", (a, b) -> a + UString.NL + b);
 		IO.writeFile(code, f, IO.utf8);
 		System.out.println("Session saved to " + f.getAbsolutePath());
 	}
 
 	private void loadCmd(GGReplCmd cmd) {
-		File f = new File(cmd.params.getOpt(0).map(s -> s.toString()).orElse("session.gg"));
+		File f = new File(cmd.params.getOpt(0).map(s -> s.toString()).orElse("session.glasg"));
 		String res = IO.readTextFile(f, IO.utf8)
 					   .ifPresent(s -> history = PList.val(s.getValue().trim()))
 					   .ifPresent(s -> System.out.println("loaded " + f.getAbsolutePath()))

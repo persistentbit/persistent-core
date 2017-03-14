@@ -6,7 +6,6 @@ import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.utils.UReflect;
 
-import java.io.File;
 import java.util.function.Predicate;
 
 /**
@@ -41,25 +40,37 @@ public class GlasgoliaRepl{
 			"com.persistentbit.core.glasgolia.ETypeSig",
 			"com.persistentbit.core.utils.StrPos",
 			"com.persistentbit.core.tuples",
-			"com.persistentbit.core.result"
+			"com.persistentbit.core.result",
+			"com.persistentbit.core.logging",
+			"javax."
 		);
 
 		Predicate<String> includeNames = name -> {
 			return excludeNames.find(n -> name.startsWith(n)).isPresent() == false;
 		};
-		classLoader = new DynamicClassLoader(config.getClassResourceLoader(), includeNames);
-		//classLoader = getClass().getClassLoader();
-		Class         clsRepl =
-			UReflect.getClass("com.persistentbit.core.glasgolia.repl.ReplImpl", classLoader).orElseThrow();
-		ReplInterface repl    = (ReplInterface) UReflect.executeConstructor(clsRepl, config).orElseThrow();
-		System.out.println(repl);
-		repl.startRepl();
+
+
+		PList<String> history = PList.empty();
+		while(true) {
+			classLoader = new DynamicClassLoader(config.getClassResourceLoader(), includeNames);
+			//classLoader = getClass().getClassLoader();
+			Class clsRepl =
+				UReflect.getClass("com.persistentbit.core.glasgolia.repl.ReplImpl", classLoader).orElseThrow();
+			ReplInterface            repl   =
+				(ReplInterface) UReflect.executeConstructor(clsRepl, config).orElseThrow();
+			ReplInterface.ReplAction action = repl.startRepl(history);
+			switch(action) {
+				case exit:
+					System.exit(0);
+				case reload:
+					history = repl.getHistory();
+			}
+		}
 	}
 
 
 	public static void main(String[] args) {
 		lp.registerAsGlobalHandler();
-		System.out.println(new File(".").getAbsoluteFile());
 		new GlasgoliaRepl().startRepl();
 	}
 }
