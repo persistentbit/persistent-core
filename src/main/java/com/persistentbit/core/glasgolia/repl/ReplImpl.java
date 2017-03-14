@@ -264,7 +264,7 @@ public class ReplImpl implements ReplInterface{
 		String res = IO.readTextFile(f, IO.utf8)
 					   .ifPresent(s -> history = PList.val(s.getValue().trim()))
 					   .ifPresent(s -> System.out.println("loaded " + f.getAbsolutePath()))
-					   .orElseThrow();
+					   .orElseThrow().trim();
 		throw new ReloadException();
 	}
 
