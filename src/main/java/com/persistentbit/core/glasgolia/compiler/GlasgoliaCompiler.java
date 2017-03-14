@@ -68,6 +68,25 @@ public class GlasgoliaCompiler{
 		return replCompiler(ResourceLoader.rootAndClassPath);
 	}
 
+	/**
+	 * Add a name/value to the current compile context
+	 * @param name
+	 * @param value
+	 * @return
+	 */
+	public GlasgoliaCompiler addConstValue(String name, Object value){
+		StrPos pos = new StrPos("GlasgoliaCompiler.addConstValue");
+		RConst constValue = new RConst(pos,value == null ?Object.class : value.getClass(),value);
+		CompileFrame.NameDef nameDef    =
+				new CompileFrame.NameDef(pos, name, false, GGAccess.publicAccess, constValue.getType());
+		ctx.addName(nameDef);
+		RExpr getter = ctx.bind(pos,name);
+		RExpr assign = new RAssign(getter,constValue);
+		assign.get(); //execute assign statement
+		return this;
+	}
+
+
 	private Optional<Source> findSource(String moduleName) {
 		//make name end with '.glasg'
 		if(moduleName.endsWith(".glasg") == false) {
@@ -197,6 +216,7 @@ public class GlasgoliaCompiler{
 
 		*/
 	}
+
 
 
 	public RExpr compileValVar(GExpr.ValVar g) {

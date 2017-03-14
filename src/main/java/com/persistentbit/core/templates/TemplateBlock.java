@@ -10,7 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * TODO: Add comment
+ * A Templateblock represent a template block.<br>
+ * A Templateblock is a code expression or a string block with a position from the original text
  *
  * @author Peter Muys
  * @since 21/02/2017
@@ -75,8 +76,14 @@ public class TemplateBlock {
         return parse(StrPos.inst,code);
     }
 
+    /**
+     * Default block parser with '&lt;:' as starting tag and ':&gt;' as ending tag
+     * @param pos The position for the code
+     * @param code The code to parse
+     * @return A list of parsed blocks
+     */
     public static PList<TemplateBlock> parse(StrPos pos, String code){
-        return parse(pos,code,"<<",">>");
+        return parse(pos,code,"<:",":>");
     }
     public static PList<TemplateBlock> parse(StrPos orgPos, String orgCode, String regExItemBlockStart, String regExItemBlockEnd){
 		return Log.function(orgPos, UString.present(orgCode, 10), regExItemBlockStart, regExItemBlockEnd).code(l -> {
