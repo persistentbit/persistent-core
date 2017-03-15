@@ -12,7 +12,7 @@ import java.util.Optional;
  */
 public abstract class AbstractCompileFrame implements CompileFrame{
 
-	private Imported imported = null;
+	protected Imported imported = null;
 
 	@Override
 	public void addImported(Imported imported) {
@@ -34,6 +34,6 @@ public abstract class AbstractCompileFrame implements CompileFrame{
 
 	@Override
 	public Optional<Class> getType(String name) {
-		return imported.bind(name).map(r -> r.getType());
+		return imported == null ? Optional.empty() : imported.bind(name).map(r -> r.getType());
 	}
 }

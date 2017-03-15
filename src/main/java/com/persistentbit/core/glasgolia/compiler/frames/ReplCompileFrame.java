@@ -10,9 +10,11 @@ import com.persistentbit.core.glasgolia.compiler.rexpr.RExpr;
 import com.persistentbit.core.printing.PrintTextWriter;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.StrPos;
-import com.persistentbit.core.utils.ToDo;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -178,10 +180,6 @@ public class ReplCompileFrame extends AbstractCompileFrame{
 		return replStack.getNextId();
 	}
 
-	@Override
-	public Optional<Class> getType(String name) {
-		throw new ToDo();
-	}
 
 	public RStack getStack() {
 		return replStack;

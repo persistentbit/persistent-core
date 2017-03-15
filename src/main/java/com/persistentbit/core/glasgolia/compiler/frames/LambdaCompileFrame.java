@@ -8,6 +8,8 @@ import com.persistentbit.core.glasgolia.compiler.rexpr.*;
 import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.utils.StrPos;
 
+import java.util.Optional;
+
 /**
  * TODOC
  *
@@ -78,5 +80,13 @@ public class LambdaCompileFrame extends AbstractCompileFrame{
 				initFreeList.plus(Tuple2.of(idAndNameDef._1, parentFrame.bind(code.getPos(), undeclaredName)));
 		}
 		return new RLambdaCreate(pos, paramSize, paramNames, paramTypes, initFreeList, frameSize, code, runtimeStack);
+	}
+
+	public Optional<Class> getType(String name) {
+		Optional<Class> clsOpt = super.getType(name);
+		if(clsOpt.isPresent()) {
+			return clsOpt;
+		}
+		return parentFrame.getType(name);
 	}
 }
