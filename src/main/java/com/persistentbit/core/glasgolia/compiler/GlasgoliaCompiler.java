@@ -419,6 +419,9 @@ public class GlasgoliaCompiler{
 		else if(leftType == Long.class) {
 			return RLong.createBinOp(left, g.op, right);
 		}
+		else if(leftType == Double.class){
+			return RDouble.createBinOp(left,g.op,right);
+		}
 		else if(leftType == Boolean.class) {
 			return RBoolean.createBinOp(left, g.op, right);
 		}
@@ -431,6 +434,9 @@ public class GlasgoliaCompiler{
 	private RExpr createCast(RExpr r, Class castTo) {
 		if(castTo == Integer.class) {
 			return new RInteger.CastToInt(r);
+		}
+		if(castTo == Double.class){
+			return new RDouble.CastToDouble(r);
 		}
 		if(castTo == Boolean.class) {
 			return new RBoolean.CastToBoolean(r);
@@ -491,6 +497,12 @@ public class GlasgoliaCompiler{
 		if(Long.class.isAssignableFrom(left.getType())) {
 			if(UNumber.isNaturalNumberClass(right.getType())) {
 				return Optional.of(Tuple2.of(left, new RLong.CastToLong(right)));
+			}
+			return Optional.empty();
+		}
+		if(Double.class.isAssignableFrom(left.getType())){
+			if(UNumber.isNumberClass(right.getType())) {
+				return Optional.of(Tuple2.of(left, new RDouble.CastToDouble(right)));
 			}
 			return Optional.empty();
 		}

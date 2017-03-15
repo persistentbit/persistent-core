@@ -61,6 +61,9 @@ public class RDynamicBinOp implements RExpr{
 			if(l instanceof Integer) {
 				return RInteger.getOperatorFunction(op).apply((Integer) l, (Integer) r);
 			}
+			if(l instanceof Double){
+				return RDouble.getOperatorFunction(op).apply((Double)l, (Double)r);
+			}
 			if(l instanceof Long) {
 				return RLong.getOperatorFunction(op).apply((Long) l, (Long) r);
 			}
