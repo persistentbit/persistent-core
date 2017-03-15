@@ -32,8 +32,8 @@ public abstract class AbstractCompileFrame implements CompileFrame{
 		return imported.bind(name);
 	}
 
-	@Override
-	public Optional<Class> getType(String name) {
-		return imported == null ? Optional.empty() : imported.bind(name).map(r -> r.getType());
+
+	protected Optional<Class> getLocalClassForTypeName(String name) {
+		return imported == null ? Optional.empty() : imported.getJavaClass(name);
 	}
 }

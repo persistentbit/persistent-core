@@ -70,6 +70,26 @@ public class RJavaMethods implements RExpr, RFunction{
 		return methods;
 	}
 
+
+	@Override
+	public Class getResultType(Class[] argTypes) {
+		if(argTypes.length == 0) {
+			for (Method c : methods) {
+				if (c.getParameterCount() == argTypes.length && isPublic(c)) {
+					return c.getReturnType();
+				}
+			}
+		}
+		if(methods.size() == 1){
+			if(isPublic(methods.get(0)) == false) {
+				throw new EvalException("No public method!", pos);
+			}
+			return methods.get(0).getReturnType();
+		}
+		System.out.println("todo:RJavaMethods. getResultType");
+		return Object.class;
+	}
+
 	@Override
 	public Object apply(Object[] resolvedArgs) {
 		if(resolvedArgs.length == 0) {
@@ -82,7 +102,7 @@ public class RJavaMethods implements RExpr, RFunction{
 
 		if(methods.size() == 1) {
 			if(isPublic(methods.get(0)) == false) {
-				throw new EvalException("No public constructor!", pos);
+				throw new EvalException("No public method!", pos);
 			}
 			Class[]                                           paramTypes  = methods.get(0).getParameterTypes();
 			Tuple2<JavaExecutableFinder.MatchLevel, Object[]> matchResult =

@@ -24,18 +24,28 @@ public class ImportedJava implements Imported{
 
 	@Override
 	public Optional<RExpr> bind(String name) {
+
+		return getJavaClass(name)
+					   .map(cls -> new RConst(StrPos.inst, Class.class, cls));
+	}
+
+	@Override
+	public Optional<Class> getJavaClass(String name) {
 		if(importName.endsWith("." + name)) {
 			//Must be a class
-			return UReflect.getClass(importName).getOpt().map(cls -> new RConst(StrPos.inst, Class.class, cls));
+			return UReflect.getClass(importName).getOpt();
 		}
-		//if(name.startsWith(importName) == false){
-		//	return Optional.empty();
-		//}
+
 		Result<Class> clsResult = UReflect.getClass(importName + "." + name);
 		if(clsResult.isError()) {
 			clsResult.orElseThrow();
 		}
-		return clsResult.getOpt()
-					   .map(cls -> new RConst(StrPos.inst, Class.class, cls));
+		return clsResult.getOpt();
+
+	}
+
+	@Override
+	public String toString() {
+		return "JavaImport(" + importName + ")";
 	}
 }

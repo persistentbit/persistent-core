@@ -14,13 +14,35 @@ public interface Imported{
 
 	Optional<RExpr> bind(String name);
 
+	Optional<Class> getJavaClass(String name);
+
+
 	default Imported addImport(Imported otherImport) {
-		return name -> {
-			Optional<RExpr> found = otherImport.bind(name);
-			if(found.isPresent()) {
-				return found;
+		Imported self = this;
+		return new Imported() {
+			@Override
+			public Optional<RExpr> bind(String name) {
+				Optional<RExpr> found = self.bind(name);
+				if(found.isPresent()) {
+					return found;
+				}
+				return otherImport.bind(name);
 			}
-			return Imported.this.bind(name);
+
+			@Override
+			public Optional<Class> getJavaClass(String name) {
+				Optional<Class> found = self.getJavaClass(name);
+				if(found.isPresent()) {
+					return found;
+				}
+				return otherImport.getJavaClass(name);
+			}
+
+			@Override
+			public String toString() {
+				return self + " orTry " + otherImport;
+			}
 		};
+
 	}
 }

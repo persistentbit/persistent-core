@@ -27,7 +27,10 @@ public class RObjectChild implements RExpr{
 
 	@Override
 	public Class getType() {
-		return Object.class;
+		if(parent.isConst() == false){
+			return Object.class;
+		}
+		return createChildGetter().get().getClass();
 	}
 
 	@Override

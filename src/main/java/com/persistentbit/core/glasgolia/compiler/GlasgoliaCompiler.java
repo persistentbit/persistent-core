@@ -191,36 +191,7 @@ public class GlasgoliaCompiler{
 		} finally {
 			ctx = currentFrame;
 		}
-		/*//System.out.println("Before Lambda: " + ctx);
-		ctx = ctx.addFrame();
-		//System.out.println("After add frame: " + ctx);
-		//Add parameter in order to the frame
-		for(GExpr.TypedName param : g.params) {
-			ctx = ctx.addVar(true, param.name, getType(param.pos, param.type));
-		}
-		RExpr code = compile(g.code);
 
-		//System.out.println("After compile code: " + ctx);
-
-		//System.out.println(code);
-
-		PSet<CompileContext.ValVar> undeclared = ctx.findUndeclaredInFrame();
-		//undeclared.forEach(u -> ctx.addVal(false,u.name,u.type));
-		//code = compile(g.code);
-		int frameSize = ctx.getFrameSize();
-		ctx = ctx.popFrame();
-
-		//System.out.println("Undeclared: " + undeclared.toString(", "));
-		PList<Tuple2<Integer, RExpr>> initFreeList = PList.empty();
-		for(CompileContext.ValVar vv : undeclared) {
-			boolean isParam = g.params.find(v -> v.name.equals(vv.name)).isPresent();
-			if(isParam == false) {
-				initFreeList = initFreeList.plus(Tuple2.of(vv.id, ctx.bindName(g.getPos(), runtimeStack, vv.name)));
-			}
-		}
-		return new RLambdaCreate(g.getPos(), g.params.size(), initFreeList, frameSize, code, runtimeStack);
-
-		*/
 	}
 
 
@@ -489,7 +460,7 @@ public class GlasgoliaCompiler{
 			mName -> {
 				String name = mName.clsName;
 				name = name.replace('.', '$');
-				Class foundCls = ctx.getType(name).orElse(null);
+				Class foundCls = ctx.getClassForTypeName(name).orElse(null);
 				if(foundCls == null) {
 					throw new CompileException("Can't find class '" + name + "'", pos);
 				}

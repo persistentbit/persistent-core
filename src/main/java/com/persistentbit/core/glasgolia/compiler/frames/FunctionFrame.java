@@ -8,6 +8,8 @@ import com.persistentbit.core.glasgolia.compiler.rexpr.RVar;
 import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.utils.StrPos;
 
+import java.util.Optional;
+
 /**
  * TODO: Add comment
  *
@@ -58,5 +60,14 @@ public class FunctionFrame extends AbstractCompileFrame{
 	@Override
 	public boolean canDefineLocal(String name) {
 		return names.containsKey(name) == false;
+	}
+
+	@Override
+	public Optional<Class> getClassForTypeName(String name) {
+		Optional<Class> res = getLocalClassForTypeName(name);
+		if(res.isPresent()){
+			return res;
+		}
+		return parentFrame.getClassForTypeName(name);
 	}
 }

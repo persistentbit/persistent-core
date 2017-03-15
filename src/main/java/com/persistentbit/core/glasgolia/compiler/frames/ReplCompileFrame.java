@@ -11,10 +11,7 @@ import com.persistentbit.core.printing.PrintTextWriter;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.StrPos;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -183,5 +180,10 @@ public class ReplCompileFrame extends AbstractCompileFrame{
 
 	public RStack getStack() {
 		return replStack;
+	}
+
+	@Override
+	public Optional<Class> getClassForTypeName(String name) {
+		return getLocalClassForTypeName(name);
 	}
 }

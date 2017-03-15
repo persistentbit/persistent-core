@@ -9,4 +9,5 @@ package com.persistentbit.core.glasgolia.compiler.rexpr;
 public interface RFunction{
 
 	Object apply(Object[] arguments);
+	Class getResultType(Class[] argTypes);
 }

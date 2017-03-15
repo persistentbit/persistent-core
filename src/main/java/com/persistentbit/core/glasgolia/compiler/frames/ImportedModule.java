@@ -23,4 +23,14 @@ public class ImportedModule implements Imported{
 	public Optional<RExpr> bind(String name) {
 		return module.bindChild(name);
 	}
+
+	@Override
+	public Optional<Class> getJavaClass(String name) {
+		return Optional.empty();
+	}
+
+	@Override
+	public String toString() {
+		return "ModuleImport("+ module.getModuleName() +")";
+	}
 }

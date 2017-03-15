@@ -48,7 +48,7 @@ public class RLambda implements RFunction{
 		return "lambda " + params + " -> " + UReflect.present(code.getType());
 	}
 
-	public Class getResultType() {
+	public Class getResultType(Class[] argTypes) {
 		return code.getType();
 	}
 	@Override

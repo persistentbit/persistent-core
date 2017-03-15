@@ -44,30 +44,6 @@ public class RLambdaCreate implements RExpr{
 			.toString(",") + ", code:" + code + ")";
 	}
 
-	/*@Override
-	public Object apply(Object[] arguments) {
-		System.out.println(runtimeStack.printToString());
-		if(arguments.length != paramCount){
-			throw new EvalException("Expected " + paramCount + " arguments for lambda ",pos);
-		}
-		Object[] frame = new Object[paramCount + freeInitList.size()];
-
-		freeInitList.forEach(t -> frame[t._1] = t._2.get());
-
-		for(int t=0; t<arguments.length;t++){
-			frame[t] = arguments[t];
-		}
-		System.out.println("applying lambda with frame " + PStream.val(frame).toString(",") + ": " + code);
-		runtimeStack.addFrame(frame);
-		System.out.println(runtimeStack.printToString());
-		try {
-			Object res = code.get();
-			System.out.println("apply result for " + this + " = " + res);
-			return res;
-		}finally {
-			runtimeStack.popFrame();
-		}
-	}*/
 
 	@Override
 	public Class getType() {

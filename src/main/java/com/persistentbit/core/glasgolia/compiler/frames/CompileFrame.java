@@ -50,5 +50,5 @@ public interface CompileFrame{
 
 	void addImported(Imported imported);
 
-	Optional<Class> getType(String name);
+	Optional<Class> getClassForTypeName(String name);
 }

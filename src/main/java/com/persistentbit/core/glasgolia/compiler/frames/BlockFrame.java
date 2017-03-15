@@ -9,6 +9,7 @@ import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.utils.StrPos;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * TODO: Add comment
@@ -56,4 +57,12 @@ public class BlockFrame extends AbstractCompileFrame{
 		return stackVars.containsKey(name) == false;
 	}
 
+    @Override
+    public Optional<Class> getClassForTypeName(String name) {
+        Optional<Class> res = getLocalClassForTypeName(name);
+        if(res.isPresent()){
+            return res;
+        }
+        return parentFrame.getClassForTypeName(name);
+    }
 }

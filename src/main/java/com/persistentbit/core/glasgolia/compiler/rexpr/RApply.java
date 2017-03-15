@@ -35,6 +35,10 @@ public class RApply implements RExpr{
 
 	@Override
 	public Class getType() {
+		if(parent instanceof RFunction){
+			RFunction fun = (RFunction) parent;
+			return fun.getResultType(arguments.map(r -> r.getType()).toArray(new Class[arguments.size()]));
+		}
 		return Object.class;
 	}
 

@@ -9,6 +9,8 @@ import com.persistentbit.core.glasgolia.compiler.rexpr.RConst;
 import com.persistentbit.core.glasgolia.compiler.rexpr.RExpr;
 import com.persistentbit.core.utils.StrPos;
 
+import java.util.Optional;
+
 /**
  * TODOC
  *
@@ -145,5 +147,10 @@ public class GGModuleCompileFrame extends AbstractCompileFrame{
 	@Override
 	public boolean canDefineLocal(String name) {
 		return nameLookup.containsKey(name) == false;
+	}
+
+	@Override
+	public Optional<Class> getClassForTypeName(String name) {
+		return getLocalClassForTypeName(name);
 	}
 }

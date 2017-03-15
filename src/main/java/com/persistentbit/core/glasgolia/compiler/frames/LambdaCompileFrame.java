@@ -45,6 +45,11 @@ public class LambdaCompileFrame extends AbstractCompileFrame{
 		if(imported != null) {
 			return imported;
 		}
+		Class cls = parentFrame.getClassForTypeName(name).orElse(null);
+		if(cls != null)
+		{
+			return new RConst(pos,Class.class,cls);
+		}
 		addName(new NameDef(pos, name, false, GGAccess.publicAccess, Object.class));
 		undeclared = undeclared.plus(name);
 		return bind(pos, name);
@@ -82,11 +87,12 @@ public class LambdaCompileFrame extends AbstractCompileFrame{
 		return new RLambdaCreate(pos, paramSize, paramNames, paramTypes, initFreeList, frameSize, code, runtimeStack);
 	}
 
-	public Optional<Class> getType(String name) {
-		Optional<Class> clsOpt = super.getType(name);
-		if(clsOpt.isPresent()) {
-			return clsOpt;
+	@Override
+	public Optional<Class> getClassForTypeName(String name) {
+		Optional<Class> res = getLocalClassForTypeName(name);
+		if(res.isPresent()){
+			return res;
 		}
-		return parentFrame.getType(name);
+		return parentFrame.getClassForTypeName(name);
 	}
 }
