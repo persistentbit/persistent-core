@@ -31,6 +31,9 @@ public class ImportedJava implements Imported{
 
 	@Override
 	public Optional<Class> getJavaClass(String name) {
+		if(name.length() == 0 || Character.isUpperCase(name.charAt(0)) == false){
+			return Optional.empty();
+		}
 		if(importName.endsWith("." + name)) {
 			//Must be a class
 			return UReflect.getClass(importName).getOpt();

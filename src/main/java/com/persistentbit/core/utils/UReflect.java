@@ -86,7 +86,9 @@ public final class UReflect{
 			return Result.success(Class.forName(name, true, classLoader));
 		} catch(ClassNotFoundException cnf) {
 			return Result.empty(cnf);
-		} catch(Exception e){
+		} catch(NoClassDefFoundError e){
+			return Result.failure(e);
+		}catch (Exception e){
 			return Result.failure(e);
 		}
 	}
