@@ -124,7 +124,8 @@ public class RJavaMethods implements RExpr, RFunction{
 			}
 		}
 		if(first == null) {
-			throw new EvalException("Can't find method", pos);
+			String args = PStream.val(resolvedArgs).toString(", ");
+			throw new EvalException("Can't find method with args (" + args + ") in " + parentValue, pos);
 		}
 		if(otherPossibles.isEmpty()) {
 			//We have only 1 method with the same number of arguments
