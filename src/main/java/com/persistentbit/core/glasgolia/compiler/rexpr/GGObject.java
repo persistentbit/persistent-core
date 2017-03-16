@@ -1,6 +1,7 @@
 package com.persistentbit.core.glasgolia.compiler.rexpr;
 
 import com.persistentbit.core.utils.StrPos;
+import com.persistentbit.core.utils.ToDo;
 
 /**
  * TODOC
@@ -15,4 +16,8 @@ public interface GGObject{
 	Object binOp(StrPos pos, String op, Object other);
 
 	Object castTo(StrPos pos, Class cls);
+
+	default Object assignChild(String childName, Object value){
+		throw new ToDo("in " + this.getClass());
+	}
 }

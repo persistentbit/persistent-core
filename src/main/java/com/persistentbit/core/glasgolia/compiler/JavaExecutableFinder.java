@@ -82,13 +82,18 @@ public class JavaExecutableFinder{
 		MatchLevel level     = MatchLevel.full;
 		Object[]   converted = new Object[compareCount];
 		for(int t = 0; t < compareCount; t++) {
-			Optional<Object> convertedArg = caster.apply(arguments[t], paramTypes[t]);
-			if(convertedArg.isPresent() == false) {
-				return Tuple2.of(MatchLevel.not, null);
-			}
-			converted[t] = convertedArg.get();
-			if(converted[t] != arguments[t]) {
-				level = MatchLevel.partial;
+			if(arguments[t] == null){
+				converted[t] = null;
+			} else {
+				Optional<Object> convertedArg = caster.apply(arguments[t], paramTypes[t]);
+				if(convertedArg.isPresent() == false) {
+					return Tuple2.of(MatchLevel.not, null);
+				}
+				converted[t] = convertedArg.get();
+				if(converted[t] != arguments[t]) {
+					level = MatchLevel.partial;
+				}
+
 			}
 		}
 		return Tuple2.of(level, converted);
@@ -97,7 +102,7 @@ public class JavaExecutableFinder{
 
 	public static final Caster defaultCaster = (Object value, Class cls) -> {
 		if(value == null) {
-			return Optional.of(null);
+			return Optional.empty();
 		}
 		Class valueCls = value.getClass();
 		if(cls.isAssignableFrom(valueCls)) {

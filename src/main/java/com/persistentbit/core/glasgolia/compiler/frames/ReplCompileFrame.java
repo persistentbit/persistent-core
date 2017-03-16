@@ -4,8 +4,9 @@ import com.persistentbit.core.collections.LList;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.glasgolia.CompileException;
+import com.persistentbit.core.glasgolia.EvalException;
 import com.persistentbit.core.glasgolia.compiler.RStack;
-import com.persistentbit.core.glasgolia.compiler.rexpr.RConst;
+import com.persistentbit.core.glasgolia.compiler.rexpr.GGReplThis;
 import com.persistentbit.core.glasgolia.compiler.rexpr.RExpr;
 import com.persistentbit.core.printing.PrintTextWriter;
 import com.persistentbit.core.printing.PrintableText;
@@ -129,9 +130,13 @@ public class ReplCompileFrame extends AbstractCompileFrame{
 			return other;
 		}
 	}
-
+	private GGReplThis	replThis;
 	private ReplStack replStack = new ReplStack();
 	private PMap<String, ReplVar> nameLookup = PMap.empty();
+
+	public ReplCompileFrame() {
+		replThis = new GGReplThis(this);
+	}
 
 	@Override
 	public boolean canDefineLocal(String name) {
@@ -151,9 +156,21 @@ public class ReplCompileFrame extends AbstractCompileFrame{
 			return res;
 		}
 		if(name.equals("this")) {
-			return new RConst(pos, Object.class, null);
+			return replThis.asRExpr();
 		}
 		throw new CompileException("Can't find '" + name + "'", pos);
+	}
+
+	public Object assignChild(String name, Object value){
+		ReplVar var = nameLookup.getOrDefault(name,null);
+		if(var == null){
+			throw new EvalException("Can't assign a value to non-existing child '" + name + "'.");
+		}
+		if(var.isConst() && var.isAssigned){
+			throw new EvalException("Can't assign a value to val '" + name + "'.");
+		}
+		var.assign(value);
+		return value;
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package com.persistentbit.core.glasgolia.compiler.rexpr;
 import com.persistentbit.core.glasgolia.EvalException;
 import com.persistentbit.core.glasgolia.compiler.GlasgoliaCompiler;
 import com.persistentbit.core.utils.StrPos;
+import com.persistentbit.core.utils.ToDo;
 
 import java.util.function.Supplier;
 
@@ -31,6 +32,18 @@ public class RObjectChild implements RExpr{
 			return Object.class;
 		}
 		return createChildGetter().get().getClass();
+	}
+
+
+	@Override
+	public Object assign(Object other) {
+		Object parentValue = parent.get();
+
+		if(parentValue instanceof GGObject){
+			GGObject ggObjParent = (GGObject)parentValue;
+			return ggObjParent.assignChild(name,other);
+		}
+		throw new ToDo("Not done for " + parentValue);
 	}
 
 	@Override
