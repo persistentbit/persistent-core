@@ -12,7 +12,7 @@ import com.persistentbit.core.experiments.grid.draw.Layout;
  * @author Peter Muys
  * @since 21/03/2017
  */
-public class LineList extends Rijbewijs.AbstractComponent {
+public class LineList extends AbstractComponent {
     private final PList<Component> rows;
 
     public LineList(PList<Component> rows) {
