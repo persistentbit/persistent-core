@@ -1,6 +1,7 @@
 package com.persistentbit.core.experiments.grid.draw;
 
-import javafx.scene.paint.Color;
+
+import java.awt.*;
 
 /**
  * TODO: Add comment
@@ -10,7 +11,7 @@ import javafx.scene.paint.Color;
  */
 public interface DrawContext {
     FontDef getCurrentFont();
-    Color   getFgColor();
+    Color getFgColor();
     Color   getBgColor();
     int textWidth(FontDef font,String text);
     int textHeight(FontDef font, String text);

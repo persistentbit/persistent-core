@@ -1,12 +1,14 @@
 package com.persistentbit.core.experiments.grid.draw;
 
+import com.persistentbit.core.utils.BaseValueClass;
+
 /**
  * TODO: Add comment
  *
  * @author Peter Muys
  * @since 21/03/2017
  */
-public class FontDef{
+public class FontDef extends BaseValueClass{
     private final String name;
     private final int   size;
     private final boolean bold;
