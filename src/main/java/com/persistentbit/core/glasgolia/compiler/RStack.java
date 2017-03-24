@@ -13,6 +13,8 @@ import com.persistentbit.core.utils.ToDo;
  */
 public interface RStack extends PrintableText{
 
+
+
 	void addFrame(int size);
 
 	default void addFrame(Object[] frame) {

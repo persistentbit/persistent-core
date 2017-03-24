@@ -1,6 +1,5 @@
 package com.persistentbit.core.glasgolia.compiler.rexpr;
 
-import com.persistentbit.core.glasgolia.EvalException;
 import com.persistentbit.core.glasgolia.compiler.RStack;
 import com.persistentbit.core.utils.StrPos;
 import com.persistentbit.core.utils.UReflect;
@@ -17,7 +16,6 @@ public class RVal implements RExpr{
 	protected final Class type;
 	protected final RStack stack;
 	protected final int index;
-	private boolean isInitialized;
 
 
 	public RVal(StrPos pos, Class type, RStack stack, int index) {
@@ -40,22 +38,17 @@ public class RVal implements RExpr{
 
 	@Override
 	public boolean isConst() {
-		return isInitialized;
+		return stack.get(index) != null;
 	}
 
 	@Override
 	public Object get() {
-
-
 		return stack.get(index);
 	}
 
 	@Override
 	public Object assign(Object other) {
-		if(isInitialized) {
-			throw new EvalException("val is already initialized", pos);
-		}
-		isInitialized = true;
+
 		stack.set(index, other);
 		return other;
 	}

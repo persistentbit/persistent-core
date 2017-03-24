@@ -3,6 +3,7 @@ package com.persistentbit.core.logging.printing;
 import com.persistentbit.core.logging.entries.LogEntry;
 
 import java.io.PrintStream;
+import java.util.function.Supplier;
 
 /**
  * TODO: Add comment
@@ -13,25 +14,25 @@ import java.io.PrintStream;
 public class LogPrintStream implements LogPrint{
 
 	private final LogFormatter logFormatter;
-	private final PrintStream  out;
+	private final Supplier<PrintStream> outSupplier;
 
-	public LogPrintStream(LogFormatter logFormatter, PrintStream out) {
+	public LogPrintStream(LogFormatter logFormatter, Supplier<PrintStream> outSupplier) {
 		this.logFormatter = logFormatter;
-		this.out = out;
+		this.outSupplier = outSupplier;
 	}
 
 	public static LogPrintStream sysOut(LogFormatter lp) {
-		return new LogPrintStream(lp, System.out);
+		return new LogPrintStream(lp, ()->System.out);
 	}
 
 	public static LogPrintStream sysErr(LogFormatter lp) {
-		return new LogPrintStream(lp, System.err);
+		return new LogPrintStream(lp, ()->System.err);
 	}
 
 	@Override
 	public void print(LogEntry logEntry) {
 		try {
-			out.print(logFormatter.printableLog(logEntry).printToString());
+			outSupplier.get().print(logFormatter.printableLog(logEntry).printToString());
 		} catch(Exception e) {
 			e.printStackTrace(System.err);
 		}
@@ -40,7 +41,7 @@ public class LogPrintStream implements LogPrint{
 	@Override
 	public void print(Throwable exception) {
 		try {
-			out.print(logFormatter.printableException(exception).printToString());
+			outSupplier.get().print(logFormatter.printableException(exception).printToString());
 		} catch(Exception e) {
 			e.printStackTrace(System.err);
 		}
