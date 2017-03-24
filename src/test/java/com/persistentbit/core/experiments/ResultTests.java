@@ -1,6 +1,6 @@
 package com.persistentbit.core.experiments;
 
-import com.persistbit.core.CoreTest;
+import com.persistentbit.core.tests.CoreTest;
 import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.logging.entries.LogEntryEmpty;
 import com.persistentbit.core.result.Result;

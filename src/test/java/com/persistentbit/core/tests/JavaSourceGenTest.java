@@ -1,4 +1,4 @@
-package com.persistbit.core;
+package com.persistentbit.core.tests;
 
 import com.persistentbit.core.experiments.javasource.JavaClass;
 import com.persistentbit.core.experiments.javasource.JavaDoc;

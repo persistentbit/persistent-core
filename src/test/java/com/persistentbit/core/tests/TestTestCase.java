@@ -1,4 +1,4 @@
-package com.persistbit.core;
+package com.persistentbit.core.tests;
 
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.testing.TestCase;

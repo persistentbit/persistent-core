@@ -1,6 +1,6 @@
-package com.persistbit.core.tokenizer;
+package com.persistentbit.core.tests.tokenizer;
 
-import com.persistbit.core.CoreTest;
+import com.persistentbit.core.tests.CoreTest;
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PStream;

@@ -1,6 +1,6 @@
-package com.persistbit.core.dependencies;
+package com.persistentbit.core.tests.dependencies;
 
-import com.persistbit.core.CoreTest;
+import com.persistentbit.core.tests.CoreTest;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.dependencies.DependencyResolver;
 import com.persistentbit.core.testing.TestCase;

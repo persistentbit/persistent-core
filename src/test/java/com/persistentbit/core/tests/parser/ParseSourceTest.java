@@ -1,4 +1,4 @@
-package com.persistbit.core.parser;
+package com.persistentbit.core.tests.parser;
 
 import com.persistentbit.core.ModuleCore;
 import com.persistentbit.core.logging.printing.LogPrint;

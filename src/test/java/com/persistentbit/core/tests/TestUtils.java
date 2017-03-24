@@ -1,6 +1,6 @@
-package com.persistbit.core;
+package com.persistentbit.core.tests;
 
-import com.persistbit.core.utils.TestValue;
+import com.persistentbit.core.tests.utils.TestValue;
 import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestData;

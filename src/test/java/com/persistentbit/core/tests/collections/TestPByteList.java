@@ -1,6 +1,6 @@
-package com.persistbit.core.collections;
+package com.persistentbit.core.tests.collections;
 
-import com.persistbit.core.CoreTest;
+import com.persistentbit.core.tests.CoreTest;
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.collections.PByteList;
 import com.persistentbit.core.logging.Log;

@@ -1,4 +1,4 @@
-package com.persistbit.core.collections;
+package com.persistentbit.core.tests.collections;
 
 import com.persistentbit.core.collections.IPSet;
 import com.persistentbit.core.collections.POrderedSet;

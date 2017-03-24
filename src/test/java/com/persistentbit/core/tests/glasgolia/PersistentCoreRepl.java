@@ -1,4 +1,4 @@
-package com.persistbit.core.glasgolia;
+package com.persistentbit.core.tests.glasgolia;
 
 import com.persistentbit.core.glasgolia.repl.GlasgoliaRepl;
 import com.persistentbit.core.glasgolia.repl.ReplConfig;

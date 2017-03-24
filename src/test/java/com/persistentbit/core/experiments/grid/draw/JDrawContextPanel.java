@@ -27,6 +27,6 @@ public class JDrawContextPanel<DOC> extends JPanel implements View<DOC>{
 
     @Override
     public ViewManager<DOC> getManager() {
-        return viewManager
+        return viewManager;
     }
 }

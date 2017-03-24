@@ -1,7 +1,7 @@
-package com.persistbit.core.validation;
+package com.persistentbit.core.tests.validation;
 
-import com.persistbit.core.CoreTest;
-import com.persistbit.core.utils.TestValue;
+import com.persistentbit.core.tests.CoreTest;
+import com.persistentbit.core.tests.utils.TestValue;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.validation.StringValidator;
 import com.persistentbit.core.validation.Validator;

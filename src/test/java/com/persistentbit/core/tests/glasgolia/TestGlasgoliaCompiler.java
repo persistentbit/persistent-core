@@ -1,6 +1,6 @@
-package com.persistbit.core.glasgolia;
+package com.persistentbit.core.tests.glasgolia;
 
-import com.persistbit.core.CoreTest;
+import com.persistentbit.core.tests.CoreTest;
 import com.persistentbit.core.ModuleCore;
 import com.persistentbit.core.glasgolia.compiler.GlasgoliaCompiler;
 import com.persistentbit.core.testing.TestCase;

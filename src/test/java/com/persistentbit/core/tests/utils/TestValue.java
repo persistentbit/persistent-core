@@ -1,4 +1,4 @@
-package com.persistbit.core.utils;
+package com.persistentbit.core.tests.utils;
 
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.NoEqual;
