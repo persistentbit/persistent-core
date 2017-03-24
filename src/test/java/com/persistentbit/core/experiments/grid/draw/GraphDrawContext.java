@@ -84,7 +84,7 @@ public class GraphDrawContext implements DrawContext {
         graph.setFont(this.font.apply(font));
         graph.setColor(color);
         graph.drawString(text,pos.x,pos.y);
-        return new Layout(get)
+        return new Layout(new Dim(textWidth(font,text),textHeight(font,text)),baseLine(font));
     }
 
     @Override
