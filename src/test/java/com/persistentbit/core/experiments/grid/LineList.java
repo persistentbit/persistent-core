@@ -5,6 +5,7 @@ import com.persistentbit.core.experiments.grid.draw.DPoint;
 import com.persistentbit.core.experiments.grid.draw.Dim;
 import com.persistentbit.core.experiments.grid.draw.DrawContext;
 import com.persistentbit.core.experiments.grid.draw.Layout;
+import com.persistentbit.core.utils.ToDo;
 
 /**
  * TODO: Add comment
@@ -12,30 +13,35 @@ import com.persistentbit.core.experiments.grid.draw.Layout;
  * @author Peter Muys
  * @since 21/03/2017
  */
-public class LineList extends AbstractComponent {
-    private final PList<Component> rows;
+public class LineList extends AbstractDComponent{
+    private final PList<DComponent> rows;
 
-    public LineList(PList<Component> rows) {
+    public LineList(PList<DComponent> rows) {
         this.rows = rows;
     }
 
-    public LineList(Component...rows){
+    public LineList(DComponent...rows){
         this(PList.val(rows));
     }
     public LineList() {
         this(PList.empty());
     }
 
-    public LineList add(Component line){
+    public LineList add(DComponent line){
         return new LineList(rows.plus(line));
     }
 
-    @Override
+	@Override
+	public ViewCursor createCursor(int x, int y) {
+		throw new ToDo();
+	}
+
+	@Override
     public Layout layout(DrawContext context, int width) {
         int w = 0;
         int h = 0;
         Integer baseLine = null;
-        for(Component c : rows){
+        for(DComponent c : rows){
             Layout l = c.layout(context, width);
             if(baseLine==null){
                 baseLine = l.baseLine;
@@ -55,7 +61,7 @@ public class LineList extends AbstractComponent {
     public Layout draw(DPoint offset, DrawContext context, int width) {
         Dim  res = new Dim();
         Integer baseLine = null;
-        for(Component c : rows){
+        for(DComponent c : rows){
             Layout l = c.draw(offset,context,width);
             if(baseLine == null){
                 baseLine = l.baseLine;

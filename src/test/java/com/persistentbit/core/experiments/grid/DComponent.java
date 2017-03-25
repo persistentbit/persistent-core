@@ -10,10 +10,11 @@ import com.persistentbit.core.experiments.grid.draw.Layout;
  * @author Peter Muys
  * @since 21/03/2017
  */
-public interface Component {
+public interface DComponent{
     Layout layout(DrawContext context, int width);
 
     boolean needLayout();
 
     Layout draw(DPoint offset, DrawContext context, int width);
+	ViewCursor createCursor(int x, int y);
 }

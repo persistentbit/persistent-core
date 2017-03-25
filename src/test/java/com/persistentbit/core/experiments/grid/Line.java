@@ -1,6 +1,7 @@
 package com.persistentbit.core.experiments.grid;
 
 import com.persistentbit.core.experiments.grid.draw.*;
+import com.persistentbit.core.utils.ToDo;
 
 /**
  * TODO: Add comment
@@ -8,7 +9,7 @@ import com.persistentbit.core.experiments.grid.draw.*;
  * @author Peter Muys
  * @since 21/03/2017
  */
-public class Line extends AbstractComponent{
+public class Line extends AbstractDComponent{
     private String text;
     private boolean needLayout = true;
     public Line(String text) {
@@ -24,7 +25,12 @@ public class Line extends AbstractComponent{
         return new Layout(new Dim(w,h),context.baseLine(font));
     }
 
-    @Override
+	@Override
+	public ViewCursor createCursor(int x, int y) {
+		throw new ToDo();
+	}
+
+	@Override
     public boolean needLayout() {
         return needLayout;
     }
@@ -32,6 +38,6 @@ public class Line extends AbstractComponent{
     @Override
     public Layout draw(DPoint offset, DrawContext context, int width) {
 
-        return context.drawText(offset,context.getCurrentFont(),context.getFgColor(),text);
+        return context.drawText(offset.addY(context.baseLine(context.getCurrentFont())),context.getCurrentFont(),context.getFgColor(),text);
     }
 }

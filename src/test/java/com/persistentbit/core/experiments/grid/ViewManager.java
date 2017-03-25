@@ -2,6 +2,8 @@ package com.persistentbit.core.experiments.grid;
 
 import com.persistentbit.core.collections.PList;
 
+import java.util.Optional;
+
 /**
  * TODO: Add comment
  *
@@ -10,7 +12,7 @@ import com.persistentbit.core.collections.PList;
  */
 public interface ViewManager<DOC> {
 
-    DOC getDoc();
-    PList<DOC>   getViews();
-
+    Optional<DOC> 		getDoc();
+    PList<View<DOC>>   	getViews();
+	void addView(View<DOC> view);
 }

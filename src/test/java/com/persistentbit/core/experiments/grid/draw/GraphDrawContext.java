@@ -42,7 +42,7 @@ public class GraphDrawContext implements DrawContext {
         this.fontMetrics = Memoizer.of( fdef ->
                 graph.getFontMetrics(font.apply(fdef))
         );
-
+		this.currentFontDef = new FontDef("Helvetica",14,false,false,false);
     }
 
     @Override

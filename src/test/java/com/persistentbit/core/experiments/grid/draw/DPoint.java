@@ -17,6 +17,11 @@ public class DPoint {
     public DPoint(){
         this(0,0);
     }
+
+    static public DPoint of(int x, int y){
+    	return new DPoint(x,y);
+	}
+
     public DPoint withX(int x){
         return new DPoint(x,y);
     }

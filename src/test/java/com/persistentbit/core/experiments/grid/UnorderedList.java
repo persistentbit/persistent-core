@@ -12,13 +12,13 @@ import com.persistentbit.core.experiments.grid.draw.Layout;
  * @author Peter Muys
  * @since 21/03/2017
  */
-public class UnorderedList extends AbstractComponent {
-    private final PList<Component> rows;
-    public UnorderedList(PList<Component> rows) {
+public class UnorderedList extends AbstractDComponent{
+    private final PList<DComponent> rows;
+    public UnorderedList(PList<DComponent> rows) {
         this.rows = rows;
     }
 
-    public UnorderedList(Component...rows){
+    public UnorderedList(DComponent...rows){
         this(PList.val(rows));
     }
 
@@ -26,7 +26,7 @@ public class UnorderedList extends AbstractComponent {
         this(PList.empty());
     }
 
-    public UnorderedList add(Component line){
+    public UnorderedList add(DComponent line){
         return new UnorderedList(rows.plus(line));
     }
 
@@ -41,7 +41,7 @@ public class UnorderedList extends AbstractComponent {
         int w = 0;
         int h = 0;
         Integer baseLine = null;
-        for(Component c : rows){
+        for(DComponent c : rows){
             Layout l = c.layout(context, width-blay.dim.width);
             l = l.combineHeight(blay);
             if(baseLine==null){
@@ -54,7 +54,22 @@ public class UnorderedList extends AbstractComponent {
         return new Layout(new Dim(w + blay.dim.width,h),baseLine);
     }
 
-    @Override
+    class UListCursor implements ViewCursor{
+    	private ViewCursor childCursor;
+    	private int itemNumber;
+
+		public UListCursor(ViewCursor childCursor, int itemNumber) {
+			this.childCursor = childCursor;
+			this.itemNumber = itemNumber;
+		}
+	}
+
+	@Override
+	public ViewCursor createCursor(int x, int y) {
+		return null;
+	}
+
+	@Override
     public boolean needLayout() {
         return rows.find(c -> c.needLayout()).isPresent();
     }
@@ -66,10 +81,10 @@ public class UnorderedList extends AbstractComponent {
         int h = 0;
         offset = offset.addX(blay.dim.width);
         Integer baseLine = null;
-        for(Component c : rows){
+        for(DComponent c : rows){
             Layout l = c.layout(context,width-blay.dim.width);
             l = l.combineHeight(blay);
-            context.drawText(offset.addX(-blay.dim.width),context.getCurrentFont(),context.getFgColor(),bulletText);
+            context.drawText(offset.addX(-blay.dim.width).addY(l.baseLine),context.getCurrentFont(),context.getFgColor(),bulletText);
             c.draw(offset,context,width-blay.dim.width);
             if(baseLine==null){
                 baseLine = l.baseLine;

@@ -8,4 +8,6 @@ package com.persistentbit.core.experiments.grid;
  */
 public interface View<DOC> {
     ViewManager<DOC> getManager();
+    void docUpdated(DOC doc);
+
 }

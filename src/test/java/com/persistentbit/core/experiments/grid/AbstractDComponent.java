@@ -6,6 +6,6 @@ package com.persistentbit.core.experiments.grid;
  * @author Peter Muys
  * @since 21/03/2017
  */
-public abstract class AbstractComponent implements Component{
+public abstract class AbstractDComponent implements DComponent{
 
 }

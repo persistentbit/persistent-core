@@ -1,6 +1,7 @@
 package com.persistentbit.core.experiments.grid.draw;
 
-import javafx.scene.paint.Color;
+
+import java.awt.*;
 
 /**
  * TODO: Add comment
