@@ -1,4 +1,4 @@
-package com.persistentbit.core.experiments.grid.draw;
+package com.persistentbit.core.experiments.pred.draw;
 
 import com.persistentbit.core.utils.BaseValueClass;
 

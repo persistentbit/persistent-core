@@ -1,6 +1,9 @@
-package com.persistentbit.core.experiments.grid.draw;
+package com.persistentbit.core.experiments.pred.draw;
 
-import com.persistentbit.core.experiments.grid.*;
+import com.persistentbit.core.experiments.pred.*;
+import com.persistentbit.core.experiments.pred.boxes.Box;
+import com.persistentbit.core.experiments.pred.boxes.Line;
+import com.persistentbit.core.experiments.pred.boxes.UnorderedList;
 import com.persistentbit.core.utils.ToDo;
 
 import javax.swing.*;
@@ -18,8 +21,8 @@ import java.util.function.Function;
 public class JDrawContextPanel<DOC> extends JPanel implements View<DOC>{
 
     private final ViewManager<DOC> viewManager;
-    private DComponent drawComponent;
-    private Function<DOC, DComponent> componentBuilder;
+    private Box drawComponent;
+    private Function<DOC, Box> componentBuilder;
 
     public JDrawContextPanel(ViewManager<DOC> viewManager) {
         this.viewManager = viewManager;
@@ -60,7 +63,11 @@ public class JDrawContextPanel<DOC> extends JPanel implements View<DOC>{
 
 	public void mouseClicked(MouseEvent e){
     	if(drawComponent != null){
-    		drawComponent.createCursor(e.getX(),e.getY());
+    		Graphics2D           g2 = (Graphics2D)this.getGraphics();
+			GraphDrawContext     dc = new GraphDrawContext(g2);
+			Rectangle            bounds = getBounds();
+    		ViewCursor vc =drawComponent.createCursor(dc,(int)bounds.getWidth(),new DPoint(e.getX(),e.getY())).orElse(null);
+    		System.out.println(vc);
 		}
 	}
 
@@ -82,7 +89,7 @@ public class JDrawContextPanel<DOC> extends JPanel implements View<DOC>{
 
     }
 
-    private DComponent build(OutlineDoc doc){
+    private Box build(OutlineDoc doc){
     	if(doc instanceof OutlineList){
     		return buildList((OutlineList)doc);
 		} else if(doc instanceof OutlineText){
@@ -91,10 +98,10 @@ public class JDrawContextPanel<DOC> extends JPanel implements View<DOC>{
 		throw new ToDo();
 	}
 
-	private DComponent buildList(OutlineList doc){
+	private Box buildList(OutlineList doc){
     	return new UnorderedList(doc.getElements().map(d -> build(d)));
 	}
-	private DComponent buildText(OutlineText text){
+	private Box buildText(OutlineText text){
 		return new Line(text.getText());
 	}
 

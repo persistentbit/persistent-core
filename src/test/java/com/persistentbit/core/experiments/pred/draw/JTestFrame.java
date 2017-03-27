@@ -1,8 +1,8 @@
-package com.persistentbit.core.experiments.grid.draw;
+package com.persistentbit.core.experiments.pred.draw;
 
-import com.persistentbit.core.experiments.grid.OutlineDoc;
-import com.persistentbit.core.experiments.grid.OutlineList;
-import com.persistentbit.core.experiments.grid.OutlineText;
+import com.persistentbit.core.experiments.pred.OutlineDoc;
+import com.persistentbit.core.experiments.pred.OutlineList;
+import com.persistentbit.core.experiments.pred.OutlineText;
 
 import javax.swing.*;
 import java.awt.*;

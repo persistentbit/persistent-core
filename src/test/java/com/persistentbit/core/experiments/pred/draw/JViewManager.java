@@ -1,8 +1,8 @@
-package com.persistentbit.core.experiments.grid.draw;
+package com.persistentbit.core.experiments.pred.draw;
 
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.experiments.grid.View;
-import com.persistentbit.core.experiments.grid.ViewManager;
+import com.persistentbit.core.experiments.pred.View;
+import com.persistentbit.core.experiments.pred.ViewManager;
 
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package com.persistentbit.core.experiments.grid;
+package com.persistentbit.core.experiments.pred;
 
 import com.persistentbit.core.collections.PList;
 

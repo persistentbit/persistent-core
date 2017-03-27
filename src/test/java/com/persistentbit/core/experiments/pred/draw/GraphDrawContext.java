@@ -1,4 +1,4 @@
-package com.persistentbit.core.experiments.grid.draw;
+package com.persistentbit.core.experiments.pred.draw;
 
 
 import com.persistentbit.core.function.Memoizer;
@@ -16,8 +16,7 @@ import java.util.function.Function;
 public class GraphDrawContext implements DrawContext {
     private Graphics2D graph;
     private FontDef currentFontDef;
-    //private Font        currentFont;
-    //private FontMetrics currentFontMetrics;
+
     private Function<FontDef, Font> font;
     private Function<FontDef, FontMetrics> fontMetrics;
     private Color fgColor;
@@ -42,7 +41,7 @@ public class GraphDrawContext implements DrawContext {
         this.fontMetrics = Memoizer.of( fdef ->
                 graph.getFontMetrics(font.apply(fdef))
         );
-		this.currentFontDef = new FontDef("Helvetica",14,false,false,false);
+		this.currentFontDef = new FontDef("PragmataPro",18,false,false,false);
     }
 
     @Override
