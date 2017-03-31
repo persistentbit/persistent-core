@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * User: petermuys
- * Date: 7/07/16
- * Time: 18:06
+ * An immutable {@link List} that uses a {@link IPList} as the data container
+ * @author  Peter Muys
+ * @since 7/07/16
  */
-public class PListList<T> implements List<T>, PStreamable<T>{
+class PListList<T> implements List<T>, PStreamable<T>{
 
   private final PList<T> master;
 

@@ -4,8 +4,10 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
+ * A {@link IPSet} persistent implementation.
  * @author Peter Muys
  * @since 8/07/16
+ * @see IPSet
  */
 public class PSet<T> extends AbstractPStreamDirect<T, PSet<T>> implements IPSet<T>{
 

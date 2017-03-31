@@ -9,15 +9,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * User: petermuys
- * Date: 9/07/16
- * Time: 11:21
+ * An immutable java {@link Map} backed by a {@link IPMap}
+ * @author Peter Muys
+ * @since 9/07/16
  */
-public class PMapMap<K, V> extends AbstractMap<K, V> implements PStreamable<Tuple2<K, V>>, Serializable{
+class PMapMap<K, V> extends AbstractMap<K, V> implements PStreamable<Tuple2<K, V>>, Serializable{
 
 	private final IPMap<K, V> master;
 
-	public PMapMap(IPMap<K, V> master) {
+	PMapMap(IPMap<K, V> master) {
 		this.master = master;
 	}
 

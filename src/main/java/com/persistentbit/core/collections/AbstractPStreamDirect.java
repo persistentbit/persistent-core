@@ -12,7 +12,7 @@ import java.util.function.Predicate;
  * @author Peter Muys
  * @since 7/07/16
  */
-public abstract class AbstractPStreamDirect<T, IMP extends PStream<T>> extends AbstractPStreamLazy<T>{
+abstract class AbstractPStreamDirect<T, IMP extends PStream<T>> extends AbstractPStreamLazy<T>{
 
   @Override
   public IMP clear() {

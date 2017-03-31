@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * A IPList based on a java byte array byte[]
+ * An {@link IPList} based on a java byte array byte[]
  *
  * @author petermuys
  * @since 7/11/16

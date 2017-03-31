@@ -14,6 +14,7 @@ import java.util.function.Function;
  * @author Peter Muys
  * @see PMap
  * @see POrderedMap
+ * @see PStream
  * @since 13/07/2016
  */
 public interface IPMap<K, V> extends PStream<Tuple2<K, V>>{

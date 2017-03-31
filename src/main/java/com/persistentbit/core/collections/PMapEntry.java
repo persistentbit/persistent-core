@@ -10,7 +10,7 @@ import java.util.Map;
  * Date: 8/07/16
  * Time: 09:19
  */
-public class PMapEntry<K, V> extends Tuple2<K, V> implements Map.Entry<K, V>{
+class PMapEntry<K, V> extends Tuple2<K, V> implements Map.Entry<K, V>{
 
   public PMapEntry(K key, V val) {
 	super(key, val);

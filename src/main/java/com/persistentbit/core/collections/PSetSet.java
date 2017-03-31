@@ -6,11 +6,11 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * User: petermuys
- * Date: 9/07/16
- * Time: 11:10
+ * An immutable java {@link Set} backed by an {@link IPSet}
+ * @author Peter Muys
+ * @since 9/07/16
  */
-public class PSetSet<T> implements Set<T>, PStreamable<T>, Serializable{
+class PSetSet<T> implements Set<T>, PStreamable<T>, Serializable{
 
 	private final IPSet<T> master;
 

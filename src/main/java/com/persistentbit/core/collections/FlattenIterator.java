@@ -7,7 +7,7 @@ import java.util.NoSuchElementException;
  * @author Peter Muys
  * @since 11/07/2016
  */
-public class FlattenIterator<T> implements Iterator<T>{
+class FlattenIterator<T> implements Iterator<T>{
 
   private final Iterator<?>           parent;
   private       Iterator<? extends T> child;

@@ -1,9 +1,9 @@
 package com.persistentbit.core.collections;
 
 /**
- * User: petermuys
- * Date: 9/07/16
- * Time: 09:49
+ *
+ * @author Peter Muys
+ * @since 9/07/16
  */
 public class InfinitePStreamException extends UnsupportedOperationException{
 

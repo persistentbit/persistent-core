@@ -10,8 +10,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
+ * An {@link IPList} implementation that is a Single Linked list.
  * @author Peter Muys
  * @since 9/06/2016
+ * @see IPList
+ * @see PStream
  */
 @SuppressWarnings({"AbstractClassNamingConvention"})
 public abstract class LList<E> extends AbstractIPList<E, LList<E>> implements Serializable{

@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  * Time: 17:42
  */
 @SuppressWarnings({"InterfaceMayBeAnnotatedFunctional", "unchecked"})
-public interface PStreamWithDefaults<T> extends PStream<T>{
+interface PStreamWithDefaults<T> extends PStream<T>{
 
 
 	@Override

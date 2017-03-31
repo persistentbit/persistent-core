@@ -9,10 +9,11 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * A Persistent Map where the order of adding elements is preserved when iterating keys orOf values
+ * A Persistent {@link IPMap} where the order of adding elements is preserved when iterating keys orOf values
  *
  * @author Peter Muys
  * @since 13/07/2016
+ * @see IPMap
  */
 public final class POrderedMap<K, V> extends AbstractPStreamDirect<Tuple2<K, V>, POrderedMap<K, V>>
   implements IPMap<K, V>{

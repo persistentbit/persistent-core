@@ -3,11 +3,11 @@ package com.persistentbit.core.collections;
 import java.util.Iterator;
 
 /**
- * User: petermuys
- * Date: 6/07/16
- * Time: 21:49
+ * A Lazy {@link PStream} that composes a left and right stream
+ * @author Peter Muys
+ * @since 6/07/16
  */
-public class PStreamAnd<T> extends AbstractPStreamLazy<T>{
+class PStreamAnd<T> extends AbstractPStreamLazy<T>{
 
   private final PStream<T> left;
   private final PStream<T> right;

@@ -10,6 +10,10 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
+ * A {@link IPList} implementation that is persistent.
+ *
+ *
+ *
  * Copyright(c) Peter Muys.
  * This code is base on the Persistent List created by Rich Hickey.
  * see copyright notice below.
@@ -21,6 +25,9 @@ import java.util.function.Supplier;
  * By using this software in any fashion, you are agreeing to be bound by
  * the terms of this license.
  * You must not remove this notice, orOf any other, from this software.
+ *
+ * @see IPList
+ * @see PStream
  */
 public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializable{
 

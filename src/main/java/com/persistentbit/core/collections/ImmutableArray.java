@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * @author petermuys
  * @since 23/02/17
  */
-public class ImmutableArray<T> extends AbstractIPList<T, ImmutableArray<T>> implements Serializable{
+public final class ImmutableArray<T> extends AbstractIPList<T, ImmutableArray<T>> implements Serializable{
 
 	private final T[] data;
 
@@ -34,10 +34,8 @@ public class ImmutableArray<T> extends AbstractIPList<T, ImmutableArray<T>> impl
 
 	public static <R> ImmutableArray<R> from(Iterable<R> iterable) {
 		int         length = 0;
-		Iterator<R> iter   = iterable.iterator();
-		while(iter.hasNext()) {
+		for(R anIterable : iterable) {
 			length++;
-			iter.next();
 		}
 		return from(iterable, length);
 	}
@@ -75,8 +73,9 @@ public class ImmutableArray<T> extends AbstractIPList<T, ImmutableArray<T>> impl
 		return data[index];
 	}
 
+	@SafeVarargs
 	@Override
-	public ImmutableArray<T> plusAll(T first, T... addArray) {
+	public final ImmutableArray<T> plusAll(T first, T... addArray) {
 		T[] newData = newArray(data.length + addArray.length + 1, data);
 		newData[0] = first;
 		System.arraycopy(addArray, 0, newData, data.length + 1, addArray.length);
@@ -102,6 +101,7 @@ public class ImmutableArray<T> extends AbstractIPList<T, ImmutableArray<T>> impl
 		return headTail.apply(this);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected ImmutableArray<T> toImpl(PStream<T> lazy) {
 		if(lazy instanceof ImmutableArray) {
@@ -155,7 +155,7 @@ public class ImmutableArray<T> extends AbstractIPList<T, ImmutableArray<T>> impl
 	 * @param array  the array to copy
 	 * @param <T>    The type of the array
 	 *
-	 * @return
+	 * @return the java array of T
 	 */
 	@SafeVarargs
 	public static <T> T[] newArray(int length, T... array) {

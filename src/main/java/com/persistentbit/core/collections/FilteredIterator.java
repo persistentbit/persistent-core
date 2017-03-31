@@ -4,16 +4,14 @@ import java.util.Iterator;
 import java.util.function.Predicate;
 
 /**
- * User: petermuys
- * Date: 7/07/16
- * Time: 17:33
+ * Iterator that is filtered by a Predicate.
  */
 public class FilteredIterator<T> implements Iterator<T>{
 
-  private final Predicate<? super T> filter;
-  private final Iterator<T>          master;
-  private       boolean              hasNext;
-  private       T                    next;
+	private final Predicate<? super T> filter;
+	private final Iterator<T> master;
+	private boolean hasNext;
+	private T next;
 
 	public FilteredIterator(Predicate<? super T> filter, Iterator<T> master) {
 		this.filter = filter;
@@ -21,17 +19,17 @@ public class FilteredIterator<T> implements Iterator<T>{
 		doNext();
 	}
 
-  private void doNext() {
+	private void doNext() {
 
-	do {
-	  hasNext = master.hasNext();
-	  if(hasNext == false) {
-		next = null;
-		return;
-	  }
-	  next = master.next();
-	} while(filter.test(next) == false);
-  }
+		do {
+			hasNext = master.hasNext();
+			if(hasNext == false) {
+				next = null;
+				return;
+			}
+			next = master.next();
+		} while(filter.test(next) == false);
+	}
 
 	@Override
 	public boolean hasNext() {

@@ -8,8 +8,9 @@ import java.util.Set;
  *
  * @author Peter Muys
  * @since 13/07/2016
+ * @see IPSet
  */
-public class POrderedSet<T> extends AbstractPStreamDirect<T, POrderedSet<T>> implements IPSet<T>{
+public final class POrderedSet<T> extends AbstractPStreamDirect<T, POrderedSet<T>> implements IPSet<T>{
 
   private static final POrderedSet<Object> sEmpty = new POrderedSet<>();
   private final POrderedMap<T, T> map;

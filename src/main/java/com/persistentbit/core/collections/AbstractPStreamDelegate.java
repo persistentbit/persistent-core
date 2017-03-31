@@ -15,7 +15,7 @@ import java.util.stream.Stream;
  * Date: 20/07/16
  * Time: 17:56
  */
-public abstract class AbstractPStreamDelegate<T> implements PStream<T>{
+abstract class AbstractPStreamDelegate<T> implements PStream<T>{
 
 
   @Override

@@ -7,7 +7,7 @@ import java.util.Iterator;
  * Date: 9/07/16
  * Time: 10:48
  */
-public abstract class AbstractIPList<T, IMPL extends PStream<T>> extends AbstractPStreamDirect<T, IMPL>
+abstract class AbstractIPList<T, IMPL extends PStream<T>> extends AbstractPStreamDirect<T, IMPL>
   implements IPList<T>{
 
   @Override

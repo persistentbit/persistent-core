@@ -5,9 +5,13 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * User: petermuys
- * Date: 6/07/16
- * Time: 19:32
+ * Interface defining a persistent List<br>
+ *
+ * @author petermuys
+ * @since 6/07/16
+ * @see LList
+ * @see PList
+ * @see PStream
  */
 public interface IPList<T> extends PStream<T>{
 

@@ -4,11 +4,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * User: petermuys
- * Date: 6/07/16
- * Time: 21:32
+ * A Reversed PStream
+ * @author Peter Muys
+ * @since 6/07/16
  */
-public class PStreamReversed<T> extends AbstractPStreamLazy<T>{
+class PStreamReversed<T> extends AbstractPStreamLazy<T>{
 
   private final PStream<T> master;
   private       List<T>    rev;
