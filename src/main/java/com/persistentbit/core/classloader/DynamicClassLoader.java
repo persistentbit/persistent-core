@@ -8,6 +8,7 @@ package com.persistentbit.core.classloader;
  */
 
 import com.persistentbit.core.collections.PByteList;
+import com.persistentbit.core.doc.Component;
 import com.persistentbit.core.resources.ResourceLoader;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.UReflect;
@@ -20,6 +21,7 @@ import java.util.function.Predicate;
  * Load all classes it can, leave the rest to the Parent ClassLoader.<br>
  * Based on code in https://github.com/quanla/classreloading/
  */
+@Component
 public class DynamicClassLoader extends ClassLoader {
 
 	private final ResourceLoader resourceLoader;

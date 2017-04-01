@@ -4,6 +4,11 @@ package com.persistentbit.core.experiments.pred.draw;
 import com.persistentbit.core.function.Memoizer;
 
 import java.awt.*;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextAttribute;
+import java.awt.font.TextLayout;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 
@@ -30,13 +35,30 @@ public class GraphDrawContext implements DrawContext {
         this.graph = graph;
         this.graph = graph;
         this.font = Memoizer.of(fdef -> {
-            Font f = new Font(fdef.getName(),
+            /*Font f = new Font(fdef.getName(),
                     (fdef.isBold() ? Font.BOLD : Font.PLAIN)
                             | (fdef.isItalic() ? Font.ITALIC : 0)
                     ,
                     fdef.getSize()
-            );
-            return f;
+            );*/
+
+			try {
+				Font f = new Font(fdef.getName(),
+					(fdef.isBold() ? Font.BOLD : Font.PLAIN)
+						| (fdef.isItalic() ? Font.ITALIC : 0)
+					,
+					fdef.getSize()
+				);
+				Map<TextAttribute, Object> attributes = new HashMap<>();
+				attributes.put(TextAttribute.SIZE, fdef.getSize());
+				attributes.put(TextAttribute.LIGATURES, TextAttribute.LIGATURES_ON);
+				return f.deriveFont(attributes);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+
+
+
         });
         this.fontMetrics = Memoizer.of( fdef ->
                 graph.getFontMetrics(font.apply(fdef))
@@ -82,7 +104,13 @@ public class GraphDrawContext implements DrawContext {
     public Layout drawText(DPoint pos, FontDef font, Color color, String text) {
         graph.setFont(this.font.apply(font));
         graph.setColor(color);
-        graph.drawString(text,pos.x,pos.y);
+        //graph.drawString(text,pos.x,pos.y);
+
+		FontRenderContext frc    = graph.getFontRenderContext();
+		TextLayout        layout = new TextLayout(text, this.font.apply(font), frc);
+		layout.draw(graph, (float)pos.x,(float)pos.y);
+
+
         return new Layout(new Dim(textWidth(font,text),textHeight(font,text)),baseLine(font));
     }
 

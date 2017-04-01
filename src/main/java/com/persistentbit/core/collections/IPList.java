@@ -1,5 +1,7 @@
 package com.persistentbit.core.collections;
 
+import com.persistentbit.core.doc.Component;
+
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -13,6 +15,7 @@ import java.util.function.Supplier;
  * @see PList
  * @see PStream
  */
+@Component
 public interface IPList<T> extends PStream<T>{
 
   T get(int index);

@@ -28,9 +28,12 @@ public class JTestFrame extends JFrame{
 	}
 
 	public static void main(String[] args) {
+		if (System.getProperty("os.name").startsWith("Mac OS X")) {
+			System.setProperty("apple.awt.graphics.UseQuartz", "true");
+		}
 		OutlineList doc = new OutlineList(
 			new OutlineText("Dit is een test regel"),
-			new OutlineText("Dit is de 2e regel"),
+			new OutlineText("Dit is de 2e regel -->"),
 			new OutlineList(
 				new OutlineText("Sub item 1"),
 				new OutlineText("Sub item 2"),

@@ -77,6 +77,10 @@ public class JDrawContextPanel<DOC> extends JPanel implements View<DOC>{
 		g2.setRenderingHint(
 			RenderingHints.KEY_TEXT_ANTIALIASING,
 			RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		g2.setRenderingHint(
+			RenderingHints.KEY_RENDERING,
+			RenderingHints.VALUE_RENDER_SPEED);
+
 		g.setColor(Color.white);
 		g.fillRect(0,0,g.getClipBounds().width,g.getClipBounds().height);
 		g.setColor(Color.black);

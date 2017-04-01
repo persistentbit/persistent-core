@@ -15,6 +15,7 @@ import java.util.Optional;
 public class Line extends AbstractBox{
     private String text;
     private boolean needLayout = true;
+    private int[] xpos;
     public Line(String text) {
         this.text = text;
     }
