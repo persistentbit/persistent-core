@@ -4,7 +4,9 @@
  * @author petermuys
  * @since 31/03/17
  */
-@Component
+
+
+@Component(name="Functional",description = "Functional utility classes")
 package com.persistentbit.core.function;
 
 import com.persistentbit.core.doc.Component;
