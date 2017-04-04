@@ -1,5 +1,6 @@
 package com.persistentbit.core.result;
 
+import com.persistentbit.core.doc.Support;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.entries.LogEntry;
 
@@ -14,6 +15,7 @@ import java.util.function.*;
  * @since 4/01/2017
  * @see Result
  */
+@Support
 public class ResultLazy<T> extends Result<T>{
 
 	private Supplier<Result<T>> supplier;

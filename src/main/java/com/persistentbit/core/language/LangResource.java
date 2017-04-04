@@ -1,16 +1,18 @@
 package com.persistentbit.core.language;
 
+import com.persistentbit.core.doc.Support;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.Locale;
 import java.util.Objects;
 
 /**
- * TODO: Add comment
+ * A LangResource is a {@link FunctionalInterface} that returns a Translation of a text with a {@link Locale}.<br>
  *
  * @author Peter Muys
  * @since 2/02/2017
  */
+@Support
 @FunctionalInterface
 public interface LangResource {
     Tuple2<Locale,String> getTranslation(Locale loc, String text);

@@ -1,5 +1,6 @@
 package com.persistentbit.core.result;
 
+import com.persistentbit.core.doc.Support;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.logging.entries.LogEntryEmpty;
@@ -17,6 +18,7 @@ import java.util.function.Predicate;
  *
  * @param <T> Result Type
  */
+@Support
 public class Success<T> extends Result<T>{
 
 	private final LogEntry log;

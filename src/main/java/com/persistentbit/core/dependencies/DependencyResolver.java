@@ -2,6 +2,7 @@ package com.persistentbit.core.dependencies;
 
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.doc.Component;
 import com.persistentbit.core.logging.Log;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.function.Function;
  *
  * @see #resolve(Object)
  */
+@Component
 public final class DependencyResolver<VALUE>{
 
 

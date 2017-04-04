@@ -232,6 +232,11 @@ public interface Parser<T>{
 
 
 	static <R> Parser<R> orOf(Parser<R>... others) {
+		for(int t=0; t<others.length; t++){
+			if(others[t] == null){
+				throw new RuntimeException("Parser at " + t + " is null");
+			}
+		}
 		return source -> {
 
 			ParseResult<R> longestResult = null;

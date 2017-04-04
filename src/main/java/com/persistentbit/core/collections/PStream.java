@@ -1,7 +1,7 @@
 package com.persistentbit.core.collections;
 
 
-import com.persistentbit.core.doc.Component;
+import com.persistentbit.core.doc.Support;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.*;
@@ -26,7 +26,7 @@ import java.util.stream.Stream;
  * @see POrderedMap
  * @since 6/07/2016
  */
-@Component
+@Support
 public interface PStream<T> extends Iterable<T>{
 
 	/**

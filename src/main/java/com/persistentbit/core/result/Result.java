@@ -1,6 +1,7 @@
 package com.persistentbit.core.result;
 
 import com.persistentbit.core.collections.PStream;
+import com.persistentbit.core.doc.Component;
 import com.persistentbit.core.logging.FunctionLogging;
 import com.persistentbit.core.logging.LoggedException;
 import com.persistentbit.core.logging.LoggedValue;
@@ -27,6 +28,7 @@ import java.util.function.*;
  * @author Peter Muys
  * @since 27/12/2016
  */
+@Component
 public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 
 	public static <T> Failure<T> TODO() {
@@ -190,6 +192,8 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	 */
 	public abstract Result<T> flatMapEmpty(Function<? super Empty<T>, Result<T>> mapper);
 
+
+
 	/**
 	 * FlatMap this result if it is an {@link Empty} orOf a {@link Failure}
 	 *
@@ -228,6 +232,7 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	 * @return A failure with the new Exception
 	 */
 	public abstract Result<T> mapError(Function<Throwable, ? extends Throwable> mapper);
+
 
 	/**
 	 * If this is a {@link Success}, verify the value

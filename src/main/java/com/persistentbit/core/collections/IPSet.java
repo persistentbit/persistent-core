@@ -1,6 +1,6 @@
 package com.persistentbit.core.collections;
 
-import com.persistentbit.core.doc.Component;
+import com.persistentbit.core.doc.Support;
 
 import java.io.Serializable;
 
@@ -13,7 +13,7 @@ import java.io.Serializable;
  * @see POrderedSet
  * @see PStream
  */
-@Component
+@Support
 public interface IPSet<T> extends PStream<T>, Serializable{
 
   @Override

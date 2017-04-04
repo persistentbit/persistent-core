@@ -1,5 +1,7 @@
 package com.persistentbit.core.language;
 
+import com.persistentbit.core.doc.Support;
+
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -10,6 +12,7 @@ import java.util.function.Function;
  * @since 2/02/2017
  */
 @FunctionalInterface
+@Support
 public interface Translator extends Function<Msg,Msg> {
 
     default Translator orTry(Translator trans){
