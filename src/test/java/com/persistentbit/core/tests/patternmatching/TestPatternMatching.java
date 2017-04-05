@@ -8,7 +8,7 @@ import com.persistentbit.core.tests.CoreTest;
 import java.util.function.Predicate;
 
 /**
- * TODOC
+ * Unit tests for package com.persistentbit.core.patternmatching
  *
  * @author petermuys
  * @since 5/04/17

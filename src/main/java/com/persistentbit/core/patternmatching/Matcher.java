@@ -16,6 +16,7 @@ public class Matcher<V,R> implements Function<V,R>{
 	/**
 	 * Represent a mapper function that is executed when a case is matched.<br>
 	 * The signature is rootMatcher -> V -> R
+	 * @param <M> The root Matcher value type
 	 * @param <V> The value that is matched
 	 * @param <R> The result value
 	 */
