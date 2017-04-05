@@ -245,6 +245,19 @@ public class Scan{
 						.map(t -> t._1 + t._2);
 	}
 
+	public static Parser<String> parseUntilChar(Predicate<Source> predicate){
+		return source -> {
+			String res = "";
+			while(predicate.test(source)) {
+				if (source.current == Source.EOF) {
+					return ParseResult.failure(source, "Unexpected end-of-file");
+				}
+				res = res + source.current;
+				source = source.next();
+			}
+			return ParseResult.success(source, res);
+		};
+	}
 
 
 	public static Parser<String> parseWhile(Predicate<String> predicate) {
