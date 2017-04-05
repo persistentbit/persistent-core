@@ -18,6 +18,9 @@ public class NamedString extends NamedValue<String>{
 	public static NamedString of(Tuple2<String,String> tuple){
 		return new NamedString(tuple._1,tuple._2);
 	}
+	public static NamedString of(String name, String value){
+		return new NamedString(name,value);
+	}
 
 	@Override
 	public NamedString withValue(String s) {
