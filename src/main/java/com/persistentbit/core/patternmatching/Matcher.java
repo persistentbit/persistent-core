@@ -13,21 +13,14 @@ import java.util.function.Predicate;
  */
 public class Matcher<V,R> implements Function<V,R>{
 
-	/**
-	 * Represent a mapper function that is executed when a case is matched.<br>
-	 * The signature is rootMatcher -> V -> R
-	 * @param <M> The root Matcher value type
-	 * @param <V> The value that is matched
-	 * @param <R> The result value
-	 */
-	public interface MatchConverter<M,V,R> extends Function<Matcher<M,R>,Function<V, R>>{}
+
 
 	private final Predicate<V> match;
-	private final MatchConverter<V,V,R> convert;
+	private final Function<Matcher<V,R>,Function<V, R>> convert;
 	private final LList<Matcher<V,R>> matchers;
 
 
-	private Matcher(Predicate<V> match, MatchConverter<V,V,R> convert, LList<Matcher<V, R>> matchers
+	private Matcher(Predicate<V> match, Function<Matcher<V,R>,Function<V, R>> convert, LList<Matcher<V, R>> matchers
 	) {
 		this.match = match;
 		this.convert = convert;
@@ -58,7 +51,7 @@ public class Matcher<V,R> implements Function<V,R>{
 		});
 	}
 
-	private Matcher(Predicate<V> match, MatchConverter<V,V,R> convert){
+	private Matcher(Predicate<V> match, Function<Matcher<V,R>,Function<V, R>> convert){
 		this(match,convert,LList.empty());
 	}
 
@@ -93,7 +86,7 @@ public class Matcher<V,R> implements Function<V,R>{
 	 * @param convert The converter if this case matches
 	 * @return The New Matcher
 	 */
-	public Matcher<V,R>	addCase(Predicate<V> match, MatchConverter<V,V,R> convert){
+	public Matcher<V,R>	addCase(Predicate<V> match, Function<Matcher<V,R>,Function<V, R>> convert){
 		return new Matcher<>(
 			this.match,
 			this.convert,
@@ -101,10 +94,10 @@ public class Matcher<V,R> implements Function<V,R>{
 		);
 	}
 
-	public <C> Matcher<V,R> caseClassIs(Class<C> cls, MatchConverter<V,C,R> convert){
+	public <C> Matcher<V,R> caseClassIs(Class<C> cls, Function<Matcher<V,R>,Function<C, R>> convert){
 		return addCase(UMatch.classIs(cls),m -> v -> convert.apply(m).apply((C)v));
 	}
-	public <C> Matcher<V,R> caseIsAssignableTo(Class<C> cls, MatchConverter<V,C,R> convert){
+	public <C> Matcher<V,R> caseIsAssignableTo(Class<C> cls, Function<Matcher<V,R>,Function<C, R>> convert){
 		return addCase(UMatch.isAssignableTo(cls),m -> v ->
 			convert
 				.apply(m)
