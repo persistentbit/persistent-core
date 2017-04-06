@@ -13,13 +13,13 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -710,6 +710,66 @@ public final class IO {
 			asURL(file).flatMap(IO::getMimeType)
 		);
 
+	}
+
+	/**
+	 * Get the filename extension.<br>
+	 * The extension is the string after the last '.' character
+	 * @param fileName The filename to get the extension from.
+	 * @return error if filename is null empty if the file has no extension
+	 */
+	public static Result<String> getFileNameExtension(String fileName){
+		return Result.function(fileName).code(l -> {
+			if(fileName == null){
+				return Result.failure("filename is null");
+			}
+			int i = fileName.lastIndexOf('.');
+			if(i < 0){
+				return Result.empty("No Extension for filename '" + fileName+"'");
+			}
+			return Result.success(fileName.substring(i+1));
+		});
+	}
+
+	/**
+	 * Removes the extension from a filename.<br>
+	 * The extension is the string after the last '.' character
+	 * @param fileName
+	 * @return
+	 */
+	public static Result<String> getFileNameWithoutExtension(String fileName){
+		return Result.function(fileName).code(l -> {
+			if(fileName == null){
+				return Result.failure("filename is null");
+			}
+			int i = fileName.lastIndexOf('.');
+			if(i < 0){
+				return Result.success(fileName);
+			}
+			return Result.success(fileName.substring(0,i));
+		});
+	}
+
+	/**
+	 * Find all the file {@link Path Paths} in a directory and subdirectory.<br>
+	 * @param root	The root path
+	 * @param filter A filter for each found file
+	 * @return Result with a list of Paths
+	 */
+	public static Result<PList<Path>> findPathsInTree(Path root, Predicate<Path> filter){
+		return Result.function(root,filter).code(l -> {
+			List<Path>	files = new ArrayList<>();
+			Files.walkFileTree(root,new SimpleFileVisitor<Path>(){
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					if(filter.test(file)){
+						files.add(file);
+					}
+					return FileVisitResult.CONTINUE;
+				}
+			});
+			return Result.success(PList.from(files));
+		});
 	}
 
     public static void main(String... args) throws Exception {
