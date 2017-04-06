@@ -11,9 +11,11 @@ import com.persistentbit.core.result.Result;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -618,6 +620,39 @@ public final class IO {
         return asURI(file).flatMap(uri -> Result.noExceptions(uri::toURL)).logFunction(file);
     }
 
+	/**
+	 * Convert an {@link URL} to a {@link File}
+	 * @param url The URL
+	 * @return The File or a failure
+	 */
+	public static Result<File> asFile(URL url){
+		return Result.function(url).code(l-> {
+			/*try {
+				return Result.success(new File(url.toURI()));
+			} catch(URISyntaxException e) {
+				return Result.success(new File(url.getPath()));
+			}*/
+			return asFile(url.toURI());
+		});
+	}
+	/**
+	 * Convert an {@link URI} to a {@link File}
+	 * @param uri The URI
+	 * @return The File or a failure
+	 */
+	public static Result<File> asFile(URI uri){
+		return asPath(uri).map(p -> p.toFile());
+
+	}
+	/**
+	 * Convert an {@link URI} to a {@link Path}
+	 * @param uri The URI
+	 * @return The Path or a failure
+	 */
+	public static Result<Path> asPath(URI uri){
+		return Result.function(uri).code(l-> Result.success(Paths.get(uri)));
+
+	}
     /**
      * Resolve . and .. in a resource name
      * @param baseName The base URL in case the sub does not begin with a '/'
@@ -652,7 +687,30 @@ public final class IO {
 		});
     }
 
+	/**
+	 * Get the mime type from a {@link URL}
+	 * @param url the url
+	 * @return The mimetype or a failure
+	 */
+	public static Result<String> getMimeType(URL url){
+		return Result.function(url).code(l-> {
+			URLConnection uc   = url.openConnection();
+			String        type = uc.getContentType();
+			return Result.result(type);
+		});
+	}
 
+	/**
+	 * Get the mimetype from a {@link File}
+	 * @param file The File
+	 * @return The mimetype or a failure
+	 */
+	public static Result<String> getMimeType(File file){
+		return Result.function(file).code(l ->
+			asURL(file).flatMap(IO::getMimeType)
+		);
+
+	}
 
     public static void main(String... args) throws Exception {
         for(File f : new File("d:\\").listFiles()){
