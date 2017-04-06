@@ -192,6 +192,18 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	 */
 	public abstract Result<T> flatMapEmpty(Function<? super Empty<T>, Result<T>> mapper);
 
+	/**
+	 * If we have an {@link Empty} result, map the empty to a value.
+	 * @param mapper The Mapper
+	 * @return The new Result
+	 */
+	public Result<T> mapEmpty(Function<? super Empty<T>, T> mapper){
+		return flatMapEmpty(e -> {
+			T value = mapper.apply(e);
+			return Result.result(value);
+		});
+	}
+
 
 
 	/**
