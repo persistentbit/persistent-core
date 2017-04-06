@@ -615,10 +615,22 @@ public final class IO {
             return Result.noExceptions(file::toURI);
         });
     }
+    public static Result<URI> asURI(Path p){
+    	return Result.function(p).code(l -> {
+    		if(p == null){
+    			return Result.failure("Path is null");
+			}
+			return Result.noExceptions(p::toUri);
+		});
+	}
 
-    public static Result<URL> asURL(File file) {
-        return asURI(file).flatMap(uri -> Result.noExceptions(uri::toURL)).logFunction(file);
-    }
+	public static Result<URL> asURL(File file) {
+		return asURI(file).flatMap(uri -> Result.noExceptions(uri::toURL)).logFunction(file);
+	}
+
+	public static Result<URL> asURL(Path path) {
+		return asURI(path).flatMap(uri -> Result.noExceptions(uri::toURL)).logFunction(path);
+	}
 
 	/**
 	 * Convert an {@link URL} to a {@link File}
