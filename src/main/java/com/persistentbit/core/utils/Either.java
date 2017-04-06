@@ -1,5 +1,7 @@
 package com.persistentbit.core.utils;
 
+import com.persistentbit.core.result.Result;
+
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,6 +43,13 @@ public abstract class Either<T, U> implements Serializable{
 	public abstract Optional<T> leftOpt();
 
 	public abstract Optional<U> rightOpt();
+
+	public Result<T> leftResult() {
+		return Result.fromOpt(leftOpt());
+	}
+	public Result<U> rightResult() {
+		return Result.fromOpt(rightOpt());
+	}
 
 	private static class Left<T, U> extends Either<T, U>{
 
