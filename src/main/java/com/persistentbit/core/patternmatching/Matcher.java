@@ -11,7 +11,7 @@ import java.util.function.Predicate;
  * @author petermuys
  * @since 5/04/17
  */
-public class Matcher<V,R> implements Function<V,R>{
+public final class Matcher<V,R> implements Function<V,R>{
 
 
 
@@ -26,6 +26,12 @@ public class Matcher<V,R> implements Function<V,R>{
 		this.convert = convert;
 		this.matchers = matchers;
 	}
+	private Matcher(Predicate<V> match, Function<Matcher<V,R>,Function<V, R>> convert){
+		this(match,convert,LList.empty());
+	}
+	private Matcher(Function<Matcher<V,R>,Function<V, R>> defaultConverter){
+		this(v -> true,defaultConverter,LList.empty());
+	}
 
 	/**
 	 * Creates a default case matcher.<br>
@@ -36,9 +42,12 @@ public class Matcher<V,R> implements Function<V,R>{
 	 * @return A new Matcher
 	 */
 	public static <V extends Object,R> Matcher<V,R> defaultCase(Function<V,R> mapper){
-		return new Matcher<>(v -> true, m -> mapper);
+		return new Matcher<>(m -> mapper);
 	}
 
+	public static <V extends Object,R> Matcher<V,R> defaultCaseWithRoot(Function<Matcher<V,R>,Function<V, R>> mapper){
+		return new Matcher<>(mapper);
+	}
 	/**
 	 * Creates a default case matcher that throws an {@link IllegalArgumentException}
 	 * @param <V>
@@ -51,9 +60,7 @@ public class Matcher<V,R> implements Function<V,R>{
 		});
 	}
 
-	private Matcher(Predicate<V> match, Function<Matcher<V,R>,Function<V, R>> convert){
-		this(match,convert,LList.empty());
-	}
+
 
 	boolean matches(V value){
 		return match.test(value);
