@@ -784,6 +784,15 @@ public final class IO {
 		});
 	}
 
+	/**
+	 * A {@link Path} {@link Predicate} that filters on the filename extension
+	 * @param ext The extension to include
+	 * @return The Predicate
+	 */
+	public static Predicate<Path> fileExtensionPredicate(String ext){
+		return p -> IO.getFileNameExtension(p.getFileName().toString()).mapEmpty(e -> "").orElseThrow().equals(ext);
+	}
+
     public static void main(String... args) throws Exception {
         for(File f : new File("d:\\").listFiles()){
             if(f.isDirectory()){
