@@ -66,6 +66,19 @@ public final class IO {
         }));
     }
 
+	/**
+	 * Copy the source {@link Path} to the destination path.
+	 * @param source The source Path
+	 * @param dest The destination Path
+	 * @param options the {@link CopyOption} options
+	 * @return The destination path
+	 */
+    public static Result<Path> copy(Path source, Path dest,CopyOption...options){
+    	return Result.function(source,dest).code(l ->
+			Result.success(Files.copy(source,dest,options))
+		);
+	}
+
     /**
      * copy data from in to out. <br>
      * When done, closes in and out
@@ -632,6 +645,10 @@ public final class IO {
 		return asURI(path).flatMap(uri -> Result.noExceptions(uri::toURL)).logFunction(path);
 	}
 
+	public static Result<URI> asURI(URL url){
+    	return Result.function(url).code(l -> Result.noExceptions(url::toURI));
+	}
+
 	/**
 	 * Convert an {@link URL} to a {@link File}
 	 * @param url The URL
@@ -665,6 +682,11 @@ public final class IO {
 		return Result.function(uri).code(l-> Result.success(Paths.get(uri)));
 
 	}
+
+	public static Result<Path> asPath(URL url){
+		return Result.function(url).code(l -> asURI(url).flatMap(IO::asPath));
+	}
+
     /**
      * Resolve . and .. in a resource name
      * @param baseName The base URL in case the sub does not begin with a '/'
