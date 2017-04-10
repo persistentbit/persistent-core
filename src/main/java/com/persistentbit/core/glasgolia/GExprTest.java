@@ -7,6 +7,7 @@ import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.printing.PrintableText;
+import com.persistentbit.core.utils.UOS;
 
 /**
  * TODOC
@@ -33,7 +34,7 @@ public class GExprTest{
 	}
 
 	public static void test() {
-		LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
+		LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(UOS.hasAnsiColor())).registerAsGlobalHandler();
 
 		print("var a = \"Hello\"; 1+2*3.0 || 2l");
 		print("var add = (a,b) -> a+b");

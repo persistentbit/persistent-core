@@ -567,6 +567,19 @@ public final class IO {
 
     }
 
+    public static Result<Path>  getPathForClassPathResource(String classPathResource){
+        return Result.function(classPathResource).code(l-> {
+            if(classPathResource == null){
+                return Result.failure("classPathResource is null");
+            }
+            URL url = IO.class.getResource(classPathResource);
+            if(url == null){
+                return Result.failure("Resource not found: " + classPathResource);
+            }
+            return asPath(url);
+        });
+    }
+
     /**
      * Try reading a properties file from a Reader, closing the Reader when finished.<br>
      *
@@ -768,8 +781,8 @@ public final class IO {
 	/**
 	 * Removes the extension from a filename.<br>
 	 * The extension is the string after the last '.' character
-	 * @param fileName
-	 * @return
+	 * @param fileName The full filename
+	 * @return The result extension
 	 */
 	public static Result<String> getFileNameWithoutExtension(String fileName){
 		return Result.function(fileName).code(l -> {

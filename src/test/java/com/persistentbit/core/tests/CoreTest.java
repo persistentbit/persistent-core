@@ -6,6 +6,7 @@ import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
+import com.persistentbit.core.utils.UOS;
 
 /**
  * TODO: Add comment
@@ -15,7 +16,7 @@ import com.persistentbit.core.testing.TestRunner;
  */
 public abstract class CoreTest {
 
-    static public LogFormatter testLogFormatter = ModuleCore.createLogFormatter(true);
+    static public LogFormatter testLogFormatter = ModuleCore.createLogFormatter(UOS.hasAnsiColor());
     static public LogPrint     testLogPrint     = LogPrintStream.sysOut(testLogFormatter);
 
     static public void runTests(TestCase testCase){

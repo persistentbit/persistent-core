@@ -6,6 +6,7 @@ import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
+import com.persistentbit.core.utils.UOS;
 
 /**
  * TODOC
@@ -101,11 +102,11 @@ public class ParseSourceTest{
 
 
 	public void testAll() {
-		TestRunner.runAndPrint(LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)), ParseSourceTest.class);
+		TestRunner.runAndPrint(LogPrintStream.sysOut(ModuleCore.createLogFormatter(UOS.hasAnsiColor())), ParseSourceTest.class);
 	}
 
 	public static void main(String[] args) {
-		LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
+		LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(UOS.hasAnsiColor())).registerAsGlobalHandler();
 		new ParseSourceTest().testAll();
 	}
 }

@@ -70,9 +70,9 @@ public class GlasgoliaCompiler{
 
 	/**
 	 * Add a name/value to the current compile context
-	 * @param name
-	 * @param value
-	 * @return
+	 * @param name The name of the value
+	 * @param value The value
+	 * @return the compiler instance.
 	 */
 	public GlasgoliaCompiler addConstValue(String name, Object value){
 		StrPos pos = new StrPos("GlasgoliaCompiler.addConstValue");

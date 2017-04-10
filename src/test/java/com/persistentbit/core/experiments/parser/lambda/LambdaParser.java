@@ -8,6 +8,7 @@ import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.Parser;
 import com.persistentbit.core.parser.Scan;
 import com.persistentbit.core.parser.source.Source;
+import com.persistentbit.core.utils.UOS;
 
 /**
  * TODOC
@@ -99,7 +100,7 @@ public class LambdaParser {
 
 
     public static void main(String[] args) {
-        LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
+        LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(UOS.hasAnsiColor())).registerAsGlobalHandler();
         String src = "def test = (\\x.x \\a.\\b.b (c d))";
         ParseResult<LambdaExpr> result = expr().parse(Source.asSource("Lambda", src));
         System.out.println(result.getValue().getClass().getSimpleName() + ": " + result.getValue());

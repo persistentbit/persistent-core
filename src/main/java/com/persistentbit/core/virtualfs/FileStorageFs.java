@@ -11,6 +11,7 @@ import com.persistentbit.core.result.Result;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
 import com.persistentbit.core.utils.IO;
+import com.persistentbit.core.utils.UOS;
 
 import java.io.File;
 import java.io.IOException;
@@ -196,7 +197,7 @@ public class FileStorageFs implements FileStorage{
     });
 
     public static void main(String... args) throws Exception {
-        LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true));
+        LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(UOS.hasAnsiColor()));
         lp.registerAsGlobalHandler();
         TestRunner.runAndPrint(lp,FileStorageFs.class);
     }

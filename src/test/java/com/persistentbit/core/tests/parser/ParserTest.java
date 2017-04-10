@@ -13,6 +13,7 @@ import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
 import com.persistentbit.core.utils.StrPos;
+import com.persistentbit.core.utils.UOS;
 import com.persistentbit.core.utils.UString;
 
 import java.util.Optional;
@@ -319,11 +320,11 @@ public class ParserTest {
     }
 
     public void testAll() {
-        TestRunner.runAndPrint(LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)), ParserTest.class);
+        TestRunner.runAndPrint(LogPrintStream.sysOut(ModuleCore.createLogFormatter(UOS.hasAnsiColor())), ParserTest.class);
     }
 
     public static void main(String[] args) {
-        LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
+        LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(UOS.hasAnsiColor())).registerAsGlobalHandler();
         new ParserTest().testAll();
     }
 }

@@ -10,6 +10,7 @@ import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
+import com.persistentbit.core.utils.UOS;
 
 
 /**
@@ -76,7 +77,7 @@ public class TestTokenizer {
 	public void testAll() {
 		TestRunner.runAndPrint(logPrint, TestTokenizer.class);
 	}
-	static final LogPrint logPrint = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
+	static final LogPrint logPrint = LogPrintStream.sysOut(ModuleCore.createLogFormatter(UOS.hasAnsiColor())).registerAsGlobalHandler();
 	public static void main(String[] args) {
 
 		new TestTokenizer().testAll();

@@ -9,6 +9,7 @@ import com.persistentbit.core.tokenizers.Parser;
 import com.persistentbit.core.tokenizers.ParserException;
 import com.persistentbit.core.tokenizers.Token;
 import com.persistentbit.core.utils.BaseValueClass;
+import com.persistentbit.core.utils.UOS;
 
 import java.util.Iterator;
 import java.util.function.Supplier;
@@ -135,7 +136,7 @@ public class ExprParser extends Parser<ExprToken> {
     }
 
     public static void main(String... args) throws Exception {
-        LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true)).registerAsGlobalHandler();
+        LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(UOS.hasAnsiColor())).registerAsGlobalHandler();
         String code = "\\hello.(hello)";
         System.out.println(ExprParser
                 .parse("test",code)

@@ -50,9 +50,9 @@ public final class Matcher<V,R> implements Function<V,R>{
 	}
 	/**
 	 * Creates a default case matcher that throws an {@link IllegalArgumentException}
-	 * @param <V>
-	 * @param <R>
-	 * @return
+	 * @param <V> The type of the value to match
+	 * @param <R> The result type
+	 * @return The new Matcher
 	 */
 	public static <V extends Object,R> Matcher<V,R> defaultCaseThrowException() {
 		return defaultCase(v -> {

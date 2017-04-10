@@ -6,6 +6,7 @@ import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
+import com.persistentbit.core.utils.UOS;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -208,7 +209,7 @@ public abstract class RemotePath {
     });
 
     public static void main(String... args) throws Exception {
-        LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(true));
+        LogPrint lp = LogPrintStream.sysOut(ModuleCore.createLogFormatter(UOS.hasAnsiColor()));
         lp.registerAsGlobalHandler();
         TestRunner.runAndPrint(lp,RemotePath.class);
     }
