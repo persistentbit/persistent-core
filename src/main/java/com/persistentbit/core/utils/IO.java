@@ -1,5 +1,6 @@
 package com.persistentbit.core.utils;
 
+import com.persistentbit.core.ModuleCore;
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.OK;
 import com.persistentbit.core.collections.PByteList;
@@ -21,6 +22,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * General IO Utilities
@@ -830,12 +833,52 @@ public final class IO {
 		return p -> IO.getFileNameExtension(p.getFileName().toString()).mapEmpty(e -> "").orElseThrow().equals(ext);
 	}
 
-    public static void main(String... args) throws Exception {
-        for(File f : new File("d:\\").listFiles()){
-            if(f.isDirectory()){
-                continue;
+
+
+    /**
+     * Create a filename Matcher.<br>
+     *     '*' matches anything except '/' or '\'<br>
+     *     '**' matches anything<br>
+     *     '?' matches any 1 character<br>
+     * @param matchExpr The filename expression
+     * @return A filename {@link Predicate}
+     */
+    public static Predicate<String> fileNameMatcher(String matchExpr){
+        String reg = matchExpr.replace("\\","\\\\");
+        reg = reg.replace(".","\\.");
+        reg = reg.replace("*","[^\\/]*");
+        reg = reg.replace("[^\\/]*[^\\/]*",".*");
+        reg = reg.replace("?",".");
+        reg = "^" + reg +"$";
+        return UNamed.named("FileNameMatcher[" + reg + "]",Pattern.compile(reg).asPredicate());
+    }
+
+    public static Result<PList<Path>> getAllFiles(String matchPath){
+        return Result.function(matchPath).code(l -> {
+            Matcher m = Pattern.compile("^[^*?]*").matcher(matchPath);
+            m.find();
+            String prefix = m.group();
+            l.info("prefix = " + prefix);
+            String search = matchPath.substring(prefix.length());
+            if(search.startsWith("**") == false){
+                search = "**" + search;
             }
-            System.out.println(f.getName() + " " + f.length() + ", " + getReadableFileSize(f));
-        }
+            l.info("search = " + search);
+            Path current = Paths.get("").toAbsolutePath();
+            l.info("Current = " + current);
+            Path root = current.resolve(prefix).toAbsolutePath();
+            l.info("root = " + root);
+            String finalSearch = search;
+            Predicate<Path> filter = UNamed.<Path>named(search, path ->
+                    fileNameMatcher(finalSearch).test(path.toAbsolutePath().toString()));
+
+            return findPathsInTree(root,filter);
+        });
+
+    }
+
+    public static void main(String... args) throws Exception {
+        Result<PList<Path>> files = getAllFiles("/feniks/persistentbit/**/core/*.ddoc");
+        ModuleCore.consoleLogPrint.print(files.getLog());
     }
 }
