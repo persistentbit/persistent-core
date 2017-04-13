@@ -23,7 +23,7 @@ public class UNamed {
             }
         };
     }
-    static public <T,R> Function<T,R> named(String name, Function<T,R> function){
+    static public <T,R> Function<T,R> namedFunction(String name, Function<T,R> function){
         return new Function<T, R>() {
             @Override
             public R apply(T t) {

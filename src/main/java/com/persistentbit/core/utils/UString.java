@@ -8,6 +8,8 @@ import com.persistentbit.core.logging.Log;
 import java.text.Normalizer;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * General String utilities, because we all have to have our own  StringUtils version
@@ -461,5 +463,24 @@ public final class UString{
 			}
 		}
 		return count;
+	}
+
+	public static Function<String, String> replaceDelimited(String regExLeft, String regExName, String regExRight, Function<String,String> newContentSupplier){
+		String fullMatch = "(?:" + regExLeft + ")" + "((" + regExName +"){1}?)"+ "(?:" + regExRight + ")";
+		return UNamed.namedFunction("replaceDelimited(" + regExLeft + ", " + regExName + ", " + regExRight + ")",source -> {
+			String result = source;
+			while(true){
+				Matcher m = Pattern.compile(fullMatch,Pattern.MULTILINE).matcher(result);
+				if(m.find() == false){
+					break;
+				}
+				result = result.substring(0,m.start())
+					+ newContentSupplier.apply(m.group(2))
+					+ result.substring(m.end());
+			}
+			return result;
+		});
+
+
 	}
 }

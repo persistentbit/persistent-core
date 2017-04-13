@@ -847,42 +847,85 @@ public final class IO {
         matchExpr = pathToSystemPath(matchExpr);
         String reg = matchExpr.replace("\\","\\\\");
         reg = reg.replace(".","\\.");
-        reg = reg.replace("*","[^\\/]*");
-        reg = reg.replace("[^\\/]*[^\\/]*",".*");
-        reg = reg.replace("?",".");
+		reg = reg.replace("?",".");
+        reg = reg.replace("*","[^\\/]*?");
+        reg = reg.replace("[^\\/]*?[^\\/]*?",".*?");
         reg = "^" + reg +"$";
         return UNamed.namedPredicate("FileNameMatcher[" + reg + "]", Pattern.compile(reg).asPredicate());
     }
 
+	/**
+	 * Calls {@link #getAllFiles(Path, String)} with the current directory as root.<br>
+ 	 * @param matchPath The file matcher expression
+	 * @return The {@link TimeMeasurement.Result} of all paths found
+	 * @see #getAllFiles(Path, String)
+	 */
     public static Result<PList<Path>> getAllFiles(String matchPath){
-        return Result.function(matchPath).code(l -> {
-            Matcher m = Pattern.compile("^[^*?]*").matcher(pathToSystemPath(matchPath));
+    	return getAllFiles(Paths.get(""),matchPath);
+	}
+
+	/**
+	 * Find all files relative to a root path, where the name is matched by a search expression.<br>
+	 * Environment variables are expanded using the method {@link #replaceEnvVars(String)}.<br>
+	 *
+	 * @param root The root of the search
+	 * @param matchPath The match expression
+	 * @return The {@link Result} with all paths matching
+	 * @see #fileNameMatcher(String)
+	 * @see #replaceEnvVars(String)
+	 */
+    public static Result<PList<Path>> getAllFiles(Path root, String matchPath){
+        return Result.function(root, matchPath).code(l -> {
+        	String resolved = pathToSystemPath(replaceEnvVars(matchPath));
+			l.info("resolved = " + resolved);
+            Matcher m = Pattern.compile("^[^*?]*").matcher(resolved);
             m.find();
             String prefix = m.group();
             l.info("prefix = " + prefix);
-            String search = matchPath.substring(prefix.length());
+            String search = resolved.substring(prefix.length());
             if(search.startsWith("**") == false){
                 search = "**" + search;
             }
             l.info("search = " + search);
             Path current = Paths.get("").toAbsolutePath();
             l.info("Current = " + current);
-            Path root = current.resolve(prefix).toAbsolutePath();
-            l.info("root = " + root);
             String finalSearch = search;
             Predicate<String>  strFilter = fileNameMatcher(finalSearch);
             Predicate<Path> filter = UNamed.namedPredicate(search, (Path path) ->{
                     String pathStr = path.toAbsolutePath().toString();
                     return strFilter.test(pathStr);
             });
+            l.info("base: " + root.resolve(prefix));
             l.info("Filter: " + strFilter);
-            return findPathsInTree(root,filter);
+            return findPathsInTree(root.resolve(prefix),filter);
         });
 
     }
 
+	/**
+	 * Replace all environment vars in a string using the patterns::
+	 * <ul>
+	 *     <li>${name}</li>
+	 *     <li>$name</li>
+	 *     <li>%name%</li>
+	 * </ul>
+	 * Non matchin names are replaced with an empty value
+	 * @param source The String to expaned
+	 * @return The expanded string.
+	 */
+    public static String replaceEnvVars(String source){
+    	Function<String,String> sysEnv = name -> {
+    		String value = System.getenv(name);
+    		return value == null ? "" : value;
+		};
+    	return UString.replaceDelimited("\\$\\{",".+","\\}",sysEnv)
+			.andThen(s-> UString.replaceDelimited("\\$","[a-zA-Z_0-9]+","",sysEnv).apply(s))
+			.andThen(s -> UString.replaceDelimited("%",".+","%",sysEnv).apply(s))
+		  	.apply(source);
+	}
+
     public static void main(String... args) throws Exception {
-        Result<PList<Path>> files = getAllFiles("**/feniks/persistentbit/**/core/*.ddoc");
+        Result<PList<Path>> files = getAllFiles("${FENIKS_HOME}/**/devdocs/src/main/**/*.ddoc");
         ModuleCore.consoleLogPrint.print(files.getLog());
         files.orElseThrow();
     }

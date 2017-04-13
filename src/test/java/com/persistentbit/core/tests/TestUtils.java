@@ -1,17 +1,19 @@
 package com.persistentbit.core.tests;
 
-import com.persistentbit.core.tests.utils.TestValue;
 import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestData;
+import com.persistentbit.core.tests.utils.TestValue;
 import com.persistentbit.core.utils.IO;
 import com.persistentbit.core.utils.UNumber;
+import com.persistentbit.core.utils.UString;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Comparator;
+import java.util.function.Function;
 
 /**
  * TODOC
@@ -115,6 +117,17 @@ public class TestUtils{
 	});
 
 
+	static final TestCase testStringUtils = TestCase.name("Test UString utilities").code(tr -> {
+		Function<String,String> supplier = name -> {
+			switch(name){
+				case "NAME": return "Peter";
+				case "PATH": return "/home";
+				default: return "";
+			}
+		};
+		Function<String,String> replacer = UString.replaceDelimited("\\$","[0-9a-zA-Z_]+","",supplier);
+		tr.isEquals(replacer.apply("Hello $NAME!"),"Hello Peter!");
+	});
 
 	public void testAll() {
 		CoreTest.runTests(TestUtils.class);
