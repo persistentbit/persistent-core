@@ -10,7 +10,7 @@ import java.util.function.Predicate;
  * @since 13/04/2017
  */
 public class UNamed {
-    static public <R>Predicate<R> named(String name, Predicate<R> pred){
+    static public <R>Predicate<R> namedPredicate(String name, Predicate<R> pred){
         return new Predicate<R>() {
             @Override
             public boolean test(R r) {

@@ -844,18 +844,19 @@ public final class IO {
      * @return A filename {@link Predicate}
      */
     public static Predicate<String> fileNameMatcher(String matchExpr){
+        matchExpr = pathToSystemPath(matchExpr);
         String reg = matchExpr.replace("\\","\\\\");
         reg = reg.replace(".","\\.");
         reg = reg.replace("*","[^\\/]*");
         reg = reg.replace("[^\\/]*[^\\/]*",".*");
         reg = reg.replace("?",".");
         reg = "^" + reg +"$";
-        return UNamed.named("FileNameMatcher[" + reg + "]",Pattern.compile(reg).asPredicate());
+        return UNamed.namedPredicate("FileNameMatcher[" + reg + "]", Pattern.compile(reg).asPredicate());
     }
 
     public static Result<PList<Path>> getAllFiles(String matchPath){
         return Result.function(matchPath).code(l -> {
-            Matcher m = Pattern.compile("^[^*?]*").matcher(matchPath);
+            Matcher m = Pattern.compile("^[^*?]*").matcher(pathToSystemPath(matchPath));
             m.find();
             String prefix = m.group();
             l.info("prefix = " + prefix);
@@ -869,16 +870,20 @@ public final class IO {
             Path root = current.resolve(prefix).toAbsolutePath();
             l.info("root = " + root);
             String finalSearch = search;
-            Predicate<Path> filter = UNamed.<Path>named(search, path ->
-                    fileNameMatcher(finalSearch).test(path.toAbsolutePath().toString()));
-
+            Predicate<String>  strFilter = fileNameMatcher(finalSearch);
+            Predicate<Path> filter = UNamed.namedPredicate(search, (Path path) ->{
+                    String pathStr = path.toAbsolutePath().toString();
+                    return strFilter.test(pathStr);
+            });
+            l.info("Filter: " + strFilter);
             return findPathsInTree(root,filter);
         });
 
     }
 
     public static void main(String... args) throws Exception {
-        Result<PList<Path>> files = getAllFiles("/feniks/persistentbit/**/core/*.ddoc");
+        Result<PList<Path>> files = getAllFiles("**/feniks/persistentbit/**/core/*.ddoc");
         ModuleCore.consoleLogPrint.print(files.getLog());
+        files.orElseThrow();
     }
 }
