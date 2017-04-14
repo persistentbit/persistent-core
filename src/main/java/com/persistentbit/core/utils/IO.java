@@ -878,9 +878,11 @@ public final class IO {
         return Result.function(root, matchPath).code(l -> {
         	String resolved = pathToSystemPath(replaceEnvVars(matchPath));
 			l.info("resolved = " + resolved);
-            Matcher m = Pattern.compile("^[^*?]*").matcher(resolved);
-            m.find();
-            String prefix = m.group();
+            Matcher m = Pattern.compile("^[^*?]*\\" + File.pathSeparatorChar ).matcher(resolved);
+            String prefix="";
+            if(m.find()) {
+                prefix = m.group();
+            }
             l.info("prefix = " + prefix);
             String search = resolved.substring(prefix.length());
             if(search.startsWith("**") == false){
