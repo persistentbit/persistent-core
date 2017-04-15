@@ -4,13 +4,14 @@ import com.persistentbit.core.ModuleCore;
 import com.persistentbit.core.OK;
 import com.persistentbit.core.collections.PByteList;
 import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.io.IOCopy;
+import com.persistentbit.core.io.IOStreams;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.logging.printing.LogPrintStream;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestRunner;
-import com.persistentbit.core.utils.IO;
 import com.persistentbit.core.utils.UOS;
 
 import java.io.File;
@@ -134,10 +135,10 @@ public class FileStorageFs implements FileStorage{
             if(f.length() != newFileToken.getLengthWritten()){
                 return Result.failure("File size " + f.length() + " is different from " + newFileToken.getLengthWritten());
             }
-            return IO.fileToOutputStream(f)
-                    .flatMap(out -> {
+            return IOStreams.fileToOutputStream(f)
+							.flatMap(out -> {
                         try {
-                            return IO.copy(data.getInputStream(), out);
+                            return IOCopy.copy(data.getInputStream(), out);
                         } finally {
                             try {
                                 out.close();
@@ -146,7 +147,7 @@ public class FileStorageFs implements FileStorage{
                             }
                         }
                     })
-                    .map(out -> newFileToken.addWrittenLength(data.size()));
+							.map(out -> newFileToken.addWrittenLength(data.size()));
         });
     }
 

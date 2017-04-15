@@ -1,11 +1,11 @@
 package com.persistentbit.core.tests;
 
+import com.persistentbit.core.io.*;
 import com.persistentbit.core.resources.ClassPathResourceLoader;
 import com.persistentbit.core.resources.FileResourceLoader;
 import com.persistentbit.core.resources.ResourceLoader;
 import com.persistentbit.core.resources.URLResourceLoader;
 import com.persistentbit.core.testing.TestCase;
-import com.persistentbit.core.utils.IO;
 
 import java.io.File;
 
@@ -18,12 +18,12 @@ import java.io.File;
 public class ResourceLoaderTest{
 
 	static final TestCase loaderTest = TestCase.name("Resource Loader test").code(tr -> {
-		File f       = IO.createTempDir("resourceLoaderTest").orElseThrow();
+		File f       = IOFiles.createTempDir("resourceLoaderTest").orElseThrow();
 		File outFile = new File(f, "testje.txt");
-		IO.getClassPathResourceStream("/resourceLoaderTest.txt")
-		  .flatMap(is ->
-			  IO.fileToOutputStream(outFile)
-				.flatMap(out -> IO.copyAndClose(is, out))
+		IOClassPath.getStream("/resourceLoaderTest.txt")
+				   .flatMap(is ->
+			  IOStreams.fileToOutputStream(outFile)
+					   .flatMap(out -> IOCopy.copyAndClose(is, out))
 		  );
 
 		ResourceLoader loader =

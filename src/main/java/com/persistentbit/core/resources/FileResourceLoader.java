@@ -1,8 +1,9 @@
 package com.persistentbit.core.resources;
 
 import com.persistentbit.core.collections.PByteList;
+import com.persistentbit.core.io.IORead;
+import com.persistentbit.core.io.IOStreams;
 import com.persistentbit.core.result.Result;
-import com.persistentbit.core.utils.IO;
 
 import java.io.File;
 import java.util.Objects;
@@ -27,7 +28,7 @@ public class FileResourceLoader implements ResourceLoader{
 
 	@Override
 	public Result<PByteList> apply(String name) {
-		return IO.fileToInputStream(new File(rootPath, name)).flatMap(IO::readBytes).logFunction(name);
+		return IOStreams.fileToInputStream(new File(rootPath, name)).flatMap(IORead::readBytes).logFunction(name);
 	}
 
 

@@ -1,8 +1,9 @@
 package com.persistentbit.core.logging.printing;
 
+import com.persistentbit.core.io.IOFiles;
+import com.persistentbit.core.io.IOStreams;
 import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.printing.PrintableText;
-import com.persistentbit.core.utils.IO;
 
 import java.io.File;
 import java.io.Writer;
@@ -36,9 +37,9 @@ public class LogPrintToFile implements LogPrint{
     }
 
     public static Function<Object,File> dayFileSupplier(File rootPath, String prefix, String postfix){
-        return value -> IO.createDayFile(rootPath,prefix,postfix)
-                .logFunction(rootPath,prefix,postfix)
-                .orElseThrow();
+        return value -> IOFiles.createDayFile(rootPath,prefix,postfix)
+							   .logFunction(rootPath,prefix,postfix)
+							   .orElseThrow();
     }
 
 
@@ -64,7 +65,7 @@ public class LogPrintToFile implements LogPrint{
                 }
                 currentFile = null;
 
-                currentWriter = IO.fileToWriter(f, charset,true).orElseThrow();
+                currentWriter = IOStreams.fileToWriter(f, charset,true).orElseThrow();
                 currentFile = f;
             }
             if(currentWriter != null) {

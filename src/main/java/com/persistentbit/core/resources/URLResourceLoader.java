@@ -1,8 +1,9 @@
 package com.persistentbit.core.resources;
 
 import com.persistentbit.core.collections.PByteList;
+import com.persistentbit.core.io.IORead;
 import com.persistentbit.core.result.Result;
-import com.persistentbit.core.utils.IO;
+import com.persistentbit.core.io.IO;
 
 /**
  * TODOC
@@ -26,7 +27,7 @@ public class URLResourceLoader implements ResourceLoader{
 			}
 			return IO.asURL(name)
 					 .flatMap(url -> Result.noExceptions(url::openStream))
-					 .flatMap(IO::readBytes);
+					 .flatMap(IORead::readBytes);
 		});
 	}
 

@@ -6,7 +6,7 @@ import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.resources.ClassPathResourceLoader;
 import com.persistentbit.core.resources.ResourceLoader;
 import com.persistentbit.core.result.Result;
-import com.persistentbit.core.utils.IO;
+import com.persistentbit.core.io.IO;
 
 import java.util.function.Function;
 

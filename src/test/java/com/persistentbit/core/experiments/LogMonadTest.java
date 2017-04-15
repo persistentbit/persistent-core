@@ -1,10 +1,10 @@
 package com.persistentbit.core.experiments;
 
+import com.persistentbit.core.io.IORead;
 import com.persistentbit.core.tests.CoreTest;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.result.Result;
-import com.persistentbit.core.utils.IO;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -88,10 +88,10 @@ public class LogMonadTest{
 		UserDAO  dao = new UserDAO();
 		LogPrint lp  = CoreTest.testLogPrint;
 		lp.print(dao.getUserById(1).getLog());
-		lp.print(IO.readTextFile(new File("UnknownFile"), Charset.defaultCharset()).getLog());
+		lp.print(IORead.readTextFile(new File("UnknownFile"), Charset.defaultCharset()).getLog());
 		tryIt(() -> {
 
-			IO.readTextFile(new File("UnknownFile"),Charset.defaultCharset()).orElseThrow();
+			IORead.readTextFile(new File("UnknownFile"),Charset.defaultCharset()).orElseThrow();
 		});
 
 		try {

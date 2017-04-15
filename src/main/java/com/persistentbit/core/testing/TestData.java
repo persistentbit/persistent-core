@@ -1,8 +1,8 @@
 package com.persistentbit.core.testing;
 
+import com.persistentbit.core.io.IOFiles;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.tuples.Tuple2;
-import com.persistentbit.core.utils.IO;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -33,7 +33,7 @@ public class TestData{
 			String txt = createTestString(charset,maxSize);
 			File   f   = File.createTempFile(namePrefix, ".txt");
 			f.deleteOnExit();
-			IO.writeFile(txt, f,charset);
+			IOFiles.write(txt, f,charset);
 			return Result.success(Tuple2.of(f, txt));
 		});
 

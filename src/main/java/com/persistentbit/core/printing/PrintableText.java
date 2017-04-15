@@ -1,7 +1,7 @@
 package com.persistentbit.core.printing;
 
 import com.persistentbit.core.logging.Log;
-import com.persistentbit.core.utils.IO;
+import com.persistentbit.core.io.IO;
 
 import java.io.StringWriter;
 

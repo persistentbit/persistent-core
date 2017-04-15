@@ -7,6 +7,7 @@ import com.persistentbit.core.glasgolia.compiler.frames.*;
 import com.persistentbit.core.glasgolia.compiler.rexpr.*;
 import com.persistentbit.core.glasgolia.gexpr.GExpr;
 import com.persistentbit.core.glasgolia.gexpr.GExprParser;
+import com.persistentbit.core.io.IO;
 import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.resources.ResourceLoader;

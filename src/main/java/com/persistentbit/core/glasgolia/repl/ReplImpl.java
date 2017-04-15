@@ -9,12 +9,14 @@ import com.persistentbit.core.glasgolia.compiler.rexpr.RJavaField;
 import com.persistentbit.core.glasgolia.compiler.rexpr.RJavaMethods;
 import com.persistentbit.core.glasgolia.compiler.rexpr.RLambda;
 import com.persistentbit.core.glasgolia.gexpr.GExpr;
+import com.persistentbit.core.io.IOFiles;
+import com.persistentbit.core.io.IORead;
 import com.persistentbit.core.logging.printing.LogPrint;
 import com.persistentbit.core.parser.ParseExceptionEOF;
 import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.result.Result;
-import com.persistentbit.core.utils.IO;
+import com.persistentbit.core.io.IO;
 import com.persistentbit.core.utils.UString;
 
 import java.io.BufferedReader;
@@ -255,16 +257,16 @@ public class ReplImpl implements ReplInterface{
 	private void saveCmd(GGReplCmd cmd) {
 		File   f    = new File(cmd.params.getOpt(0).map(s -> s.toString()).orElse("session.glasg"));
 		String code = history.fold("", (a, b) -> a + UString.NL + b);
-		IO.writeFile(code, f, IO.utf8);
+		IOFiles.write(code, f, IO.utf8);
 		System.out.println("Session saved to " + f.getAbsolutePath());
 	}
 
 	private void loadCmd(GGReplCmd cmd) {
 		File f = new File(cmd.params.getOpt(0).map(s -> s.toString()).orElse("session.glasg"));
-		String res = IO.readTextFile(f, IO.utf8)
-					   .ifPresent(s -> history = PList.val(s.getValue().trim()))
-					   .ifPresent(s -> System.out.println("loaded " + f.getAbsolutePath()))
-					   .orElseThrow().trim();
+		String res = IORead.readTextFile(f, IO.utf8)
+						   .ifPresent(s -> history = PList.val(s.getValue().trim()))
+						   .ifPresent(s -> System.out.println("loaded " + f.getAbsolutePath()))
+						   .orElseThrow().trim();
 		throw new ReloadException();
 	}
 

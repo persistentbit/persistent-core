@@ -1,7 +1,7 @@
 package com.persistentbit.core.experiments.parser;
 
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.utils.IO;
+import com.persistentbit.core.io.IOStreams;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -48,7 +48,7 @@ public class ReaderImmutableIterator implements ImmutableIterator<Character>{
 				try {
 					int c = reader.read();
 					if(c == -1) {
-						IO.close(reader).orElseThrow();
+						IOStreams.close(reader).orElseThrow();
 						reader = null;
 						return;
 					}

@@ -1,6 +1,6 @@
 package com.persistentbit.core.collections;
 
-import com.persistentbit.core.utils.IO;
+import com.persistentbit.core.io.IOCopy;
 import com.persistentbit.core.utils.UString;
 
 import java.io.ByteArrayInputStream;
@@ -62,7 +62,7 @@ public final class PByteList extends AbstractIPList<Byte, PByteList> implements 
 	 */
 	public static PByteList from(InputStream in) {
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		IO.copy(in, bout);
+		IOCopy.copy(in, bout);
 		return new PByteList(bout.toByteArray());
 	}
 
