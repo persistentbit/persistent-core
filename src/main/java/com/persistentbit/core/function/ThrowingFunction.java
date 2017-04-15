@@ -1,7 +1,7 @@
 package com.persistentbit.core.function;
 
 /**
- * TODOC
+ * A Function that can throw an {@link Exception}
  *
  * @author petermuys
  * @since 14/01/17
