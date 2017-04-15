@@ -98,7 +98,15 @@ public final class IO {
 	}
 
 	public static Result<URI> asURI(URL url){
-    	return Result.function(url).code(l -> Result.noExceptions(url::toURI));
+		return Result.function(url).code(l -> Result.noExceptions(url::toURI));
+	}
+	public static Result<URI> asURI(String uri){
+		return Result.function(uri).code(l -> {
+			if(uri == null) {
+				return Result.failure("uri is null");
+			}
+			return Result.success(new URI(uri));
+		});
 	}
 
 	/**

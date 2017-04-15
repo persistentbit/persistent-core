@@ -53,6 +53,8 @@ public class IOFiles{
 
     }
 
+
+
 	public static Result<File> mkdirsIfNotExisting(File f) {
         return Result.function(f).code(log -> {
             if(f == null) {
@@ -303,6 +305,20 @@ public class IOFiles{
 		return getAllFiles(Paths.get(""),matchPath);
 	}
 
+
+	/**
+	 * Convert a {@link Path} to a real path
+	 * @param p The path to convert
+	 * @return The real path
+	 * @see Path#toRealPath(LinkOption...)
+	 */
+	public static Result<Path> toRealPath(Path p,LinkOption...options){
+		return Result.function(p).code(l ->
+			Result.success(p.toRealPath(options))
+		);
+	}
+
+
 	/**
 	 * Find all files relative to a root path, where the name is matched by a search expression.<br>
 	 * Environment variables are expanded using the method IO#replaceEnvVars.<br>
@@ -317,29 +333,36 @@ public class IOFiles{
 		return Result.function(root, matchPath).code(l -> {
 			String resolved = pathToSystemPath(IO.replaceEnvVars(matchPath));
 			l.info("resolved = " + resolved);
-			Matcher m      = Pattern.compile("^[^*?]*\\" + File.pathSeparatorChar ).matcher(resolved);
+			Matcher m      = Pattern.compile("^[^*?]*\\" + File.separatorChar ).matcher(resolved);
 			String  prefix ="";
 			if(m.find()) {
 				prefix = m.group();
 			}
 			l.info("prefix = " + prefix);
 			String search = resolved.substring(prefix.length());
-			if(search.startsWith("**") == false){
-				search = "**" + search;
-			}
+			//if(search.startsWith("**") == false){
+			//	search = "**" + search;
+			//}
 			l.info("search = " + search);
-			Path current = Paths.get("").toAbsolutePath();
-			l.info("Current = " + current);
-			String finalSearch = search;
+			//Path current = Paths.get("").toRealPath();
+			//l.info("Current = " + current);
+			String finalSearch = Paths.get(root.toString(),prefix,search).toString();
+			l.info("finalSearch = " + finalSearch);
 			Predicate<String>  strFilter = fileNameMatcher(finalSearch);
 			Predicate<Path> filter = UNamed.namedPredicate(search, (Path path) ->{
-					String pathStr = path.toAbsolutePath().toString();
+					String pathStr = IOFiles.toRealPath(path).orElseThrow().toString();
 					return strFilter.test(pathStr);
 			});
 			l.info("base: " + root.resolve(prefix));
 			l.info("Filter: " + strFilter);
-			return findPathsInTree(root.resolve(prefix),filter);
+			Path rootWithPrefix = root.resolve(prefix);
+			if(Files.exists(rootWithPrefix) == false) {
+				return Result.success(PList.empty());
+			}
+			return findPathsInTree(rootWithPrefix,filter);
 		});
 
 	}
+
+
 }

@@ -3,6 +3,7 @@ package com.persistentbit.core.io;
 import com.persistentbit.core.OK;
 import com.persistentbit.core.result.Result;
 
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.CopyOption;
@@ -72,6 +73,19 @@ public class IOCopy{
 	public static <T extends OutputStream> Result<OK> copyAndClose(InputStream in, T out){
 		return Result.function().code(l ->
 			  IOStreams.closeAfter(out,()-> copy(in,out)).flatMap(out2 -> OK.result)
+		);
+	}
+
+	/**
+	 * copy data from in to a output path <br>
+	 * When done, closes in and out
+	 * @param in The InputStream
+	 * @param out The output Path
+	 * @return OK when copy and close succeeded
+	 */
+	public static Result<OK> copyAndClose(InputStream in, Path out){
+		return Result.function(in,out).code(l ->
+			copyAndClose(in,new FileOutputStream(out.toFile()))
 		);
 	}
 }

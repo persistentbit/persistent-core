@@ -1,6 +1,8 @@
 package com.persistentbit.core.io;
 
 import com.persistentbit.core.OK;
+import com.persistentbit.core.function.ThrowingFunction;
+import com.persistentbit.core.function.ThrowingSupplier;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.result.Failure;
 import com.persistentbit.core.result.Result;
@@ -50,6 +52,28 @@ public class IOStreams{
 					onFailure -> close(closeable).flatMap(ok -> onFailure)
 				);
 		});
+	}
+
+	public static<CLOSABLE extends Closeable,R> Result<R> closeAfter(ThrowingSupplier<CLOSABLE> closableSupplier, ThrowingFunction<CLOSABLE,Result<R>,Exception> beforeClose){
+		CLOSABLE closeable;
+		try {
+			closeable = closableSupplier.get();
+		} catch(Exception e) {
+			return Result.failure(e);
+		}
+		try{
+			return beforeClose.apply(closeable);
+		}
+		catch(Exception e){
+			return Result.failure(e);
+		}
+		finally {
+			try{
+				closeable.close();
+			}catch(Exception e){
+				return Result.failure(e);
+			}
+		}
 	}
 
 	public static Result<FileInputStream> fileToInputStream(File f) {
