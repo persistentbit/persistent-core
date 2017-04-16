@@ -16,5 +16,4 @@ import java.lang.annotation.*;
 public @interface Component{
 	String name() default  "";
 	String description() default "";
-	String technology() default "Java";
 }

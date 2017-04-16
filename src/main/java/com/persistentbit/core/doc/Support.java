@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 
 /**
- * Marks a class or package as a package as a component support class or package.<br>
+ * Marks a class or package as a supporting class or package of another component.<br>
  * Classes or packages marked with this annotation will be used by documentation generators.<br>
  *
  * @author petermuys
@@ -18,6 +18,5 @@ public @interface Support{
 	String name()  default "";
 	String description()  default "";
 	String componentName() default "";
-	String technology() default "java";
 	String relation() default "Supported by";
 }
