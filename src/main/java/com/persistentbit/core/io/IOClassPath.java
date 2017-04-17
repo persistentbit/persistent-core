@@ -1,6 +1,7 @@
 package com.persistentbit.core.io;
 
 import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.result.Empty;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.result.Success;
@@ -15,12 +16,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * TODOC
+ * Utility class for handling resources from the classpath
  *
  * @author petermuys
  * @since 15/04/17
  */
-public class IOClassPath{
+public final class IOClassPath{
 
 	/**
      * Read a class path resource as a String
@@ -67,10 +68,10 @@ public class IOClassPath{
 	}
 
 	/**
-	 *
-	 * @param classPathResource
-	 * @param charset
-	 * @return
+	 * Create a {@link Reader} for a Classpath Resource Stream
+	 * @param classPathResource The Resource name
+	 * @param charset The charset to use
+	 * @return A Result with the Reader
 	 */
 	public static Result<Reader> getReader(String classPathResource, Charset charset) {
         return Result.function(classPathResource,charset).code(l -> {
@@ -107,14 +108,14 @@ public class IOClassPath{
 				l.map(p ->
 					Result.success(p.toString().substring(rootPath.toString().length()))
 				))
-			).map(stream -> stream.plist());
+			).map(PStream::plist);
 	}
 
 	/**
 	 * Find all resources in the classpath matching a pattern.<br>
 	 * example patterns:<br>
-	 *     "/com/persistentbit/core/io/*.class" ==> matches all classes in the io package<br>
-	 *     "/com/persistentbit/core/ ** /*.class" ==> matches all classes in sub packets of the core package<br>
+	 *     "/com/persistentbit/core/io/*.class" ==&gt; matches all classes in the io package<br>
+	 *     "/com/persistentbit/core/ ** /*.class" ==&gt; matches all classes in sub packets of the core package<br>
 	 * @param matchPath The pattern to match
 	 * @return Result with list of absolute resource names
 	 */
@@ -135,7 +136,7 @@ public class IOClassPath{
 					.map(list -> list.map(s ->  s));
 			}
 		});
-		Result<PList<PList<String>>> res = Result.fromSequence(items).map(stream -> stream.plist());
+		Result<PList<PList<String>>> res = Result.fromSequence(items).map(PStream::plist);
 		if(res.isError()){
 			return res.map(v -> null);
 		}

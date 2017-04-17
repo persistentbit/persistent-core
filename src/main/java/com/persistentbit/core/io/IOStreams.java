@@ -12,12 +12,12 @@ import java.nio.charset.Charset;
 import java.util.function.Supplier;
 
 /**
- * TODOC
+ * Utility class for working with IO streams
  *
  * @author petermuys
  * @since 15/04/17
  */
-public class IOStreams{
+public final class IOStreams{
 
 	/**
 	 * Closes a Closable, mapping a thrown IO Exception to a {@link Failure}

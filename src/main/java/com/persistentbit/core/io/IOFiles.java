@@ -28,12 +28,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * TODOC
+ * Utility class for working with Files
  *
  * @author petermuys
  * @since 15/04/17
  */
-public class IOFiles{
+public final class IOFiles{
 
 	/**
      * Write a string to a file

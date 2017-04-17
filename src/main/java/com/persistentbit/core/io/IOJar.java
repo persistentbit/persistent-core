@@ -10,12 +10,12 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
- * TODOC
+ * Utility class for working win jar or zip files
  *
  * @author petermuys
  * @since 15/04/17
  */
-public class IOJar{
+public final class IOJar{
 
 	public static Result<PList<String>> findInJar(Path jarPath, Predicate<String> namePredicate){
 		return Result.function(jarPath,namePredicate).code(l->
@@ -34,7 +34,5 @@ public class IOJar{
 		);
 	}
 
-	public static void main(String[] args) {
 
-	}
 }

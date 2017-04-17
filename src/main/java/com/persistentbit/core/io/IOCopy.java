@@ -11,12 +11,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * TODOC
+ * Utility class for copying files, streams,...
  *
  * @author petermuys
  * @since 15/04/17
  */
-public class IOCopy{
+public final class IOCopy{
 
 	/**
 	 * copy data from in to out. <br>

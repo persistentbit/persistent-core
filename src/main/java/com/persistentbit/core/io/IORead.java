@@ -10,12 +10,12 @@ import java.nio.charset.Charset;
 import java.util.Properties;
 
 /**
- * TODOC
+ * Utiltity class for reading streams, files,...
  *
  * @author petermuys
  * @since 15/04/17
  */
-public class IORead{
+public final class IORead{
 
 	/**
 	 * Read a Reader stream into a String.<br>
