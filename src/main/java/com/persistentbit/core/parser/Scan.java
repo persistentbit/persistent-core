@@ -133,6 +133,24 @@ public class Scan{
 				);
 			});
 
+	public static Parser<String> endsWith(String endString){
+		return source -> {
+			Source startPos = source;
+			StringBuilder sb = new StringBuilder(10);
+			while(source.isEOF() == false && source.rest().startsWith(endString) == false){
+				sb = sb.append(source.current);
+				source = source.next();
+			}
+			if(source.isEOF()){
+				return ParseResult.failure(startPos,"Expected '" + endString + "'");
+			}
+			for(int t=0; t<endString.length();t++){
+				source = source.next();
+			}
+			return ParseResult.success(source,sb.toString() + endString);
+		};
+	}
+
 	/**
 	 * Parse a Java String literal.<br>
 	 * The string must start and end with the supplied stringDelimiter char.<br>
