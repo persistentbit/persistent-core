@@ -346,7 +346,7 @@ public final class IOFiles{
 			l.info("search = " + search);
 			//Path current = Paths.get("").toRealPath();
 			//l.info("Current = " + current);
-			String finalSearch = Paths.get(root.toString(),prefix,search).toString();
+			String finalSearch = Paths.get(root.toString(),prefix).toString() + File.separatorChar +  search;
 			l.info("finalSearch = " + finalSearch);
 			Predicate<String>  strFilter = fileNameMatcher(finalSearch);
 			Predicate<Path> filter = UNamed.namedPredicate(search, (Path path) ->{

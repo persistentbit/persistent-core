@@ -3,6 +3,7 @@ package com.persistentbit.core.io;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.result.Result;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.function.Predicate;
@@ -25,6 +26,7 @@ public final class IOJar{
 				while(entries.hasMoreElements()) {
 					JarEntry entry = entries.nextElement();
 					String name = "/" + entry.getName();
+					name = name.replace('/', File.separatorChar);
 					if(namePredicate.test(name)) {
 						result = result.plus(name);
 					}

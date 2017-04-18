@@ -7,6 +7,7 @@ import com.persistentbit.core.glasgolia.compiler.JavaExecutableFinder;
 import com.persistentbit.core.io.IOClassPath;
 import com.persistentbit.core.result.Result;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
@@ -268,7 +269,8 @@ public final class UReflect{
 				.map(resourceNameList -> resourceNameList.map(resourceName -> {
 						String res = resourceName
 							.substring(1)
-							.replace('/','.')
+								.replace('/','.')
+								.replace(File.separatorChar,'.')
 							.replace('$','.');
 						res = res.substring(0,res.length()-".class".length());
 						l.info("converted " + resourceName + " -> " + res);

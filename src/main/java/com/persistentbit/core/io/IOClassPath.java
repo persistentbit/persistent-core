@@ -100,6 +100,7 @@ public final class IOClassPath{
     }
 
     private static Result<PList<String>> findInDir(Path rootPath,String matchPath){
+		matchPath = matchPath.replace('/', File.separatorChar);
 		if(matchPath.startsWith(File.separator)){
 			matchPath = matchPath.substring(1);
 		}
