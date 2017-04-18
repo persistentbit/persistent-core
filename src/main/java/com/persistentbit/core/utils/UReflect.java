@@ -2,13 +2,17 @@ package com.persistentbit.core.utils;
 
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PMap;
+import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.glasgolia.compiler.JavaExecutableFinder;
+import com.persistentbit.core.io.IOClassPath;
 import com.persistentbit.core.result.Result;
 
+import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Helper Utilities for using Reflection.
@@ -245,5 +249,52 @@ public final class UReflect{
 			name = name.substring(10);
 		}
 		return name;
+	}
+
+
+
+
+	public static Result<PList<Class>> findClasses(String packageName,boolean includeSubPackages){
+		return Result.function(packageName,includeSubPackages).code(l -> {
+			String resourcePath = "/" + packageName.replace('.','/');
+			if(includeSubPackages){
+				resourcePath += "/***.class";
+			}else {
+				resourcePath += "/*.class";
+			}
+			l.info("Resource path: " + resourcePath);
+			return IOClassPath.find(resourcePath)
+			    //CREATE CLASSNAME FROM RESOURCENAME
+				.map(resourceNameList -> resourceNameList.map(resourceName -> {
+						String res = resourceName
+							.substring(1)
+							.replace('/','.')
+							.replace('$','.');
+						res = res.substring(0,res.length()-".class".length());
+						l.info("converted " + resourceName + " -> " + res);
+						return res;
+					})
+				)
+			    //GET THE CLASSES
+				.map(classNameList -> classNameList.map(UReflect::getClass))
+				.flatMap(classResultList -> Result.fromSequence(classResultList).map(PStream::plist));
+		});
+	}
+
+	/**
+	 * Creates a {@link Predicate} that checks if a class has a declared annotation
+	 * @param classAnnotation The annotation to find
+	 * @return The Predicate
+	 */
+	public static Predicate<Class> hasClassAnnotation(Class<? extends Annotation> classAnnotation){
+		return UNamed.namedPredicate("hasClassAnnotation(" + classAnnotation.getName() + ")",
+			cls -> cls.getDeclaredAnnotation(classAnnotation) != null
+		);
+	}
+
+	public static Predicate<Package> hasPackageAnnotation(Class<? extends Annotation> classAnnotation){
+		return UNamed.namedPredicate("hasPackageAnnotation(" + classAnnotation.getName() + ")",
+			pack -> pack.getDeclaredAnnotation(classAnnotation) != null
+		);
 	}
 }

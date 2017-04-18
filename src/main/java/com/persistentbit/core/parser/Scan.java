@@ -207,7 +207,10 @@ public class Scan{
 
 							break;
 						default:
-							return ParseResult.failure(source, "Invalid escape sequence!");
+							sb.append('\\');
+							sb.append(source.current);
+							break;
+							//return ParseResult.failure(source, "Invalid escape sequence!");
 					}
 				}
 				else {
