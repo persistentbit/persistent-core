@@ -1,6 +1,6 @@
 package com.persistentbit.core.result;
 
-import com.persistentbit.core.doc.Support;
+import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.LoggedException;
 import com.persistentbit.core.logging.entries.LogEntry;
@@ -11,7 +11,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-@Support
+@UmlType
 public class Failure<T> extends Result<T>{
 
     private final Throwable exception;

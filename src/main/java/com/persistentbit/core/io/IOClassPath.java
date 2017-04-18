@@ -2,6 +2,7 @@ package com.persistentbit.core.io;
 
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PStream;
+import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.result.Empty;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.result.Success;
@@ -21,6 +22,7 @@ import java.nio.file.Paths;
  * @author petermuys
  * @since 15/04/17
  */
+@UmlType
 public final class IOClassPath{
 
 	/**

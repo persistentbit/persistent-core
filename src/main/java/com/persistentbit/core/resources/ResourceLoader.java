@@ -20,7 +20,6 @@ import java.util.function.Predicate;
  */
 public interface ResourceLoader extends Function<String, Result<PByteList>>{
 
-
 	ResourceLoader empty = name -> Result.empty("Resource '" + name + "' not found");
 
 	/**
@@ -29,7 +28,7 @@ public interface ResourceLoader extends Function<String, Result<PByteList>>{
 	 * @see #rootAndClassPath
 	 */
 	ResourceLoader classPathAndRoot =
-		ClassPathResourceLoader.inst.orTry(new FileResourceLoader(new File(".").getAbsoluteFile()));
+		ClassPathResourceLoader.getInst().orTry(new FileResourceLoader(new File(".").getAbsoluteFile()));
 
 	/**
 	 * A Resource loader that first search in classpath and then in the root folder

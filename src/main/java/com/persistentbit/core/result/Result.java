@@ -1,7 +1,7 @@
 package com.persistentbit.core.result;
 
 import com.persistentbit.core.collections.PStream;
-import com.persistentbit.core.doc.Component;
+import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.logging.FunctionLogging;
 import com.persistentbit.core.logging.LoggedException;
 import com.persistentbit.core.logging.LoggedValue;
@@ -28,7 +28,7 @@ import java.util.function.*;
  * @author Peter Muys
  * @since 27/12/2016
  */
-@Component
+@UmlType(note="Represents the result of a function call")
 public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 
 	public static <T> Failure<T> TODO() {

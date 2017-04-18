@@ -1,6 +1,6 @@
 package com.persistentbit.core.result;
 
-import com.persistentbit.core.doc.Support;
+import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.LoggedException;
 import com.persistentbit.core.logging.entries.LogEntry;
@@ -17,7 +17,7 @@ import java.util.function.Predicate;
  *
  * @param <T> The non-empty result type.
  */
-@Support
+@UmlType
 public class Empty<T> extends Result<T>{
 
     private Throwable exception;

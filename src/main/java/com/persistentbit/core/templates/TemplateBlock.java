@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A Templateblock represent a template block.<br>
+ * A Templateblock instance represent a template block.<br>
  * A Templateblock is a code expression or a string block with a position from the original text
  *
  * @author Peter Muys

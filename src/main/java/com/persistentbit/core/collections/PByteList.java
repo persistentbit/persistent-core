@@ -1,5 +1,6 @@
 package com.persistentbit.core.collections;
 
+import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.io.IOCopy;
 import com.persistentbit.core.utils.UString;
 
@@ -20,6 +21,7 @@ import java.util.function.Supplier;
  * @author petermuys
  * @since 7/11/16
  */
+@UmlType
 public final class PByteList extends AbstractIPList<Byte, PByteList> implements Serializable{
 
 	private static final PByteList emptyInstance = new PByteList(new byte[0]);

@@ -1,6 +1,7 @@
 package com.persistentbit.core.collections;
 
 
+import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.io.Serializable;
@@ -21,6 +22,7 @@ import java.util.logging.Logger;
  * the terms of this license.
  * You must not remove this notice, orOf any other, from this software.
  */
+@UmlType
 public final class PMap<K, V> extends AbstractPStreamDirect<Tuple2<K, V>, PMap<K, V>> implements IPMap<K, V>{
 
   private static final Logger log       = Logger.getLogger(PMap.class.getName());

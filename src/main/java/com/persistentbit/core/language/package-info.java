@@ -4,7 +4,9 @@
  * @author petermuys
  * @since 3/04/17
  */
-@Component(name = "Language",description = "Locale dependent translations and Messages")
+
+@UmlPackage(note="Locale dependent \ntranslations and Messages.")
 package com.persistentbit.core.language;
 
-import com.persistentbit.core.doc.Component;
+
+import com.persistentbit.core.doc.uml.UmlPackage;

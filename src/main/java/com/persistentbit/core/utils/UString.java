@@ -4,6 +4,7 @@ import com.persistentbit.core.NotNullable;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.logging.Log;
+import com.persistentbit.core.result.Result;
 
 import java.text.Normalizer;
 import java.util.Objects;
@@ -482,5 +483,20 @@ public final class UString{
 		});
 
 
+	}
+
+	public static Result<Boolean> parseBoolean(String boolString){
+		return Result.function(boolString).code(l -> {
+			if(boolString == null){
+				return Result.failure("boolString is null");
+			}
+			String lowerBool = boolString.trim().toLowerCase();
+			return Result.success(
+				lowerBool.equals("yes")
+				|| lowerBool.equals("true")
+				|| lowerBool.equals("y")
+				|| lowerBool.equals("1")
+			);
+		});
 	}
 }

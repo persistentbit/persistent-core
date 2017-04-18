@@ -87,15 +87,33 @@ public final class UReflect{
 	 * @return Result.empty if the class is not found, Result.failure on exception, Result.success when we have a class
 	 */
 	public static Result<Class> getClass(String name, ClassLoader classLoader) {
-		try {
-			return Result.success(Class.forName(name, true, classLoader));
-		} catch(ClassNotFoundException cnf) {
-			return Result.empty(cnf);
-		} catch(NoClassDefFoundError e){
-			return Result.failure(e);
-		}catch (Exception e){
-			return Result.failure(e);
-		}
+		return getClass(name,classLoader,true);
+	}
+	/**
+	 * Try loading a java class
+	 * @param name    The name of the class to load
+	 * @param classLoader The classloader to use
+	 * @param initClass Initialize the class ?
+	 * @return Result.empty if the class is not found, Result.failure on exception, Result.success when we have a class
+	 */
+	public static Result<Class> getClass(String name, ClassLoader classLoader, boolean initClass){
+		return Result.function(name,classLoader).code(l -> {
+			try {
+				if(name == null){
+					return Result.failure("Class name is null");
+				}
+				if(classLoader == null){
+					return Result.failure("Class loader is null");
+				}
+				return Result.result(Class.forName(name, initClass, classLoader));
+			} catch(ClassNotFoundException cnf) {
+				return Result.empty(cnf);
+			} catch(NoClassDefFoundError e){
+				return Result.failure(e);
+			}catch (Exception e){
+				return Result.failure(e);
+			}
+		});
 	}
 
 	public static Optional<Method> getGetter(Class cls,String name){
@@ -279,7 +297,7 @@ public final class UReflect{
 					})
 				)
 			    //GET THE CLASSES
-				.map(classNameList -> classNameList.map(UReflect::getClass))
+				.map(classNameList -> classNameList.map(name -> UReflect.getClass(name,UReflect.class.getClassLoader(),false)))
 				.flatMap(classResultList -> Result.fromSequence(classResultList).map(PStream::plist));
 		});
 	}

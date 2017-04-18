@@ -11,6 +11,7 @@ import java.lang.annotation.*;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PACKAGE,ElementType.TYPE})
+@UmlType
 public @interface UmlPackage{
 	String name() default "";
 	String info() default "";

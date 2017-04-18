@@ -19,6 +19,9 @@ public class ClassPathResourceLoader implements ResourceLoader{
 	}
 
 	public static final ClassPathResourceLoader inst = new ClassPathResourceLoader();
+	public static final ClassPathResourceLoader getInst() {
+		return inst;
+	}
 
 	@Override
 	public Result<PByteList> apply(String name) {

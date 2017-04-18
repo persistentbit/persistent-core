@@ -1,6 +1,7 @@
 package com.persistentbit.core.language;
 
-import com.persistentbit.core.doc.Support;
+import com.persistentbit.core.doc.uml.UmlLevel;
+import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.Locale;
@@ -12,7 +13,7 @@ import java.util.Objects;
  * @author Peter Muys
  * @since 2/02/2017
  */
-@Support
+@UmlType(level = UmlLevel.support)
 @FunctionalInterface
 public interface LangResource {
     Tuple2<Locale,String> getTranslation(Locale loc, String text);

@@ -1,6 +1,6 @@
 package com.persistentbit.core.collections;
 
-import com.persistentbit.core.doc.Support;
+import com.persistentbit.core.doc.uml.UmlType;
 
 import java.io.Serializable;
 
@@ -13,7 +13,7 @@ import java.io.Serializable;
  * @see POrderedSet
  * @see PStream
  */
-@Support
+@UmlType
 public interface IPSet<T> extends PStream<T>, Serializable{
 
   @Override

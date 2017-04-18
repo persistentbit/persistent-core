@@ -2,6 +2,7 @@ package com.persistentbit.core.collections;
 
 
 import com.persistentbit.core.doc.Support;
+import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.*;
@@ -27,6 +28,7 @@ import java.util.stream.Stream;
  * @since 6/07/2016
  */
 @Support
+@UmlType
 public interface PStream<T> extends Iterable<T>{
 
 	/**

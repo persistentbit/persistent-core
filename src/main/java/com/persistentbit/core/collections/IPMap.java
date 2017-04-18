@@ -1,6 +1,6 @@
 package com.persistentbit.core.collections;
 
-import com.persistentbit.core.doc.Support;
+import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.Map;
@@ -18,7 +18,7 @@ import java.util.function.Function;
  * @see PStream
  * @since 13/07/2016
  */
-@Support
+@UmlType
 public interface IPMap<K, V> extends PStream<Tuple2<K, V>>{
 
 

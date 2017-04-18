@@ -1,6 +1,7 @@
 package com.persistentbit.core.io;
 
 import com.persistentbit.core.OK;
+import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.result.Result;
 
 import java.io.FileOutputStream;
@@ -16,6 +17,7 @@ import java.nio.file.Path;
  * @author petermuys
  * @since 15/04/17
  */
+@UmlType
 public final class IOCopy{
 
 	/**
