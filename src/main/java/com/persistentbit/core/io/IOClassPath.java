@@ -107,7 +107,7 @@ public final class IOClassPath{
 		return IOFiles.getAllFiles(rootPath,matchPath)
 			.flatMap(l -> Result.fromSequence(
 				l.map(p ->
-					Result.success(p.toString().substring(rootPath.toString().length()))
+					Result.success(p.toString().substring(rootPath.toString().length()).replace(File.separatorChar,'/'))
 				))
 			).map(PStream::plist);
 	}

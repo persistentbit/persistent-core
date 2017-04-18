@@ -271,7 +271,8 @@ public final class UReflect{
 							.substring(1)
 								.replace('/','.')
 								.replace(File.separatorChar,'.')
-							.replace('$','.');
+							//.replace('$','.')
+								;
 						res = res.substring(0,res.length()-".class".length());
 						l.info("converted " + resourceName + " -> " + res);
 						return res;
