@@ -6,7 +6,7 @@
  *
  */
 
-@Component(name = "Collections", description = "Persistent Collections and Streams")
+@UmlPackage(info = "Persistent Collections and Streams")
 package com.persistentbit.core.collections;
 
-import com.persistentbit.core.doc.Component;
+import com.persistentbit.core.doc.uml.UmlPackage;

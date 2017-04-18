@@ -8,6 +8,7 @@ import java.sql.SQLException;
  * @author petermuys
  * @since 1/11/16
  */
+@Deprecated
 public class RtSqlException extends RuntimeException{
 
 	public RtSqlException(String message, SQLException cause) {

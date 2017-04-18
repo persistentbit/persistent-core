@@ -6,7 +6,7 @@
  */
 
 
-@Component(name="Functional",description = "Functional utility classes")
+@UmlPackage(name="FunctionalUtilities",info="Functional utility classes")
 package com.persistentbit.core.function;
 
-import com.persistentbit.core.doc.Component;
+import com.persistentbit.core.doc.uml.UmlPackage;

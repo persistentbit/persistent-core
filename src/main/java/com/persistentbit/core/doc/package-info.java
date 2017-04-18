@@ -6,5 +6,10 @@
  * @author petermuys
  * @since 31/03/17
  */
-@Component(name = "doc",description = "Code annotations for marking Architectural components")
+
+
+
+@UmlPackage(name="DocAnnotations",info = "Code annotations for auto documentation generation")
 package com.persistentbit.core.doc;
+
+import com.persistentbit.core.doc.uml.UmlPackage;
