@@ -271,8 +271,12 @@ public final class UReflect{
 	}
 
 
-
-
+	/**
+	 * Find all Classes for a package using the current classpath.
+	 * @param packageName The package name
+	 * @param includeSubPackages Include subpackages ?
+	 * @return Result with list of classes
+	 */
 	public static Result<PList<Class>> findClasses(String packageName,boolean includeSubPackages){
 		return Result.function(packageName,includeSubPackages).code(l -> {
 			String resourcePath = "/" + packageName.replace('.','/');
