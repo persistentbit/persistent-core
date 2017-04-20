@@ -38,4 +38,8 @@ public class BaseValueClass{
 	ImTools im = ImTools.get(this.getClass());
 	return (T) im.copyWith(this, propertyName, value);
   }
+  protected void checkNullFields() {
+      ImTools im = ImTools.get(this.getClass());
+      im.checkNullFields(this);
+  }
 }
