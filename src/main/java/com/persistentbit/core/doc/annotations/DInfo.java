@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PACKAGE,ElementType.TYPE})
-public @interface DNote{
+public @interface DInfo {
 	String value();
 }
