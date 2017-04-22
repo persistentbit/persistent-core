@@ -1,9 +1,6 @@
 package com.persistentbit.core.doc.annotations;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * TODOC
@@ -13,6 +10,11 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
+@Repeatable(DUsesComponents.class)
 public @interface DUsesComponent{
 	String name();
+	String packageName();
+	String label() default "";
+	String thisLabel() default "";
+	String otherLabel() default "";
 }
