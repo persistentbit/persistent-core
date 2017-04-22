@@ -1,8 +1,8 @@
 package com.persistentbit.core.parser;
 
+import com.persistentbit.core.exceptions.ToDo;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.result.Result;
-import com.persistentbit.core.utils.ToDo;
 
 import java.util.Objects;
 import java.util.function.Function;

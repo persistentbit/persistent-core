@@ -307,6 +307,27 @@ public final class UReflect{
 	}
 
 	/**
+	 * Find all the classes and interfaces that a given Class implements or extends.
+	 * @param cls The Class to find the parents of
+	 * @return A List of parent classes and interfaces
+	 */
+	public static PList<Class> getExtendsImplementsClasses(Class cls){
+
+		PList<Class> res = PList.empty();
+		Class superClass = cls.getSuperclass();
+		if(superClass != null){
+			res = res.plusAll(getExtendsImplementsClasses(superClass)).plus(superClass);
+		}
+		for(Class inter : cls.getInterfaces()){
+			if(inter != null){
+				res = res.plusAll(getExtendsImplementsClasses(inter)).plus(inter);
+			}
+		}
+		return res;
+	}
+
+
+	/**
 	 * Creates a {@link Predicate} that checks if a class has a declared annotation
 	 * @param classAnnotation The annotation to find
 	 * @return The Predicate

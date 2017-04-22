@@ -6,14 +6,13 @@ import java.lang.annotation.*;
  * TODOC
  *
  * @author petermuys
- * @since 19/04/17
+ * @since 22/04/17
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.PACKAGE})
-@Repeatable(DUsesComponents.class)
-public @interface DUsesComponent{
-	String name() default "";
-	String packageName();
+@Target({ElementType.TYPE})
+@Repeatable(DAggregateOfMultiple.class)
+public @interface DAggregateOf{
+	Class value();
 	String label() default "";
 	String thisLabel() default "";
 	String otherLabel() default "";

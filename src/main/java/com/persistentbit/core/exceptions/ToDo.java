@@ -1,4 +1,4 @@
-package com.persistentbit.core.utils;
+package com.persistentbit.core.exceptions;
 
 /**
  * @author petermuys

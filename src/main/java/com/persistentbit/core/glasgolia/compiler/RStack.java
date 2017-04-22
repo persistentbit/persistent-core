@@ -1,9 +1,9 @@
 package com.persistentbit.core.glasgolia.compiler;
 
 import com.persistentbit.core.collections.LList;
+import com.persistentbit.core.exceptions.ToDo;
 import com.persistentbit.core.printing.PrintTextWriter;
 import com.persistentbit.core.printing.PrintableText;
-import com.persistentbit.core.utils.ToDo;
 
 /**
  * TODOC

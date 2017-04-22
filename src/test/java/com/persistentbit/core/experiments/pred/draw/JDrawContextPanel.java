@@ -1,10 +1,10 @@
 package com.persistentbit.core.experiments.pred.draw;
 
+import com.persistentbit.core.exceptions.ToDo;
 import com.persistentbit.core.experiments.pred.*;
 import com.persistentbit.core.experiments.pred.boxes.Box;
 import com.persistentbit.core.experiments.pred.boxes.Line;
 import com.persistentbit.core.experiments.pred.boxes.UnorderedList;
-import com.persistentbit.core.utils.ToDo;
 
 import javax.swing.*;
 import java.awt.*;

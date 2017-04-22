@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  * @since 21/04/17
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
+@Target({ElementType.PACKAGE})
 public @interface DUsesComponents{
 	DUsesComponent[] value();
 }

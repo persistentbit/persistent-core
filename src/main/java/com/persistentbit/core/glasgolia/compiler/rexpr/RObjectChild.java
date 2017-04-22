@@ -1,9 +1,9 @@
 package com.persistentbit.core.glasgolia.compiler.rexpr;
 
+import com.persistentbit.core.exceptions.ToDo;
 import com.persistentbit.core.glasgolia.EvalException;
 import com.persistentbit.core.glasgolia.compiler.GlasgoliaCompiler;
 import com.persistentbit.core.utils.StrPos;
-import com.persistentbit.core.utils.ToDo;
 
 import java.util.function.Supplier;
 

@@ -4,8 +4,8 @@ import com.persistentbit.core.Lazy;
 import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.collections.PSet;
 import com.persistentbit.core.collections.PStream;
+import com.persistentbit.core.exceptions.ToDo;
 import com.persistentbit.core.glasgolia.gexpr.GExpr;
-import com.persistentbit.core.utils.ToDo;
 
 import java.util.Iterator;
 import java.util.Optional;
