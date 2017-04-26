@@ -1,10 +1,8 @@
 package com.persistentbit.core.logging;
 
 import com.persistentbit.core.Nothing;
-import com.persistentbit.core.logging.entries.LogContext;
-import com.persistentbit.core.logging.entries.LogEntry;
-import com.persistentbit.core.logging.entries.LogEntryException;
-import com.persistentbit.core.logging.entries.LogEntryMessage;
+import com.persistentbit.core.doc.annotations.DUsesClass;
+import com.persistentbit.core.logging.entries.*;
 
 /**
  * TODOC
@@ -12,6 +10,7 @@ import com.persistentbit.core.logging.entries.LogEntryMessage;
  * @author petermuys
  * @since 5/01/17
  */
+@DUsesClass(LoggedValue.class)
 public abstract class AbstractLogEntryLogging {
 
 	protected final int stackEntryIndex;

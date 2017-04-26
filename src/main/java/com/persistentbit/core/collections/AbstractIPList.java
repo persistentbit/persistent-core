@@ -1,5 +1,7 @@
 package com.persistentbit.core.collections;
 
+import com.persistentbit.core.doc.annotations.DMain;
+
 import java.util.Iterator;
 
 /**
@@ -7,6 +9,7 @@ import java.util.Iterator;
  * Date: 9/07/16
  * Time: 10:48
  */
+@DMain
 abstract class AbstractIPList<T, IMPL extends PStream<T>> extends AbstractPStreamDirect<T, IMPL>
   implements IPList<T>{
 

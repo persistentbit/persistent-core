@@ -2,6 +2,7 @@ package com.persistentbit.core.collections;
 
 
 import com.persistentbit.core.doc.Support;
+import com.persistentbit.core.doc.annotations.DSupport;
 import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.tuples.Tuple2;
 
@@ -837,7 +838,7 @@ public interface PStream<T> extends Iterable<T>{
 	PStream<T> peek(Consumer<? super T> consumer);
 
 
-
+	@DSupport
 	enum HeadMiddleEnd{
 		head, middle, end, headAndEnd
 	}

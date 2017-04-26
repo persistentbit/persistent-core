@@ -1,6 +1,7 @@
 package com.persistentbit.core.logging;
 
 import com.persistentbit.core.Nothing;
+import com.persistentbit.core.doc.annotations.DAggregate;
 import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.logging.entries.LogEntryEmpty;
 
@@ -12,6 +13,7 @@ import com.persistentbit.core.logging.entries.LogEntryEmpty;
  * @since 13/04/2017
  */
 public class LogCollector   extends AbstractLogEntryLogging {
+	@DAggregate
     private LogEntry entry;
 
     public LogCollector() {

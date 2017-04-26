@@ -1,5 +1,6 @@
 package com.persistentbit.core.logging.printing;
 
+import com.persistentbit.core.doc.annotations.DCreates;
 import com.persistentbit.core.logging.entries.*;
 import com.persistentbit.core.printing.PrintTextWriter;
 import com.persistentbit.core.printing.PrintableText;
@@ -10,10 +11,8 @@ import com.persistentbit.core.printing.PrintableText;
  * @author Peter Muys
  * @since 11/01/2017
  */
-public class DefaultLogPrinter {
-
-
-
+@DCreates(value = SpecificLogPrinter.class)
+public class DefaultLogPrinters{
 
 
     public static SpecificLogPrinter<LogEntryEmpty> forLogEntryEmpty(LogEntryDefaultFormatting format) {

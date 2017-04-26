@@ -1,6 +1,6 @@
 package com.persistentbit.core.logging.entries;
 
-import com.persistentbit.core.logging.LogMessageLevel;
+import com.persistentbit.core.doc.annotations.DComposite;
 
 import java.util.Optional;
 
@@ -11,6 +11,7 @@ import java.util.Optional;
  * @since 30/12/16
  */
 public class LogEntryMessage extends AbstractLogEntry{
+	@DComposite
 	private final LogMessageLevel level;
 	private final LogContext source;
 	private final String     message;

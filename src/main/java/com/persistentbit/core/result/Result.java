@@ -1,6 +1,7 @@
 package com.persistentbit.core.result;
 
 import com.persistentbit.core.collections.PStream;
+import com.persistentbit.core.doc.annotations.DInfo;
 import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.logging.FunctionLogging;
 import com.persistentbit.core.logging.LoggedException;
@@ -35,6 +36,7 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 		return Result.failure("TODO");
 	}
 
+	@DInfo("Logging in a function")
 	public static class FLogging extends FunctionLogging{
 
 		public FLogging(LogEntryFunction lef, int stackEntryIndex) {

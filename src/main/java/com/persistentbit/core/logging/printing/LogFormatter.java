@@ -1,6 +1,7 @@
 package com.persistentbit.core.logging.printing;
 
 import com.persistentbit.core.collections.POrderedMap;
+import com.persistentbit.core.doc.annotations.DAggregateOf;
 import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.printing.PrintableText;
 
@@ -10,7 +11,8 @@ import com.persistentbit.core.printing.PrintableText;
  * @author petermuys
  * @since 30/12/16
  */
-
+@DAggregateOf(value = SpecificExceptionPrinter.class,otherLabel = "exceptionPrinters")
+@DAggregateOf(value = SpecificLogPrinter.class,otherLabel = "logPrinters")
 public final class LogFormatter{
     private POrderedMap<Class, SpecificExceptionPrinter> exceptionPrinters;
     private POrderedMap<Class, SpecificLogPrinter>          logPrinters;

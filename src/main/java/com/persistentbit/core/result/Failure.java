@@ -1,6 +1,7 @@
 package com.persistentbit.core.result;
 
-import com.persistentbit.core.doc.uml.UmlType;
+import com.persistentbit.core.doc.annotations.DComposite;
+import com.persistentbit.core.doc.annotations.DUsesClass;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.LoggedException;
 import com.persistentbit.core.logging.entries.LogEntry;
@@ -11,10 +12,11 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-@UmlType
+@DUsesClass(value = Result.FailureException.class,label = "throws")
 public class Failure<T> extends Result<T>{
 
     private final Throwable exception;
+    @DComposite
     private final LogEntry log;
 
 

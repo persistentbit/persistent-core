@@ -23,11 +23,11 @@ public final class ModuleCore {
 
         return LogFormatter.create()
                 //LogEntries
-                .logIf(LogEntryGroup.class, DefaultLogPrinter.forLogEntryGroup(format))
-                .logIf(LogEntryEmpty.class, DefaultLogPrinter.forLogEntryEmpty(format))
-                .logIf(LogEntryException.class, DefaultLogPrinter.forLogEntryException(format))
-                .logIf(LogEntryFunction.class, DefaultLogPrinter.forLogEntryFunction(format))
-                .logIf(LogEntryMessage.class, DefaultLogPrinter.forLogEntryMessage(format))
+                .logIf(LogEntryGroup.class, DefaultLogPrinters.forLogEntryGroup(format))
+                .logIf(LogEntryEmpty.class, DefaultLogPrinters.forLogEntryEmpty(format))
+                .logIf(LogEntryException.class, DefaultLogPrinters.forLogEntryException(format))
+                .logIf(LogEntryFunction.class, DefaultLogPrinters.forLogEntryFunction(format))
+                .logIf(LogEntryMessage.class, DefaultLogPrinters.forLogEntryMessage(format))
                 //Exceptions
                 .logIf(LoggedException.class, LoggedException.createExceptionPrinter(format))
                 .logIf(Throwable.class, new DefaultExceptionPrinter(format))

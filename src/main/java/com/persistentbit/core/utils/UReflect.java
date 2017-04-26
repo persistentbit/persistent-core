@@ -23,26 +23,53 @@ import java.util.function.Predicate;
  */
 public final class UReflect{
 
-  public static Class<?> classFromType(Type t) {
-	if(t instanceof Class) {
-	  return (Class<?>) t;
+	public static Class<?> classFromType(Type t) {
+		if(t instanceof Class) {
+			return (Class<?>) t;
+		}
+		if(t instanceof ParameterizedType) {
+			return classFromType(((ParameterizedType) t).getRawType());
+		}
+		if(t instanceof GenericArrayType) {
+			GenericArrayType gat = (GenericArrayType) t;
+			throw new RuntimeException(gat.getTypeName());
+		}
+		if(t instanceof WildcardType) {
+			WildcardType wct = (WildcardType) t;
+			return classFromType(wct.getUpperBounds()[0]);
+		}
+		if(t instanceof TypeVariable) {
+			return Object.class;
+		}
+		throw new RuntimeException("Don't know how to handle " + t);
 	}
-	if(t instanceof ParameterizedType) {
-	  return classFromType(((ParameterizedType) t).getRawType());
+
+	public static String typeToSimpleString(Type t){
+		if(t instanceof Class){
+			return ((Class<?>)t).getSimpleName();
+		}
+		if(t instanceof ParameterizedType){
+			ParameterizedType pt = (ParameterizedType)t;
+			return typeToSimpleString(pt.getRawType()) + PStream.from(pt.getActualTypeArguments()).map(v -> typeToSimpleString(v)).toString("<",", ",">");
+		}
+		if(t instanceof GenericArrayType){
+			GenericArrayType gat = (GenericArrayType) t;
+			return typeToSimpleString(gat.getGenericComponentType()) + "[]";
+		}
+		if(t instanceof WildcardType){
+			WildcardType wct = (WildcardType) t;
+			return PStream.from(wct.getUpperBounds())
+				.map(ub -> "* extends " + typeToSimpleString(ub))
+				.plusAll(PStream.from(wct.getLowerBounds())
+					.map(lb -> "* super " + typeToSimpleString(lb))
+				).toString("<" ,", " , ">");
+		}
+		if(t instanceof TypeVariable) {
+			TypeVariable tv = (TypeVariable)t;
+			return tv.getName();
+		}
+		throw new RuntimeException("Don't know how to handle " + t);
 	}
-	if(t instanceof GenericArrayType) {
-	  GenericArrayType gat = (GenericArrayType) t;
-	  throw new RuntimeException(gat.getTypeName());
-	}
-	if(t instanceof WildcardType) {
-	  WildcardType wct = (WildcardType) t;
-	  return classFromType(wct.getUpperBounds()[0]);
-	}
-	if(t instanceof TypeVariable) {
-	  return Object.class;
-	}
-	throw new RuntimeException("Don't know how to handle " + t);
-  }
 
 	private static final PMap<Class, Class> primitiveClassToObjectClassLookup;
 
@@ -77,46 +104,51 @@ public final class UReflect{
 	 * @see #getClass(String, ClassLoader)
 	 */
 	public static Result<Class> getClass(String name) {
-		return getClass(name,UReflect.class.getClassLoader());
+		return getClass(name, UReflect.class.getClassLoader());
 	}
 
 	/**
 	 * Try loading a java class
-	 * @param name    The name of the class to load
+	 *
+	 * @param name        The name of the class to load
 	 * @param classLoader The classloader to use
+	 *
 	 * @return Result.empty if the class is not found, Result.failure on exception, Result.success when we have a class
 	 */
 	public static Result<Class> getClass(String name, ClassLoader classLoader) {
-		return getClass(name,classLoader,true);
+		return getClass(name, classLoader, true);
 	}
+
 	/**
 	 * Try loading a java class
-	 * @param name    The name of the class to load
+	 *
+	 * @param name        The name of the class to load
 	 * @param classLoader The classloader to use
-	 * @param initClass Initialize the class ?
+	 * @param initClass   Initialize the class ?
+	 *
 	 * @return Result.empty if the class is not found, Result.failure on exception, Result.success when we have a class
 	 */
-	public static Result<Class> getClass(String name, ClassLoader classLoader, boolean initClass){
-		return Result.function(name,classLoader).code(l -> {
+	public static Result<Class> getClass(String name, ClassLoader classLoader, boolean initClass) {
+		return Result.function(name, classLoader).code(l -> {
 			try {
-				if(name == null){
+				if(name == null) {
 					return Result.failure("Class name is null");
 				}
-				if(classLoader == null){
+				if(classLoader == null) {
 					return Result.failure("Class loader is null");
 				}
 				return Result.result(Class.forName(name, initClass, classLoader));
 			} catch(ClassNotFoundException cnf) {
 				return Result.empty(cnf);
-			} catch(NoClassDefFoundError e){
+			} catch(NoClassDefFoundError e) {
 				return Result.failure(e);
-			}catch (Exception e){
+			} catch(Exception e) {
 				return Result.failure(e);
 			}
 		});
 	}
 
-	public static Optional<Method> getGetter(Class cls,String name){
+	public static Optional<Method> getGetter(Class cls, String name) {
 		name = UString.firstUpperCase(name);
 		try {
 			return Optional.of(cls.getMethod("get" + name));
@@ -211,44 +243,50 @@ public final class UReflect{
 			return Optional.empty();
 		}
 	}
-
-	public static Optional<Method> getFunctionalInterfaceMethod(Class functionalInterfaceClass){
-		for(Method m : functionalInterfaceClass.getMethods()){
-			if(m.isDefault() == false){
+	public static Optional<Field> getDeclaredField(Class cls, String name) {
+		try {
+			return Optional.of(cls.getDeclaredField(name));
+		} catch(NoSuchFieldException e) {
+			return Optional.empty();
+		}
+	}
+	public static Optional<Method> getFunctionalInterfaceMethod(Class functionalInterfaceClass) {
+		for(Method m : functionalInterfaceClass.getMethods()) {
+			if(m.isDefault() == false) {
 				return Optional.of(m);
 			}
 		}
 		return Optional.empty();
 	}
 
-	public static <T> T createProxyForFunctionalInterface(Class<T> clsFunctionalInterface, Function<Object[],Object> implementation){
-		InvocationHandler handler=  (proxy, method, args) -> {
-			if (method.isDefault())
-			{
+	public static <T> T createProxyForFunctionalInterface(Class<T> clsFunctionalInterface,
+														  Function<Object[], Object> implementation
+	) {
+		InvocationHandler handler = (proxy, method, args) -> {
+			if(method.isDefault()) {
 				final Class<?> declaringClass = method.getDeclaringClass();
 				return
 					MethodHandles.lookup()
-						.in(declaringClass)
-						.unreflectSpecial(method, declaringClass)
-						.bindTo(proxy)
-						.invokeWithArguments(args);
+								 .in(declaringClass)
+								 .unreflectSpecial(method, declaringClass)
+								 .bindTo(proxy)
+								 .invokeWithArguments(args);
 			}
 			return implementation.apply(args);
 		};
-		Class[] clsList = new Class[]{ clsFunctionalInterface};
-		return (T)Proxy.newProxyInstance(clsFunctionalInterface.getClassLoader(),clsList,handler);
+		Class[] clsList = new Class[]{clsFunctionalInterface};
+		return (T) Proxy.newProxyInstance(clsFunctionalInterface.getClassLoader(), clsList, handler);
 	}
 
 	public static final InvocationHandler invocationHandlerWithDefaults = (proxy, method, args) -> {
-		if (method.isDefault())
-		{
+		if(method.isDefault()) {
 			final Class<?> declaringClass = method.getDeclaringClass();
 			return
 				MethodHandles.lookup()
-					.in(declaringClass)
-					.unreflectSpecial(method, declaringClass)
-					.bindTo(proxy)
-					.invokeWithArguments(args);
+							 .in(declaringClass)
+							 .unreflectSpecial(method, declaringClass)
+							 .bindTo(proxy)
+							 .invokeWithArguments(args);
 		}
 
 		// proxy impl of not defaults methods
@@ -273,53 +311,59 @@ public final class UReflect{
 
 	/**
 	 * Find all Classes for a package using the current classpath.
-	 * @param packageName The package name
+	 *
+	 * @param packageName        The package name
 	 * @param includeSubPackages Include subpackages ?
+	 *
 	 * @return Result with list of classes
 	 */
-	public static Result<PList<Class>> findClasses(String packageName,boolean includeSubPackages){
-		return Result.function(packageName,includeSubPackages).code(l -> {
-			String resourcePath = "/" + packageName.replace('.','/');
-			if(includeSubPackages){
+	public static Result<PList<Class>> findClasses(String packageName, boolean includeSubPackages) {
+		return Result.function(packageName, includeSubPackages).code(l -> {
+			String resourcePath = "/" + packageName.replace('.', '/');
+			if(includeSubPackages) {
 				resourcePath += "/***.class";
-			}else {
+			}
+			else {
 				resourcePath += "/*.class";
 			}
 			l.info("Resource path: " + resourcePath);
 			return IOClassPath.find(resourcePath)
-			    //CREATE CLASSNAME FROM RESOURCENAME
-				.map(resourceNameList -> resourceNameList.map(resourceName -> {
-						String res = resourceName
-							.substring(1)
-								.replace('/','.')
-								.replace(File.separatorChar,'.')
-							//.replace('$','.')
-								;
-						res = res.substring(0,res.length()-".class".length());
-						l.info("converted " + resourceName + " -> " + res);
-						return res;
-					})
-				)
-			    //GET THE CLASSES
-				.map(classNameList -> classNameList.map(name -> UReflect.getClass(name,UReflect.class.getClassLoader(),false)))
-				.flatMap(classResultList -> Result.fromSequence(classResultList).map(PStream::plist));
+							  //CREATE CLASSNAME FROM RESOURCENAME
+							  .map(resourceNameList -> resourceNameList.map(resourceName -> {
+									  String res = resourceName
+										  .substring(1)
+										  .replace('/', '.')
+										  .replace(File.separatorChar, '.')
+										  //.replace('$','.')
+										  ;
+									  res = res.substring(0, res.length() - ".class".length());
+									  l.info("converted " + resourceName + " -> " + res);
+									  return res;
+								  })
+							  )
+							  //GET THE CLASSES
+							  .map(classNameList -> classNameList
+								  .map(name -> UReflect.getClass(name, UReflect.class.getClassLoader(), false)))
+							  .flatMap(classResultList -> Result.fromSequence(classResultList).map(PStream::plist));
 		});
 	}
 
 	/**
 	 * Find all the classes and interfaces that a given Class implements or extends.
+	 *
 	 * @param cls The Class to find the parents of
+	 *
 	 * @return A List of parent classes and interfaces
 	 */
-	public static PList<Class> getExtendsImplementsClasses(Class cls){
+	public static PList<Class> getExtendsImplementsClasses(Class cls) {
 
-		PList<Class> res = PList.empty();
-		Class superClass = cls.getSuperclass();
-		if(superClass != null){
+		PList<Class> res        = PList.empty();
+		Class        superClass = cls.getSuperclass();
+		if(superClass != null) {
 			res = res.plusAll(getExtendsImplementsClasses(superClass)).plus(superClass);
 		}
-		for(Class inter : cls.getInterfaces()){
-			if(inter != null){
+		for(Class inter : cls.getInterfaces()) {
+			if(inter != null) {
 				res = res.plusAll(getExtendsImplementsClasses(inter)).plus(inter);
 			}
 		}
@@ -329,16 +373,18 @@ public final class UReflect{
 
 	/**
 	 * Creates a {@link Predicate} that checks if a class has a declared annotation
+	 *
 	 * @param classAnnotation The annotation to find
+	 *
 	 * @return The Predicate
 	 */
-	public static Predicate<Class> hasClassAnnotation(Class<? extends Annotation> classAnnotation){
+	public static Predicate<Class> hasClassAnnotation(Class<? extends Annotation> classAnnotation) {
 		return UNamed.namedPredicate("hasClassAnnotation(" + classAnnotation.getName() + ")",
 			cls -> cls.getDeclaredAnnotation(classAnnotation) != null
 		);
 	}
 
-	public static Predicate<Package> hasPackageAnnotation(Class<? extends Annotation> classAnnotation){
+	public static Predicate<Package> hasPackageAnnotation(Class<? extends Annotation> classAnnotation) {
 		return UNamed.namedPredicate("hasPackageAnnotation(" + classAnnotation.getName() + ")",
 			pack -> pack.getDeclaredAnnotation(classAnnotation) != null
 		);

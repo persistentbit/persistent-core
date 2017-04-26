@@ -1,6 +1,7 @@
 package com.persistentbit.core.logging;
 
 import com.persistentbit.core.doc.Support;
+import com.persistentbit.core.doc.annotations.DAggregate;
 import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.logging.printing.LogEntryDefaultFormatting;
 import com.persistentbit.core.logging.printing.SpecificExceptionPrinter;
@@ -12,6 +13,7 @@ import com.persistentbit.core.printing.PrintableText;
  */
 @Support
 public class LoggedException extends RuntimeException{
+	@DAggregate
 	private LogEntry logs;
 
 	public LoggedException(LogEntry logs) {
