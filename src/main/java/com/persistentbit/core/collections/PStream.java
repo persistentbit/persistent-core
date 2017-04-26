@@ -1,9 +1,8 @@
 package com.persistentbit.core.collections;
 
 
-import com.persistentbit.core.doc.Support;
 import com.persistentbit.core.doc.annotations.DSupport;
-import com.persistentbit.core.doc.uml.UmlType;
+import com.persistentbit.core.doc.annotations.DUsesClass;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.*;
@@ -28,8 +27,7 @@ import java.util.stream.Stream;
  * @see POrderedMap
  * @since 6/07/2016
  */
-@Support
-@UmlType
+@DUsesClass(value = InfinitePStreamException.class,label = "throws >")
 public interface PStream<T> extends Iterable<T>{
 
 	/**
