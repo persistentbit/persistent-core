@@ -3,6 +3,7 @@ package com.persistentbit.core.utils;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.collections.PStream;
+import com.persistentbit.core.exceptions.ToDo;
 import com.persistentbit.core.glasgolia.compiler.JavaExecutableFinder;
 import com.persistentbit.core.io.IOClassPath;
 import com.persistentbit.core.result.Result;
@@ -24,6 +25,9 @@ import java.util.function.Predicate;
 public final class UReflect{
 
 	public static Class<?> classFromType(Type t) {
+		return classFromType(t,genName -> Object.class);
+	}
+	public static Class<?> classFromType(Type t,Function<String,Class<?>> genericNameToClass) {
 		if(t instanceof Class) {
 			return (Class<?>) t;
 		}
@@ -39,7 +43,8 @@ public final class UReflect{
 			return classFromType(wct.getUpperBounds()[0]);
 		}
 		if(t instanceof TypeVariable) {
-			return Object.class;
+			TypeVariable tv  = (TypeVariable)t;
+			return genericNameToClass.apply(tv.getName());
 		}
 		throw new RuntimeException("Don't know how to handle " + t);
 	}
@@ -402,5 +407,9 @@ public final class UReflect{
 				return false;
 			}
 		}).isPresent();
+	}
+
+	public static Class<?> getGenericTypeVarClass(Class cls, String genericVarName){
+		throw new ToDo(cls.getSimpleName() + "  - " + genericVarName);
 	}
 }
