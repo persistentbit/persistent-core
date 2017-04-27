@@ -250,6 +250,8 @@ public final class UReflect{
 			return Optional.empty();
 		}
 	}
+
+
 	public static Optional<Method> getFunctionalInterfaceMethod(Class functionalInterfaceClass) {
 		for(Method m : functionalInterfaceClass.getMethods()) {
 			if(m.isDefault() == false) {
@@ -388,5 +390,17 @@ public final class UReflect{
 		return UNamed.namedPredicate("hasPackageAnnotation(" + classAnnotation.getName() + ")",
 			pack -> pack.getDeclaredAnnotation(classAnnotation) != null
 		);
+	}
+
+	public static boolean isOverrideMethod(Method method){
+		Class methodClass = method.getDeclaringClass();
+		return getExtendsImplementsClasses(methodClass).find(scls -> {
+			try{
+				scls.getDeclaredMethod(method.getName(),method.getParameterTypes());
+				return true;
+			}catch (NoSuchMethodException nsm){
+				return false;
+			}
+		}).isPresent();
 	}
 }

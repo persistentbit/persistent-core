@@ -6,7 +6,5 @@
  * @author petermuys
  * @since 3/04/17
  */
-@UmlPackage(note="Function call results on steroids!")
 package com.persistentbit.core.result;
 
-import com.persistentbit.core.doc.uml.UmlPackage;

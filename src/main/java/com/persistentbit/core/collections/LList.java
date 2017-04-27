@@ -1,8 +1,6 @@
 package com.persistentbit.core.collections;
 
 
-import com.persistentbit.core.doc.uml.UmlType;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
@@ -19,7 +17,6 @@ import java.util.function.Supplier;
  * @see PStream
  */
 @SuppressWarnings({"AbstractClassNamingConvention"})
-@UmlType
 public abstract class LList<E> extends AbstractIPList<E, LList<E>> implements Serializable{
 
   private static final LList empty = new LList(){

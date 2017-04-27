@@ -10,7 +10,5 @@
 
 
 
-@UmlPackage(note="Function Logging Framework")
 package com.persistentbit.core.logging;
 
-import com.persistentbit.core.doc.uml.UmlPackage;

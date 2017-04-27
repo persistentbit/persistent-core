@@ -1,8 +1,6 @@
 package com.persistentbit.core.collections;
 
 
-import com.persistentbit.core.doc.uml.UmlType;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -31,7 +29,6 @@ import java.util.function.Supplier;
  * @see IPList
  * @see PStream
  */
-@UmlType
 public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializable{
 
 

@@ -2,7 +2,6 @@ package com.persistentbit.core.io;
 
 import com.persistentbit.core.ModuleCore;
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.UString;
 
@@ -25,7 +24,6 @@ import java.util.function.Function;
  * @author Peter Muys
  * @since 28/10/2016
  */
-@UmlType
 public final class IO {
 
     public static final Charset utf8 = Charset.forName("UTF-8");

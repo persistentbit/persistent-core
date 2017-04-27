@@ -1,6 +1,5 @@
 package com.persistentbit.core.collections;
 
-import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.Iterator;
@@ -16,7 +15,6 @@ import java.util.function.Function;
  * @since 13/07/2016
  * @see IPMap
  */
-@UmlType
 public final class POrderedMap<K, V> extends AbstractPStreamDirect<Tuple2<K, V>, POrderedMap<K, V>>
   implements IPMap<K, V>{
 

@@ -1,7 +1,6 @@
 package com.persistentbit.core.io;
 
 import com.persistentbit.core.OK;
-import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.function.ThrowingFunction;
 import com.persistentbit.core.function.ThrowingSupplier;
 import com.persistentbit.core.logging.Log;
@@ -18,7 +17,6 @@ import java.util.function.Supplier;
  * @author petermuys
  * @since 15/04/17
  */
-@UmlType
 public final class IOStreams{
 
 	/**
