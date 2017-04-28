@@ -3,7 +3,6 @@ package com.persistentbit.core.utils;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.collections.PStream;
-import com.persistentbit.core.exceptions.ToDo;
 import com.persistentbit.core.glasgolia.compiler.JavaExecutableFinder;
 import com.persistentbit.core.io.IOClassPath;
 import com.persistentbit.core.result.Result;
@@ -26,6 +25,9 @@ public final class UReflect{
 
 	public static Class<?> classFromType(Type t) {
 		return classFromType(t,genName -> Object.class);
+	}
+	public static Class<?> classFromType(Type t, Class<?> genericsDefinitionClass){
+		return classFromType(t, name -> getGenericTypeVarClass(genericsDefinitionClass,name).orElse(Object.class));
 	}
 	public static Class<?> classFromType(Type t,Function<String,Class<?>> genericNameToClass) {
 		if(t instanceof Class) {
@@ -409,7 +411,28 @@ public final class UReflect{
 		}).isPresent();
 	}
 
-	public static Class<?> getGenericTypeVarClass(Class cls, String genericVarName){
-		throw new ToDo(cls.getSimpleName() + "  - " + genericVarName);
+
+
+
+	public static Result<Class<?>> getGenericTypeVarClass(Class cls, String genericVarName){
+		for(TypeVariable tv : cls.getTypeParameters()){
+			if(tv.getName().equals(genericVarName)){
+				if(tv.getBounds().length!= 1){
+					return Result.success(Object.class);
+				}
+				return Result.success(classFromType(tv.getBounds()[0],cls));
+			}
+		}
+		Result<Class<?>> res = getGenericTypeVarClass(cls.getSuperclass(),genericVarName);
+		if(res.isPresent()){
+			return res;
+		}
+		for(Class inter : cls.getInterfaces()){
+			res = getGenericTypeVarClass(inter,genericVarName);
+			if(res.isPresent()){
+				return res;
+			}
+		}
+		return Result.empty("Not found in " + cls.getName() + ": " + genericVarName );
 	}
 }
