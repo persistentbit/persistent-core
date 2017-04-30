@@ -1,6 +1,7 @@
 package com.persistentbit.core.collections;
 
 
+import com.persistentbit.core.doc.annotations.DUsedByClass;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.Map;
@@ -10,6 +11,8 @@ import java.util.Map;
  * Date: 8/07/16
  * Time: 09:19
  */
+@DUsedByClass(PMap.class)
+@DUsedByClass(POrderedMap.class)
 class PMapEntry<K, V> extends Tuple2<K, V> implements Map.Entry<K, V>{
 
   public PMapEntry(K key, V val) {

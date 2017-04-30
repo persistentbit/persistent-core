@@ -2,6 +2,7 @@ package com.persistentbit.core.collections;
 
 
 import com.persistentbit.core.doc.annotations.DSupport;
+import com.persistentbit.core.doc.annotations.DUsedByClass;
 import com.persistentbit.core.doc.annotations.DUsesClass;
 import com.persistentbit.core.tuples.Tuple2;
 
@@ -837,6 +838,7 @@ public interface PStream<T> extends Iterable<T>{
 
 
 	@DSupport
+	@DUsedByClass(PStream.class)
 	enum HeadMiddleEnd{
 		head, middle, end, headAndEnd
 	}

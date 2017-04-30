@@ -1,6 +1,9 @@
 package com.persistentbit.core.collections;
 
 
+import com.persistentbit.core.doc.annotations.DAggregate;
+import com.persistentbit.core.doc.annotations.DUsedByClass;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -33,6 +36,7 @@ public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializabl
 
 
 	private static final Object[] emptyArray = new Object[0];
+	@DAggregate
 	private static final Node     emtpyNode  = new Node();
 	private static final PList    emptyPList = new PList();
 	//Next ones should be final but can't because of Serializable
@@ -500,6 +504,7 @@ public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializabl
 		this.tailOffset = v.tailOffset;
 	}
 
+
 	private static final class Node implements Serializable{
 
 		private final Object[] array;
@@ -513,6 +518,7 @@ public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializabl
 		}
 	}
 
+	@DUsedByClass(PList.class)
 	private class PListIterator implements ListIterator<T>{
 
 		private int position;

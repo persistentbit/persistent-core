@@ -1,6 +1,8 @@
 package com.persistentbit.core.collections;
 
 
+import com.persistentbit.core.doc.annotations.DComposite;
+import com.persistentbit.core.doc.annotations.DUsedByClass;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.io.Serializable;
@@ -28,6 +30,7 @@ public final class PMap<K, V> extends AbstractPStreamDirect<Tuple2<K, V>, PMap<K
   private static final PMap   sEmpty    = new PMap(0, null);
   private static final Object sNotFound = new Object();
   final int     size;
+  @DComposite
   final MapNode root;
 
 
@@ -287,6 +290,7 @@ public final class PMap<K, V> extends AbstractPStreamDirect<Tuple2<K, V>, PMap<K
 	Iterator iterator();
   }
 
+  @DUsedByClass(PMap.class)
   private static final class Box{
 
 	public Object val;
@@ -388,7 +392,7 @@ public final class PMap<K, V> extends AbstractPStreamDirect<Tuple2<K, V>, PMap<K
 	public Iterator<Object> iterator() {
 	  return new Iter(array);
 	}
-
+	@DUsedByClass(ArrayNode.class)
 	static final class Iter implements Iterator{
 
 	  private final MapNode[] array;
@@ -680,6 +684,8 @@ public final class PMap<K, V> extends AbstractPStreamDirect<Tuple2<K, V>, PMap<K
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
+  @DUsedByClass(BitmapIndexedNode.class)
+  @DUsedByClass(HashCollisionNode.class)
   private static final class NodeIter implements Iterator<Object>{
 
 	final   Object[] array;
