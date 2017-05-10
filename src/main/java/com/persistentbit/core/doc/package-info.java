@@ -9,7 +9,5 @@
 
 
 
-@UmlPackage(name="DocAnnotations",info = "Code annotations for auto documentation generation")
 package com.persistentbit.core.doc;
 
-import com.persistentbit.core.doc.uml.UmlPackage;

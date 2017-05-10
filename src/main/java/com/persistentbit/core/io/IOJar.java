@@ -1,7 +1,6 @@
 package com.persistentbit.core.io;
 
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.result.Result;
 
 import java.io.File;
@@ -17,7 +16,6 @@ import java.util.jar.JarFile;
  * @author petermuys
  * @since 15/04/17
  */
-@UmlType
 public final class IOJar{
 
 	public static Result<PList<String>> findInJar(Path jarPath, Predicate<String> namePredicate){

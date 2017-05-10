@@ -1,14 +1,11 @@
 package com.persistentbit.core.language;
 
-import com.persistentbit.core.doc.uml.UmlType;
-
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-@UmlType
 public class Msg {
     static public Locale nlBE = new Locale("nl","BE");
     static public Locale nlNL = new Locale("nl","NL");

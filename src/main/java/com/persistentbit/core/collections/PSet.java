@@ -1,7 +1,5 @@
 package com.persistentbit.core.collections;
 
-import com.persistentbit.core.doc.uml.UmlType;
-
 import java.util.Iterator;
 import java.util.Set;
 
@@ -11,7 +9,6 @@ import java.util.Set;
  * @since 8/07/16
  * @see IPSet
  */
-@UmlType
 public class PSet<T> extends AbstractPStreamDirect<T, PSet<T>> implements IPSet<T>{
 
 	private static final PSet<Object> sEmpty = new PSet<>();

@@ -3,7 +3,6 @@ package com.persistentbit.core.io;
 import com.persistentbit.core.Nothing;
 import com.persistentbit.core.OK;
 import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.TimeMeasurement;
@@ -34,7 +33,6 @@ import java.util.regex.Pattern;
  * @author petermuys
  * @since 15/04/17
  */
-@UmlType
 public final class IOFiles{
 
 	/**
@@ -311,6 +309,7 @@ public final class IOFiles{
 	/**
 	 * Convert a {@link Path} to a real path
 	 * @param p The path to convert
+	 * @param options {@link LinkOption}
 	 * @return The real path
 	 * @see Path#toRealPath(LinkOption...)
 	 */

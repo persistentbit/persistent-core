@@ -24,6 +24,12 @@ import java.util.function.Predicate;
 public final class UReflect{
 
 	public static Class<?> classFromType(Type t) {
+		return classFromType(t,genName -> Object.class);
+	}
+	public static Class<?> classFromType(Type t, Class<?> genericsDefinitionClass){
+		return classFromType(t, name -> getGenericTypeVarClass(genericsDefinitionClass,name).orElse(Object.class));
+	}
+	public static Class<?> classFromType(Type t,Function<String,Class<?>> genericNameToClass) {
 		if(t instanceof Class) {
 			return (Class<?>) t;
 		}
@@ -39,7 +45,8 @@ public final class UReflect{
 			return classFromType(wct.getUpperBounds()[0]);
 		}
 		if(t instanceof TypeVariable) {
-			return Object.class;
+			TypeVariable tv  = (TypeVariable)t;
+			return genericNameToClass.apply(tv.getName());
 		}
 		throw new RuntimeException("Don't know how to handle " + t);
 	}
@@ -250,6 +257,8 @@ public final class UReflect{
 			return Optional.empty();
 		}
 	}
+
+
 	public static Optional<Method> getFunctionalInterfaceMethod(Class functionalInterfaceClass) {
 		for(Method m : functionalInterfaceClass.getMethods()) {
 			if(m.isDefault() == false) {
@@ -388,5 +397,42 @@ public final class UReflect{
 		return UNamed.namedPredicate("hasPackageAnnotation(" + classAnnotation.getName() + ")",
 			pack -> pack.getDeclaredAnnotation(classAnnotation) != null
 		);
+	}
+
+	public static boolean isOverrideMethod(Method method){
+		Class methodClass = method.getDeclaringClass();
+		return getExtendsImplementsClasses(methodClass).find(scls -> {
+			try{
+				scls.getDeclaredMethod(method.getName(),method.getParameterTypes());
+				return true;
+			}catch (NoSuchMethodException nsm){
+				return false;
+			}
+		}).isPresent();
+	}
+
+
+
+
+	public static Result<Class<?>> getGenericTypeVarClass(Class cls, String genericVarName){
+		for(TypeVariable tv : cls.getTypeParameters()){
+			if(tv.getName().equals(genericVarName)){
+				if(tv.getBounds().length!= 1){
+					return Result.success(Object.class);
+				}
+				return Result.success(classFromType(tv.getBounds()[0],cls));
+			}
+		}
+		Result<Class<?>> res = getGenericTypeVarClass(cls.getSuperclass(),genericVarName);
+		if(res.isPresent()){
+			return res;
+		}
+		for(Class inter : cls.getInterfaces()){
+			res = getGenericTypeVarClass(inter,genericVarName);
+			if(res.isPresent()){
+				return res;
+			}
+		}
+		return Result.empty("Not found in " + cls.getName() + ": " + genericVarName );
 	}
 }

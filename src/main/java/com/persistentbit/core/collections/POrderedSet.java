@@ -1,7 +1,5 @@
 package com.persistentbit.core.collections;
 
-import com.persistentbit.core.doc.uml.UmlType;
-
 import java.util.Iterator;
 import java.util.Set;
 
@@ -12,7 +10,6 @@ import java.util.Set;
  * @see IPSet
  * @since 13/07/2016
  */
-@UmlType
 public final class POrderedSet<T> extends AbstractPStreamDirect<T, POrderedSet<T>> implements IPSet<T>{
 
 	private static final POrderedSet<Object> sEmpty = new POrderedSet<>();

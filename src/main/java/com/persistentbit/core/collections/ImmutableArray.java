@@ -1,7 +1,6 @@
 package com.persistentbit.core.collections;
 
 import com.persistentbit.core.OK;
-import com.persistentbit.core.doc.uml.UmlType;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -16,7 +15,6 @@ import java.util.function.Supplier;
  * @author petermuys
  * @since 23/02/17
  */
-@UmlType
 public final class ImmutableArray<T> extends AbstractIPList<T, ImmutableArray<T>> implements Serializable{
 
 	private final T[] data;

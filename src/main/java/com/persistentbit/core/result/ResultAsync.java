@@ -1,6 +1,5 @@
 package com.persistentbit.core.result;
 
-import com.persistentbit.core.doc.uml.UmlType;
 import com.persistentbit.core.logging.Log;
 import com.persistentbit.core.logging.entries.LogEntry;
 import com.persistentbit.core.tuples.Tuple2;
@@ -17,7 +16,6 @@ import java.util.function.*;
  * @author Peter Muys
  * @since 4/01/2017
  */
-@UmlType
 public class ResultAsync<T> extends Result<T> {
     private CompletableFuture<Result<T>> future;
 
