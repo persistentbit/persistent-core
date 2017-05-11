@@ -145,7 +145,7 @@ public class ParserTest {
     }
 
 	public static Parser<String> lineComment = Scan.lineComment("//");
-	public static Parser<String> blockComment = Scan.blockComment("/*", "*?");
+	public static Parser<String> blockComment = Scan.blockComment("/*", "*/");
 
 
 	public static Parser<String> ws =

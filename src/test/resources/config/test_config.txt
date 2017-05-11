@@ -1,4 +1,4 @@
 intTest=1234
 boolTest = false
 strTest = "Dit is een String"
-
+runEnv = "development"
