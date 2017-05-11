@@ -8,6 +8,8 @@ import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.BaseValueClass;
+import com.persistentbit.core.validation.OKValidator;
+import com.persistentbit.core.validation.Validator;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -23,14 +25,16 @@ public class ConfigGroup {
         public final String name;
         public final Class type;
         public final String info;
+        public final Validator<T> validator;
         private Result<T> value;
         private PList<BiConsumer<Config,Result<T>>> watchers;
-        public Property(String name, Class type, String info, Result<T> value,PList<BiConsumer<Config,Result<T>>> watchers) {
+        public Property(String name, Class type, String info, Result<T> value,PList<BiConsumer<Config,Result<T>>> watchers,Validator<T> validator) {
             this.name = name;
             this.type = type;
             this.info = info;
             this.value = value;
             this.watchers = watchers;
+            this.validator = validator;
         }
 
         @Override
@@ -45,7 +49,9 @@ public class ConfigGroup {
         public synchronized Result<OK> set(Result newValue){
             return Result.function(newValue).code(l -> {
                 Result<T> oldValue = value;
-                value = newValue;
+                value = newValue
+                        .flatMap(t -> validator.validateToResult(name,t));
+
                 if(oldValue.equals(value) == false){
                     watchers.forEach(c -> c.accept(this,oldValue));
                 }
@@ -61,7 +67,7 @@ public class ConfigGroup {
     }
 
     public <T> Property<T> add(String name, Class<T> type, String info, T defaultValue){
-        Property<T> prop = new Property<>(name,type,info,Result.result(defaultValue),PList.empty());
+        Property<T> prop = new Property<>(name,type,info,Result.result(defaultValue),PList.empty(), OKValidator.inst());
         this.properties = this.properties.put(name,prop);
         return prop;
     }

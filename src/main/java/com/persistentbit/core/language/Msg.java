@@ -6,6 +6,12 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * A Msg instance defines a text in a {@link Locale} with optional extra parameters
+ * that will be mixed in the text using a {@link MessageFormat} instance.<br>
+ * If the {@link Locale} is not defined then the text is seen as a key value
+ * that can be looked up somewhere else.
+ */
 public class Msg {
     static public Locale nlBE = new Locale("nl","BE");
     static public Locale nlNL = new Locale("nl","NL");
@@ -67,7 +73,7 @@ public class Msg {
 
     public static void main(String... args) throws Exception {
 		Msg msg =
-			Msg.nlBE("Hello, {0} it is now {1,time} at {2,date,short} orOf {2,date,full}", "Bravo", new Date(), new Date());
+			Msg.nlBE("Hello, {0} it is now {1,time} at {2,date,short} of {2,date,full}", "Bravo", new Date(), new Date());
 		System.out.println("msg:" + msg);
         System.out.println("msg:" + msg.withLocale(Msg.nlNL));
         System.out.println("msg:" + msg.withLocale(Locale.ENGLISH));

@@ -28,7 +28,7 @@ public interface SimpleValidator<S>{
 
 	default Validator<S> toValidator() {
 		return (name, value) -> {
-			PList<Msg> validateResult = validate(value);
+			//PList<Msg> validateResult = validate(value);
 			return validate(value).map(error -> new ValidationResult(name, error));
 		};
 	}
