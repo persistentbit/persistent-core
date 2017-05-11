@@ -3,6 +3,7 @@ package com.persistentbit.core.collections;
 
 import com.persistentbit.core.doc.annotations.DComposite;
 import com.persistentbit.core.doc.annotations.DUsedByClass;
+import com.persistentbit.core.result.Result;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.io.Serializable;
@@ -203,7 +204,15 @@ public final class PMap<K, V> extends AbstractPStreamDirect<Tuple2<K, V>, PMap<K
 	return Optional.ofNullable(getOrDefault(key, null));
   }
 
-  @Override
+	@Override
+	public Result<V> getResult(Object key) {
+		if(containsKey(key)){
+			return Result.result(get(key));
+		}
+		return Result.empty("No value for key " + key);
+	}
+
+	@Override
   public PMap<K, V> removeKey(Object key) {
 	if(key == null) { key = sNullKey; }
 

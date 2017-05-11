@@ -5,6 +5,7 @@ import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.utils.UNumber;
 import com.persistentbit.core.utils.UString;
 
+import java.math.BigDecimal;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -132,6 +133,9 @@ public class Scan{
 					failure -> ParseResult.failure(res.getSource(), failure.getException().getMessage())
 				);
 			});
+	public static Parser<BigDecimal> bigDecimalLiteral =
+			Scan.regEx("[+-]?[0-9]*[.][0-9]+")
+			.map(s -> new BigDecimal(s));
 
 	public static Parser<String> endsWith(String endString){
 		return source -> {
