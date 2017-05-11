@@ -93,6 +93,38 @@ public final class UNumber{
 		return Result.success(value.doubleValue());
 	}
 
+	/**
+	 * Convert a Number instance to a BigDecimal representation.<br>
+	 *
+	 * @param number The Number to convert
+	 *
+	 * @return The resulting {@link BigDecimal}
+	 */
+	public static Result<BigDecimal> convertToBigDecimal(Number number) {
+		if(number == null) {
+			return Result.<BigDecimal>failure("number should not be null").logFunction(number);
+		}
+
+		if(number instanceof BigDecimal) {
+			return Result.success((BigDecimal) number).logFunction(number);
+		}
+
+		if(number instanceof BigInteger) {
+			return Result.success(new BigDecimal((BigInteger) number)).logFunction(number);
+		}
+		if(number instanceof Byte
+				|| number instanceof Short
+				|| number instanceof Integer
+				|| number instanceof Long
+				) {
+			return Result.success(new BigDecimal(number.longValue())).logFunction(number);
+		}
+		if(number instanceof Float || number instanceof Double) {
+			return Result.success(new BigDecimal(number.doubleValue())).logFunction(number);
+		}
+		return parseBigDecimal(number.toString()).logFunction(number);
+	}
+
 	public static <R> Result<R> convertTo(Number value, Class<R> cls) {
 		if(value == null) {
 			return Result.<R>empty().logFunction(value);
@@ -114,6 +146,9 @@ public final class UNumber{
 		}
 		if(cls == double.class || cls == Double.class) {
 			return (Result<R>) convertToDouble(value);
+		}
+		if(cls == BigDecimal.class){
+			return (Result<R>)convertToBigDecimal(value);
 		}
 		return Result
 			.failure("Don't know how to convert a " + value.getClass().getSimpleName() + " to a" + cls.getName());
@@ -256,9 +291,9 @@ public final class UNumber{
 	 */
 	public static final Comparator<Number> numberComparator = (Number left, Number right) ->
 		Log.function(left, right).code(log ->
-										   numberToBigDecimal(left)
+										   convertToBigDecimal(left)
 											   .flatMap(l ->
-															numberToBigDecimal(right).map(l::compareTo)
+															convertToBigDecimal(right).map(l::compareTo)
 											   ).orElseThrow()
 		);
 
@@ -278,37 +313,7 @@ public final class UNumber{
 			&& (Float.isNaN((Float) number) || Float.isInfinite((Float) number));
 	}
 
-	/**
-	 * Convert a Number instance to a BigDecimal representation.<br>
-	 *
-	 * @param number The Number to convert
-	 *
-	 * @return The resulting {@link BigDecimal}
-	 */
-	public static Result<BigDecimal> numberToBigDecimal(Number number) {
-		if(number == null) {
-			return Result.<BigDecimal>failure("number should not be null").logFunction(number);
-		}
 
-		if(number instanceof BigDecimal) {
-			return Result.success((BigDecimal) number).logFunction(number);
-		}
-
-		if(number instanceof BigInteger) {
-			return Result.success(new BigDecimal((BigInteger) number)).logFunction(number);
-		}
-		if(number instanceof Byte
-				|| number instanceof Short
-				|| number instanceof Integer
-				|| number instanceof Long
-				) {
-			return Result.success(new BigDecimal(number.longValue())).logFunction(number);
-		}
-		if(number instanceof Float || number instanceof Double) {
-			return Result.success(new BigDecimal(number.doubleValue())).logFunction(number);
-		}
-		return parseBigDecimal(number.toString()).logFunction(number);
-	}
 
 	/**
 	 * Convert a computer size into a human readable String

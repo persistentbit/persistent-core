@@ -1,6 +1,7 @@
 package com.persistentbit.core.tests.config;
 
 import com.persistentbit.core.ModuleCore;
+import com.persistentbit.core.config.Config;
 import com.persistentbit.core.config.ConfigGroup;
 import com.persistentbit.core.io.IO;
 import com.persistentbit.core.parser.source.Source;
@@ -15,13 +16,23 @@ import com.persistentbit.core.tests.CoreTest;
  */
 public class ConfigTest {
 
+    private static class Settings {
+        public final Config<Integer> intTest;
+        public final Config<Boolean> boolTest;
+        public final Config<String> strTest;
+        public Settings(ConfigGroup grp){
+            intTest = grp.addInt("intTest","",10);
+            boolTest = grp.addBoolean("boolTest","",true);
+            strTest = grp.addString("strTest","","Default string");
+        }
+    }
+
+
     static final TestCase configTest = TestCase.name("configTest").code(tr-> {
         Source src = Source.asSource(ConfigTest.class.getResource("/config/test_config.txt"), IO.utf8).orElseThrow();
         tr.info(src);
         ConfigGroup grp = new ConfigGroup();
-        ConfigGroup.Property<Integer> intTest = grp.add("intTest",Integer.class,"int value test", -1);
-        ConfigGroup.Property<Boolean> boolTest = grp.add("boolTest",Boolean.class,"bool value test", true);
-        ConfigGroup.Property<String> strTest = grp.add("strTest",String.class,"string value test", "This is the default value");
+        Settings settings = new Settings(grp);
         grp.load(src).orElseThrow();
 
     });

@@ -1,7 +1,10 @@
 package com.persistentbit.core.tests;
 
 import com.persistentbit.core.collections.PStream;
-import com.persistentbit.core.io.*;
+import com.persistentbit.core.io.IO;
+import com.persistentbit.core.io.IOCopy;
+import com.persistentbit.core.io.IORead;
+import com.persistentbit.core.io.IOStreams;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.testing.TestData;
 import com.persistentbit.core.tests.utils.TestValue;
@@ -102,14 +105,14 @@ public class TestUtils{
 
 
 	static final TestCase testNumberUtils = TestCase.name("Test Number Utilities").code(tr -> {
-		tr.isFailure(UNumber.numberToBigDecimal(null));
+		tr.isFailure(UNumber.convertToBigDecimal(null));
 		Comparator<Number> nc = UNumber.numberComparator;
 		tr.isEquals(nc.compare(1, 1.0), 0);
 		tr.isEquals(nc.compare((short) 2, 2.0f), 0);
 		tr.isEquals(nc.compare(1234567l, 1234567), 0);
 		tr.isEquals(nc.compare(1234567l, 1234566), 1);
-		tr.isFailure(UNumber.numberToBigDecimal(null));
-		tr.isEquals(UNumber.numberToBigDecimal(1234), UNumber.numberToBigDecimal(1234.0));
+		tr.isFailure(UNumber.convertToBigDecimal(null));
+		tr.isEquals(UNumber.convertToBigDecimal(1234), UNumber.convertToBigDecimal(1234.0));
 		tr.isFailure(UNumber.parseBigDecimal(null));
 		tr.isFailure(UNumber.parseInt(null));
 		tr.isFailure(UNumber.parseLong(null));

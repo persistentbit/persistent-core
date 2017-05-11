@@ -8,6 +8,8 @@ import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.BaseValueClass;
+import com.persistentbit.core.utils.UNumber;
+import com.persistentbit.core.utils.UReflect;
 import com.persistentbit.core.validation.OKValidator;
 import com.persistentbit.core.validation.Validator;
 
@@ -66,11 +68,11 @@ public class ConfigGroup {
         public synchronized void watch(BiConsumer<Config,Result<T>> changeWatcher) {
             watchers = watchers.plus(changeWatcher);
         }
-        public synchronized Result<OK> set(Result newValue){
+        public synchronized Result<OK> set(Result<T> newValue){
             return Result.function(newValue).code(l -> {
                 Result<T> oldValue = value;
                 value = newValue
-                        .flatMap(t -> validator.validateToResult(name,(T)t));
+                        .flatMap(t -> validator.validateToResult(name,t));
 
                 if(oldValue.equals(value) == false){
                     watchers.forEach(c -> c.accept(this,oldValue));
@@ -89,19 +91,42 @@ public class ConfigGroup {
         this(POrderedMap.empty());
     }
 
+
     public <T> Property<T> add(String name, Class<T> type, String info, T defaultValue){
         Property<T> prop = new Property<>(name,type,info,Result.result(defaultValue),PList.empty(), OKValidator.inst());
         this.properties = this.properties.put(name,prop);
         return prop;
     }
 
-    public Result<OK> set(String name, Result<?> value){
-        return Result.function(name,value).code(l -> {
+    public Property<Integer> addInt(String name, String info, Integer defaultValue){
+        return add(name,Integer.class, info,defaultValue);
+    }
+    public Property<String> addString(String name, String info, String defaultValue){
+        return add(name,String.class, info,defaultValue);
+    }
+    public Property<Boolean> addBoolean(String name, String info, Boolean defaultValue){
+        return add(name,Boolean.class, info,defaultValue);
+    }
+
+
+    public Result<OK> set(String name, Result<?> resValue){
+        return Result.function(name,resValue).code(l -> {
             Property cfg = this.properties.getOrDefault(name, null);
             if(cfg == null){
                 return Result.failure("Unknown property: '" + name + "'");
             }
-            cfg.set(value);
+            Result<?> mappedRes = resValue.flatMap(value -> {
+                if(cfg.type.isAssignableFrom(value.getClass())){
+                    return resValue;
+                }
+                if(Number.class.isAssignableFrom(value.getClass())){
+                    //We have a number type...
+                    return UNumber.convertTo((Number)value,cfg.type);
+                }
+                return Result.failure("Don't know how to convert " + value + " to " + UReflect.typeToSimpleString(cfg.type));
+            });
+
+            cfg.set(resValue);
             return OK.result;
         });
     }
