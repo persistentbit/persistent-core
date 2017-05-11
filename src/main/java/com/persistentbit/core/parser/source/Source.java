@@ -1,9 +1,15 @@
 package com.persistentbit.core.parser.source;
 
+import com.persistentbit.core.io.IO;
+import com.persistentbit.core.io.IORead;
 import com.persistentbit.core.parser.Parser;
+import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.StrPos;
 import com.persistentbit.core.utils.UString;
 
+import java.io.File;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Objects;
 
 /**
@@ -38,6 +44,23 @@ public abstract class Source{
 	}
 	public static Source asSource(StrPos pos, String source) {
 		return new SourceFromString(source, 0, pos);
+	}
+
+
+	public static Result<Source> asSource(URL url,Charset charset){
+		return IORead.readTextFromURL(url,charset)
+				.map(txt -> asSource(url.toString(),txt));
+	}
+
+
+	public static Result<Source> asSource(File f){
+		return asSource(f, IO.utf8);
+	}
+
+
+	public static Result<Source> asSource(File f, Charset charSet){
+		return IORead.readTextFile(f,charSet)
+				.map(txt -> asSource(f.getAbsolutePath(),txt));
 	}
 
 	public boolean isEOF() {

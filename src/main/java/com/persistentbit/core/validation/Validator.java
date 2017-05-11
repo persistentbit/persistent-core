@@ -1,6 +1,5 @@
 package com.persistentbit.core.validation;
 
-import com.persistentbit.core.OK;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PMap;
 import com.persistentbit.core.language.Msg;
@@ -20,10 +19,10 @@ public interface Validator<T>{
 
 	PList<ValidationResult> validate(String name, T item);
 
-	default Result<OK> validateToResult(String name, T item) {
+	default Result<T> validateToResult(String name, T item) {
 		PList<ValidationResult> result = validate(name, item);
 		if(result.isEmpty()) {
-			return OK.result;
+			return Result.result(item);
 		}
 		return Result.failure(result.toString(", "));
 	}

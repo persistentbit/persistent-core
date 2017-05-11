@@ -134,7 +134,7 @@ public class Scan{
 				);
 			});
 	public static Parser<BigDecimal> bigDecimalLiteral =
-			Scan.regEx("[+-]?[0-9]*[.][0-9]+")
+			Scan.regEx("([+-]?[0-9]*[.][0-9]+)|([+-]?[0-9]+)")
 			.map(s -> new BigDecimal(s));
 
 	public static Parser<String> endsWith(String endString){
@@ -266,7 +266,7 @@ public class Scan{
 	public static Parser<String> blockComment(String startComment, String endComment) {
 		return
 			Scan.term(startComment)
-				.and(parseWhile(s -> s.endsWith("*/") == false))
+				.and(parseWhile(s -> s.endsWith(endComment) == false))
 						.map(t -> t._1 + t._2);
 	}
 

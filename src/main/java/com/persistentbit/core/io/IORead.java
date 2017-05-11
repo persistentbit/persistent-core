@@ -6,6 +6,8 @@ import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.UString;
 
 import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.Properties;
 
@@ -71,7 +73,6 @@ public final class IORead{
 
 	/**
      * Read an InputStream into a String.<br>
-     * Uses UTF-8 for encoding.<br>
      * The given stream is automatically closed.<br>
      *
      * @param fin the inputStream
@@ -94,6 +95,21 @@ public final class IORead{
         });
 
     }
+	public static Result<String> readTextFromURL(URL url,Charset charset){
+    	return Result.function(url,charset).code(l -> {
+
+			URLConnection connection = url.openConnection();
+			return readTextStream(connection.getInputStream(),charset);
+
+		});
+
+	}
+	public static Result<String> readTextFromURL(String url, Charset charset){
+		return Result.function(url,charset).code(l ->
+			readTextFromURL(new URL(url),charset)
+		);
+	}
+
 
 	/**
      * Reads a text file

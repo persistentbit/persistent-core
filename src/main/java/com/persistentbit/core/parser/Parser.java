@@ -157,12 +157,12 @@ public interface Parser<T>{
 	@SuppressWarnings("unchecked")
 	static <R> Parser<PList<R>> zeroOrMore(Parser<R> parser) {
 		return source -> {
-			PList  res       = PList.empty();
-			Source orgSource = source;
+			PList<R>  res       = PList.empty();
+			//Source orgSource = source;
 			while(source.current != Source.EOF) {
 				ParseResult<R> itemRes = parser.parse(source);
 				if(itemRes.isFailure()) {
-					return ParseResult.success(source, res);
+					break;
 				}
 				res = res.plus(itemRes.getValue());
 				if(source.position.equals(itemRes.getSource().position)) {

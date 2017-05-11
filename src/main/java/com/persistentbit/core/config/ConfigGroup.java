@@ -21,11 +21,11 @@ import java.util.function.BiConsumer;
  * @since 10/05/2017
  */
 public class ConfigGroup {
-    private class Property<T> extends BaseValueClass implements Config<T> {
-        public final String name;
-        public final Class type;
-        public final String info;
-        public final Validator<T> validator;
+    public class Property<T> extends BaseValueClass implements Config<T> {
+        private String name;
+        private Class type;
+        private String info;
+        private Validator<T> validator;
         private Result<T> value;
         private PList<BiConsumer<Config,Result<T>>> watchers;
         public Property(String name, Class type, String info, Result<T> value,PList<BiConsumer<Config,Result<T>>> watchers,Validator<T> validator) {
@@ -42,6 +42,26 @@ public class ConfigGroup {
             return value;
         }
 
+        public void setInfo(String info) {
+            this.info = info;
+        }
+
+        public void setValidator(Validator<T> validator) {
+            this.validator = validator;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getInfo() {
+            return info;
+        }
+
+        public Validator<T> getValidator() {
+            return validator;
+        }
+
         @Override
         public synchronized void watch(BiConsumer<Config,Result<T>> changeWatcher) {
             watchers = watchers.plus(changeWatcher);
@@ -50,7 +70,7 @@ public class ConfigGroup {
             return Result.function(newValue).code(l -> {
                 Result<T> oldValue = value;
                 value = newValue
-                        .flatMap(t -> validator.validateToResult(name,t));
+                        .flatMap(t -> validator.validateToResult(name,(T)t));
 
                 if(oldValue.equals(value) == false){
                     watchers.forEach(c -> c.accept(this,oldValue));
@@ -64,6 +84,9 @@ public class ConfigGroup {
 
     public ConfigGroup(POrderedMap<String, Property> properties) {
         this.properties = Objects.requireNonNull(properties);
+    }
+    public ConfigGroup() {
+        this(POrderedMap.empty());
     }
 
     public <T> Property<T> add(String name, Class<T> type, String info, T defaultValue){

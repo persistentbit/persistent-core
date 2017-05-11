@@ -17,24 +17,31 @@ import java.math.BigDecimal;
  */
 public class ValueParser {
 
-    static private final Parser<String> ws = Parser.zeroOrMore(Scan.whiteSpaceAndNewLine.or(Scan.blockComment("/*","*/"))).map(l -> l.toString(""));
+    //static private final Parser<String> ws =
+    //        Parser.zeroOrMore(
+    //                Scan.whiteSpaceAndNewLine.or(Scan.blockComment("/*","*/"))
+    //        ).map(l -> l.toString(""));
+    static private final Parser<String> ws =Scan.whiteSpaceAndNewLine;
     static private final Parser<BigDecimal> parseNumber = Scan.bigDecimalLiteral;
     static private final Parser<String> parseString =
             Scan.stringLiteral("\"",false)
             .or(Scan.stringLiteral("\'", false))
             .or(Scan.stringLiteral("\"\"\"",true));
     static private final Parser<Boolean> parseBool =
-            Scan.term("true").map(s -> true)
-                    .or(Scan.term("false").map(s -> false));
+            Scan.term("true").map(s -> Boolean.TRUE)
+                    .or(Scan.term("false").map(s ->  Boolean.FALSE));
     static private final Parser<String> parseName =
             Parser.oneOrMoreSep(Scan.identifier,Scan.term(".")).map(l -> l.toString("."));
     static private final Parser<Object> parseValue =
-            parseNumber.or(parseString).or(parseBool).map(v -> v);
+            parseNumber.map(v -> (Object)v)
+                    .or(parseString.map(v -> (Object)v))
+                    .or(parseBool.map(v -> (Object)v));
 
 
     private static  Parser<PList<NamedValue<Object>>> parse(){
         return source -> {
-            ParseResult<String> resName = ws.skipAnd(parseName).parse(source);
+            source = ws.parse(source).getSource();
+            ParseResult<String> resName = parseName.parse(source);
             if(resName.isFailure()){
                 return resName.onErrorAdd("Expected a property name").map(v-> null);
             }
@@ -66,6 +73,6 @@ public class ValueParser {
     }
 
     public static Parser<PList<NamedValue<Object>>> parseAll(){
-        return Parser.zeroOrMore(parse()).andEof().map(ll -> ll.<NamedValue<Object>>flatten().plist());
+        return Parser.zeroOrMore(parse().skip(ws)).andEof().map(ll -> ll.<NamedValue<Object>>flatten().plist());
     }
 }

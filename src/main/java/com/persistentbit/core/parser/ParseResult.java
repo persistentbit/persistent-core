@@ -84,7 +84,13 @@ public abstract class ParseResult<T>{
 
 		@Override
 		public <R> ParseResult<R> map(Function<T, R> mapper) {
-			return new ParseSuccess<>(source, mapper.apply(value));
+			try {
+				R r = mapper.apply(value);
+				return new ParseSuccess<>(source, r);
+			}catch(Exception e){
+				return ParseResult.failure(source, new ParseException("Mapper failed",e,source.position));
+			}
+
 		}
 
 		@Override
