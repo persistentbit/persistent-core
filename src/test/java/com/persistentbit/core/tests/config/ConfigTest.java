@@ -7,6 +7,8 @@ import com.persistentbit.core.io.IO;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.tests.CoreTest;
+import com.persistentbit.core.utils.RuntimeEnvironment;
+import com.persistentbit.core.utils.UReflect;
 
 /**
  * TODO: Add comment
@@ -20,10 +22,12 @@ public class ConfigTest {
         public final Config<Integer> intTest;
         public final Config<Boolean> boolTest;
         public final Config<String> strTest;
+        public final Config<RuntimeEnvironment> runEnv;
         public Settings(ConfigGroup grp){
-            intTest = grp.addInt("intTest","",10);
-            boolTest = grp.addBoolean("boolTest","",true);
-            strTest = grp.addString("strTest","","Default string");
+            intTest = grp.addInt("intTest", 10, "");
+            boolTest = grp.addBoolean("boolTest", true, "");
+            strTest = grp.addString("strTest", "Default string", "");
+            runEnv = grp.addEnum("runEnv",RuntimeEnvironment.class, null,"Runtime env");
         }
     }
 
@@ -33,8 +37,17 @@ public class ConfigTest {
         tr.info(src);
         ConfigGroup grp = new ConfigGroup();
         Settings settings = new Settings(grp);
+        tr.isEquals(settings.boolTest.get().orElseThrow(),true);
+        tr.isEquals(settings.intTest.get().orElseThrow(),10);
+        tr.isEquals(settings.strTest.get().orElseThrow(),"Default string");
+        tr.isEquals(settings.runEnv.get().orElse(null),null);
         grp.load(src).orElseThrow();
-
+        tr.isEquals(settings.boolTest.get().orElseThrow(),false);
+        tr.isEquals(settings.intTest.get().orElseThrow(),1234);
+        tr.isEquals(settings.strTest.get().orElseThrow(),"Dit is een String");
+        tr.isEquals(settings.runEnv.get().orElseThrow(),RuntimeEnvironment.development);
+        tr.info(grp);
+        tr.info(UReflect.getEnumInstances(RuntimeEnvironment.class));
     });
 
     public void testAll(){

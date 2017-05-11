@@ -198,6 +198,20 @@ public final class UReflect{
 		return methods;
 	}
 
+	public static <E extends Enum> PList<E>	getEnumInstances(Class<E> cls){
+		PList<E> res = PList.empty();
+		for(Field f : cls.getDeclaredFields()){
+			if(f.isEnumConstant()){
+				try {
+					res = res.plus((E)f.get(null));
+				} catch (IllegalAccessException e) {
+					throw new RuntimeException("Getting value from " + f, e);
+				}
+			}
+		}
+		return res;
+	}
+
 	public static PList<Executable> findConstructors(Class cls) {
 		return PList.val(cls.getConstructors());
 	}

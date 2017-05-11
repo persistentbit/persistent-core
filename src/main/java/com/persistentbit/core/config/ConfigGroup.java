@@ -10,6 +10,7 @@ import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.UNumber;
 import com.persistentbit.core.utils.UReflect;
+import com.persistentbit.core.utils.UString;
 import com.persistentbit.core.validation.OKValidator;
 import com.persistentbit.core.validation.Validator;
 
@@ -38,6 +39,13 @@ public class ConfigGroup {
             this.watchers = watchers;
             this.validator = validator;
         }
+
+        @Override
+        public String toString() {
+            String infoString = info.isEmpty() ? "" : "  ..." + info;
+            return UReflect.typeToSimpleString(type) +" " + name + " = " + value + infoString;
+        }
+
 
         @Override
         public Result<T> get() {
@@ -92,20 +100,26 @@ public class ConfigGroup {
     }
 
 
-    public <T> Property<T> add(String name, Class<T> type, String info, T defaultValue){
+    public <T> Property<T> add(String name, Class<T> type, T defaultValue, String info){
         Property<T> prop = new Property<>(name,type,info,Result.result(defaultValue),PList.empty(), OKValidator.inst());
         this.properties = this.properties.put(name,prop);
         return prop;
     }
 
-    public Property<Integer> addInt(String name, String info, Integer defaultValue){
-        return add(name,Integer.class, info,defaultValue);
+    public Property<Integer> addInt(String name, Integer defaultValue, String info){
+        return add(name,Integer.class, defaultValue, info);
     }
-    public Property<String> addString(String name, String info, String defaultValue){
-        return add(name,String.class, info,defaultValue);
+    public Property<Long> addLong(String name, Long defaultValue, String info){
+        return add(name,Long.class, defaultValue, info);
     }
-    public Property<Boolean> addBoolean(String name, String info, Boolean defaultValue){
-        return add(name,Boolean.class, info,defaultValue);
+    public Property<String> addString(String name, String defaultValue, String info){
+        return add(name,String.class, defaultValue, info);
+    }
+    public Property<Boolean> addBoolean(String name, Boolean defaultValue, String info){
+        return add(name,Boolean.class, defaultValue, info);
+    }
+    public <E extends Enum> Property<E> addEnum(String name,Class<E> cls,  E defaultValue, String info){
+        return add(name,cls, defaultValue, info);
     }
 
 
@@ -116,6 +130,13 @@ public class ConfigGroup {
                 return Result.failure("Unknown property: '" + name + "'");
             }
             Result<?> mappedRes = resValue.flatMap(value -> {
+                if(Enum.class.isAssignableFrom(cfg.type)){
+                    if(value instanceof String == false){
+                        return Result.failure("Expected an enum name, got " + value);
+                    }
+                    Result res = Result.noExceptions(()-> Enum.valueOf(cfg.type,value.toString()));
+                    return res;
+                }
                 if(cfg.type.isAssignableFrom(value.getClass())){
                     return resValue;
                 }
@@ -126,7 +147,7 @@ public class ConfigGroup {
                 return Result.failure("Don't know how to convert " + value + " to " + UReflect.typeToSimpleString(cfg.type));
             });
 
-            cfg.set(resValue);
+            cfg.set(mappedRes);
             return OK.result;
         });
     }
@@ -147,7 +168,7 @@ public class ConfigGroup {
                 if(get(nv.key).isEmpty()){
                     l.warning("Unknown property: '" + nv.key);
                 } else {
-                    Result<OK> setRes = properties.get(nv.key).set(Result.result(nv.value));
+                    Result<OK> setRes = set(nv.key,Result.result(nv.value));
                     if(setRes.isError()){
                         return setRes;
                     }
@@ -157,4 +178,8 @@ public class ConfigGroup {
         });
     }
 
+    @Override
+    public String toString() {
+        return properties.values().map(p -> p.toString()).toString(UString.NL);
+    }
 }

@@ -61,6 +61,14 @@ public final class UNumber{
 		if(value instanceof Long) {
 			return Result.success((Long) value);
 		}
+		if(value instanceof BigDecimal){
+			BigDecimal bd = (BigDecimal)value;
+			try{
+				return Result.success(bd.longValueExact());
+			}catch (ArithmeticException ae){
+				return Result.failure(ae);
+			}
+		}
 		if(isNaturalNumber(value)) {
 			return Result.success(value.longValue());
 		}
