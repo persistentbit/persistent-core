@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 public class GExprParser{
 
 	private final Parser<String> lineComment = Scan.lineComment("//");
-	private final Parser<String> blockComment = Scan.blockComment("/*", "*?");
+	private final Parser<String> blockComment = Scan.blockComment("/*", "*/");
 	public final Parser<String> ws =
 		Scan.parseWhiteSpaceWithComment(Scan.whiteSpaceAndNewLine, lineComment.or(blockComment));
 

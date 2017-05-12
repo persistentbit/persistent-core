@@ -17,11 +17,12 @@ import java.math.BigDecimal;
  */
 public class ValueParser {
 
-    //static private final Parser<String> ws =
-    //        Parser.zeroOrMore(
-    //                Scan.whiteSpaceAndNewLine.or(Scan.blockComment("/*","*/"))
-    //        ).map(l -> l.toString(""));
-    static private final Parser<String> ws =Scan.whiteSpaceAndNewLine;
+    private static final Parser<String> lineComment = Scan.lineComment("//");
+    private static final Parser<String> blockComment = Scan.blockComment("/*", "*/");
+    private static final Parser<String> ws =
+            Scan.parseWhiteSpaceWithComment(Scan.whiteSpaceAndNewLine, lineComment.or(blockComment));
+
+    //static private final Parser<String> ws =Scan.whiteSpaceAndNewLine;
     static private final Parser<BigDecimal> parseNumber = Scan.bigDecimalLiteral;
     static private final Parser<String> parseString =
             Scan.stringLiteral("\"",false)
@@ -30,13 +31,29 @@ public class ValueParser {
     static private final Parser<Boolean> parseBool =
             Scan.term("true").map(s -> Boolean.TRUE)
                     .or(Scan.term("false").map(s ->  Boolean.FALSE));
+    static private final Parser<Object> parseNull = Scan.term("null").map(s -> null);
+
+    static private final Parser<PList<Object>> parseArray() {
+        return source -> Scan.term("[")
+                .skipAnd(
+                    Parser.zeroOrMoreSep(parseValue(),ws)
+                ).skip(Scan.term("]"))
+                .parse(source);
+    }
+
+
     static private final Parser<String> parseName =
             Parser.oneOrMoreSep(Scan.identifier,Scan.term(".")).map(l -> l.toString("."));
-    static private final Parser<Object> parseValue =
-            parseNumber.map(v -> (Object)v)
-                    .or(parseString.map(v -> (Object)v))
-                    .or(parseBool.map(v -> (Object)v));
 
+    static private final Parser<Object> parseValue() {
+        return source -> parseNumber.map(v -> (Object) v)
+                .or(parseString.map(v -> (Object) v))
+                .or(parseBool.map(v -> (Object) v))
+                .or(parseArray().map(v -> (Object) v))
+                .or(parseNull)
+                .parse(source)
+        ;
+    }
 
     private static  Parser<PList<NamedValue<Object>>> parse(){
         return source -> {
@@ -52,7 +69,7 @@ public class ValueParser {
             }
             source  = div.getSource();
             if(div.getValue().equals("=")){
-                ParseResult<Object> resValue = ws.skipAnd(parseValue).parse(source);
+                ParseResult<Object> resValue = ws.skipAnd(parseValue()).parse(source);
                 if(resValue.isFailure()){
                     return resValue.onErrorAdd("Expected a value for property " + resName.getValue()).map(v-> null);
                 }

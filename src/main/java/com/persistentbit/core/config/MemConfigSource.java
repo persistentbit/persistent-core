@@ -3,6 +3,7 @@ package com.persistentbit.core.config;
 import com.persistentbit.core.OK;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.POrderedMap;
+import com.persistentbit.core.exceptions.ToDo;
 import com.persistentbit.core.keyvalue.NamedValue;
 import com.persistentbit.core.parser.ParseResult;
 import com.persistentbit.core.parser.source.Source;
@@ -23,16 +24,18 @@ import java.util.function.BiConsumer;
  * @author Peter Muys
  * @since 10/05/2017
  */
-public class ConfigGroup {
+public class MemConfigSource implements ConfigSource{
     public class Property<T> extends BaseValueClass implements Config<T> {
         private String name;
+        private boolean isArray;
         private Class type;
         private String info;
         private Validator<T> validator;
         private Result<T> value;
         private PList<BiConsumer<Config,Result<T>>> watchers;
-        public Property(String name, Class type, String info, Result<T> value,PList<BiConsumer<Config,Result<T>>> watchers,Validator<T> validator) {
+        public Property(String name, boolean isArray, Class type, String info, Result<T> value,PList<BiConsumer<Config,Result<T>>> watchers,Validator<T> validator) {
             this.name = name;
+            this.isArray = isArray;
             this.type = type;
             this.info = info;
             this.value = value;
@@ -43,21 +46,27 @@ public class ConfigGroup {
         @Override
         public String toString() {
             String infoString = info.isEmpty() ? "" : "  ..." + info;
-            return UReflect.typeToSimpleString(type) +" " + name + " = " + value + infoString;
+            return UReflect.typeToSimpleString(type) +" " + name + " = " + get() + infoString;
         }
 
+        public boolean isArray() {
+            return isArray;
+        }
 
         @Override
         public Result<T> get() {
-            return value;
+            return value
+             .flatMap(t -> validator.validateToResult(name,t));
         }
 
-        public void setInfo(String info) {
+        public Property<T> setInfo(String info) {
             this.info = info;
+            return this;
         }
 
-        public void setValidator(Validator<T> validator) {
+        public Property<T> setValidator(Validator<T> validator) {
             this.validator = validator;
+            return this;
         }
 
         public String getName() {
@@ -79,9 +88,7 @@ public class ConfigGroup {
         public synchronized Result<OK> set(Result<T> newValue){
             return Result.function(newValue).code(l -> {
                 Result<T> oldValue = value;
-                value = newValue
-                        .flatMap(t -> validator.validateToResult(name,t));
-
+                value = newValue;
                 if(oldValue.equals(value) == false){
                     watchers.forEach(c -> c.accept(this,oldValue));
                 }
@@ -90,38 +97,29 @@ public class ConfigGroup {
         }
     }
 
+
     private POrderedMap<String, Property> properties;
 
-    public ConfigGroup(POrderedMap<String, Property> properties) {
+    public MemConfigSource(POrderedMap<String, Property> properties) {
         this.properties = Objects.requireNonNull(properties);
     }
-    public ConfigGroup() {
+    public MemConfigSource() {
         this(POrderedMap.empty());
     }
 
 
     public <T> Property<T> add(String name, Class<T> type, T defaultValue, String info){
-        Property<T> prop = new Property<>(name,type,info,Result.result(defaultValue),PList.empty(), OKValidator.inst());
+        Property<T> prop = new Property<>(name,false, type,info,Result.result(defaultValue),PList.empty(), OKValidator.inst());
         this.properties = this.properties.put(name,prop);
         return prop;
     }
 
-    public Property<Integer> addInt(String name, Integer defaultValue, String info){
-        return add(name,Integer.class, defaultValue, info);
+    @Override
+    public <T> Config<PList<T>> addArray(String name, Class<T> cls, PList<T> defaultValue, String info) {
+        Property<PList<T>> prop = new Property<>(name,true, cls,info,Result.result(defaultValue),PList.empty(), OKValidator.inst());
+        this.properties = this.properties.put(name,prop);
+        return prop;
     }
-    public Property<Long> addLong(String name, Long defaultValue, String info){
-        return add(name,Long.class, defaultValue, info);
-    }
-    public Property<String> addString(String name, String defaultValue, String info){
-        return add(name,String.class, defaultValue, info);
-    }
-    public Property<Boolean> addBoolean(String name, Boolean defaultValue, String info){
-        return add(name,Boolean.class, defaultValue, info);
-    }
-    public <E extends Enum> Property<E> addEnum(String name,Class<E> cls,  E defaultValue, String info){
-        return add(name,cls, defaultValue, info);
-    }
-
 
     public Result<OK> set(String name, Result<?> resValue){
         return Result.function(name,resValue).code(l -> {
@@ -130,6 +128,23 @@ public class ConfigGroup {
                 return Result.failure("Unknown property: '" + name + "'");
             }
             Result<?> mappedRes = resValue.flatMap(value -> {
+                if(cfg.isArray){
+                    if(PList.class.isAssignableFrom(value.getClass()) == false){
+                        return Result.failure("Expected a list");
+                    }
+                    PList vl = (PList)value;
+                    Object nonMapable;
+                    if(Number.class.isAssignableFrom(cfg.type)){
+                        throw new ToDo();
+                    } else {
+                        nonMapable = vl.find(item -> item != null && cfg.type.isAssignableFrom(item.getClass()) == false).orElse(null);
+                    }
+                    if(nonMapable != null){
+                        return Result.failure("Can't convert array element " + nonMapable + " to " + UReflect.present(cfg.type));
+                    }
+                    Result res = Result.success(vl.map(v -> v));
+                    return res;
+                }
                 if(Enum.class.isAssignableFrom(cfg.type)){
                     if(value instanceof String == false){
                         return Result.failure("Expected an enum name, got " + value);
@@ -157,7 +172,7 @@ public class ConfigGroup {
         return (Result<Config<T>>)res;
     }
 
-    public Result<OK> load(Source source){
+    public Result<MemConfigSource> load(Source source){
         return Result.function(source.position).code(l -> {
             ParseResult<PList<NamedValue<Object>>> res = ValueParser.parseAll().parse(source);
             if(res.isFailure()){
@@ -170,16 +185,16 @@ public class ConfigGroup {
                 } else {
                     Result<OK> setRes = set(nv.key,Result.result(nv.value));
                     if(setRes.isError()){
-                        return setRes;
+                        return setRes.map(v-> null);
                     }
                 }
             }
-            return OK.result;
+            return Result.success(this);
         });
     }
 
     @Override
     public String toString() {
-        return properties.values().map(p -> p.toString()).toString(UString.NL);
+        return properties.values().map(Property::toString).toString(UString.NL);
     }
 }

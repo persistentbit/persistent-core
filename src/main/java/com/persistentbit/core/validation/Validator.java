@@ -34,6 +34,15 @@ public interface Validator<T>{
 			return res.plusAll(subResult.map(vr -> vr.mapName(n -> name + "." + subName + "." + n)));
 		};
 	}
+	default Validator<T> and(Validator<T> validator){
+		return (name, item) -> {
+			PList<ValidationResult> res      = validate(name, item);
+			return res.plusAll(validator.validate(name, item));
+		};
+	}
+	default Validator<T> and(SimpleValidator<T> validator){
+		return and(validator.toValidator());
+	}
 
 	default <S> Validator<T> and(Function<T, S> subGetter, String subName, SimpleValidator<S> simpleValidator) {
 		return (name, item) -> {

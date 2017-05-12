@@ -1,4 +1,9 @@
-intTest=1234
-boolTest = false
-strTest = "Dit is een String"
-runEnv = "development"
+configtest {
+    intTest=1234
+    boolTest = false
+    strTest = "Dit is een String"
+    runEnv = "development"
+    //Must be between 10 and 15
+    rangeTest=14
+    intArr = [21 5 72 285 50]
+}

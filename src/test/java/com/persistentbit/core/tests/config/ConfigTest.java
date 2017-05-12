@@ -1,14 +1,18 @@
 package com.persistentbit.core.tests.config;
 
 import com.persistentbit.core.ModuleCore;
+import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.config.Config;
-import com.persistentbit.core.config.ConfigGroup;
+import com.persistentbit.core.config.ConfigSource;
+import com.persistentbit.core.config.MemConfigSource;
 import com.persistentbit.core.io.IO;
 import com.persistentbit.core.parser.source.Source;
 import com.persistentbit.core.testing.TestCase;
 import com.persistentbit.core.tests.CoreTest;
 import com.persistentbit.core.utils.RuntimeEnvironment;
 import com.persistentbit.core.utils.UReflect;
+import com.persistentbit.core.validation.NumberValidator;
+import com.persistentbit.core.validation.Validator;
 
 /**
  * TODO: Add comment
@@ -23,11 +27,22 @@ public class ConfigTest {
         public final Config<Boolean> boolTest;
         public final Config<String> strTest;
         public final Config<RuntimeEnvironment> runEnv;
-        public Settings(ConfigGroup grp){
+        public final Config<Integer> rangeTest;
+        public final Config<PList<Integer>> intArr;
+        public Settings(ConfigSource grp){
             intTest = grp.addInt("intTest", 10, "");
             boolTest = grp.addBoolean("boolTest", true, "");
             strTest = grp.addString("strTest", "Default string", "");
             runEnv = grp.addEnum("runEnv",RuntimeEnvironment.class, null,"Runtime env");
+            rangeTest = grp.addInt("rangeTest",0,"Must be between 10 and 15")
+            .setValidator(
+                    Validator.<Integer>notNull()
+                            .and(NumberValidator.minimum(10))
+                            .and(NumberValidator.maximum(15))
+
+            );
+            intArr = grp.addIntArray("intArr",PList.empty(),"int array");
+
         }
     }
 
@@ -35,17 +50,19 @@ public class ConfigTest {
     static final TestCase configTest = TestCase.name("configTest").code(tr-> {
         Source src = Source.asSource(ConfigTest.class.getResource("/config/test_config.txt"), IO.utf8).orElseThrow();
         tr.info(src);
-        ConfigGroup grp = new ConfigGroup();
-        Settings settings = new Settings(grp);
+        MemConfigSource grp = new MemConfigSource();
+        Settings settings = new Settings(grp.subGroup("configtest"));
         tr.isEquals(settings.boolTest.get().orElseThrow(),true);
         tr.isEquals(settings.intTest.get().orElseThrow(),10);
         tr.isEquals(settings.strTest.get().orElseThrow(),"Default string");
         tr.isEquals(settings.runEnv.get().orElse(null),null);
+        tr.isFailure(settings.rangeTest.get());
         grp.load(src).orElseThrow();
         tr.isEquals(settings.boolTest.get().orElseThrow(),false);
         tr.isEquals(settings.intTest.get().orElseThrow(),1234);
         tr.isEquals(settings.strTest.get().orElseThrow(),"Dit is een String");
         tr.isEquals(settings.runEnv.get().orElseThrow(),RuntimeEnvironment.development);
+        tr.isEquals(settings.rangeTest.get().orElseThrow(),14);
         tr.info(grp);
         tr.info(UReflect.getEnumInstances(RuntimeEnvironment.class));
     });
