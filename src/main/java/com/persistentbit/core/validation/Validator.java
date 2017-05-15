@@ -82,6 +82,8 @@ public interface Validator<T>{
 		return new MaybeNullValidator<>();
 	}
 
+	static <T> Validator<T> ok() { return OKValidator.inst(); }
+
 
 	static <ERR> PMap<String, PList<ERR>> validationResultAsErrorMap(PList<ValidationResult> validationResults,
 																	 Function<Msg, ERR> errorMapper

@@ -14,10 +14,12 @@ import com.persistentbit.core.tuples.Tuple3;
 import com.persistentbit.core.tuples.Tuple4;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.function.*;
+import java.util.stream.Collectors;
 
 /**
  * A Result represents the result of a function.<br>
@@ -634,8 +636,18 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 		}
 
 		return Result.success(stream.lazy()
-								  .filter(r -> r.isEmpty() == false)
-								  .map(Result::orElseThrow));
+								  .map(r -> r.orElse(null)));
 
+	}
+
+	public static <T> Result<List<T>> fromSequence(List<Result<T>> list){
+		Optional<Result<T>> optWrong =  list.stream().filter(res -> res.isError()).findFirst();
+		if(optWrong.isPresent()) {
+			return optWrong.get()
+					.flatMapFailure(f -> Result.failure(
+							new RuntimeException("list contains failure", f.getException()))
+					).flatMap(t -> Result.failure("Should not happen"));
+		}
+		return Result.success(list.stream().map(r -> r.orElse(null)).collect(Collectors.toList()));
 	}
 }

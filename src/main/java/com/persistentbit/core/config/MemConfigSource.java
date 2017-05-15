@@ -32,8 +32,8 @@ public class MemConfigSource implements ConfigSource{
         private String info;
         private Validator<T> validator;
         private Result<T> value;
-        private PList<BiConsumer<Config,Result<T>>> watchers;
-        public Property(String name, boolean isArray, Class type, String info, Result<T> value,PList<BiConsumer<Config,Result<T>>> watchers,Validator<T> validator) {
+        private PList<BiConsumer<Config<T>,Result<T>>> watchers;
+        public Property(String name, boolean isArray, Class type, String info, Result<T> value,PList<BiConsumer<Config<T>,Result<T>>> watchers,Validator<T> validator) {
             this.name = name;
             this.isArray = isArray;
             this.type = type;
@@ -82,8 +82,9 @@ public class MemConfigSource implements ConfigSource{
         }
 
         @Override
-        public synchronized void watch(BiConsumer<Config,Result<T>> changeWatcher) {
+        public synchronized Property<T> watch(BiConsumer<Config<T>,Result<T>> changeWatcher) {
             watchers = watchers.plus(changeWatcher);
+            return this;
         }
         public synchronized Result<OK> set(Result<T> newValue){
             return Result.function(newValue).code(l -> {

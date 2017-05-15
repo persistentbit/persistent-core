@@ -1,21 +1,22 @@
-package com.persistentbit.core.experiments.mapper;
+package com.persistentbit.core.omapper;
 
-import com.persistentbit.core.Nullable;
-import com.persistentbit.core.collections.IPList;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PMap;
+import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.BaseValueClass;
 
+import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
- * TODOC
+ * Register with Object mappers.<br>
  *
  * @author petermuys
  * @since 13/05/17
  */
-public class OMapper{
+public class OMapper {
 	public interface DestType<T>{
 
 	}
@@ -27,17 +28,7 @@ public class OMapper{
 		}
 	}
 
-	public static class PListDestType<T> extends BaseValueClass implements DestType<PList<T>>{
-		@Nullable
-		private final transient DestType<T> itemDestType;
 
-		public PListDestType(DestType<T> itemDestType) {
-			this.itemDestType = itemDestType;
-		}
-		public PListDestType(){
-			this(null);
-		}
-	}
 
 	@FunctionalInterface
 	public interface ValueMapper<V,R>{
@@ -82,14 +73,7 @@ public class OMapper{
 		);
 	}
 
-	public OMapper registerPListMapper(){
-		PListDestType destType = new PListDestType();
-		ValueMapper<IPList,PList> vm = (omap, val, dest) -> {
-			PListDestType plistDest = (PListDestType) dest;
-			return Result.fromSequence(val.map(item -> omap.map(item, plistDest.itemDestType))).map(stream -> stream.plist());
-		};
-		return register(valueClassPred(IPList.class),destType,vm);
-	}
+
 
 	public <V,R> Result<R> map(V value, DestType<R> destType){
 		return Result.function(value,destType).code(l -> {
@@ -108,8 +92,32 @@ public class OMapper{
 			return Result.failure("No mapper defined for value" + value);
 		});
 	}
+	public <V,R> Result<PList<R>> mapPList(PList<V> value, Class<R> destCls){
+		return mapPList(value, new ClsDestType<>(destCls));
+	}
+
 	public <V,R> Result<PList<R>> mapPList(PList<V> value, DestType<R> itemDestType){
-		return map(value, new PListDestType<>(itemDestType));
+		return Result.function(value,itemDestType).code(l -> {
+			PList<Result<R>> resRes = value.map(item -> map(item,itemDestType));
+			Result<PStream<R>> resStream = Result.fromSequence(resRes);
+			return resStream.map(PStream::plist);
+		});
+
+	}
+	public <V,R> Result<List<R>> mapList(List<V> value, DestType<R> itemDestType){
+		return Result.function(value,itemDestType).code(l -> {
+			List<Result<R>> resRes = value.stream().map(item -> map(item,itemDestType)).collect(Collectors.toList());
+			return Result.fromSequence(resRes);
+		});
+	}
+	public <V,R> Result<List<R>> mapList(List<V> value, Class<R> destCls){
+		return mapList(value, new ClsDestType<>(destCls));
+	}
+	public <V,R> Result<R> mapResult(Result<V> value, DestType<R> itemDestType){
+		return value.flatMap(v -> map(v,itemDestType));
+	}
+	public <V,R> Result<R> mapResult(Result<V> value, Class<R> itemDestCls){
+		return mapResult(value,new ClsDestType<>(itemDestCls));
 	}
 	public <V,R> Result<R> map(V value, Class<R> destCls){
 		return map(value,new ClsDestType<>(destCls));

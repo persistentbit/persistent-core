@@ -4,6 +4,7 @@ import com.persistentbit.core.result.Result;
 import com.persistentbit.core.validation.Validator;
 
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 /**
  * Represents a Config setting.<br>
@@ -24,7 +25,7 @@ public interface Config<T>{
      * Add a change event listener
      * @param changeWatcher with the config and previous value as parameters
      */
-    void watch(BiConsumer<Config, Result<T>> changeWatcher);
+    Config<T> watch(BiConsumer<Config<T>, Result<T>> changeWatcher);
 
     /**
      * Get the value or a defaultvalue if this setting is empty
@@ -45,6 +46,8 @@ public interface Config<T>{
      */
     String getInfo();
 
+    String getName();
+
     /**
      * Get the validator for this setting.
      * Default value is a {@link com.persistentbit.core.validation.OKValidator}
@@ -58,4 +61,8 @@ public interface Config<T>{
      * @return this item.
      */
     Config<T> setValidator(Validator<T> validator);
+
+    default <R> Config<R> mapped(Function<T,Result<R>> mapper){
+        return new MappedConfig<>(this,getName(),mapper,getInfo(),Validator.ok());
+    }
 }
