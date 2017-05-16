@@ -1,68 +1,88 @@
 package com.persistentbit.core.config;
 
+import com.persistentbit.core.io.IO;
 import com.persistentbit.core.result.Result;
-import com.persistentbit.core.validation.Validator;
+import com.persistentbit.core.utils.UNumber;
+import com.persistentbit.core.utils.UReflect;
+import com.persistentbit.core.utils.UString;
+import com.persistentbit.core.validation.EmailValidator;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
- * Represents a Config setting.<br>
- * Typically read from a config file or a database.<br>
- * A Config setting can be watched for change.<br>
+ * TODOC
  *
- * @author Peter Muys
- * @since 10/05/2017
+ * @author petermuys
+ * @since 15/05/17
  */
-public interface Config<T>{
-    /**
-     * Get the value.
-     * @return The value as a {@link Result}
-     */
-    Result<T> get();
+public class Config{
 
-    /**
-     * Add a change event listener
-     * @param changeWatcher with the config and previous value as parameters
-     */
-    Config<T> watch(BiConsumer<Config<T>, Result<T>> changeWatcher);
+	public static ConfigVar<String> stringVar(String name){
+		return new ConfigVar<>(name,v -> Result.result(v))
+				.withInfo("A text strings");
+	}
+	public static ConfigVar<Integer> intVar(String name){
+		return new ConfigVar<>(name, UNumber::parseInt)
+				.withInfo("An Integer number");
+	}
+	public static ConfigVar<Long> longVar(String name){
+		return new ConfigVar<>(name, UNumber::parseLong)
+				.withInfo("A Long value");
+	}
+	public static ConfigVar<Double> doubleVar(String name){
+		return new ConfigVar<>(name, UNumber::parseDouble)
+				.withInfo("A Double value");
+	}
+	public static ConfigVar<Boolean> boolVar(String name){
+		return new ConfigVar<>(name, UString::parseBoolean)
+				.withInfo("Boolean value (true or false)");
+	}
+	public static ConfigVar<Path> pathVar(String name){
+		return new ConfigVar<>(name,str -> Result.noExceptions(()-> Paths.get(str)))
+				.withInfo("Filesystem path");
+	}
+	public static ConfigVar<Class> classVar(String name){
+		return new ConfigVar<>(name,
+				str -> UReflect.getClass(str),
+				cls -> Result.result(cls == null ? null : cls.getName())
+		).withInfo("Class name");
+	}
+	public static <E extends Enum> ConfigVar<E> enumValue(String name, Class<E> enumCls){
+		return new ConfigVar<E>(name,
+				str -> {
+					E instance = UReflect.getEnumInstances(enumCls).find(e -> e.name().equals(str)).orElse(null);
+					if(instance == null){
+						return Result.failure("No enum value with name '" + str + "' found for enum " + UReflect.typeToSimpleString(enumCls));
+					}
+					return Result.success(instance);
+				},
+				value -> Result.result(value == null ? null : value.name() )
+		)
+				.withInfo("Enum '" + UReflect.typeToSimpleString(enumCls) + "'. One of " + UReflect.getEnumInstances(enumCls).map(e -> e.name()).toString(", "));
 
-    /**
-     * Get the value or a defaultvalue if this setting is empty
-     * @param defaultValue The default value on empty
-     * @return The Result
-     */
-    default Result<T> get(T defaultValue){
-        Result<T> res = get();
-        if(res.isEmpty()){
-            return Result.success(defaultValue);
-        }
-        return res;
-    }
+	}
 
-    /**
-     * Info about this setting or an empty string
-     * @return The info
-     */
-    String getInfo();
+	public static ConfigVar<String> emailVar(String name){
+		return stringVar(name)
+				.withValidator(EmailValidator.stringValidator.toValidator())
+				.withInfo("An e-mail address");
+	}
 
-    String getName();
-
-    /**
-     * Get the validator for this setting.
-     * Default value is a {@link com.persistentbit.core.validation.OKValidator}
-     * @return The validator.
-     */
-    Validator<T> getValidator();
-
-    /**
-     * Register a new validator for this setting
-     * @param validator The validator
-     * @return this item.
-     */
-    Config<T> setValidator(Validator<T> validator);
-
-    default <R> Config<R> mapped(Function<T,Result<R>> mapper){
-        return new MappedConfig<>(this,getName(),mapper,getInfo(),Validator.ok());
-    }
+	public static ConfigVar<URL> urlVar(String name){
+		return new ConfigVar<>(
+				name,
+				str -> IO.asURL(str),
+				url -> Result.result(url == null ? null : url.toExternalForm())
+		).withInfo("An URL");
+	}
+	public static ConfigVar<URI> uriVar(String name){
+		return new ConfigVar<>(
+				name,
+				str -> IO.asURI(str),
+				uri -> Result.result(uri == null ? null : uri.toString())
+		).withInfo("An URI");
+	}
 }

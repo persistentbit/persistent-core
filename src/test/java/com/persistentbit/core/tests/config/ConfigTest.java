@@ -1,19 +1,5 @@
 package com.persistentbit.core.tests.config;
 
-import com.persistentbit.core.ModuleCore;
-import com.persistentbit.core.collections.PList;
-import com.persistentbit.core.config.Config;
-import com.persistentbit.core.config.ConfigSource;
-import com.persistentbit.core.config.MemConfigSource;
-import com.persistentbit.core.io.IO;
-import com.persistentbit.core.parser.source.Source;
-import com.persistentbit.core.testing.TestCase;
-import com.persistentbit.core.tests.CoreTest;
-import com.persistentbit.core.utils.RuntimeEnvironment;
-import com.persistentbit.core.utils.UReflect;
-import com.persistentbit.core.validation.NumberValidator;
-import com.persistentbit.core.validation.Validator;
-
 /**
  * TODO: Add comment
  *
@@ -21,7 +7,7 @@ import com.persistentbit.core.validation.Validator;
  * @since 11/05/2017
  */
 public class ConfigTest {
-
+/*
     private static class Settings {
         public final Config<Integer> intTest;
         public final Config<Boolean> boolTest;
@@ -74,5 +60,5 @@ public class ConfigTest {
     public static void main(String... args) throws Exception {
         ModuleCore.consoleLogPrint.registerAsGlobalHandler();
         new ConfigTest().testAll();
-    }
+    }*/
 }
