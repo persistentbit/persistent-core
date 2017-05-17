@@ -7,8 +7,8 @@ import com.persistentbit.core.result.Result;
 import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
-import java.nio.file.*;
-import java.util.List;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
@@ -65,7 +65,7 @@ public class ConfigPropertyFile{
 			});
 		});
 	}
-	static public WatchService watchFileForChange(ConfigGroup grp, Path propertyFilePath){
+	/*static public WatchService watchFileForChange(ConfigGroup grp, Path propertyFilePath){
 
 	}
 	static public void watchForChange(Path path){
@@ -98,10 +98,10 @@ public class ConfigPropertyFile{
 		}
 
 	}
-
+	*/
 	public static void main(String[] args) {
 		//load(new ConfigGroup(),ConfigPropertyFile.class.getResourceAsStream("/config/test.properties")).orElseThrow();
 		Path p = Paths.get("D:\\bravoconfig\\conf\\bevolking-server.config.properties");
-		watchForChange(p);
+		//watchForChange(p);
 	}
 }
