@@ -55,7 +55,7 @@ public class Config{
 				str -> {
 					E instance = UReflect.getEnumInstances(enumCls).find(e -> e.name().equals(str)).orElse(null);
 					if(instance == null){
-						return Result.failure("No enum value with name '" + str + "' found for enum " + UReflect.typeToSimpleString(enumCls));
+						return Result.failure(name + ": " + "No enum value with name '" + str + "' found for enum " + UReflect.typeToSimpleString(enumCls));
 					}
 					return Result.success(instance);
 				},

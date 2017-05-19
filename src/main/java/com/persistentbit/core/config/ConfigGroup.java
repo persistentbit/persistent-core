@@ -5,6 +5,8 @@ import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.ImTools;
 
+import java.util.Objects;
+
 /**
  * TODOC
  *
@@ -17,7 +19,7 @@ public class ConfigGroup extends BaseValueClass{
 	public ConfigGroup(
 		PMap<String, ConfigVar<?>> vars
 	) {
-		this.vars = vars;
+		this.vars = Objects.requireNonNull(vars);
 	}
 	public ConfigGroup(){
 		this(PMap.empty());
