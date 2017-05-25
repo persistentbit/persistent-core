@@ -26,6 +26,7 @@ import java.util.stream.Stream;
  * @see POrderedSet
  * @see PMap
  * @see POrderedMap
+ * @see PByteList
  * @since 6/07/2016
  */
 @DUsesClass(value = InfinitePStreamException.class,label = "throws >")
@@ -70,7 +71,7 @@ public interface PStream<T> extends Iterable<T>{
 	}
 
 	/**
-	 * Create a PStream from an {@link Iterator} orOf a {@link PStreamable}<br>
+	 * Create a PStream from an {@link Iterator} or a {@link PStreamable}<br>
 	 *
 	 * @param iter The Iterator orOf PStreamable
 	 * @param <T>  The type of the resulting stream
@@ -152,14 +153,26 @@ public interface PStream<T> extends Iterable<T>{
 		};
 	}
 
-	static PStream<Integer> range(int start, int length) {
-		return sequence(start).limit(length);
+	/**
+	 * Create a lazy PStream with integers in a range
+	 * @param first	First number in the stream
+	 * @param last Last number in the stream
+	 * @return a Lazy PStream
+	 */
+	static PStream<Integer> range(int first, int last) {
+		int length = Math.max(0,last - first + 1);
+		return sequence(first).limit(length);
 	}
 
-
+	/**
+	 * Create a lazy infinite PStream of Integers starting with the given value and incrementing by 1.
+	 * @param start Starting number
+	 * @return a lazy PStream
+	 */
 	static PStream<Integer> sequence(int start) {
 		return sequence(start, i -> i + 1);
 	}
+
 
 	static <T> PStream<T> sequence(T start, Function<T, T> next) {
 		return new AbstractPStreamLazy<T>(){

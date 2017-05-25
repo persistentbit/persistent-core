@@ -9,8 +9,21 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
+ * Contains 6 nullable values with possible different types.
+ * @param <T1> Type of value 1
+ * @param <T2> Type of value 2
+ * @param <T3> Type of value 3
+ * @param <T4> Type of value 4
+ * @param <T5> Type of value 5
+ * @param <T6> Type of value 6
+ * @param <T7> Type of value 6
  * @author Peter Muys
  * @since 30/09/2016
+ * @see Tuple2
+ * @see Tuple3
+ * @see Tuple4
+ * @see Tuple5
+ * @see Tuple6
  */
 public class Tuple7<T1, T2, T3, T4, T5, T6, T7> implements Comparable<Tuple7<T1, T2, T3, T4, T5, T6, T7>>, Serializable{
 

@@ -1,5 +1,5 @@
 /**
- * Utility classes for Functions.<br>
+ * General Utility classes for Functions.<br>
  *
  * @author petermuys
  * @since 31/03/17

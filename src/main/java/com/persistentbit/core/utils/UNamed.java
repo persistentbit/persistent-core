@@ -4,7 +4,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * Utilities to give a Lambda a meaningfull toString() method
+ * Utilities to give a Lambda a meaning full toString() method
  *
  * @author Peter Muys
  * @since 13/04/2017

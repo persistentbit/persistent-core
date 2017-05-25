@@ -11,7 +11,15 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * TODO: Add comment
+ * A Config var is a container for a variable with:
+ * <ul>
+ *     <li>A name</li>
+ *     <li>Setter/Getter using strings</li>
+ *     <li>Extra info or description</li>
+ *     <li>An optional Validator for the value</li>
+ *     <li>A change watchers</li>
+ * </ul>
+ *
  *
  * @author Peter Muys
  * @since 15/05/2017
@@ -22,7 +30,7 @@ public class ConfigVar<T> extends BaseValueClass implements ResultSupplier<T> {
     private final Function<T,Result<String>> toString;
     private final String info;
     private final Validator<T> validator;
-    private final PList<BiConsumer<Result<T>, ConfigVar<T>>> watchers;
+    private PList<BiConsumer<Result<T>, ConfigVar<T>>> watchers;
     private Result<T> value;
 
 	public ConfigVar(String name,
@@ -50,6 +58,11 @@ public class ConfigVar<T> extends BaseValueClass implements ResultSupplier<T> {
 		this(name,fromString,v -> Result.result(v.toString()));
 	}
 
+	/**
+	 * Get the value of this var.<br>
+	 * The value returned is validated.<br>
+	 * @return The value Result
+	 */
     public Result<T> get() {
 		if(value.isError()){
 			return value;
@@ -57,32 +70,64 @@ public class ConfigVar<T> extends BaseValueClass implements ResultSupplier<T> {
         return validator.validateToResult(name,value.orElse(null));
     }
 
-
+	/**
+	 * Convert this instance to a {@link Supplier}
+	 * @return
+	 */
     public Supplier<Result<T>> asSupplier() {
 		return this::get;
 	}
 
-
+	/**
+	 * Get the info for this var or an empty string
+	 * @return The info
+	 */
     public String getInfo() {
         return info;
     }
 
 
-    public String getName() {
+	/**
+	 * Get the name of this var
+	 * @return The name
+	 */
+	public String getName() {
         return name;
     }
 
-
+	/**
+	 * Create a new version of this instance with updated info
+	 * @param info The new info
+	 * @return a new ConfigVar
+	 */
     public ConfigVar<T> withInfo(String info) {
         return copyWith("info",info);
     }
 
-    public ConfigVar<T> withValidator(Validator<T> validator){
+	/**
+	 * Create a new version of this instance with updated validator
+	 * @param validator The new validator
+	 * @return a new ConfigVar
+	 */
+	public ConfigVar<T> withValidator(Validator<T> validator){
 		return copyWith("validator",validator);
 	}
+
+	/**
+	 * Add a value change watcher to this config var.
+	 * @param watcher BiConsumer with a Result<T> containing the previous value and this var.
+	 * @return this instance with added watcher
+	 */
     public ConfigVar<T> addWatcher(BiConsumer<Result<T>, ConfigVar<T>> watcher){
+
 		return copyWith("watchers", watchers.plus(watcher));
 	}
+
+	/**
+	 * Validate the given string value by calling the from
+	 * @param stringValue The string value to validate
+	 * @return
+	 */
 	public Result<T> validateStringValue(String stringValue){
     	return fromString.apply(stringValue)
 			.flatMap(this::validateValue);

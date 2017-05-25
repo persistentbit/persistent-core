@@ -1,5 +1,6 @@
 package com.persistentbit.core.tests.dependencies;
 
+import com.persistentbit.core.ModuleCore;
 import com.persistentbit.core.tests.CoreTest;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.dependencies.DependencyResolver;
@@ -25,20 +26,15 @@ public class TestDependencies{
 		b.add(e);
 		c.add(d);
 		c.add(e);
-		PList<String> resolved = DependencyResolver.resolve(a, Node::getEdges).map(Node::getValue);
+		PList<String> resolved = DependencyResolver.resolve(a, Node::getEdges).map(plist -> plist.map(Node::getValue)).orElseThrow();
 		System.out.println("Resolved: " + resolved);
 		assert resolved.equals(PList.val("d", "e", "c", "b", "a"));
 
 		//Check circular dependency...
 
 		d.add(b);
-	/*try {
-	  DependencyResolver.resolve(a, Node::getEdges).map(Node::getValue);
-	  assert false;
-	} catch(CircularDependencyException ex) {
-	  assert ex.getFirstNode().equals(d) || ex.getSecondNode().equals(d);
-	  assert ex.getFirstNode().equals(b) || ex.getSecondNode().equals(b);
-	}*/
+		tr.isFailure(DependencyResolver.resolve(a, Node::getEdges).map(plist -> plist.map(Node::getValue)));
+
 	});
 
   public void testAll(){
@@ -80,4 +76,9 @@ public class TestDependencies{
 	  return "(" + value + ")";
 	}
   }
+
+	public static void main(String[] args) {
+		ModuleCore.consoleLogPrint.registerAsGlobalHandler();
+		new TestDependencies().testAll();
+	}
 }

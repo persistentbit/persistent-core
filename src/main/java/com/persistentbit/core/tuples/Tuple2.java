@@ -10,9 +10,16 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * A Tuple2 contains 2 nullable values with possible different types.
- *
+ * Contains 2 nullable values with possible different types.
+ * @param <T1> Type of value 1
+ * @param <T2> Type of value 2
  * @author Peter Muys
+ * @since 30/09/2016
+ * @see Tuple3
+ * @see Tuple4
+ * @see Tuple5
+ * @see Tuple6
+ * @see Tuple7
  */
 @Immutable
 public class Tuple2<T1, T2> implements Comparable<Tuple2<T1, T2>>, Serializable {

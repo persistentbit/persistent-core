@@ -10,9 +10,17 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * A Tuple3 contains 3 nullable values with possible different types.
- *
+ * Contains 3 nullable values with possible different types.
+ * @param <T1> Type of value 1
+ * @param <T2> Type of value 2
+ * @param <T3> Type of value 3
  * @author Peter Muys
+ * @since 30/09/2016
+ * @see Tuple2
+ * @see Tuple4
+ * @see Tuple5
+ * @see Tuple6
+ * @see Tuple7
  */
 @Immutable
 public class Tuple3<T1, T2, T3> implements Comparable<Tuple3<T1, T2, T3>>, Serializable {

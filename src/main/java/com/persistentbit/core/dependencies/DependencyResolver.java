@@ -4,6 +4,7 @@ import com.persistentbit.core.Nothing;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.doc.Component;
 import com.persistentbit.core.logging.Log;
+import com.persistentbit.core.result.Result;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,11 +35,8 @@ public final class DependencyResolver<VALUE>{
 	 * @param <T>             The Node type
 	 *
 	 * @return An ordered list with the dependencies.
-	 *
-	 * @throws CircularDependencyException Thrown when there is a circular dependency between 2 nodes.
 	 */
-	public static <T> PList<T> resolve(T node, Function<T, PList<T>> getDependencies
-	) throws CircularDependencyException {
+	public static <T> Result<PList<T>> resolve(T node, Function<T, PList<T>> getDependencies) {
 		return Log.function(node).code(l -> {
 			DependencyResolver<T> dr = new DependencyResolver<>(getDependencies);
 			return dr.resolve(node);
@@ -46,17 +44,20 @@ public final class DependencyResolver<VALUE>{
 
 	}
 
-	private PList<VALUE> resolve(VALUE value) {
+	private Result<PList<VALUE>> resolve(VALUE value) {
 		List<VALUE> res = new ArrayList<>();
-		Set<VALUE>  seen = new HashSet<>();
-		resolve(value, res, seen);
-		return PList.from(res);
+		try {
+			resolve(value, res, new HashSet<>());
+		} catch(Exception e) {
+			return Result.failure(e);
+		}
+		return Result.success(PList.from(res));
 	}
 
 	private void resolve(VALUE node, List<VALUE> resolved, Set<VALUE> seen) {
 		Log.function(node).code(l -> {
 			seen.add(node);
-			l.info("Seen",seen);
+			l.info("Seen", seen);
 			for(VALUE edge : getEdges.apply(node)) {
 				if(resolved.contains(edge) == false) {
 					if(seen.contains(edge)) {
