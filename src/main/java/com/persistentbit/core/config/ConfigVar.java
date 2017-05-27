@@ -72,7 +72,7 @@ public class ConfigVar<T> extends BaseValueClass implements ResultSupplier<T> {
 
 	/**
 	 * Convert this instance to a {@link Supplier}
-	 * @return
+	 * @return This config value as a Result supplier
 	 */
     public Supplier<Result<T>> asSupplier() {
 		return this::get;
@@ -115,7 +115,7 @@ public class ConfigVar<T> extends BaseValueClass implements ResultSupplier<T> {
 
 	/**
 	 * Add a value change watcher to this config var.
-	 * @param watcher BiConsumer with a Result<T> containing the previous value and this var.
+	 * @param watcher BiConsumer with a Result T containing the previous value and this var.
 	 * @return this instance with added watcher
 	 */
     public ConfigVar<T> addWatcher(BiConsumer<Result<T>, ConfigVar<T>> watcher){
@@ -124,9 +124,9 @@ public class ConfigVar<T> extends BaseValueClass implements ResultSupplier<T> {
 	}
 
 	/**
-	 * Validate the given string value by calling the from
+	 * Validate the given string value by converting to T and validating the converted value
 	 * @param stringValue The string value to validate
-	 * @return
+	 * @return The validated result value
 	 */
 	public Result<T> validateStringValue(String stringValue){
     	return fromString.apply(stringValue)
