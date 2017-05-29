@@ -3,6 +3,7 @@ package com.persistentbit.core.javacodegen;
 import com.persistentbit.core.Nullable;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.BaseValueClass;
+import com.persistentbit.core.utils.UString;
 
 import java.util.Optional;
 
@@ -161,7 +162,7 @@ public class JField extends BaseValueClass{
 			res = res.isEmpty()? res : res + " ";
 			res = isStatic ? res + " static" : res;
 			res = isFinal ? res + " final" : res;
-			res = res + "\t" + definition;
+			res = res + "\t" + (isNullable && defaultValue == null ? getNullableDefinition() : definition);
 			res = res + "\t" + name;
 			res = initValue != null ? "\t=\t" + initValue : res;
 			res += ";";
@@ -183,6 +184,42 @@ public class JField extends BaseValueClass{
 				res += name;
 			}
 			out.println(res + ";");
+		};
+	}
+
+	public String getNullableDefinition(){
+		if(primitiveType == null){
+			return definition;
+		}
+		switch (primitiveType.getSimpleName()){
+			case "int" : return "Integer";
+			case "byte" : return "Byte";
+			case "short" : return "Short";
+			case "long" : return "Long";
+			case "float" : return "Float";
+			case "double" : return "Double";
+			default: throw new RuntimeException("Unknown: " + primitiveType);
+		}
+
+	}
+
+	public PrintableText printGetter() {
+		return out -> {
+			if(genGetter == false){
+				return;
+			}
+			String res = "public ";
+			res += isStatic ? "static " : "";
+			if(isNullable && defaultValue == null){
+				res += "Optional<" + getNullableDefinition() + "> ";
+			} else {
+				res += definition + " ";
+			}
+			res += "get" + UString.firstUpperCase(name) + "() { return ";
+			res += isNullable && defaultValue == null
+					? "Optional.ofNullable(" + (isStatic? "" : "this.") + name + "); }"
+					: (isStatic ? "" : "this.") + name + "; }";
+			out.println(res);
 		};
 	}
 

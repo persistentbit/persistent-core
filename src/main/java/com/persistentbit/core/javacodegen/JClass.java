@@ -151,12 +151,18 @@ public class JClass extends BaseValueClass{
 		};
 	}
 
+	public PrintableText printGettersSetters() {
+		return out -> {
+			fields.forEach(f -> out.print(f.printGetter()));
+		};
+	}
+
 	public PrintableText printClassContent() {
 		return out -> {
 			out.print(printFields());
 			out.println();
 			out.print(printConstructors());
-
+			out.print(printGettersSetters());
 			out.print(printMethods());
 		};
 	}
@@ -179,10 +185,11 @@ public class JClass extends BaseValueClass{
 	}
 
 	static public void main(String...args){
-		JClass cls = new JClass("com.persistentbit.blog","Blog")
+		JClass cls = new JClass("be.schaubroeck.be","PersoonData")
 			   	.addField(new JField("id",int.class))
-				.addField(new JField("title",String.class))
+				.addField(new JField("rrn",String.class))
 				.addField(new JField("enabled",boolean.class).defaultValue("true"))
+				.addField(new JField("inschrijving",int.class).asNullable())
 
 				.addMainConstructor(AccessLevel.Public)
 			;
