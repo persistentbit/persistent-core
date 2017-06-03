@@ -2,6 +2,7 @@ package com.persistentbit.core.result;
 
 import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.doc.annotations.DInfo;
+import com.persistentbit.core.function.ThrowingFunction;
 import com.persistentbit.core.logging.FunctionLogging;
 import com.persistentbit.core.logging.LoggedException;
 import com.persistentbit.core.logging.LoggedValue;
@@ -101,9 +102,9 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	/**
 	 * Map the Success value orOf return a Failure orOf a Empty.<br>
 	 *
-	 * @param mapper the value mapper
 	 * @param <U>    The resulting value type
 	 *
+	 * @param mapper the value mapper
 	 * @return a new Result
 	 */
 	public abstract <U> Result<U> map(Function<T, U> mapper);
@@ -111,12 +112,31 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	/**
 	 * Flatmap the Success value orOf return a Failure orOf a Empty.<br>
 	 * The new Result's LogEntry is this {@link LogEntry} with the mapped appended.<br>
-	 * @param mapper the value mapper
 	 * @param <U>    The resulting value type
 	 *
+	 * @param mapper the value mapper
 	 * @return a new Result
 	 */
 	public abstract <U> Result<U> flatMap(Function<T, Result<U>> mapper);
+
+	public <U> Result<U> flatMapExc(ThrowingFunction<T,Result<U>,Exception> mapper){
+		return flatMap(value -> {
+			try{
+				return mapper.apply(value);
+			}catch(Exception e){
+				return Result.failure(e);
+			}
+		});
+	}
+	public <U> Result<U> mapExc(ThrowingFunction<T,U,Exception> mapper){
+		return map(value -> {
+			try{
+				return mapper.apply(value);
+			}catch(Exception e){
+				throw new RuntimeException(e);
+			}
+		});
+	}
 
 
 	public Result<T> flatMapIfTrue(Predicate<T> isTrue, Function<T, Result<T>> mapper) {
