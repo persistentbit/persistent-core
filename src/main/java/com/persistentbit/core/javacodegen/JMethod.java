@@ -72,8 +72,8 @@ public class JMethod extends BaseValueClass{
 	public JMethod addArg(JArgument arg){
 		return copyWith("arguments",arguments.plus(arg));
 	}
-	public JMethod addArg(String type, String name,String...annotations){
-		return addArg(new JArgument(type,name,PList.val(annotations)));
+	public JMethod addArg(String type, String name,boolean isNullable, String...annotations){
+		return addArg(new JArgument(type,name,isNullable,PList.val(annotations)));
 	}
 	public JMethod code(PrintableText code){
 		return copyWith("definition",code);
@@ -85,6 +85,14 @@ public class JMethod extends BaseValueClass{
 
 	public JMethod withCode(PrintableText code){
 		return copyWith("definition",code);
+	}
+
+	public JMethod addAnnotation(String annotation){
+		return copyWith("annotations",annotations.plus(annotation));
+	}
+
+	public JMethod asStatic() {
+		return copyWith("isStatic",true);
 	}
 
 	public PrintableText print() {

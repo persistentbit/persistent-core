@@ -1,6 +1,7 @@
 package com.persistentbit.core.javacodegen;
 
 import com.persistentbit.core.Nullable;
+import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.UString;
@@ -224,6 +225,6 @@ public class JField extends BaseValueClass{
 	}
 
 	public JArgument asArgument(){
-		return new JArgument(definition,name);
+		return new JArgument(definition,name,isNullable, PList.empty());
 	}
 }
