@@ -2,6 +2,7 @@ package com.persistentbit.core.javacodegen;
 
 import com.persistentbit.core.Nullable;
 import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.collections.PSet;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.BaseValueClass;
 
@@ -26,12 +27,14 @@ public class JMethod extends BaseValueClass{
 	private final String           doc;
 	private final PList<String>    annotations;
 	private final PList<JArgument> arguments;
+	private final PSet<JImport> imports;
 
 	public JMethod(String name, String resultType, PrintableText definition, boolean isStatic, boolean isFinal,
 				   AccessLevel accessLevel,
 				   String doc,
 				   PList<String> annotations,
-				   PList<JArgument> arguments
+				   PList<JArgument> arguments,
+				   PSet<JImport> imports
 	) {
 		this.name = name;
 		this.resultType = resultType;
@@ -42,6 +45,7 @@ public class JMethod extends BaseValueClass{
 		this.doc = doc;
 		this.annotations = annotations;
 		this.arguments = arguments;
+		this.imports = imports;
 	}
 
 	public JMethod(String name, String resultType, PrintableText definition){
@@ -54,7 +58,8 @@ public class JMethod extends BaseValueClass{
 			AccessLevel.Public,
 			null,
 			PList.empty(),
-			PList.empty()
+			PList.empty(),
+			PSet.empty()
 
 		);
 	}
@@ -73,7 +78,7 @@ public class JMethod extends BaseValueClass{
 		return copyWith("arguments",arguments.plus(arg));
 	}
 	public JMethod addArg(String type, String name,boolean isNullable, String...annotations){
-		return addArg(new JArgument(type,name,isNullable,PList.val(annotations)));
+		return addArg(new JArgument(type,name,isNullable,PList.val(annotations),PSet.empty()));
 	}
 	public JMethod code(PrintableText code){
 		return copyWith("definition",code);
@@ -93,6 +98,14 @@ public class JMethod extends BaseValueClass{
 
 	public JMethod asStatic() {
 		return copyWith("isStatic",true);
+	}
+
+	public JMethod addImport(JImport imp){
+		return copyWith("imports",imports.plus(imp));
+	}
+	public PSet<JImport> getAllImports(){
+		return imports
+			.plusAll(arguments.map(JArgument::getAllImports).flatten());
 	}
 
 	public PrintableText print() {

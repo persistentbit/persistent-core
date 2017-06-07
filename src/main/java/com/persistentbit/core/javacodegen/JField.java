@@ -2,6 +2,7 @@ package com.persistentbit.core.javacodegen;
 
 import com.persistentbit.core.Nullable;
 import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.collections.PSet;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.UString;
@@ -29,6 +30,7 @@ public class JField extends BaseValueClass{
 	@Nullable private final String  defaultValue;
 	@Nullable private final String initValue;
 	@Nullable private final Class primitiveType;
+	private final PSet<JImport> imports;
 
 	public JField(String name, String definition, boolean isStatic, boolean isFinal, boolean genGetter,
 				 boolean genWith,
@@ -37,7 +39,8 @@ public class JField extends BaseValueClass{
 				 boolean isNullable,
 				 String defaultValue,
 				 String initValue,
-				 Class primitiveType
+				 Class primitiveType,
+				 PSet<JImport> imports
 	) {
 		this.name = name;
 		this.definition = definition;
@@ -51,6 +54,7 @@ public class JField extends BaseValueClass{
 		this.defaultValue = null;
 		this.initValue = initValue;
 		this.primitiveType = primitiveType;
+		this.imports = imports;
 	}
 
 	public JField(String name, String definition,Class primitiveType){
@@ -64,7 +68,8 @@ public class JField extends BaseValueClass{
 			 false,
 			 null,
 			 null,
-			 primitiveType
+			 primitiveType,
+			 PSet.empty()
 		);
 	}
 	public JField(String name, String definition){
@@ -83,7 +88,7 @@ public class JField extends BaseValueClass{
 		return copyWith("isStatic",true);
 	}
 	public JField asNullable() {
-		return copyWith("isNullable",true);
+		return addImport(Nullable.class).copyWith("isNullable",true);
 	}
 	public JField defaultValue(String defaultValue){
 		return copyWith("defaultValue",defaultValue);
@@ -204,27 +209,38 @@ public class JField extends BaseValueClass{
 
 	}
 
-	public PrintableText printGetter() {
-		return out -> {
-			if(genGetter == false){
-				return;
-			}
-			String res = "public ";
-			res += isStatic ? "static " : "";
-			if(isNullable && defaultValue == null){
-				res += "Optional<" + getNullableDefinition() + "> ";
+	public JMethod	createGetter() {
+		boolean isOptional = isNullable && defaultValue == null;
+		String resType = isOptional
+			   ? "Optional<" + getNullableDefinition() + ">"
+			   : definition ;
+		JMethod m = new JMethod("get" + UString.firstUpperCase(name),resType);
+		if(isOptional) m = m.addImport(JImport.forClass(Optional.class));
+		m = m.withCode(out -> {
+			if(isOptional){
+				out.println("return Optional.ofNullable(" + (isStatic? "" : "this.") + name + ");");
 			} else {
-				res += definition + " ";
+				out.println("return " + (isStatic ? "" : "this.") + name + ";");
 			}
-			res += "get" + UString.firstUpperCase(name) + "() { return ";
-			res += isNullable && defaultValue == null
-					? "Optional.ofNullable(" + (isStatic? "" : "this.") + name + "); }"
-					: (isStatic ? "" : "this.") + name + "; }";
-			out.println(res);
-		};
+		});
+		return m;
+	}
+
+
+
+	public JField addImport(JImport imp){
+		return copyWith("imports",imports.plus(imp));
+	}
+
+	public JField addImport(Class cls){
+		return addImport(JImport.forClass(cls));
+	}
+
+	public PSet<JImport> getAllImports(){
+		return imports;
 	}
 
 	public JArgument asArgument(){
-		return new JArgument(definition,name,isNullable, PList.empty());
+		return new JArgument(definition,name,isNullable, PList.empty(),getAllImports());
 	}
 }

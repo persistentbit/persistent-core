@@ -17,6 +17,11 @@ public class JImport extends BaseValueClass{
 		this.name = name;
 		this.isStatic = isStatic;
 	}
+
+	public static JImport forClass(Class cls){
+		return new JImport(cls);
+	}
+
 	public JImport(String name){
 		this(name,false);
 	}

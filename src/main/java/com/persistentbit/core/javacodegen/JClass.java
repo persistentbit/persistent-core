@@ -2,6 +2,7 @@ package com.persistentbit.core.javacodegen;
 
 import com.persistentbit.core.Nullable;
 import com.persistentbit.core.collections.PList;
+import com.persistentbit.core.collections.PSet;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.UString;
@@ -27,9 +28,9 @@ public class JClass extends BaseValueClass{
 	@Nullable
 	private final String doc;
 	private final PList<String> annotations;
-	private final PList<JImport> imports;
 	private final PList<JClass> internalClasses;
 	private final boolean isStatic;
+	private final PSet<JImport> imports;
 
 	public JClass(String packageName, String className, AccessLevel accessLevel, String extendsDef,
 				  PList<String> implementsDef,
@@ -38,7 +39,7 @@ public class JClass extends BaseValueClass{
 				  PList<JMethod> methods,
 				  String doc,
 				  PList<String> annotations,
-				  PList<JImport> imports,
+				  PSet<JImport> imports,
 				  PList<JClass> internalClasses,
 				  boolean isStatic
 	) {
@@ -69,7 +70,7 @@ public class JClass extends BaseValueClass{
 			PList.<JMethod>empty(),
 			null,
 			PList.<String>empty(),
-			PList.empty(),
+			PSet.empty(),
 			PList.empty(),
 				false
 		);
@@ -101,7 +102,7 @@ public class JClass extends BaseValueClass{
 	}
 
 	public JClass addImport(JImport imp){
-		return copyWith("imports", imp);
+		return copyWith("imports", imports.plus(imp));
 	}
 
 	public JClass addInternalClass(JClass cls) {
@@ -116,8 +117,11 @@ public class JClass extends BaseValueClass{
 		return addImport(cls.getName());
 	}
 
-	public PList<JImport> getAllImports(){
-		return imports;
+	public PSet<JImport> getAllImports(){
+		return imports
+			.plusAll(fields.map(JField::getAllImports).flatten())
+			.plusAll(internalClasses.map(JClass::getAllImports).flatten())
+			.plusAll(methods.map(JMethod::getAllImports).flatten());
 	}
 
 
@@ -170,11 +174,30 @@ public class JClass extends BaseValueClass{
 		};
 	}
 
-	public PrintableText printGettersSetters() {
-		return out -> {
-			fields.forEach(f -> out.print(f.printGetter()));
-		};
+	public JClass addGettersAndSetters() {
+		JClass res = this;
+		for(JField f : fields){
+			if(f.isGenGetter()){
+				res = res.addMethod(f.createGetter());
+			}
+
+			if(f.isGenWith()){
+				res = res.addWithMethod(f);
+			}
+		}
+		return res;
 	}
+	public JClass addWithMethod(JField field){
+		JMethod m = new JMethod("with" + UString.firstUpperCase(field.getName()),className)
+			.addArg(field.asArgument());
+		m = m.withCode(out -> {
+			String args = getConstructorFields().map(f -> f.getName()).toString(", ");
+			out.println("return new " + className + "(" + args + ")");
+		});
+		return addMethod(m);
+	}
+
+
 
 	public PrintableText printInternalClasses() {
 		return out -> {
@@ -189,10 +212,21 @@ public class JClass extends BaseValueClass{
 			out.print(printInternalClasses());
 			out.println();
 			out.print(printConstructors());
-			out.print(printGettersSetters());
+			//out.print(printGettersSetters());
 			out.print(printMethods());
 		};
 	}
+
+	public PrintableText printClassFile(){
+		return out -> {
+			out.println("package " + packageName + ";");
+			out.println();
+			out.print(printImports());
+			out.println();
+			out.print(printClass());
+		};
+	}
+
 	public PrintableText printClass() {
 		return out -> {
 			String res = isStatic ? "static " : "";
@@ -213,13 +247,15 @@ public class JClass extends BaseValueClass{
 		};
 	}
 
-
+	private PList<JField> getBuilderRequiredFields(){
+		return fields
+			.filter(f -> f.isFinal() == false || f.getInitValue().isPresent() == false)
+			.filter(f -> f.isStatic() == false)
+			.filter(f -> f.isNullable() == false && f.getDefaultValue().isPresent() == false);
+	}
 
 	private JClass addBuilderClass() {
-		PList<JField> reqFields = fields
-				.filter(f -> f.isFinal() == false || f.getInitValue().isPresent() == false)
-				.filter(f -> f.isStatic() == false)
-				.filter(f -> f.isNullable() == false && f.getDefaultValue().isPresent() == false);
+		PList<JField> reqFields = getBuilderRequiredFields();
 		String clsGenerics = reqFields.zipWithIndex().map(t-> "_T" + (t._1+1)).toString(", ");
 		String clsName = reqFields.isEmpty() ? "Builder" : "Builder<" + clsGenerics + ">";
 		JClass bcls = new JClass(packageName,clsName).asStatic();
@@ -245,12 +281,35 @@ public class JClass extends BaseValueClass{
 		return addInternalClass(bcls);
 	}
 	private JClass addBuilderMethods() {
+		JClass res = this;
 		JMethod m = new JMethod("build",className).asStatic();
-		PList<JField> constFields = fields
-				.filter(f -> f.isStatic() == false)
-				.filter(f -> f.isFinal() == false || f.getInitValue().isPresent() == false);
+		PList<JField> reqFields = getBuilderRequiredFields();
 
-		return this;
+		JArgument setterArg = new JArgument(
+			"Function<Builder<" + reqFields.map(f -> "NOT").toString(",")
+				+ ">, Builder<" + reqFields.map(f -> "SET").toString(", ") + ">>","setter"
+		).addImport(JImport.forClass(Function.class));
+
+		JMethod updated = new JMethod("updated",className)
+			.addArg("Function<Builder<>,Builder<>>","updater",false)
+			.withCode(out -> {
+				out.println("Builder b = new Builder();");
+				for(JField f : fields.filter(f -> f.isStatic() == false)){
+					out.println("b.set" + UString.firstUpperCase(f.getName()) + "(this." + f.getName() + ");");
+				}
+				out.println("b = updated.apply(b);");
+				out.println("return new " + className + "(" + getConstructorFields().map(f -> "b." + f.getName()).toString(", ") + ");");
+			});
+		res = res.addMethod(updated);
+		JMethod build = new JMethod("build",className).asStatic()
+				.addArg(setterArg)
+			.withCode(out -> {
+				out.println("Builder b = setter.apply(new Builder<>());");
+				out.println("return new " + className + "(" + getConstructorFields().map(f -> "b." + f.getName()).toString(", ") + ");");
+			});
+
+		res = res.addMethod(build);
+		return res;
 	}
 
 	public JClass addBuilder() {
@@ -263,10 +322,10 @@ public class JClass extends BaseValueClass{
 				.addField(new JField("rrn",String.class))
 				.addField(new JField("enabled",boolean.class).defaultValue("true"))
 				.addField(new JField("inschrijving",Integer.class).asNullable())
-
+				.addGettersAndSetters()
 				.addMainConstructor(AccessLevel.Public)
 				.addBuilder()
 			;
-		System.out.println(cls.printClass().printToString());
+		System.out.println(cls.printClassFile().printToString());
 	}
 }
