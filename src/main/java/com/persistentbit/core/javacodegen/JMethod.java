@@ -27,14 +27,16 @@ public class JMethod extends BaseValueClass{
 	private final String           doc;
 	private final PList<String>    annotations;
 	private final PList<JArgument> arguments;
-	private final PSet<JImport> imports;
+	private final PSet<JImport>    imports;
+	private final boolean          overrides;
 
 	public JMethod(String name, String resultType, PrintableText definition, boolean isStatic, boolean isFinal,
 				   AccessLevel accessLevel,
 				   String doc,
 				   PList<String> annotations,
 				   PList<JArgument> arguments,
-				   PSet<JImport> imports
+				   PSet<JImport> imports,
+				   boolean overrides
 	) {
 		this.name = name;
 		this.resultType = resultType;
@@ -46,6 +48,7 @@ public class JMethod extends BaseValueClass{
 		this.annotations = annotations;
 		this.arguments = arguments;
 		this.imports = imports;
+		this.overrides = overrides;
 	}
 
 	public JMethod(String name, String resultType, PrintableText definition){
@@ -59,10 +62,11 @@ public class JMethod extends BaseValueClass{
 			null,
 			PList.empty(),
 			PList.empty(),
-			PSet.empty()
-
+			PSet.empty(),
+			false
 		);
 	}
+
 	public boolean isConstructor() {
 		return resultType == null;
 	}
@@ -82,6 +86,10 @@ public class JMethod extends BaseValueClass{
 	}
 	public JMethod code(PrintableText code){
 		return copyWith("definition",code);
+	}
+
+	public JMethod overrides() {
+		return copyWith("overrides",true);
 	}
 
 	public JMethod withAccessLevel(AccessLevel level){
@@ -111,6 +119,9 @@ public class JMethod extends BaseValueClass{
 	public PrintableText print() {
 		return out -> {
 			annotations.forEach(a -> out.println(a));
+			if(overrides){
+				out.println("@Overrides");
+			}
 			String res = accessLevel.label();
 			res = res.isEmpty()? res : res + " ";
 			res = isStatic ? res + " static" : res;

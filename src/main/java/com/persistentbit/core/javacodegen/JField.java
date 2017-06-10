@@ -179,16 +179,21 @@ public class JField extends BaseValueClass{
 	public PrintableText printConstructAssign(){
 		return out -> {
 			String res = "this." + name + " = ";
-			if(isNullable){
-				if(defaultValue != null){
-					res += name + " == null ? " + defaultValue + " : " + defaultValue;
+			if(primitiveType != null){
+				res += name;
+			} else {
+				if(isNullable){
+					if(defaultValue != null){
+						res += name + " == null ? " + defaultValue + " : " + defaultValue;
+					} else {
+						res += name;
+					}
 				} else {
 					res += "Objects.requireNotNull(" + name + ", \"" + name + " can not be null\"";
-				}
 
-			} else {
-				res += name;
+				}
 			}
+
 			out.println(res + ";");
 		};
 	}
@@ -207,6 +212,17 @@ public class JField extends BaseValueClass{
 			default: throw new RuntimeException("Unknown: " + primitiveType);
 		}
 
+	}
+
+	public Optional<Class> getPrimitiveType(){
+		return Optional.ofNullable(primitiveType);
+	}
+
+	public boolean isArray() {
+		return getDefinition().endsWith("[]");
+	}
+	public boolean isArrayArray() {
+		return getDefinition().endsWith("[][]");
 	}
 
 	public JMethod	createGetter() {

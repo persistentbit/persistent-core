@@ -7,6 +7,7 @@ import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.UString;
 
+import java.util.Arrays;
 import java.util.function.Function;
 
 /**
@@ -312,6 +313,142 @@ public class JClass extends BaseValueClass{
 		return res;
 	}
 
+	public JClass addEquals(){
+		JMethod m = new JMethod("equals","boolean")
+			.addArg("Object","o",true)
+			.overrides();
+
+		m = m.withCode(out -> {
+			out.println("if(this == o) return true;");
+			out.println("if(o instanceof " + className + " == false) return false;");
+			out.println(className + " obj = (" + className + ")o;");
+			for(JField f : fields.filter(f -> f.isIncludeInHash())){
+				String thisField = f.getName();
+				String otherField = "obj." + f.getName();
+				if(f.getPrimitiveType().isPresent()){
+					if(f.getPrimitiveType().get() == float.class ){
+						out.println("if(Float.compare(" + thisField + ", " + otherField + ") != 0) return false");
+					}
+					if(f.getPrimitiveType().get() == double.class ){
+						out.println("if(Double.compare(" + thisField + ", " + otherField + ") != 0) return false");
+					}
+					out.println("if(" + thisField + "!= "+ otherField+ ") return false;");
+					continue;
+				}
+				if(f.isArrayArray()){
+					out.println("if(!Arrays.deepEquals(" + thisField + ", " + otherField + ")) return false;");
+					continue;
+				}
+				if(f.isArray()){
+					out.println("if(!Arrays.equals(" + thisField + ", " + otherField + ")) return false;");
+					continue;
+				}
+				if(f.isNullable()){
+					out.println("if(" + thisField + " != null ? !" + thisField + ".equals(" + otherField + ") : " + otherField + "!= null) return false;");
+				} else {
+					out.println("if(!" + thisField + ".equals(" + otherField + ")) return false;");
+				}
+			}
+			out.println("return true;");
+		});
+		if(fields.find(f -> f.isIncludeInHash() && f.isArray()).isPresent()){
+			m = m.addImport(JImport.forClass(Arrays.class));
+		}
+		return addMethod(m);
+	}
+/*
+	@Override
+	public int hashCode() {
+		int  result;
+		long temp;
+		result = (int) s1;
+		result = 31 * result + (sS1 != null ? sS1.hashCode() : 0);
+		result = 31 * result + (int) b1;
+		result = 31 * result + (bB1 != null ? bB1.hashCode() : 0);
+		result = 31 * result + (bool ? 1 : 0);
+		result = 31 * result + (int) charValue;
+		result = 31 * result + intValue;
+		result = 31 * result + (int) (longValue ^ (longValue >>> 32));
+		result = 31 * result + Arrays.deepHashCode(charArray);
+		result = 31 * result + Arrays.hashCode(intArray);
+		result = 31 * result + (f1 != +0.0f ? Float.floatToIntBits(f1) : 0);
+		temp = Double.doubleToLongBits(d1);
+		result = 31 * result + (int) (temp ^ (temp >>> 32));
+		result = 31 * result + (ff1 != null ? ff1.hashCode() : 0);
+		result = 31 * result + (dd1 != null ? dd1.hashCode() : 0);
+		return result;
+	}
+ */
+	public JClass addHashCode(){
+		JMethod m = new JMethod("hashCode","int")
+			.overrides();
+		m = m.withCode(out -> {
+			out.println("int result;");
+			if(fields.find(f -> f.isIncludeInHash() && double.class == f.getPrimitiveType().orElse(null)).isPresent()){
+				out.println("long temp;");
+			}
+			boolean first = true;
+			for(JField f : fields.filter(f -> f.isIncludeInHash())){
+				String prefix = first ? "result = " : "result = 31 * result + ";
+				first = false;
+				if(f.getPrimitiveType().isPresent()){
+					Class cls = f.getPrimitiveType().get();
+					if(cls == double.class){
+						out.println("temp =  Double.doubleToLongBits(" + f.getName() + ");");
+						out.println(prefix + "(int)(temp ^ (temp >>> 32));");
+					} else if(cls == float.class){
+						out.println(prefix + "(" + f.getName() + " != +0.0f ? Float.floatToIntBits(" + f.getName() + ") : 0);");
+					} else if(cls == long.class){
+						out.println(prefix + "(int) (" + f.getName() + " ^ (" + f.getName() + ">>> 32));");
+					} else if(cls == boolean.class){
+						out.println(prefix + "(" + f.getName() + " ? 1 : 0);");
+					} else if(cls == int.class){
+						out.println(prefix + f.getName() + ";");
+					} else {
+						out.println(prefix + "(int)" + f.getName() + ";");
+					}
+				} else {
+					if(f.isArrayArray()){
+						out.println(prefix + "Arrays.deepHashCode(" + f.getName() + ");");
+					} else if(f.isArray()){
+						out.println(prefix + "Arrays.hashCode(" + f.getName() + ");");
+					} else {
+						out.println(prefix + "(" + f.getName() + " != null ? " + f.getName() + ".hashCode() : 0);");
+					}
+				}
+			}
+		});
+		if(fields.find(f -> f.isIncludeInHash() && f.isArray()).isPresent()){
+			m = m.addImport(JImport.forClass(Arrays.class));
+		}
+
+		return addMethod(m);
+	}
+
+	public JClass addEqualsHashCode(){
+		return addEquals().addHashCode();
+	}
+
+	public JClass addToString(){
+		JMethod m = new JMethod("toString","String")
+			.overrides();
+		m = m.withCode(code -> {
+
+		});
+
+		return addMethod(m);
+	}
+
+
+	public JClass makeCaseClass(){
+		return addGettersAndSetters()
+			.addMainConstructor(AccessLevel.Public)
+			.addEqualsHashCode()
+			.addToString()
+			.addBuilder();
+	}
+
+
 	public JClass addBuilder() {
 		return addBuilderClass().addBuilderMethods();
 	}
@@ -319,12 +456,16 @@ public class JClass extends BaseValueClass{
 	static public void main(String...args){
 		JClass cls = new JClass("be.schaubroeck.be","PersoonData")
 			   	.addField(new JField("id",int.class))
+				.addField(new JField("floatValue",Float.class))
+				.addField(new JField("doubleValueNullable",Double.class).asNullable())
+				.addField(new JField("doubleValuePrimitive",double.class))
+				.addField(new JField("longValue",long.class))
+				.addField(new JField("charArr","char[]"))
+				.addField(new JField("intArrArr","Integer[][]"))
 				.addField(new JField("rrn",String.class))
 				.addField(new JField("enabled",boolean.class).defaultValue("true"))
 				.addField(new JField("inschrijving",Integer.class).asNullable())
-				.addGettersAndSetters()
-				.addMainConstructor(AccessLevel.Public)
-				.addBuilder()
+				.makeCaseClass()
 			;
 		System.out.println(cls.printClassFile().printToString());
 	}
