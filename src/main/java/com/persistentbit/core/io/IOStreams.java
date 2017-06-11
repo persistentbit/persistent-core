@@ -82,13 +82,13 @@ public final class IOStreams{
 				return Result.failure("File is null");
 			}
 			if (f.exists() == false) {
-				return Result.failure("File does not exist:" + f);
+				return Result.failure("File does not exist:" + f.getAbsolutePath());
 			}
 			if (f.isFile() == false) {
-				return Result.failure("Not a file: " + f);
+				return Result.failure("Not a file: " + f.getAbsolutePath());
 			}
 			if (f.canRead() == false) {
-				return Result.failure("No read access: " + f);
+				return Result.failure("No read access: " + f.getAbsolutePath());
 			}
 			return Result.success(new FileInputStream(f));
 		});

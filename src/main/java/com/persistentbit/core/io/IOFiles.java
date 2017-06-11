@@ -8,6 +8,7 @@ import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.TimeMeasurement;
 import com.persistentbit.core.utils.UNamed;
 import com.persistentbit.core.utils.UNumber;
+import com.persistentbit.core.utils.UString;
 
 import java.io.File;
 import java.io.FilterWriter;
@@ -42,14 +43,19 @@ public final class IOFiles{
      * @param f    The file to write to
      * @param charset Character encoding
      */
-    public static void write(String text, File f, Charset charset) {
-        Log.function(f).code(l -> {
-            Objects.requireNonNull(text,"text is null");
-            try (Writer fileOut = IOStreams.fileToWriter(f,charset).orElseThrow()) {
-                fileOut.write(text);
-                return Nothing.inst;
-            }
-        });
+    public static Result<OK> write(String text, File f, Charset charset) {
+    	return Result.function(UString.present(text,10),f,charset).code(l -> {
+    		if(text == null){
+    			return Result.failure("text is null");
+			}
+			return IOStreams.fileToWriter(f,charset)
+				.flatMapExc(fileOut -> {
+					try(Writer writer = fileOut){
+						writer.write(text);
+						return OK.result;
+					}
+				});
+		});
 
     }
 

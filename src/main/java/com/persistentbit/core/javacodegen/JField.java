@@ -3,10 +3,12 @@ package com.persistentbit.core.javacodegen;
 import com.persistentbit.core.Nullable;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PSet;
+import com.persistentbit.core.javacodegen.annotations.Generated;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.UString;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -20,7 +22,7 @@ public class JField extends BaseValueClass{
 	private final String definition;
 	private final boolean isStatic ;
 	private final boolean isFinal;
-	private final AccessLevel accessLevel = AccessLevel.Private;
+	private final AccessLevel accessLevel;
 	private final           boolean genGetter;
 	private final           boolean genWith;
 	@Nullable
@@ -31,6 +33,7 @@ public class JField extends BaseValueClass{
 	@Nullable private final String initValue;
 	@Nullable private final Class primitiveType;
 	private final PSet<JImport> imports;
+	private final PList<String> annotations;
 
 	public JField(String name, String definition, boolean isStatic, boolean isFinal, boolean genGetter,
 				 boolean genWith,
@@ -40,7 +43,9 @@ public class JField extends BaseValueClass{
 				 String defaultValue,
 				 String initValue,
 				 Class primitiveType,
-				 PSet<JImport> imports
+				 PSet<JImport> imports,
+				  AccessLevel accessLevel,
+				  PList<String> annotations
 	) {
 		this.name = name;
 		this.definition = definition;
@@ -55,6 +60,8 @@ public class JField extends BaseValueClass{
 		this.initValue = initValue;
 		this.primitiveType = primitiveType;
 		this.imports = imports;
+		this.accessLevel =  accessLevel;
+		this.annotations = annotations;
 	}
 
 	public JField(String name, String definition,Class primitiveType){
@@ -69,7 +76,9 @@ public class JField extends BaseValueClass{
 			 null,
 			 null,
 			 primitiveType,
-			 PSet.empty()
+			 PSet.empty(),
+			 AccessLevel.Private,
+			 PList.empty()
 		);
 	}
 	public JField(String name, String definition){
@@ -80,6 +89,9 @@ public class JField extends BaseValueClass{
 		this(name,type.getSimpleName(), type.isPrimitive() ? type : null);
 	}
 
+	public JField withAccessLevel(AccessLevel accessLevel){
+		return copyWith("accessLevel",accessLevel);
+	}
 
 	public JField primitive(Class cls){
 		return copyWith("primitiveType",cls);
@@ -98,9 +110,17 @@ public class JField extends BaseValueClass{
 		return copyWith("initValue",initValue);
 	}
 
-	public JField notFinal() {
-		return copyWith("isFinal",false);
+	public JField withFinal(boolean isFinal){
+		return copyWith("isFinal",isFinal);
 	}
+
+	public JField notFinal() {
+		return withFinal(false);
+	}
+	public JField asFinal() {
+		return withFinal(true);
+	}
+
 	public JField noGetter() {
 		return copyWith("genGetter", false);
 	}
@@ -162,16 +182,29 @@ public class JField extends BaseValueClass{
 		return Optional.ofNullable(initValue);
 	}
 
+	public JField withAnnotations(PList<String> annotations){
+		return copyWith("annotations",annotations);
+	}
+
+	public JField addAnnotation(String annotation){
+		return copyWith("annotations",annotations.plus(annotation));
+	}
+
 	public PrintableText printDef() {
 		return out -> {
 			String res = accessLevel.label();
 			res = res.isEmpty()? res : res + " ";
 			res = isStatic ? res + " static" : res;
 			res = isFinal ? res + " final" : res;
+			res = res.trim();
 			res = res + "\t" + (isNullable && defaultValue == null ? getNullableDefinition() : definition);
 			res = res + "\t" + name;
 			res = initValue != null ? "\t=\t" + initValue : res;
 			res += ";";
+			if(this.doc != null){
+				out.print(this.doc);
+			}
+			annotations.forEach(ann -> out.println(ann));
 			out.println(res);
 		};
 	}
@@ -189,7 +222,7 @@ public class JField extends BaseValueClass{
 						res += name;
 					}
 				} else {
-					res += "Objects.requireNotNull(" + name + ", \"" + name + " can not be null\"";
+					res += "Objects.requireNonNull(" + name + ", \"" + name + " can not be null\")";
 
 				}
 			}
@@ -239,6 +272,8 @@ public class JField extends BaseValueClass{
 				out.println("return " + (isStatic ? "" : "this.") + name + ";");
 			}
 		});
+		m = m.addAnnotation("@Generated");
+		m = m.addImport(JImport.forClass(Generated.class));
 		return m;
 	}
 
@@ -253,7 +288,11 @@ public class JField extends BaseValueClass{
 	}
 
 	public PSet<JImport> getAllImports(){
-		return imports;
+		PSet<JImport> res = imports;
+		if(primitiveType == null && isNullable == false){
+			res = res.plus(JImport.forClass(Objects.class));
+		}
+		return res;
 	}
 
 	public JArgument asArgument(){

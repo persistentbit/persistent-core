@@ -34,6 +34,11 @@ public class JArgument extends BaseValueClass{
 	public boolean isNullable(){
 		return isNullable;
 	}
+
+	public JArgument addAnnotation(String annotation){
+		return copyWith("annotations", annotations.plus(annotation));
+	}
+
 	public String toString() {
 		String annStr = annotations.toString(" ");
 		if(isNullable){

@@ -96,16 +96,50 @@ public class JMethod extends BaseValueClass{
 		return copyWith("accessLevel",level);
 	}
 
+	public JMethod withResultType(String resultType){
+		return copyWith("resultType",resultType);
+	}
+
 	public JMethod withCode(PrintableText code){
-		return copyWith("definition",code);
+		PrintableText fullCode = out -> {
+			out.println("{");
+			out.indent(code);
+			out.println("}");
+		};
+		return copyWith("definition",fullCode);
+	}
+
+	public JMethod withFullCode(String code){
+		PrintableText pt = out -> {
+			out.println(code);
+		};
+		return copyWith("definition", pt);
 	}
 
 	public JMethod addAnnotation(String annotation){
 		return copyWith("annotations",annotations.plus(annotation));
 	}
 
+	public PList<String> getAnnotations() {
+		return annotations;
+	}
+
 	public JMethod asStatic() {
 		return copyWith("isStatic",true);
+	}
+
+	public boolean isStatic() {
+		return isStatic;
+	}
+
+	public boolean isAbstract() {
+		return definition == null;
+	}
+
+
+
+	public JMethod asFinal() {
+		return copyWith("isFinal",true);
 	}
 
 	public JMethod addImport(JImport imp){
@@ -120,7 +154,7 @@ public class JMethod extends BaseValueClass{
 		return out -> {
 			annotations.forEach(a -> out.println(a));
 			if(overrides){
-				out.println("@Overrides");
+				out.println("@Override");
 			}
 			String res = accessLevel.label();
 			res = res.isEmpty()? res : res + " ";
@@ -135,10 +169,8 @@ public class JMethod extends BaseValueClass{
 				out.println(res + ";");
 				return;
 			}
-			res += "{";
-			out.println(res);
-			out.indent(definition);
-			out.println("}");
+			out.print(res);
+			out.print(definition);
 		};
 	}
 }
