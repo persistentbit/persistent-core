@@ -8,6 +8,7 @@ import com.persistentbit.core.javacodegen.annotations.NoGet;
 import com.persistentbit.core.javacodegen.annotations.NoWith;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.BaseValueClass;
+import com.persistentbit.core.utils.NoToString;
 import com.persistentbit.core.utils.UString;
 import com.persistentbit.core.utils.builders.NOT;
 import com.persistentbit.core.utils.builders.SET;
@@ -488,14 +489,43 @@ public class JClass extends BaseValueClass{
 		if(hasAnnotation("NoToString")){
 			return this;
 		}
+		PList<JField> toStringFields = fields
+					  .filter(f -> f.isStatic() == false)
+					  .filter(f -> f.hasAnnotation(NoToString.class.getSimpleName()) == false);
 		JMethod m = new JMethod("toString","String")
 			.overrides();
 		m = m.addAnnotation("@Generated");
 		m = m.addImport(JImport.forClass(Generated.class));
 		m = m.withCode(out -> {
-			out.println("return \"" + className + "\";");
-		});
+			out.println("return \"" + className + "[\" + ");
+			boolean first = true;
 
+			for(JField f : toStringFields){
+				if(first){
+					out.print("\t\"" + f.getName() + "=\" + ");
+				} else {
+					out.print("\t\", " + f.getName() + "=\" + ");
+				}
+				first = false;
+				if(f.getDefinition().equals("String")){
+					out.println("(" + f.getName() + " == null ? \"null\" : '\\\"' + UString.present(UString.escapeToJavaString(" + f.getName() + "),32,\"...\") + '\\\"') +") ;
+				} else if(f.isArray()){
+
+					out.println("Arrays.toString(" + f.getName() + ") +");
+				} else {
+					out.println(f.getName() + " + ");
+				}
+
+			}
+
+			out.println("\t']';");
+		});
+		if(toStringFields.find(f -> f.getDefinition().equals("String")).isPresent()){
+			m = m.addImport(JImport.forClass(UString.class));
+		}
+		if(toStringFields.find(f -> f.isArray()).isPresent()){
+			m = m.addImport(JImport.forClass(Arrays.class));
+		}
 		return hasMethodWithSignature(m) == false ? addMethod(m) : this;
 	}
 
