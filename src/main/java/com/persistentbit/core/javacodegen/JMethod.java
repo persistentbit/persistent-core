@@ -6,6 +6,8 @@ import com.persistentbit.core.collections.PSet;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.BaseValueClass;
 
+import java.util.Objects;
+
 /**
  * TODOC
  *
@@ -84,8 +86,20 @@ public class JMethod extends BaseValueClass{
 	public JMethod addArg(String type, String name,boolean isNullable, String...annotations){
 		return addArg(new JArgument(type,name,isNullable,PList.val(annotations),PSet.empty()));
 	}
-	public JMethod code(PrintableText code){
-		return copyWith("definition",code);
+
+	public JMethod doc(String doc){
+		return copyWith("doc",doc);
+	}
+
+	public JMethod doc(PrintableText doc){
+		return doc(doc.printToString());
+	}
+
+	public boolean isSameSignature(JMethod other){
+		return name.equals(other.name)
+			&& Objects.equals(resultType,other.resultType)
+			&& arguments.map(a -> a.getType()).equals(other.arguments.map(a -> a.getType()))
+			&& isStatic() == other.isStatic();
 	}
 
 	public JMethod overrides() {
@@ -152,6 +166,9 @@ public class JMethod extends BaseValueClass{
 
 	public PrintableText print() {
 		return out -> {
+			if(doc != null){
+				out.print(doc);
+			}
 			annotations.forEach(a -> out.println(a));
 			if(overrides){
 				out.println("@Override");

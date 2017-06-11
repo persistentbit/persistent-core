@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
  * Field annotation for fields that should be excluded in {@link ImTools#toStringAll(Object, boolean)}
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.FIELD})
+@Target(value = {ElementType.FIELD, ElementType.TYPE})
 public @interface NoToString{
 }

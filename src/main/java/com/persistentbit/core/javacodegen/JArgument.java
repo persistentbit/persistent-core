@@ -29,7 +29,7 @@ public class JArgument extends BaseValueClass{
 		this(type,name,false, PList.empty(),PSet.empty());
 	}
 	public JArgument asNullable(){
-		return addImport(JImport.forClass(Nullable.class)).copyWith("isNullable",true);
+		return copyWith("isNullable",true);
 	}
 	public boolean isNullable(){
 		return isNullable;
@@ -53,6 +53,22 @@ public class JArgument extends BaseValueClass{
 	}
 
 	public PSet<JImport> getAllImports(){
-		return imports;
+		PSet<JImport> res = imports;
+		if(isNullable){
+			res = res.plus(JImport.forClass(Nullable.class));
+		}
+		return res;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public PList<String> getAnnotations() {
+		return annotations;
 	}
 }

@@ -3,12 +3,12 @@ package com.persistentbit.core.javacodegen;
 import com.persistentbit.core.Nullable;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PSet;
-import com.persistentbit.core.javacodegen.annotations.Generated;
+import com.persistentbit.core.javacodegen.annotations.*;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.BaseValueClass;
+import com.persistentbit.core.utils.NoEqual;
 import com.persistentbit.core.utils.UString;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -23,25 +23,15 @@ public class JField extends BaseValueClass{
 	private final boolean isStatic ;
 	private final boolean isFinal;
 	private final AccessLevel accessLevel;
-	private final           boolean genGetter;
-	private final           boolean genWith;
 	@Nullable
 	private final           String  doc;
-	private final           boolean includeInHash;
-	private final           boolean isNullable;
-	@Nullable private final String  defaultValue;
-	@Nullable private final String initValue;
+
 	@Nullable private final Class primitiveType;
 	private final PSet<JImport> imports;
 	private final PList<String> annotations;
 
-	public JField(String name, String definition, boolean isStatic, boolean isFinal, boolean genGetter,
-				 boolean genWith,
+	public JField(String name, String definition, boolean isStatic, boolean isFinal,
 				 String doc,
-				 boolean includeInHash,
-				 boolean isNullable,
-				 String defaultValue,
-				 String initValue,
 				 Class primitiveType,
 				 PSet<JImport> imports,
 				  AccessLevel accessLevel,
@@ -51,29 +41,23 @@ public class JField extends BaseValueClass{
 		this.definition = definition;
 		this.isStatic = isStatic;
 		this.isFinal = isFinal;
-		this.genGetter = genGetter;
-		this.genWith = genWith;
+
 		this.doc = doc;
-		this.includeInHash = includeInHash;
-		this.isNullable = isNullable;
-		this.defaultValue = null;
-		this.initValue = initValue;
 		this.primitiveType = primitiveType;
 		this.imports = imports;
 		this.accessLevel =  accessLevel;
 		this.annotations = annotations;
 	}
+	public boolean hasAnnotation(String name){
+		return getAnnotation(name).isPresent();
+	}
+
+	public Optional<String> getAnnotation(String name){
+		return annotations.find(str -> str.startsWith("@" + name));
+	}
 
 	public JField(String name, String definition,Class primitiveType){
-		this(name,definition,
-			 false,
-			 true,
-			 true,
-			 true,
-			 null,
-			 true,
-			 false,
-			 null,
+		this(name,definition,false,true,
 			 null,
 			 primitiveType,
 			 PSet.empty(),
@@ -100,14 +84,17 @@ public class JField extends BaseValueClass{
 		return copyWith("isStatic",true);
 	}
 	public JField asNullable() {
-		return addImport(Nullable.class).copyWith("isNullable",true);
+		if(isNullable()){
+			return this;
+		}
+		return addImport(Nullable.class).addAnnotation("@" + Nullable.class.getSimpleName());
 	}
 	public JField defaultValue(String defaultValue){
-		return copyWith("defaultValue",defaultValue);
+		return addImport(DefaultValue.class).addAnnotation("@" + DefaultValue.class.getSimpleName() + "(\"" + defaultValue + "\")");
 	}
 
 	public JField initValue(String initValue){
-		return copyWith("initValue",initValue);
+		return addImport(InitValue.class).addAnnotation("@" + InitValue.class.getSimpleName() + "(\"" + initValue + "\")");
 	}
 
 	public JField withFinal(boolean isFinal){
@@ -122,10 +109,16 @@ public class JField extends BaseValueClass{
 	}
 
 	public JField noGetter() {
-		return copyWith("genGetter", false);
+		if(isGenGetter() == false){
+			return this;
+		}
+		return addImport(NoGet.class).addAnnotation("@" + NoGet.class.getSimpleName());
 	}
 	public JField noWith() {
-		return copyWith("genWith",false);
+		if(isGenWith() == false){
+			return this;
+		}
+		return addImport(NoWith.class).addAnnotation("@" + NoWith.class.getSimpleName());
 	}
 	public JField javaDoc(String doc){
 		return copyWith("doc",doc);
@@ -155,11 +148,11 @@ public class JField extends BaseValueClass{
 	}
 
 	public boolean isGenGetter() {
-		return genGetter;
+		return hasAnnotation(NoGet.class.getSimpleName()) == false;
 	}
 
 	public boolean isGenWith() {
-		return genWith;
+		return hasAnnotation(NoWith.class.getSimpleName()) == false;
 	}
 
 	public String getDoc() {
@@ -167,19 +160,31 @@ public class JField extends BaseValueClass{
 	}
 
 	public boolean isIncludeInHash() {
-		return includeInHash;
+		return hasAnnotation(NoEqual.class.getSimpleName()) == false;
 	}
 
 	public boolean isNullable() {
-		return isNullable;
+		return hasAnnotation(Nullable.class.getSimpleName());
+	}
+
+
+	private Optional<String> annotationValue(String ann){
+		int start = ann.indexOf("\"");
+		int end = ann.lastIndexOf("\"");
+		if(start < 0 || end < 0){
+			return Optional.empty();
+		}
+
+		return Optional.of(UString.unEscapeJavaString(ann.substring(start+1,end)));
 	}
 
 	public Optional<String> getDefaultValue() {
-		return Optional.ofNullable(defaultValue);
+
+		return getAnnotation(DefaultValue.class.getSimpleName()).flatMap(ann -> annotationValue(ann));
 	}
 
 	public Optional<String> getInitValue() {
-		return Optional.ofNullable(initValue);
+		return getAnnotation(InitValue.class.getSimpleName()).flatMap(ann -> annotationValue(ann));
 	}
 
 	public JField withAnnotations(PList<String> annotations){
@@ -197,9 +202,9 @@ public class JField extends BaseValueClass{
 			res = isStatic ? res + " static" : res;
 			res = isFinal ? res + " final" : res;
 			res = res.trim();
-			res = res + "\t" + (isNullable && defaultValue == null ? getNullableDefinition() : definition);
+			res = res + "\t" + (isNullable() && getDefaultValue().isPresent()==false ? getNullableDefinition() : definition);
 			res = res + "\t" + name;
-			res = initValue != null ? "\t=\t" + initValue : res;
+			res = getInitValue().isPresent() ? "\t=\t" + getInitValue().get() : res;
 			res += ";";
 			if(this.doc != null){
 				out.print(this.doc);
@@ -215,9 +220,9 @@ public class JField extends BaseValueClass{
 			if(primitiveType != null){
 				res += name;
 			} else {
-				if(isNullable){
-					if(defaultValue != null){
-						res += name + " == null ? " + defaultValue + " : " + defaultValue;
+				if(isNullable()){
+					if(getDefaultValue().isPresent()){
+						res += name + " == null ? " + getDefaultValue().get() + " : " + name;
 					} else {
 						res += name;
 					}
@@ -259,7 +264,7 @@ public class JField extends BaseValueClass{
 	}
 
 	public JMethod	createGetter() {
-		boolean isOptional = isNullable && defaultValue == null;
+		boolean isOptional = isNullable() && getDefaultValue().isPresent() == false;
 		String resType = isOptional
 			   ? "Optional<" + getNullableDefinition() + ">"
 			   : definition ;
@@ -289,13 +294,10 @@ public class JField extends BaseValueClass{
 
 	public PSet<JImport> getAllImports(){
 		PSet<JImport> res = imports;
-		if(primitiveType == null && isNullable == false){
-			res = res.plus(JImport.forClass(Objects.class));
-		}
 		return res;
 	}
 
 	public JArgument asArgument(){
-		return new JArgument(definition,name,isNullable, PList.empty(),getAllImports());
+		return new JArgument(definition,name,isNullable(), PList.empty(),getAllImports());
 	}
 }

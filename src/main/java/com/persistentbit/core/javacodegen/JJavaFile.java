@@ -24,18 +24,20 @@ public class JJavaFile extends BaseValueClass{
 	private  final	String	doc;
 	private  final	PList<JClass>	classes;
 	private  final PSet<JImport> imports;
+	private final PList<JEnum> enums;
 
 
 
-	public JJavaFile(String packageName, @Nullable String doc, PList<JClass> classes,PSet<JImport> imports){
+	public JJavaFile(String packageName, @Nullable String doc, PList<JClass> classes,PSet<JImport> imports, PList<JEnum> enums){
 		this.packageName = Objects.requireNonNull(packageName, "packageName can not be null");
 		this.doc = doc;
 		this.classes = Objects.requireNonNull(classes, "classes can not be null");
 		this.imports = imports;
+		this.enums = enums;
 	}
 
 	public JJavaFile(String packageName){
-		this(packageName,null,PList.empty(),PSet.empty());
+		this(packageName,null,PList.empty(),PSet.empty(),PList.empty());
 	}
 
 	public PSet<JImport> getAllImports() {
@@ -58,6 +60,14 @@ public class JJavaFile extends BaseValueClass{
 		return withImports(imports.plus(imp));
 	}
 
+	public JJavaFile withEnums(PList<JEnum> enums){
+		return copyWith("enums", enums);
+	}
+
+	public JJavaFile addEnum(JEnum jenum){
+		return withEnums(enums.plus(jenum));
+	}
+
 	public PrintableText print(){
 		return out -> {
 			if(doc != null){
@@ -77,21 +87,21 @@ public class JJavaFile extends BaseValueClass{
 		return this.packageName;
 	}
 	public  JJavaFile	withPackageName(String packageName){
-		return new JJavaFile(packageName, doc, classes,imports);
+		return new JJavaFile(packageName, doc, classes,imports,enums);
 	}
 	public  Optional<String>	getDoc(){
 		return Optional.ofNullable(this.doc);
 	}
 	public  JJavaFile	withDoc(@Nullable String doc){
-		return new JJavaFile(packageName, doc, classes,imports);
+		return new JJavaFile(packageName, doc, classes,imports,enums);
 	}
 	public  PList<JClass>	getClasses(){
 		return this.classes;
 	}
 	public  JJavaFile	withClasses(PList<JClass> classes){
-		return new JJavaFile(packageName, doc, classes,imports);
+		return new JJavaFile(packageName, doc, classes,imports,enums);
 	}
 	public  JJavaFile	withImports(PSet<JImport> imports){
-		return new JJavaFile(packageName, doc, classes,imports);
+		return new JJavaFile(packageName, doc, classes,imports,enums);
 	}
 }
