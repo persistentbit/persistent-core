@@ -14,6 +14,7 @@ import com.persistentbit.core.utils.builders.NOT;
 import com.persistentbit.core.utils.builders.SET;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -158,6 +159,10 @@ public class JClass extends BaseValueClass{
 				.filter(f -> f.isFinal() == false || f.getInitValue().isPresent() == false);
 	}
 
+	private PList<JField> getNotNullableConstructorFields() {
+		return getConstructorFields().filter(f -> f.isRequired());
+	}
+
 	public JClass addMainConstructor(AccessLevel level) {
 		JMethod m = new JMethod(className).withAccessLevel(level);
 		m = m.addAnnotation("@Generated");
@@ -168,11 +173,36 @@ public class JClass extends BaseValueClass{
 		}
 		m = m.withCode(out -> {
 			for(JField f: constFields){
-				out.indent(f.printConstructAssign());
+				out.indent(f.printConstructAssign(f.getName()));
 			}
+		});
+		constFields.find(f -> f.isNullable()==false).ifPresent(field -> {
+			addImport(Objects.class);
 		});
 
 		return hasMethodWithSignature(m) == false ? addMethod(m) : this;
+	}
+
+	public JClass addRequiredFieldsConstructor(AccessLevel level){
+
+		JMethod m = new JMethod(className).withAccessLevel(level);
+		m = m.addAnnotation("@Generated");
+		m = m.addImport(JImport.forClass(Generated.class));
+		PList<JField> constFields = getNotNullableConstructorFields();
+		for(JField f : constFields){
+			m = m.addArg(f.asArgument());
+		}
+		m = m.withCode(out -> {
+			for(JField f: constFields){
+				out.indent(f.printConstructAssign());
+			}
+		});
+		constFields.find(f -> f.isNullable()==false).ifPresent(field -> {
+			addImport(Objects.class);
+		});
+
+		return hasMethodWithSignature(m) == false ? addMethod(m) : this;
+	}
 	}
 
 
@@ -377,7 +407,7 @@ public class JClass extends BaseValueClass{
 		JMethod build = new JMethod("build",className).asStatic()
 				.addArg(setterArg)
 			.withCode(out -> {
-				out.println("Builder b = setter.apply(new Builder<>());");
+				out.println("Builder b = setter.apply(new Builder());");
 				out.println("return new " + className + "(" + getConstructorFields().map(f -> "b." + f.getName()).toString(", ") + ");");
 			});
 		build = build.addAnnotation("@Generated");

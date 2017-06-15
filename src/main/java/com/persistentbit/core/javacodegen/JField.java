@@ -214,27 +214,33 @@ public class JField extends BaseValueClass{
 		};
 	}
 
-	public PrintableText printConstructAssign(){
+	public boolean isRequired(){
+		return isNullable() == false && getDefaultValue().isPresent() == false;
+	}
+
+	public PrintableText printConstructAssign(String assignValue){
 		return out -> {
-			String res = "this." + name + " = ";
-			if(primitiveType != null){
-				res += name;
+
+			if(getDefaultValue().isPresent()){
+				if(assignValue.equals("null")){
+					out.println("this." + name + " = " + getDefaultValue().get() + ";");
+				} else {
+					if(isNullable()){
+						out.println("this." + name + " = " + assignValue + " == null ? " + getDefaultValue().get() + " : " + assignValue + ";");
+					} else {
+						out.println("this." + name + " = " + assignValue + ";");
+					}
+				}
 			} else {
 				if(isNullable()){
-					if(getDefaultValue().isPresent()){
-						res += name + " == null ? " + getDefaultValue().get() + " : " + name;
-					} else {
-						res += name;
-					}
+					out.println("this." + name + " = " + assignValue + ";");
 				} else {
-					res += "Objects.requireNonNull(" + name + ", \"" + name + " can not be null\")";
-
+					out.println("this." + name + " = Objects.requireNonNull(" + assignValue + ", \"" + name + " can not be null\");");
 				}
 			}
-
-			out.println(res + ";");
 		};
 	}
+
 
 	public String getNullableDefinition(){
 		if(primitiveType == null){
