@@ -4,7 +4,8 @@ import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.logging.entries.LogEntry;
 
 /**
- * TODO: Add comment
+ * A LogPrintGroup contains a list of {@link LogPrint} printers.<br>
+ * Printing is done by executing the print of all added {@link LogPrint} instances.
  *
  * @author Peter Muys
  * @since 18/01/2017
