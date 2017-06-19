@@ -3,10 +3,13 @@ package com.persistentbit.core.javacodegen;
 import com.persistentbit.core.Nullable;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PSet;
+import com.persistentbit.core.exceptions.ToDo;
+import com.persistentbit.core.function.ThrowingFunction;
 import com.persistentbit.core.javacodegen.annotations.Generated;
 import com.persistentbit.core.javacodegen.annotations.NoGet;
 import com.persistentbit.core.javacodegen.annotations.NoWith;
 import com.persistentbit.core.printing.PrintableText;
+import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.NoToString;
 import com.persistentbit.core.utils.UString;
@@ -184,7 +187,7 @@ public class JClass extends BaseValueClass{
 	}
 
 	public JClass addRequiredFieldsConstructor(AccessLevel level){
-
+		/*
 		JMethod m = new JMethod(className).withAccessLevel(level);
 		m = m.addAnnotation("@Generated");
 		m = m.addImport(JImport.forClass(Generated.class));
@@ -202,7 +205,9 @@ public class JClass extends BaseValueClass{
 		});
 
 		return hasMethodWithSignature(m) == false ? addMethod(m) : this;
-	}
+
+	}*/
+		throw new ToDo();
 	}
 
 
@@ -386,9 +391,14 @@ public class JClass extends BaseValueClass{
 		PList<JField> reqFields = getBuilderRequiredFields();
 		res = res.addImport(NOT.class);
 		res = res.addImport(SET.class);
+		String reqNOT = reqFields.isEmpty()
+			   	? ""
+				: "<" + reqFields.map(f -> "NOT").toString(",") + ">";
+		String reqSET  = reqFields.isEmpty()
+			? ""
+			: "<" + reqFields.map(f -> "SET").toString(",") + ">";
 		JArgument setterArg = new JArgument(
-			"Function<Builder<" + reqFields.map(f -> "NOT").toString(",")
-				+ ">, Builder<" + reqFields.map(f -> "SET").toString(", ") + ">>","setter"
+			"Function<Builder" + reqNOT + ", Builder" + reqSET + ">","setter"
 		).addImport(JImport.forClass(Function.class));
 
 		JMethod updated = new JMethod("updated",className)
@@ -412,7 +422,21 @@ public class JClass extends BaseValueClass{
 			});
 		build = build.addAnnotation("@Generated");
 		build = build.addImport(JImport.forClass(Generated.class));
-		res = res.addMethod(build);
+		JMethod buildExc = new JMethod("buildExc","Result<" + className +">").asStatic()
+			.addArg(new JArgument(
+				"ThrowingFunction<Builder" + reqNOT + ", Builder" + reqSET + ",Exception>","setter"
+				).addImport(JImport.forClass(Function.class))
+			)
+			.withCode(out -> {
+				out.println("return setter.applyResult(new Builder" + (reqFields.isEmpty() ? "" : "<>") + "()).mapExc(b -> new "+ className + "(" + getConstructorFields().map(f -> "b." + f.getName()).toString(", ") +"));");
+
+			});
+
+		buildExc = buildExc.addAnnotation("@Generated");
+		buildExc = buildExc.addImport(JImport.forClass(ThrowingFunction.class));
+		buildExc = buildExc.addImport(JImport.forClass(Result.class));
+
+		res = res.addMethod(buildExc);
 		return res;
 	}
 
