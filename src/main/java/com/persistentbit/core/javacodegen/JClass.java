@@ -86,6 +86,11 @@ public class JClass extends BaseValueClass{
 				false
 		);
 	}
+
+	public String getClassName() {
+		return className;
+	}
+
 	public JClass packagePrivate(){
 		return copyWith("accessLevel",AccessLevel.Private);
 	}

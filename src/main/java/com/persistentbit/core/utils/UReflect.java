@@ -11,6 +11,7 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -448,5 +449,21 @@ public final class UReflect{
 			}
 		}
 		return Result.empty("Not found in " + cls.getName() + ": " + genericVarName );
+	}
+
+	/**
+	 * Convert a full classname not a {@link Path} by using
+	 * a rootPath and a fully defined class name.
+	 * @param rootPath  The root of the path
+	 * @param fullClassName the package name and class, separated by '.'
+	 * @return The new Path
+	 */
+	public static Result<Path> convertClassNameToPath(Path rootPath, String fullClassName){
+		return Result.function(rootPath,fullClassName).code(l -> {
+
+			String classPath = fullClassName.replace(".",rootPath.getFileSystem().getSeparator());
+			Path endPath = rootPath.resolve(classPath);
+			return Result.success(endPath);
+		});
 	}
 }
