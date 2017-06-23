@@ -4,6 +4,7 @@ package com.persistentbit.core.collections;
 import com.persistentbit.core.doc.annotations.DSupport;
 import com.persistentbit.core.doc.annotations.DUsedByClass;
 import com.persistentbit.core.doc.annotations.DUsesClass;
+import com.persistentbit.core.function.ThrowingFunction;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.*;
@@ -279,6 +280,8 @@ public interface PStream<T> extends Iterable<T>{
 	 * @return A New stream where every item is mapped.
 	 */
 	<R> PStream<R> map(Function<? super T, ? extends R> mapper);
+
+	<R> PStream<R> mapExc(ThrowingFunction<? super T,? extends R,Exception> mapper);
 
 	/**
 	 * Filter this stream using a Predicate

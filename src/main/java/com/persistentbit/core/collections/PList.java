@@ -3,6 +3,7 @@ package com.persistentbit.core.collections;
 
 import com.persistentbit.core.doc.annotations.DAggregate;
 import com.persistentbit.core.doc.annotations.DUsedByClass;
+import com.persistentbit.core.function.ThrowingFunction;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -481,6 +482,11 @@ public class PList<T> extends AbstractIPList<T, PList<T>> implements Serializabl
 			res = res.plus(mapper.apply(v));
 		}
 		return res;
+	}
+
+	@Override
+	public <R> PStream<R> mapExc(ThrowingFunction<? super T, ? extends R, Exception> mapper) {
+		return map(ThrowingFunction.createNonChecked(value -> mapper.apply(value)));
 	}
 
 	private void writeObject(ObjectOutputStream out) throws IOException {

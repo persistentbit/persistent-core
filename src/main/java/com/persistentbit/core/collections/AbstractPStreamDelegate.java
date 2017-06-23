@@ -1,5 +1,6 @@
 package com.persistentbit.core.collections;
 
+import com.persistentbit.core.function.ThrowingFunction;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.Comparator;
@@ -358,4 +359,41 @@ abstract class AbstractPStreamDelegate<T> implements PStream<T>{
   public PStream<T> filterNotContainedIn(PStream<? extends T> others) {
 	return getDelegate().filterNotContainedIn(others);
   }
+
+	@Override
+	public PStream<T> until(Predicate<T> until) {
+		return getDelegate().until(until);
+	}
+
+	@Override
+	public <R> PStream<R> mapExc(ThrowingFunction<? super T, ? extends R, Exception> mapper
+	) {
+		return getDelegate().mapExc(mapper);
+	}
+
+	@Override
+	public <A, B> Tuple2<PStream<A>, PStream<B>> unzip(Function<T, Tuple2<A, B>> unzipper
+	) {
+		return getDelegate().unzip(unzipper);
+	}
+
+	@Override
+	public <R> R fold(R init, Function<R, Function<T, R>> f) {
+		return getDelegate().fold(init,f);
+	}
+
+	@Override
+	public <R> R foldRight(R init, Function<T, Function<R, R>> f) {
+		return getDelegate().foldRight(init,f);
+	}
+
+	@Override
+	public ImmutableArray<T> toImmutableArray() {
+		return getDelegate().toImmutableArray();
+	}
+
+	@Override
+	public PStream<T> limitOnPreviousValue(Predicate<T> stopOnTrue) {
+		return getDelegate().limitOnPreviousValue(stopOnTrue);
+	}
 }

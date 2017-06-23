@@ -239,12 +239,16 @@ public final class PMap<K, V> extends AbstractPStreamDirect<Tuple2<K, V>, PMap<K
 	return new PMapMap<>(this);
   }
 
+
+
   @Override
   public <K2, V2> PMap<K2, V2> mapKeyValues(Function<? super Tuple2<K, V>, ? extends Tuple2<K2, V2>> items) {
 	PMap<K2, V2> res = PMap.empty();
 	return with(res, (r, t) -> r.plus(items.apply(t)));
 
   }
+
+
 
   @Override
   public boolean isEmpty() {

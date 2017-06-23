@@ -1,5 +1,6 @@
 package com.persistentbit.core.collections;
 
+import com.persistentbit.core.function.ThrowingFunction;
 import com.persistentbit.core.tuples.Tuple2;
 
 import java.util.*;
@@ -457,6 +458,17 @@ interface PStreamWithDefaults<T> extends PStream<T>{
 			}
 
 		};
+	}
+
+	@Override
+	default <R> PStream<R> mapExc(ThrowingFunction<? super T, ? extends R, Exception> mapper){
+		return map(value -> {
+			try{
+				return mapper.apply(value);
+			}catch(Exception e){
+				throw new RuntimeException("Exception during map",e);
+			}
+		});
 	}
 
 	@Override
