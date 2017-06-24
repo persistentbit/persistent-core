@@ -42,6 +42,7 @@ public final class IOFiles{
      * @param text The text to write
      * @param f    The file to write to
      * @param charset Character encoding
+	 * @return OK Result
      */
     public static Result<OK> write(String text, File f, Charset charset) {
     	return Result.function(UString.present(text,10),f,charset).code(l -> {

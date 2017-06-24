@@ -38,7 +38,7 @@ public class Success<T> extends Result<T>{
 	}
 
 	@Override
-	public Result<T> withLogs(Consumer<LogEntry> effect) {
+	public Result<T> doWithLogs(Consumer<LogEntry> effect) {
 		return Log.function().code(l -> {
 			effect.accept(log);
 			return Success.this;

@@ -52,6 +52,11 @@ public class JJavaFile extends BaseValueClass{
 		};
 	}
 
+	@Override
+	public String toString() {
+		return "JJavaFile[package=" + packageName + ", classes=" + classes + "]";
+	}
+
 	public JJavaFile addClass(JClass cls){
 		return withClasses(classes.plus(cls));
 	}

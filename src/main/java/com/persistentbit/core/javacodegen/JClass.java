@@ -5,9 +5,7 @@ import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PSet;
 import com.persistentbit.core.exceptions.ToDo;
 import com.persistentbit.core.function.ThrowingFunction;
-import com.persistentbit.core.javacodegen.annotations.Generated;
-import com.persistentbit.core.javacodegen.annotations.NoGet;
-import com.persistentbit.core.javacodegen.annotations.NoWith;
+import com.persistentbit.core.javacodegen.annotations.*;
 import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.BaseValueClass;
@@ -18,6 +16,7 @@ import com.persistentbit.core.utils.builders.SET;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -69,6 +68,10 @@ public class JClass extends BaseValueClass{
 		this.isStatic = isStatic;
 	}
 
+	@Override
+	public String toString() {
+		return "JClass[" + className + "]";
+	}
 
 	public JClass(String className){
 		this(
@@ -171,6 +174,70 @@ public class JClass extends BaseValueClass{
 		return getConstructorFields().filter(f -> f.isRequired());
 	}
 
+
+	public PrintableText printFieldDef(JField field) {
+		return out -> {
+			String res = field.getAccessLevel().label();
+			res = res.isEmpty()? res : res + " ";
+			res = field.isStatic() ? res + " static" : res;
+			res = field.isFinal() ? res + " final" : res;
+			res = res.trim();
+			res = res + "\t" + (field.isNullable() && field.hasDefaultValue()==false ? field.getNullableDefinition() : field.getDefinition());
+			res = res + "\t" + field.getName();
+			res = field.getInitValue().isPresent() ? "\t=\t" + field.getInitValue().get() : res;
+			res += ";";
+			if(field.getDoc() != null){
+				out.print(this.doc);
+			}
+			field.getAnnotations().forEach(ann -> out.println(ann));
+			out.println(res);
+		};
+	}
+
+	public PrintableText printFieldConstructAssign(JField field, String assignValue){
+		return out -> {
+			String name = field.getName();
+			if(field.hasDefaultValue()){
+				if(assignValue.equals("null")){
+					out.println("this." + name + " = " + getFieldDefaultValue(field).get() + ";");
+				} else {
+					/*if(field.isNullable()){
+						out.println("this." + name + " = " + assignValue + " == null ? " + getFieldDefaultValue(field).get() + " : " + assignValue + ";");
+					} else {
+						out.println("this." + name + " = " + assignValue + ";");
+					}*/
+					out.println("this." + name + " = " + assignValue + " == null ? " + getFieldDefaultValue(field).get() + " : " + assignValue + ";");
+				}
+			} else {
+				if(field.isNullable()){
+					out.println("this." + name + " = " + assignValue + ";");
+				} else {
+					out.println("this." + name + " = Objects.requireNonNull(" + assignValue + ", \"" + name + " can not be null\");");
+				}
+			}
+		};
+	}
+
+	public Optional<String> getFieldDefaultValue(JField field) {
+		if(field.getAnnotation(DefaultEmpty.class.getSimpleName()).isPresent()){
+			String def = field.getDefinition();
+			if(def.startsWith("PList")){
+				return Optional.of("PList.empty()");
+			}
+			if(def.startsWith("PStream")){
+				return Optional.of("Pstream.empty()");
+			}
+			if(def.startsWith("PMap") || def.startsWith("IPMap")){
+				return Optional.of("PMap.empty()");
+			}
+			if(def.startsWith("List")){
+				return Optional.of("new ArrayList()");
+			}
+			throw new ToDo("Unknown: " + def);
+		}
+		return field.getAnnotation(DefaultValue.class.getSimpleName()).flatMap(ann -> field.annotationValue(ann));
+	}
+
 	public JClass addMainConstructor(AccessLevel level) {
 		JMethod m = new JMethod(className).withAccessLevel(level);
 		m = m.addAnnotation("@Generated");
@@ -181,7 +248,7 @@ public class JClass extends BaseValueClass{
 		}
 		m = m.withCode(out -> {
 			for(JField f: constFields){
-				out.indent(f.printConstructAssign(f.getName()));
+				out.indent(printFieldConstructAssign(f, f.getName()));
 			}
 		});
 		constFields.find(f -> f.isNullable()==false).ifPresent(field -> {
@@ -218,7 +285,7 @@ public class JClass extends BaseValueClass{
 
 	public PrintableText printFields() {
 		return out -> {
-			fields.forEach(f -> out.print(f.printDef()));
+			fields.forEach(f -> out.print(printFieldDef(f)));
 		};
 	}
 	public PrintableText printMethods() {
@@ -339,7 +406,7 @@ public class JClass extends BaseValueClass{
 		return fields
 			.filter(f -> f.isFinal() == false || f.getInitValue().isPresent() == false)
 			.filter(f -> f.isStatic() == false)
-			.filter(f -> f.isNullable() == false && f.getDefaultValue().isPresent() == false);
+			.filter(f -> f.isNullable() == false && f.hasDefaultValue() == false);
 	}
 
 	private JClass addBuilderClass() {
@@ -403,8 +470,11 @@ public class JClass extends BaseValueClass{
 			? ""
 			: "<" + reqFields.map(f -> "SET").toString(",") + ">";
 		JArgument setterArg = new JArgument(
-			"Function<Builder" + reqNOT + ", Builder" + reqSET + ">","setter"
-		).addImport(JImport.forClass(Function.class));
+			"ThrowingFunction<Builder" + reqNOT + ", Builder" + reqSET  + ", Exception>","setter"
+		).addImport(JImport.forClass(ThrowingFunction.class));
+
+
+		//ADD UPDATES METHOD
 
 		JMethod updated = new JMethod("updated",className)
 			.addArg("Function<Builder,Builder>","updater",false)
@@ -419,14 +489,22 @@ public class JClass extends BaseValueClass{
 		updated = updated.addAnnotation("@Generated");
 		updated = updated.addImport(JImport.forClass(Generated.class));
 		res = res.addMethod(updated);
+
+		//ADD BUILD METHOD
+
 		JMethod build = new JMethod("build",className).asStatic()
 				.addArg(setterArg)
 			.withCode(out -> {
-				out.println("Builder b = setter.apply(new Builder());");
+				out.println("Builder b = setter.toNonChecked().apply(new Builder());");
 				out.println("return new " + className + "(" + getConstructorFields().map(f -> "b." + f.getName()).toString(", ") + ");");
 			});
 		build = build.addAnnotation("@Generated");
+		build = build.addAnnotation("@SuppressWarnings(\"unchecked\")");
 		build = build.addImport(JImport.forClass(Generated.class));
+		res = res.addMethod(build);
+
+		//ADD BUILDEXC METHOD
+
 		JMethod buildExc = new JMethod("buildExc","Result<" + className +">").asStatic()
 			.addArg(new JArgument(
 				"ThrowingFunction<Builder" + reqNOT + ", Builder" + reqSET + ",Exception>","setter"
@@ -440,6 +518,7 @@ public class JClass extends BaseValueClass{
 		buildExc = buildExc.addAnnotation("@Generated");
 		buildExc = buildExc.addImport(JImport.forClass(ThrowingFunction.class));
 		buildExc = buildExc.addImport(JImport.forClass(Result.class));
+		buildExc = buildExc.addAnnotation("@SuppressWarnings(\"unchecked\")");
 
 		res = res.addMethod(buildExc);
 		return res;

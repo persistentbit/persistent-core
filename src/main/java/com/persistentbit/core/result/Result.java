@@ -4,6 +4,7 @@ import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.doc.annotations.DInfo;
 import com.persistentbit.core.function.ThrowingFunction;
 import com.persistentbit.core.logging.FunctionLogging;
+import com.persistentbit.core.logging.LogCollector;
 import com.persistentbit.core.logging.LoggedException;
 import com.persistentbit.core.logging.LoggedValue;
 import com.persistentbit.core.logging.entries.LogContext;
@@ -13,6 +14,7 @@ import com.persistentbit.core.logging.entries.LogEntryFunction;
 import com.persistentbit.core.tuples.Tuple2;
 import com.persistentbit.core.tuples.Tuple3;
 import com.persistentbit.core.tuples.Tuple4;
+import com.persistentbit.core.utils.UString;
 
 import java.io.Serializable;
 import java.util.List;
@@ -80,7 +82,26 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 				return Result.failure(new LoggedException(e, entry));
 			}
 		}
-
+		public <R> Result<R> codeMapResult(Function<R,String> resultValueMapper, FunctionLogging.LoggedFunction<Result<R>> code) {
+			try {
+				Result<R> result = code.run(this);
+				functionDoneTimestamp(System.currentTimeMillis());
+				functionResult(result.map(r -> resultValueMapper.apply(r)));
+				return result.mapLog(resultLog ->
+					entry.append(resultLog)
+				);
+			} catch(LoggedException le) {
+				return Result.failure(le.setLogs(entry.append(le.getLogs())));
+			} catch(Throwable e) {
+				return Result.failure(new LoggedException(e, entry));
+			}
+		}
+		public <R> Result<R> codePresentResult(int maxLength, FunctionLogging.LoggedFunction<Result<R>> code){
+			return codeMapResult(value -> value == null ? null : UString.presentEscaped(value.toString(),maxLength), code);
+		}
+		public <R> Result<R> codePresentResult(FunctionLogging.LoggedFunction<Result<R>> code){
+			return codePresentResult(60,code);
+		}
 	}
 
 
@@ -318,8 +339,16 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 	 * @param effect The effect, taking a {@link LogEntry} as input
 	 * @return this.
 	 */
-	public abstract Result<T> withLogs(Consumer<LogEntry> effect);
+	public abstract Result<T> doWithLogs(Consumer<LogEntry> effect);
 
+	/**
+	 * Create a new Instance with the given LogEntry
+	 * @param newLog The new LogEntry
+	 * @return A new Instance
+	 */
+	public Result<T> withLogs(LogEntry newLog){
+		return mapLog(el -> newLog);
+	}
 
 	/**
 	 * Combine this Result with an other Result into a Result with a Tuple2 of this and the other result
@@ -647,16 +676,22 @@ public abstract class Result<T> implements Serializable, LoggedValue<Result<T>>{
 
 	public static <T> Result<PStream<T>> fromSequence(PStream<Result<T>> stream) {
 		Optional<Result<T>> optWrong = stream.find(Result::isError);
-
+		LogCollector lc = new LogCollector();
+		stream.forEach(item -> lc.add(item));
+		Result<PStream<T>> result;
 		if(optWrong.isPresent()) {
-			return optWrong.get()
+			result = optWrong.get()
 				.flatMapFailure(f -> Result.failure(
 					new RuntimeException("sequence contains failure", f.getException()))
 				).flatMap(t -> Result.failure("Should not happen"));
+
+
+		} else {
+			result = Result.success(stream.lazy()
+										  .map(r -> r.orElse(null)));
 		}
 
-		return Result.success(stream.lazy()
-								  .map(r -> r.orElse(null)));
+		return result.withLogs(lc.getEntry());
 
 	}
 

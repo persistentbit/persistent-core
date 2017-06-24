@@ -149,6 +149,6 @@ public final class IOClassPath{
 	public static void main(String[] args) {
 		find("/**/*Exception.class").orElseThrow().forEach(u -> System.out.println(u));
 		//findInDir(Paths.get("/Users/petermuys/feniks/persistentbit/persistent-core/target/classes"),
-		//	"**/Result.*").withLogs(ModuleCore.consoleLogPrint::print).orElseThrow().forEach(System.out::println);
+		//	"**/Result.*").doWithLogs(ModuleCore.consoleLogPrint::print).orElseThrow().forEach(System.out::println);
 	}
 }

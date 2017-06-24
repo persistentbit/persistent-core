@@ -4,7 +4,6 @@ import com.persistentbit.core.Nullable;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PSet;
 import com.persistentbit.core.javacodegen.annotations.*;
-import com.persistentbit.core.printing.PrintableText;
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.utils.NoEqual;
 import com.persistentbit.core.utils.UString;
@@ -93,6 +92,10 @@ public class JField extends BaseValueClass{
 		return addImport(DefaultValue.class).addAnnotation("@" + DefaultValue.class.getSimpleName() + "(\"" + defaultValue + "\")");
 	}
 
+	public JField defaultEmptyValue() {
+		return addImport(DefaultEmpty.class).addAnnotation("@" + DefaultEmpty.class.getSimpleName());
+	}
+
 	public JField initValue(String initValue){
 		return addImport(InitValue.class).addAnnotation("@" + InitValue.class.getSimpleName() + "(\"" + initValue + "\")");
 	}
@@ -168,7 +171,7 @@ public class JField extends BaseValueClass{
 	}
 
 
-	private Optional<String> annotationValue(String ann){
+	public Optional<String> annotationValue(String ann){
 		int start = ann.indexOf("\"");
 		int end = ann.lastIndexOf("\"");
 		if(start < 0 || end < 0){
@@ -178,10 +181,16 @@ public class JField extends BaseValueClass{
 		return Optional.of(UString.unEscapeJavaString(ann.substring(start+1,end)));
 	}
 
-	public Optional<String> getDefaultValue() {
-
-		return getAnnotation(DefaultValue.class.getSimpleName()).flatMap(ann -> annotationValue(ann));
+	public PList<String> getAnnotations() {
+		return annotations;
 	}
+
+	public boolean hasDefaultValue() {
+		return getAnnotation(DefaultValue.class.getSimpleName()).isPresent()
+			|| getAnnotation(DefaultEmpty.class.getSimpleName()).isPresent()
+			;
+	}
+
 
 	public Optional<String> getInitValue() {
 		return getAnnotation(InitValue.class.getSimpleName()).flatMap(ann -> annotationValue(ann));
@@ -195,51 +204,14 @@ public class JField extends BaseValueClass{
 		return copyWith("annotations",annotations.plus(annotation));
 	}
 
-	public PrintableText printDef() {
-		return out -> {
-			String res = accessLevel.label();
-			res = res.isEmpty()? res : res + " ";
-			res = isStatic ? res + " static" : res;
-			res = isFinal ? res + " final" : res;
-			res = res.trim();
-			res = res + "\t" + (isNullable() && getDefaultValue().isPresent()==false ? getNullableDefinition() : definition);
-			res = res + "\t" + name;
-			res = getInitValue().isPresent() ? "\t=\t" + getInitValue().get() : res;
-			res += ";";
-			if(this.doc != null){
-				out.print(this.doc);
-			}
-			annotations.forEach(ann -> out.println(ann));
-			out.println(res);
-		};
-	}
+
 
 	public boolean isRequired(){
-		return isNullable() == false && getDefaultValue().isPresent() == false;
+		return isNullable() == false && hasDefaultValue()== false;
 	}
 
-	public PrintableText printConstructAssign(String assignValue){
-		return out -> {
 
-			if(getDefaultValue().isPresent()){
-				if(assignValue.equals("null")){
-					out.println("this." + name + " = " + getDefaultValue().get() + ";");
-				} else {
-					if(isNullable()){
-						out.println("this." + name + " = " + assignValue + " == null ? " + getDefaultValue().get() + " : " + assignValue + ";");
-					} else {
-						out.println("this." + name + " = " + assignValue + ";");
-					}
-				}
-			} else {
-				if(isNullable()){
-					out.println("this." + name + " = " + assignValue + ";");
-				} else {
-					out.println("this." + name + " = Objects.requireNonNull(" + assignValue + ", \"" + name + " can not be null\");");
-				}
-			}
-		};
-	}
+
 
 
 	public String getNullableDefinition(){
@@ -270,7 +242,7 @@ public class JField extends BaseValueClass{
 	}
 
 	public JMethod	createGetter() {
-		boolean isOptional = isNullable() && getDefaultValue().isPresent() == false;
+		boolean isOptional = isNullable() && hasDefaultValue() == false;
 		String resType = isOptional
 			   ? "Optional<" + getNullableDefinition() + ">"
 			   : definition ;
@@ -304,6 +276,6 @@ public class JField extends BaseValueClass{
 	}
 
 	public JArgument asArgument(){
-		return new JArgument(definition,name,isNullable(), PList.empty(),getAllImports());
+		return new JArgument(definition,name,isRequired() == false, PList.empty(),getAllImports());
 	}
 }

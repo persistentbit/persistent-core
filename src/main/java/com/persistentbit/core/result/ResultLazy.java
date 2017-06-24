@@ -124,8 +124,8 @@ public class ResultLazy<T> extends Result<T>{
 	}
 
 	@Override
-	public Result<T> withLogs(Consumer<LogEntry> effect) {
-		return getValue().withLogs(effect);
+	public Result<T> doWithLogs(Consumer<LogEntry> effect) {
+		return getValue().doWithLogs(effect);
 	}
 
 	@Override

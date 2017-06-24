@@ -1,6 +1,7 @@
 package com.persistentbit.core.utils;
 
 import com.persistentbit.core.NotNullable;
+import com.persistentbit.core.Nullable;
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.collections.PStream;
 import com.persistentbit.core.logging.Log;
@@ -268,11 +269,11 @@ public final class UString{
 		return str;
 	}
 
-	public static String present(String org, int maxLength){
-		return present(org, maxLength, "");
+	public static @Nullable String present(@Nullable  String org, int maxLength){
+		return present(org, maxLength, "...");
 	}
 
-	public static String present(String org, int maxLength, String continueString) {
+	public static @Nullable String present(@Nullable  String org, int maxLength, String continueString) {
 		if(org == null){
 			return null;
 		}
@@ -289,6 +290,10 @@ public final class UString{
 			kleiner = str;
 		}
 		return kleiner + continueString;
+	}
+	public static @Nullable String presentEscaped(@Nullable String org, int maxLength){
+		String presented = present(org,maxLength);
+		return presented == null ? null : escapeToJavaString(presented);
 	}
 
 

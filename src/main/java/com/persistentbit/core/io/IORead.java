@@ -27,7 +27,7 @@ public final class IORead{
 	 * @return The String content from the Reader
 	 */
 	public static Result<String> readTextStream(Reader fin) {
-		return Result.function().code(l -> {
+		return Result.function().codePresentResult(60,l -> {
 			if (fin == null) {
 				return Result.failure("Reader is null");
 			}
@@ -80,7 +80,7 @@ public final class IORead{
      * @return The String content from the InputStream
      */
     public static Result<String> readTextStream(InputStream fin,Charset charset) {
-        return Result.function().code(l -> {
+        return Result.function().codePresentResult(60,l -> {
             if (fin == null) {
                 return Result.failure("Inputstream is null");
             }
@@ -96,7 +96,7 @@ public final class IORead{
 
     }
 	public static Result<String> readTextFromURL(URL url,Charset charset){
-    	return Result.function(url,charset).code(l -> {
+    	return Result.function(url,charset).codePresentResult(60,l -> {
 
 			URLConnection connection = url.openConnection();
 			return readTextStream(connection.getInputStream(),charset);
@@ -105,7 +105,7 @@ public final class IORead{
 
 	}
 	public static Result<String> readTextFromURL(String url, Charset charset){
-		return Result.function(url,charset).code(l ->
+		return Result.function(url,charset).codePresentResult(60,l ->
 			readTextFromURL(new URL(url),charset)
 		);
 	}
@@ -119,13 +119,13 @@ public final class IORead{
      * @return String with content of the text file
      */
     public static Result<String> readTextFile(File f, Charset charset) {
-        return Result.function(f).code(l ->
+        return Result.function(f).codePresentResult(l ->
                 IOStreams.fileToReader(f,charset).flatMap(IORead::readTextStream)
         );
     }
 
 	public static Result<PList<String>> readLines(String text) {
-		return Result.function(UString.present(text, 40)).code(l -> {
+		return Result.function(UString.presentEscaped(text, 40)).code(l -> {
 			if (text == null) {
                 return Result.empty();
             }
@@ -135,7 +135,7 @@ public final class IORead{
     }
 
 	public static Result<PList<String>> readLinesFromReader(Reader r) {
-        return Result.function().code(l -> {
+        return Result.function().codePresentResult(120,l -> {
             if (r == null) {
                 return Result.failure("Reader is null");
             }
@@ -157,7 +157,7 @@ public final class IORead{
     }
 
 	public static Result<PList<String>> readLinesFromFile(File file, Charset charset) {
-        return Result.function(file,charset).code(l -> IOStreams.fileToReader(file,charset).flatMap(IORead::readLinesFromReader));
+        return Result.function(file,charset).codePresentResult(l -> IOStreams.fileToReader(file,charset).flatMap(IORead::readLinesFromReader));
     }
 
 	public static Result<Properties> readClassPathProperties(String classPathResource, Charset charset) {
