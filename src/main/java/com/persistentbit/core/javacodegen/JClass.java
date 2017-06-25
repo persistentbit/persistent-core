@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * TODOC
@@ -184,7 +185,7 @@ public class JClass extends BaseValueClass{
 			res = res.trim();
 			res = res + "\t" + (field.isNullable() && field.hasDefaultValue()==false ? field.getNullableDefinition() : field.getDefinition());
 			res = res + "\t" + field.getName();
-			res = field.getInitValue().isPresent() ? "\t=\t" + field.getInitValue().get() : res;
+			res = field.getInitValue().isPresent() ? res + "\t=\t" + field.getInitValue().get() : res;
 			res += ";";
 			if(field.getDoc() != null){
 				out.print(this.doc);
@@ -221,7 +222,7 @@ public class JClass extends BaseValueClass{
 	public Optional<String> getFieldDefaultValue(JField field) {
 		if(field.getAnnotation(DefaultEmpty.class.getSimpleName()).isPresent()){
 			String def = field.getDefinition();
-			if(def.startsWith("PList")){
+			if(def.startsWith("PList") || def.startsWith("IPList")){
 				return Optional.of("PList.empty()");
 			}
 			if(def.startsWith("PStream")){
@@ -232,6 +233,22 @@ public class JClass extends BaseValueClass{
 			}
 			if(def.startsWith("List")){
 				return Optional.of("new ArrayList()");
+			}
+			if(field.getPrimitiveType().isPresent()){
+				String name = field.getPrimitiveType().get().getSimpleName();
+				switch(name){
+					case "boolean" : return Optional.of("false");
+					case "byte": return Optional.of("(byte)0");
+					case "short" : return Optional.of("(short)0");
+					case "int" : return Optional.of("0");
+					case "long": return Optional.of("0");
+					case "float": return Optional.of("0.0F");
+					case "double": return Optional.of("0.0");
+					case "char" : return Optional.of("0");
+				}
+			}
+			if(def.equals("String")){
+				return Optional.of("");
 			}
 			throw new ToDo("Unknown: " + def);
 		}
@@ -259,34 +276,40 @@ public class JClass extends BaseValueClass{
 	}
 
 	public JClass addRequiredFieldsConstructor(AccessLevel level){
-		/*
 		JMethod m = new JMethod(className).withAccessLevel(level);
 		m = m.addAnnotation("@Generated");
 		m = m.addImport(JImport.forClass(Generated.class));
-		PList<JField> constFields = getNotNullableConstructorFields();
-		for(JField f : constFields){
+		PList<JField> constFields = getConstructorFields();
+		PList<JField> requiredFields = constFields.filter(JField::isRequired);
+		if(constFields.equals(requiredFields)) {
+			return this; //all are required
+		}
+		for(JField f : requiredFields){
 			m = m.addArg(f.asArgument());
 		}
 		m = m.withCode(out -> {
-			for(JField f: constFields){
-				out.indent(f.printConstructAssign());
-			}
+			String thisCall = "this(" + constFields.map(f ->
+				f.isRequired() ? f.getName() : "null"
+			).toString(", ") + ");";
+			out.indent(ind -> ind.println(thisCall));
 		});
 		constFields.find(f -> f.isNullable()==false).ifPresent(field -> {
 			addImport(Objects.class);
 		});
 
 		return hasMethodWithSignature(m) == false ? addMethod(m) : this;
-
-	}*/
-		throw new ToDo();
 	}
 
 
-	public PrintableText printFields() {
-		return out -> {
-			fields.forEach(f -> out.print(printFieldDef(f)));
-		};
+	public PrintableText printNonStaticFields() {
+		return out ->
+			fields.filter(f -> f.isStatic() == false).forEach(f -> out.print(printFieldDef(f)));
+
+	}
+	public PrintableText printStaticFields() {
+		return out ->
+			fields.filter(f -> f.isStatic() == true).forEach(f -> out.print(printFieldDef(f)));
+
 	}
 	public PrintableText printMethods() {
 		return out -> {
@@ -313,7 +336,7 @@ public class JClass extends BaseValueClass{
 
 	public JClass addGettersAndSetters() {
 		JClass res = this;
-		for(JField f : fields){
+		for(JField f : fields.filter(f -> f.isStatic() == false)){
 			if(f.isGenGetter()){
 				if(f.isGenGetter() && isGenGetter()){
 					JMethod m = f.createGetter();
@@ -356,19 +379,21 @@ public class JClass extends BaseValueClass{
 
 
 
-	public PrintableText printInternalClasses() {
+	public PrintableText printInternalClasses(Predicate<JClass> filter) {
 		return out -> {
-			internalClasses.forEach(cls -> out.print(cls.printClass()));
+			internalClasses.filter(cls -> filter.test(cls)).forEach(cls -> out.print(cls.printClass()));
 		};
 	}
 
 	public PrintableText printClassContent() {
 		return out -> {
-			out.print(printFields());
+			out.print(printNonStaticFields());
 			out.println();
-			out.print(printInternalClasses());
+			out.print(printInternalClasses(jcls -> jcls.getClassName().matches("Builder(<.*>)?") == false));
 			out.println();
 			out.print(printConstructors());
+			out.print(printInternalClasses(jcls -> jcls.getClassName().matches("Builder(<.*)?")));
+			out.print(printStaticFields());
 			//out.print(printGettersSetters());
 			out.print(printMethods());
 		};
@@ -675,10 +700,19 @@ public class JClass extends BaseValueClass{
 		return copyWith("internalClasses",internalClasses);
 	}
 
+	/**
+	 * Make non-static fields static and convert initial values to default values.
+	 * @return The new JClass
+	 */
 	public JClass makeFieldsFinal() {
-		return withFields(fields.map(field ->
-			field.asFinal()
-		));
+		return withFields(fields.filter(f -> f.isStatic() == false).map(field -> {
+			JField res = field.asFinal();
+			if(res.getInitValue().isPresent()){
+				//CONVERT INITIAL VALUES TO DEFAULT VALUES
+				res = res.defaultValue(res.getInitValue().get()).initValue(null);
+			}
+			return res;
+		}));
 	}
 
 	public PList<JClass> getInternalClasses() {
@@ -690,6 +724,7 @@ public class JClass extends BaseValueClass{
 			.makeFieldsFinal()
 			.removeGenerated()
 			.addMainConstructor(AccessLevel.Public)
+			.addRequiredFieldsConstructor(AccessLevel.Public)
 			.addGettersAndSetters()
 			.addEqualsHashCode()
 			.addToString()
