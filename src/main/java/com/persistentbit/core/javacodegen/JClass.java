@@ -74,6 +74,10 @@ public class JClass extends BaseValueClass{
 		return "JClass[" + className + "]";
 	}
 
+	public AccessLevel getAccessLevel() {
+		return accessLevel;
+	}
+
 	public JClass(String className){
 		this(
 			className,
@@ -196,7 +200,7 @@ public class JClass extends BaseValueClass{
 	}
 
 	public PrintableText printFieldConstructAssign(JField field, String assignValue){
-		return out -> {
+		PrintableText pt = out -> {
 			String name = field.getName();
 			if(field.hasDefaultValue()){
 				if(assignValue.equals("null")){
@@ -217,6 +221,9 @@ public class JClass extends BaseValueClass{
 				}
 			}
 		};
+		return pt;
+
+
 	}
 
 	public Optional<String> getFieldDefaultValue(JField field) {
@@ -263,16 +270,18 @@ public class JClass extends BaseValueClass{
 		for(JField f : constFields){
 			m = m.addArg(f.asArgument());
 		}
+
 		m = m.withCode(out -> {
 			for(JField f: constFields){
 				out.indent(printFieldConstructAssign(f, f.getName()));
 			}
 		});
-		constFields.find(f -> f.isNullable()==false).ifPresent(field -> {
-			addImport(Objects.class);
-		});
+		JClass res = this;
+		if(constFields.find(field -> field.hasDefaultValue() == false && field.isNullable() == false).isPresent()){
+			res = res.addImport(Objects.class);
+		}
 
-		return hasMethodWithSignature(m) == false ? addMethod(m) : this;
+		return hasMethodWithSignature(m) == false ? res.addMethod(m) : this;
 	}
 
 	public JClass addRequiredFieldsConstructor(AccessLevel level){

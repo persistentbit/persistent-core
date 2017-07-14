@@ -86,6 +86,10 @@ public class JJavaFile extends BaseValueClass{
 		};
 	}
 
+	public GeneratedJavaSource toJavaSource() {
+		JClass publicClass = classes.find(cls -> cls.getAccessLevel() == AccessLevel.Public).orElseThrow(()-> new RuntimeException("Expected a public class"));
+		return new GeneratedJavaSource(packageName + "." + publicClass.getClassName(),print());
+	}
 
 
 	public  String	getPackageName(){
