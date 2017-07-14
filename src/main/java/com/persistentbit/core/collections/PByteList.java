@@ -76,6 +76,11 @@ public final class PByteList extends AbstractIPList<Byte, PByteList> implements 
 		return new PByteList(newArr);
 	}
 
+	@Override
+	public int size() {
+		return data.length;
+	}
+
 	/**
 	 * Get the data as a InputStream.<br>
 	 * @return The inputstream containing this byte data
