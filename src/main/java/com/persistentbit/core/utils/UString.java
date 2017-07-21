@@ -238,6 +238,29 @@ public final class UString{
 	}
 
 	/**
+	 * Convert a String to a java identifier by<br>
+	 * replace all ' ' with '_' and removing all invalid java identifier characters.<br>
+	 * @param value The value to convert
+	 * @return A java identifier or an empty string
+	 */
+	public static String toJavaIdentifier(String value){
+		String res = "";
+		for(int t=0; t<value.length(); t++){
+			char c = value.charAt(t);
+			if(c == ' '){
+				c = '_';
+			}
+			boolean include = res.isEmpty()
+					? Character.isJavaIdentifierStart(c)
+				    : Character.isJavaIdentifierPart(c);
+			if(include){
+				res = res + c;
+			}
+		}
+		return res;
+	}
+
+	/**
 	 * Make the given string have a minimum length by left padding the String with the given char
 	 *
 	 * @param str     The string
