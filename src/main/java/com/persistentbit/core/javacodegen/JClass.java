@@ -408,7 +408,17 @@ public class JClass extends BaseValueClass{
 		};
 	}
 
+	public PList<String> getImplementsDef() {
+		return implementsDef;
+	}
 
+	public String getDoc() {
+		return doc;
+	}
+
+	public PList<String> getAnnotations() {
+		return annotations;
+	}
 
 	public PrintableText printClass() {
 		return out -> {

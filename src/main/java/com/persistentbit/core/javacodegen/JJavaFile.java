@@ -41,7 +41,8 @@ public class JJavaFile extends BaseValueClass{
 	}
 
 	public PSet<JImport> getAllImports() {
-		return imports.plusAll(classes.map(cls -> cls.getAllImports()).flatten());
+		return imports.plusAll(classes.map(cls -> cls.getAllImports()).flatten())
+			.plusAll(enums.map(e -> e.getAllImports()).flatten());
 	}
 	public PrintableText printImports() {
 		return out -> {
@@ -83,12 +84,21 @@ public class JJavaFile extends BaseValueClass{
 			out.print(printImports());
 			out.println();
 			classes.forEach(cls -> out.print(cls.printClass()));
+			enums.forEach(e -> out.print(e.print()));
 		};
 	}
 
 	public GeneratedJavaSource toJavaSource() {
-		JClass publicClass = classes.find(cls -> cls.getAccessLevel() == AccessLevel.Public).orElseThrow(()-> new RuntimeException("Expected a public class"));
-		return new GeneratedJavaSource(packageName + "." + publicClass.getClassName(),print());
+		JClass publicClass =
+			classes.find(cls -> cls.getAccessLevel() == AccessLevel.Public).orElse(null);
+
+		if(publicClass != null){
+			return new GeneratedJavaSource(packageName + "." + publicClass.getClassName(),print());
+		}
+		JEnum enumCls = enums.getOpt(0)
+				.orElseThrow(()-> new RuntimeException("Expected a public class or enum"));
+		return new GeneratedJavaSource(packageName + "." + enumCls.getClassName(), print());
+
 	}
 
 
