@@ -1,5 +1,6 @@
 package com.persistentbit.core.javacodegen;
 
+import com.persistentbit.core.io.IOFiles;
 import com.persistentbit.core.javacodegen.annotations.CaseClass;
 import com.persistentbit.core.printing.PrintTextWriter;
 import com.persistentbit.core.printing.PrintableText;
@@ -34,7 +35,8 @@ public class GeneratedJavaSource{
 
 	public Result<Path>	writeSource(Path sourceRoot){
 		return
-			UReflect.convertClassNameToPath(sourceRoot,fullClassName)
+			UReflect.convertClassNameToPath(sourceRoot,fullClassName,"java")
+			.flatMap(path -> IOFiles.mkdirsIfNotExisting(path.toFile().getParentFile()).map(f -> path))
 			.flatMap(path -> PrintTextWriter.writeAndClose(path,code));
 	}
 }

@@ -53,7 +53,7 @@ public class PrintTextWriter extends PrintWriter{
         return Result.function(path,printableText).code(l -> fromPath(path)
 			.flatMap(pw -> {
 				try(PrintWriter out = pw){
-					out.print(printableText);
+					out.print(printableText.printToString());
 				}
 				return Result.success(path);
 			}));

@@ -456,12 +456,13 @@ public final class UReflect{
 	 * a rootPath and a fully defined class name.
 	 * @param rootPath  The root of the path
 	 * @param fullClassName the package name and class, separated by '.'
+	 * @param extension the file extension (without '.')
 	 * @return The new Path
 	 */
-	public static Result<Path> convertClassNameToPath(Path rootPath, String fullClassName){
+	public static Result<Path> convertClassNameToPath(Path rootPath, String fullClassName,String extension){
 		return Result.function(rootPath,fullClassName).code(l -> {
 
-			String classPath = fullClassName.replace(".",rootPath.getFileSystem().getSeparator());
+			String classPath = fullClassName.replace(".",rootPath.getFileSystem().getSeparator()) + "." + extension;
 			Path endPath = rootPath.resolve(classPath);
 			return Result.success(endPath);
 		});
