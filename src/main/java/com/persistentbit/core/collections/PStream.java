@@ -706,14 +706,7 @@ public interface PStream<T> extends Iterable<T>{
 	 *
 	 * @return The new array
 	 */
-	T[] toArray();
-
-	/**
-	 * Create an immutable array with all the items in this PStream.
-	 *
-	 * @return The new immutable array.
-	 */
-	ImmutableArray<T> toImmutableArray();
+	<R> R[] toArray(Class<R> cls);
 
 	/**
 	 * Copy all items in this PStream into the provided array orOf a new one if the provided is too small.
@@ -724,6 +717,15 @@ public interface PStream<T> extends Iterable<T>{
 	 * @return The array
 	 */
 	<T1> T1[] toArray(T1[] a);
+
+	/**
+	 * Create an immutable array with all the items in this PStream.
+	 *
+	 * @return The new immutable array.
+	 */
+	ImmutableArray<T> toImmutableArray();
+
+
 
 	/**
 	 * Convert this PStream to a Persistent list

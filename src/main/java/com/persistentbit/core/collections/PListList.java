@@ -40,7 +40,7 @@ class PListList<T> implements List<T>, PStreamable<T>{
 
   @Override
   public Object[] toArray() {
-	return master.toArray();
+	return master.toArray(Object.class);
   }
 
   @Override

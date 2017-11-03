@@ -118,7 +118,7 @@ public class TestPStream{
 		expectInfinite(s::size);
 		expectInfinite(s::plist);
 		expectInfinite(s::pset);
-		expectInfinite(s::toArray);
+		expectInfinite(() -> s.toArray(Object.class));
 		expectInfinite(s::list);
 		expectInfinite(s::dropLast);
 		expectInfinite(() -> s.fold(0, (a, b) -> a));
@@ -131,8 +131,8 @@ public class TestPStream{
 		expectInfinite(() -> s.plusAll(Collections.emptyList()));
 		expectInfinite(s::reversed);
 		expectInfinite(s::sorted);
-		expectInfinite(s::toArray);
-		expectInfinite(() -> s.toArray(null));
+		expectInfinite(()-> s.toArray(new Object[0]));
+		expectInfinite(() -> s.toArray(Object.class));
 		expectInfinite(s::toList);
 		expectInfinite(() -> s.toString(","));
 		expectInfinite(() -> s.with(1, (a, b) -> 1));

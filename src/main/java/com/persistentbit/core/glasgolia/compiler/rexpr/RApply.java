@@ -64,7 +64,7 @@ public class RApply implements RExpr{
 			throw new EvalException("Can't apply on null", pos);
 		}
 		if(parentValue instanceof RFunction) {
-			return ((RFunction) parentValue).apply(arguments.map(a -> a.get()).toArray());
+			return ((RFunction) parentValue).apply(arguments.map(a -> a.get()).toArray(Object.class));
 		}
 		Class cls = parentValue.getClass();
 		if(cls == Class.class) {
@@ -88,7 +88,7 @@ public class RApply implements RExpr{
 
 	private Object newObject(Class cls) {
 		Constructor[] constructors = cls.getConstructors();
-		Object[]      resolvedArgs = arguments.map(e -> e.get()).toArray();
+		Object[]      resolvedArgs = arguments.map(e -> e.get()).toArray(Object.class);
 		if(arguments.size() == 0) {
 			for(Constructor c : constructors) {
 				if(c.getParameterCount() == arguments.size() && isPublic(c)) {

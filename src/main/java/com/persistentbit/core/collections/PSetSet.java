@@ -41,7 +41,7 @@ class PSetSet<T> implements Set<T>, PStreamable<T>, Serializable{
 	@Override
 	public Object[] toArray() {
 
-		return master.toArray();
+		return master.toArray(Object.class);
 	}
 
 	@Override

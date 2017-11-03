@@ -17,13 +17,16 @@ import java.util.function.Supplier;
  */
 public final class ImmutableArray<T> extends AbstractIPList<T, ImmutableArray<T>> implements Serializable{
 
-	private final T[] data;
+	private final Object[] data;
 
-	private ImmutableArray(T[] data) {
-		this.data = newArray(data.length, data);
+	private ImmutableArray(Object[] data) {
+		this.data = new Object[data.length];
+		for(int t=0; t<data.length;t++){
+			this.data[t] = data[t];
+		}
 	}
 
-	private ImmutableArray(T[] data, OK noCopy) {
+	private ImmutableArray(Object[] data, OK noCopy) {
 		this.data = data;
 	}
 
@@ -41,7 +44,8 @@ public final class ImmutableArray<T> extends AbstractIPList<T, ImmutableArray<T>
 	}
 
 	public static <R> ImmutableArray<R> from(PStream<R> stream) {
-		return new ImmutableArray<>(stream.toArray());
+		Object[] arr = new Object[stream.size()];
+		return new ImmutableArray<R>(stream.toArray(arr));
 	}
 
 	public static <R> ImmutableArray<R> from(Collection<R> collection) {
@@ -70,21 +74,21 @@ public final class ImmutableArray<T> extends AbstractIPList<T, ImmutableArray<T>
 
 	@Override
 	public T get(int index) {
-		return data[index];
+		return (T) data[index];
 	}
 
 	@SafeVarargs
 	@Override
 	public final ImmutableArray<T> plusAll(T first, T... addArray) {
-		T[] newData = newArray(data.length + addArray.length + 1, data);
+		Object[] newData = newArray(data.length + addArray.length + 1, data);
 		newData[0] = first;
 		System.arraycopy(addArray, 0, newData, data.length + 1, addArray.length);
-		return new ImmutableArray<>(newData, OK.inst);
+		return new ImmutableArray<T>(newData, OK.inst);
 	}
 
 	@Override
 	public ImmutableArray<T> put(int index, T value) {
-		T[] newData = newArray(data.length, data);
+		Object[] newData = newArray(data.length, data);
 		newData[index] = value;
 		return new ImmutableArray<>(newData, OK.inst);
 	}
@@ -127,7 +131,7 @@ public final class ImmutableArray<T> extends AbstractIPList<T, ImmutableArray<T>
 
 			@Override
 			public T next() {
-				return data[index++];
+				return (T)data[index++];
 			}
 		};
 	}

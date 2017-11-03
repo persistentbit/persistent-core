@@ -3,6 +3,7 @@ package com.persistentbit.core.collections;
 import com.persistentbit.core.function.ThrowingFunction;
 import com.persistentbit.core.tuples.Tuple2;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
@@ -677,18 +678,18 @@ interface PStreamWithDefaults<T> extends PStream<T>{
 	}
 
 	@Override
-	default T[] toArray() {
+	default <R> R[] toArray(Class<R> cls) {
 		if(isInfinite()) { throw new InfinitePStreamException();}
 
-		T[] arr = newArray(size());
+		R[] arr = (R[]) Array.newInstance(cls, size());
 		int i   = 0;
 		for(T v : this) {
-			arr[i++] = v;
+			arr[i++] = (R)v;
 		}
 		return arr;
 	}
 
-	static <E> E[] newArray(int length, E... array) { return Arrays.copyOf(array, length); }
+	//static <E> E[] newArray(int length, E... array) { return Arrays.copyOf(array, length); }
 
 	@Override
 	default int size() {

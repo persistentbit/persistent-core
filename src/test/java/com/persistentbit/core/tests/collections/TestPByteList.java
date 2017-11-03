@@ -37,10 +37,14 @@ public class TestPByteList{
 			l.info("Got " + bl.size() + " bytes from pdf");
 			String    value = toString.apply(bl);
 			PByteList newBl = fromString.apply(value);
-			tr.isEquals(bl.toArray(), newBl.toArray());
+			tr.isEquals(bl.toArray(Byte.class), newBl.toArray(Byte.class));
 			tr.isEquals(bl, newBl);
 			return Nothing.inst;
 		});
 
+	}
+
+	public static void main(String[] args) {
+		new TestPByteList().testAll();
 	}
 }
