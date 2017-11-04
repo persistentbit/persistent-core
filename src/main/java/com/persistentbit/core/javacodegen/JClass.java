@@ -739,10 +739,13 @@ public class JClass extends BaseValueClass{
 	}
 
 	public JClass makeCaseClass(){
+		AccessLevel mainConstructorAccessLevel = hasAnnotation(PrivateMainConstructor.class.getSimpleName())
+					? AccessLevel.Private
+					: AccessLevel.Public;
 		return addGettersAndSetters()
 			.makeFieldsFinal()
 			.removeGenerated()
-			.addMainConstructor(AccessLevel.Public)
+			.addMainConstructor(mainConstructorAccessLevel)
 			.addRequiredFieldsConstructor(AccessLevel.Public)
 			.addGettersAndSetters()
 			.addEqualsHashCode()

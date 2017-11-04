@@ -6,10 +6,11 @@ import com.persistentbit.core.result.Result;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.xml.bind.DatatypeConverter;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
+
 
 /**
  * Utility class to convert and verify passwords with a salted hash.<br>
@@ -46,7 +47,7 @@ public final class PasswordStorage {
     }
 
     private static String toBase64(byte[] array) {
-        return DatatypeConverter.printBase64Binary(array);
+		return Base64.getEncoder().encodeToString(array);
     }
 
 
@@ -171,7 +172,7 @@ public final class PasswordStorage {
 			if(hex == null){
                 return Result.failure("bas64 string is null");
             }
-            return Result.success(DatatypeConverter.parseBase64Binary(hex));
+            return Result.success(Base64.getDecoder().decode(hex));
         });
 
     }
