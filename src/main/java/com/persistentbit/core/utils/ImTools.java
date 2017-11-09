@@ -39,9 +39,7 @@ public final class ImTools<C>{
 	this.cls = cls;
 	List<Getter> allGetters = getFields();
 	setBestConstructor(allGetters);
-	if(constructor == null) {
-	  throw new RuntimeException("Can't find constructor for " + this.cls.getName() + " with properties" + allGetters);
-	}
+
 	for(Getter g : allGetters) {
 	  getters = getters.put(g.propertyName, g);
 	}

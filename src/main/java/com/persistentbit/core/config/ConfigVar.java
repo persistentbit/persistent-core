@@ -2,6 +2,7 @@ package com.persistentbit.core.config;
 
 import com.persistentbit.core.collections.PList;
 import com.persistentbit.core.function.ResultSupplier;
+import com.persistentbit.core.properties.FieldNames;
 import com.persistentbit.core.result.Result;
 import com.persistentbit.core.utils.BaseValueClass;
 import com.persistentbit.core.validation.Validator;
@@ -33,6 +34,7 @@ public class ConfigVar<T> extends BaseValueClass implements ResultSupplier<T> {
     private PList<BiConsumer<Result<T>, ConfigVar<T>>> watchers;
     private Result<T> value;
 
+    @FieldNames(names ={"name","fromString","toString","info","validator","watchers","value"})
 	public ConfigVar(String name,
 					 Function<String, Result<T>> fromString,
 					 Function<T, Result<String>> toString,

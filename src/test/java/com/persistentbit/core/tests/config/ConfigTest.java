@@ -1,5 +1,16 @@
 package com.persistentbit.core.tests.config;
 
+import com.persistentbit.core.collections.PList;
+
+import com.persistentbit.core.config.Config;
+import com.persistentbit.core.config.ConfigGroup;
+import com.persistentbit.core.config.ConfigPropertyFile;
+import com.persistentbit.core.config.ConfigVar;
+import com.persistentbit.core.utils.RuntimeEnvironment;
+import com.persistentbit.core.validation.NumberValidator;
+import com.persistentbit.core.validation.StringValidator;
+import com.persistentbit.core.validation.Validator;
+
 /**
  * TODO: Add comment
  *
@@ -7,31 +18,24 @@ package com.persistentbit.core.tests.config;
  * @since 11/05/2017
  */
 public class ConfigTest {
-/*
+
     private static class Settings {
-        public final Config<Integer> intTest;
-        public final Config<Boolean> boolTest;
-        public final Config<String> strTest;
-        public final Config<RuntimeEnvironment> runEnv;
-        public final Config<Integer> rangeTest;
-        public final Config<PList<Integer>> intArr;
-        public Settings(ConfigSource grp){
-            intTest = grp.addInt("intTest", 10, "");
-            boolTest = grp.addBoolean("boolTest", true, "");
-            strTest = grp.addString("strTest", "Default string", "");
-            runEnv = grp.addEnum("runEnv",RuntimeEnvironment.class, null,"Runtime env");
-            rangeTest = grp.addInt("rangeTest",0,"Must be between 10 and 15")
-            .setValidator(
-                    Validator.<Integer>notNull()
-                            .and(NumberValidator.minimum(10))
-                            .and(NumberValidator.maximum(15))
-
-            );
-            intArr = grp.addIntArray("intArr",PList.empty(),"int array");
-
+        public final ConfigVar<Integer> intTest;
+        public final ConfigVar<Boolean> boolTest;
+        public final ConfigVar<String> stringTest = Config.stringVar("stringTest")
+            .withValidator(StringValidator.minLength(4).and(StringValidator.maxLength(255)).toValidator())
+            .withInfo("Just a String config var")
+            .setValue("DefaultValue");
+        public Settings(ConfigGroup grp){
+            intTest = Config.intVar("intTest").withInfo("Just an int").withValidator(NumberValidator.range(10,2).toValidator());
+            System.out.println("int:" + intTest);
+            boolTest = Config.boolVar("boolTest");
+            grp  = grp.addFields(this);
+            System.out.println(grp);
+            //ConfigPropertyFile.load(grp,)
         }
     }
-
+/*
 
     static final TestCase configTest = TestCase.name("configTest").code(tr-> {
         Source src = Source.asSource(ConfigTest.class.getResource("/config/test_config.txt"), IO.utf8).orElseThrow();
@@ -61,4 +65,9 @@ public class ConfigTest {
         ModuleCore.consoleLogPrint.registerAsGlobalHandler();
         new ConfigTest().testAll();
     }*/
+
+    public static void main(String[] args) {
+        ConfigGroup grp = new ConfigGroup();
+        new Settings(grp);
+    }
 }

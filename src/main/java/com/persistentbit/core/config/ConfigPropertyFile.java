@@ -1,12 +1,16 @@
 package com.persistentbit.core.config;
 
+import com.persistentbit.core.OK;
 import com.persistentbit.core.io.IO;
+import com.persistentbit.core.io.IORead;
 import com.persistentbit.core.io.IOStreams;
 import com.persistentbit.core.result.Result;
 
 import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -19,6 +23,18 @@ import java.util.Properties;
  */
 public class ConfigPropertyFile{
 
+/*
+	public static Result<OK> save(ConfigGroup grp, Writer writer){
+		return Result.function(grp,writer).code(l -> {
+			grp.
+		});
+	}
+	*/
+
+	public static Result<ConfigGroup> load(ConfigGroup grp, String resourceFile, Charset charset){
+		return IORead.readClassPathProperties(resourceFile, charset).flatMap(props -> load(grp,props));
+	}
+
 	public static Result<ConfigGroup> load(ConfigGroup grp, File file){
 		return IOStreams.fileToReader(file,IO.utf8)
 			.flatMap(reader -> load(grp, reader))
@@ -30,6 +46,37 @@ public class ConfigPropertyFile{
 			.flatMap(reader -> load(grp,reader))
 			.logFunction(grp,in);
 	}
+
+
+	public static Result<ConfigGroup> load(ConfigGroup grp, Properties props){
+		return Result.function(grp,props).code(l -> {
+			if(grp == null){
+				return Result.failure("grp is null");
+			}
+			if(props == null){
+				return Result.failure("props is null");
+			}
+			for(String name : props.stringPropertyNames()){
+				ConfigVar var = grp.getVar(name).orElse(null);
+				if(var == null){
+					continue;
+				}
+				Result validateResult = var.validateStringValue(props.getProperty(name));
+				if(validateResult.isError()){
+					return validateResult.map(v -> null);
+				}
+			}
+			for(String name : props.stringPropertyNames()) {
+				ConfigVar var = grp.getVar(name).orElse(null);
+				if(var == null) {
+					continue;
+				}
+				var.setString(props.getProperty(name));
+			}
+			return Result.success(grp);
+		});
+	}
+
 	public static Result<ConfigGroup> load(ConfigGroup grp, Reader reader){
 		return Result.function(grp,reader).code(l -> {
 			if(grp == null){
@@ -42,27 +89,7 @@ public class ConfigPropertyFile{
 				Properties props = new Properties();
 				props.load(reader);
 				return props;
-			}).flatMap(props -> {
-
-				for(String name : props.stringPropertyNames()){
-					ConfigVar var = grp.getVar(name).orElse(null);
-					if(var == null){
-						continue;
-					}
-					Result validateResult = var.validateStringValue(props.getProperty(name));
-					if(validateResult.isError()){
-						return validateResult.map(v -> null);
-					}
-				}
-				for(String name : props.stringPropertyNames()) {
-					ConfigVar var = grp.getVar(name).orElse(null);
-					if(var == null) {
-						continue;
-					}
-					var.setString(props.getProperty(name));
-				}
-				return Result.success(grp);
-			});
+			}).flatMap(props -> load(grp,props));
 		});
 	}
 	/*static public WatchService watchFileForChange(ConfigGroup grp, Path propertyFilePath){
